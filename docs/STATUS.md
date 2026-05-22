@@ -18,4 +18,6 @@ Previous v4.1 verification on 2026-05-22: focused `go test ./cmd/walk -run 'Test
 
 Release CI maintenance on 2026-05-22: GitHub Actions workflow uses Node 24 first-party actions, disables unnecessary Go dependency caching for this no-`go.sum` module, runs `scripts/check-docs-site.sh`, and now publishes v5.1.0-labeled release artifacts.
 
+Playground example update on 2026-05-22: `playground/route_ranker.walk` now demonstrates a compact route-ranking program with structs, arrays, loops, typed helper functions, prefix math, and scalar output. Verification passed with `./build/walk check --warnings=error playground/route_ranker.walk`, `./build/walk build playground/route_ranker.walk -o build/route_ranker`, and `./build/route_ranker`, which printed `Library Lane` with score `46`; broader verification passed with `go test -count=1 ./...`, `scripts/check-docs-site.sh`, `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh`, `scripts/release.sh v5.1.0 <temp>/release`, a 5-line `SHA256SUMS` check, host release binary `walk version` reporting `v5.1.0`, and `git diff --check`.
+
 Next: enable HTTPS enforcement after GitHub issues the Pages certificate for `walklang.wlkrlabs.com`, then continue later ecosystem work with the playground/compiler explorer before networking.
