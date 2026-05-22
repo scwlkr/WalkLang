@@ -6,6 +6,20 @@ Current compiler/tooling/docs release: v5.2.0 local function type inference.
 
 Experimental implemented language surface: v2.2.
 
+IO planning update on 2026-05-22: `IO_PLAN.md` now defines the proposed
+module-first IO direction, the recommended `do:` effect-call decision point,
+runtime-owned string and recoverable-error prerequisites, feature-by-feature
+implementation costs, and a phased order that starts with console/process IO
+before stdin, files, directories, JSON, networking, web, or graphics.
+
+IO planning verification on 2026-05-22: `scripts/build-docs-site.sh` passed;
+full `go test -count=1 ./...` passed; `go build -o build/walk ./cmd/walk`
+passed; `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh` passed and reported
+`v1.6 stress ok`; `scripts/release.sh v5.2.0 <temp>/release` produced 5
+platform artifacts plus `SHA256SUMS`; `wc -l <temp>/release/SHA256SUMS`
+reported 5 checksum lines; and the host release binary reported `v5.2.0` from
+`walk version`.
+
 State: v5.2 is complete against the new v1.6 local function type inference rule. Ordinary functions may omit parameter and return types when the local body proves the types; ambiguous omitted parameter types now fail with a direct annotation diagnostic; normal typed signatures remain valid; inference does not use later call sites; and C remains the primary backend.
 
 v5.2 verification on 2026-05-22: focused `go test ./cmd/walk -run 'TestFunctionTypeInference|TestV15ReleasePrepDocsArePresent' -count=1` passed; full `go test -count=1 ./...` passed; `go build -o build/walk ./cmd/walk` passed; `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh` passed and reported `v1.6 stress ok`; `scripts/check-docs-site.sh` passed after generated site artifacts were staged; `scripts/release.sh v5.2.0 <temp>/release` produced 5 platform artifacts plus `SHA256SUMS`; `wc -l <temp>/release/SHA256SUMS` reported 5 checksum lines; the host release binary reported `v5.2.0` from `walk version`; and `git diff --check` passed.
@@ -30,4 +44,7 @@ Playground example update on 2026-05-22: `playground/route_ranker.walk` now demo
 
 CLI run shortcut update on 2026-05-22: `walk run <source.walk>` now compiles a single file to a temporary native executable, runs it, streams program input and output, and removes the temporary build directory; `walk <source.walk>` is a direct shorthand for the same flow. Verification passed with focused `go test ./cmd/walk -run TestRunCommandRunsSingleFileAndDirectFileAlias -count=1`, `go build -o build/walk ./cmd/walk`, `./build/walk run playground/route_ranker.walk`, `./build/walk playground/route_ranker.walk`, full `go test -count=1 ./...`, `scripts/check-docs-site.sh`, `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh`, `scripts/release.sh v5.1.0 <temp>/release`, a 5-line `SHA256SUMS` check, host release binary `walk version` reporting `v5.1.0`, and `git diff --check`.
 
-Next: enable HTTPS enforcement after GitHub issues the Pages certificate for `walklang.wlkrlabs.com`, then continue later ecosystem work with the playground/compiler explorer before networking.
+Next: review the IO Phase 0 decision points in `IO_PLAN.md`, especially `do:`,
+runtime-created string ownership, and recoverable IO errors; separately retry
+HTTPS enforcement after GitHub issues the Pages certificate for
+`walklang.wlkrlabs.com`.
