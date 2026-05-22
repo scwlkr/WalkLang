@@ -75,10 +75,16 @@ Behavior:
 Single-file commands still work:
 
 ```bash
+walk run examples/hello.walk
+walk examples/hello.walk
 walk build examples/hello.walk -o build/hello
 walk test examples/v0_1_tests.walk
 walk fmt examples/hello.walk
 ```
+
+`walk run <source.walk>` compiles the file to a temporary native executable,
+runs it, streams program input and output, and removes the temporary build
+directory. `walk <source.walk>` is the shorthand for the same flow.
 
 ## Module Search
 

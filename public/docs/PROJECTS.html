@@ -100,9 +100,12 @@ walk clean</code></pre>
 <li><code>walk clean</code> removes <code>build/</code> when the configured output lives there.</li>
 </ul>
 <p>Single-file commands still work:</p>
-<pre><code class="language-bash">walk build examples/hello.walk -o build/hello
+<pre><code class="language-bash">walk run examples/hello.walk
+walk examples/hello.walk
+walk build examples/hello.walk -o build/hello
 walk test examples/v0_1_tests.walk
 walk fmt examples/hello.walk</code></pre>
+<p><code>walk run &lt;source.walk&gt;</code> compiles the file to a temporary native executable, runs it, streams program input and output, and removes the temporary build directory. <code>walk &lt;source.walk&gt;</code> is the shorthand for the same flow.</p>
 <h2 id="module-search">Module Search</h2>
 <p>Project tests can import modules from <code>src/</code>.</p>
 <pre><code class="language-walk">imp: math_extra

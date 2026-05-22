@@ -3,9 +3,11 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 
@@ -28,13 +30,18 @@ func main() {
 
 func run(args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("usage: walk <init|package|build|check|test|fmt|clean|emit-c|docs|debug-map|lsp|repl|version>")
+		return fmt.Errorf("usage: walk <init|package|run|build|check|test|fmt|clean|emit-c|docs|debug-map|lsp|repl|version>")
+	}
+	if filepath.Ext(args[0]) == ".walk" {
+		return runCommand(args)
 	}
 	switch args[0] {
 	case "init":
 		return initCommand(args[1:])
 	case "package":
 		return packageCommand(args[1:])
+	case "run":
+		return runCommand(args[1:])
 	case "build":
 		return build(args[1:])
 	case "emit-c":
@@ -176,6 +183,14 @@ func testCommand(args []string) error {
 	return nil
 }
 
+func runCommand(args []string) error {
+	config, err := parseRunArgs(args)
+	if err != nil {
+		return err
+	}
+	return runCompiledFile(config, os.Stdin, os.Stdout, os.Stderr)
+}
+
 func checkCommand(args []string) error {
 	if useProjectCheckLike(args) {
 		return projectCheckCommand(args)
@@ -256,6 +271,12 @@ type buildConfig struct {
 	warningMode warningMode
 }
 
+type runConfig struct {
+	sourcePath  string
+	native      nativeBuildOptions
+	warningMode warningMode
+}
+
 type emitCConfig struct {
 	sourcePath  string
 	output      string
@@ -313,6 +334,44 @@ func parseBuildArgs(args []string) (buildConfig, error) {
 	}
 	if config.sourcePath == "" || config.output == "" {
 		return buildConfig{}, fmt.Errorf("usage: walk build <source.walk> -o <output>")
+	}
+	return config, nil
+}
+
+func parseRunArgs(args []string) (runConfig, error) {
+	config := runConfig{warningMode: warningDefault}
+	for i := 0; i < len(args); i++ {
+		switch args[i] {
+		case "--release":
+			config.native.release = true
+		case "--cc":
+			i++
+			if i >= len(args) {
+				return runConfig{}, fmt.Errorf("run requires a value after --cc")
+			}
+			config.native.cc = args[i]
+		case "--cflag":
+			i++
+			if i >= len(args) {
+				return runConfig{}, fmt.Errorf("run requires a value after --cflag")
+			}
+			config.native.cFlags = append(config.native.cFlags, args[i])
+		default:
+			if mode, ok, err := parseWarningArg(args, &i); ok || err != nil {
+				if err != nil {
+					return runConfig{}, err
+				}
+				config.warningMode = mode
+				continue
+			}
+			if config.sourcePath != "" {
+				return runConfig{}, fmt.Errorf("usage: walk run [--release] [--warnings=off|default|error] [--cc <cc>] [--cflag <flag>] <source.walk>")
+			}
+			config.sourcePath = args[i]
+		}
+	}
+	if config.sourcePath == "" {
+		return runConfig{}, fmt.Errorf("usage: walk run [--release] [--warnings=off|default|error] [--cc <cc>] [--cflag <flag>] <source.walk>")
 	}
 	return config, nil
 }
@@ -779,6 +838,43 @@ func nativeBuildArgs(cPath string, output string, options nativeBuildOptions) []
 	args = append(args, options.cFlags...)
 	args = append(args, "-lm")
 	return args
+}
+
+func runCompiledFile(config runConfig, stdin io.Reader, stdout io.Writer, stderr io.Writer) error {
+	cCode, warnings, err := compileFileToCWithOptions(config.sourcePath, false)
+	if err != nil {
+		return err
+	}
+	if err := handleWarnings(warnings, config.warningMode); err != nil {
+		return err
+	}
+	dir, err := os.MkdirTemp("", "walk-run-*")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(dir)
+
+	name := strings.TrimSuffix(filepath.Base(config.sourcePath), filepath.Ext(config.sourcePath))
+	if name == "" {
+		name = "program"
+	}
+	exeName := name
+	if runtime.GOOS == "windows" {
+		exeName += ".exe"
+	}
+	exePath := filepath.Join(dir, exeName)
+	if err := buildC(cCode, filepath.Join(dir, name+".c"), exePath, config.native); err != nil {
+		return err
+	}
+
+	command := exec.Command(exePath)
+	command.Stdin = stdin
+	command.Stdout = stdout
+	command.Stderr = stderr
+	if err := command.Run(); err != nil {
+		return fmt.Errorf("program failed: %w", err)
+	}
+	return nil
 }
 
 func errorAt(location ast.Location, format string, args ...any) error {

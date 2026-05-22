@@ -81,7 +81,9 @@ walk version</code></pre>
 <pre><code class="language-bash">WALK_INSTALL_DIR=/path/to/bin scripts/install-local.sh v5-local</code></pre>
 <h2 id="smoke-test">Smoke Test</h2>
 <p>After install:</p>
-<pre><code class="language-bash">walk build examples/hello.walk -o build/hello
+<pre><code class="language-bash">walk run playground/route_ranker.walk
+walk playground/route_ranker.walk
+walk build examples/hello.walk -o build/hello
 ./build/hello
 walk check --warnings=error examples/v1.walk
 walk test examples/v0_1_tests.walk
@@ -92,6 +94,11 @@ walk build tests/pass/generics.walk -o build/generics</code></pre>
 <pre><code class="language-text">3
 hello from WalkLang
 true</code></pre>
+<p>Expected <code>playground/route_ranker.walk</code> output:</p>
+<pre><code class="language-text">Best route:
+Library Lane
+Score:
+46</code></pre>
 <h2 id="build-release-artifacts-locally">Build Release Artifacts Locally</h2>
 <p>Maintainers can produce the release artifact set with:</p>
 <pre><code class="language-bash">scripts/release.sh v5.0.0 dist</code></pre>

@@ -1,5 +1,12 @@
 # WalkLang Release Notes
 
+## Unreleased
+
+### Added
+
+- `walk run <source.walk>` compiles a single file to a temporary native executable, runs it, streams program input and output, and cleans up the temporary build directory.
+- `walk <source.walk>` is a direct shorthand for `walk run <source.walk>`.
+
 ## v5.1.0 - Public Docs And Reference Site
 
 Date: 2026-05-22

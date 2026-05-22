@@ -30,10 +30,17 @@ WalkLang compiles `.walk` source through generated C into native executables:
 
 ## Quick Start
 
-Read [the install guide][Getting started], then build a small project:
+Read [the install guide][Getting started], then run a `.walk` file directly:
 
 ```bash
 scripts/install-local.sh v5-local
+walk run playground/route_ranker.walk
+walk playground/route_ranker.walk
+```
+
+Then build a small project:
+
+```bash
 walk init hello
 cd hello
 walk check

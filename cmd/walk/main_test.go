@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -137,6 +138,32 @@ func TestV1CheckWarningsCanBeErrors(t *testing.T) {
 	}
 }
 
+func TestRunCommandRunsSingleFileAndDirectFileAlias(t *testing.T) {
+	requireCC(t)
+
+	dir := t.TempDir()
+	sourcePath := filepath.Join(dir, "main.walk")
+	writeFile(t, sourcePath, strings.Join([]string{
+		"out: 'quick run'",
+		"out: + 20 22",
+		"",
+	}, "\n"))
+
+	for name, args := range map[string][]string{
+		"run command":       {"run", sourcePath},
+		"direct file alias": {sourcePath},
+	} {
+		t.Run(name, func(t *testing.T) {
+			got := captureStdout(t, func() error {
+				return run(args)
+			})
+			if want := "quick run\n42\n"; got != want {
+				t.Fatalf("want %q, got %q", want, got)
+			}
+		})
+	}
+}
+
 func TestV14DiagnosticFormattingIncludesSnippetCaretAndSuggestion(t *testing.T) {
 	dir := t.TempDir()
 	sourcePath := filepath.Join(dir, "main.walk")
@@ -217,4 +244,32 @@ func writeFile(t *testing.T, path string, contents string) {
 	if err := os.WriteFile(path, []byte(contents), 0o644); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func captureStdout(t *testing.T, fn func() error) string {
+	t.Helper()
+
+	reader, writer, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	oldStdout := os.Stdout
+	os.Stdout = writer
+	runErr := fn()
+	os.Stdout = oldStdout
+
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+	output, err := io.ReadAll(reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := reader.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if runErr != nil {
+		t.Fatalf("run failed: %v\nstdout:\n%s", runErr, string(output))
+	}
+	return string(output)
 }

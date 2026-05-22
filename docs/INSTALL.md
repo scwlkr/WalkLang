@@ -69,6 +69,8 @@ WALK_INSTALL_DIR=/path/to/bin scripts/install-local.sh v5-local
 After install:
 
 ```bash
+walk run playground/route_ranker.walk
+walk playground/route_ranker.walk
 walk build examples/hello.walk -o build/hello
 ./build/hello
 walk check --warnings=error examples/v1.walk
@@ -84,6 +86,15 @@ Expected `examples/hello.walk` output:
 3
 hello from WalkLang
 true
+```
+
+Expected `playground/route_ranker.walk` output:
+
+```text
+Best route:
+Library Lane
+Score:
+46
 ```
 
 ## Build Release Artifacts Locally
