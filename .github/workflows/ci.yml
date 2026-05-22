@@ -8,15 +8,16 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
+          cache: false
       - run: go test ./...
       - run: go build -o build/walk ./cmd/walk
       - run: WALK_BIN="$PWD/build/walk" scripts/stress-v1.sh
       - run: scripts/release.sh v2.0.0 dist
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: walk-v2.0.0
           path: dist/
