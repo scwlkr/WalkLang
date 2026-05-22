@@ -125,7 +125,7 @@ Not v1.1:
 class: Person       # error in v1.1
 ```
 
-v2 adds structs for data modeling without classes, inheritance, or methods.
+v2 adds structs, methods, and simple generic functions for composition without classes or inheritance.
 
 ---
 

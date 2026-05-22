@@ -254,11 +254,18 @@ func TestV01DiagnosticsIncludeLineAndColumn(t *testing.T) {
 }
 
 func TestFormatterNormalizesInitialSyntax(t *testing.T) {
-	formatted, err := walkfmt.Format("var:x=+ 1 2\nout:'hello'\n", "main.walk")
+	formatted, err := walkfmt.Format("func:id[T](value T)T\n    return:value\nvar:nums array[int]=[1,2]\nout:'hello'\n", "main.walk")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got, want := formatted, "var: x = + 1 2\nout: 'hello'\n"; got != want {
+	want := strings.Join([]string{
+		"func: id[T](value T) T",
+		"    return: value",
+		"var: nums array[int] = [1, 2]",
+		"out: 'hello'",
+		"",
+	}, "\n")
+	if got := formatted; got != want {
 		t.Fatalf("want %q, got %q", want, got)
 	}
 }

@@ -82,7 +82,8 @@ These are not compatibility-protected in v1:
 
 ```text
 structs (implemented as experimental in v2)
-methods
+methods (implemented as experimental in v2.1)
+generic functions (implemented as experimental in v2.2)
 traits
 interfaces
 closures

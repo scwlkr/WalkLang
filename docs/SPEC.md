@@ -496,6 +496,7 @@ These are not stable v1 features:
 classes
 structs
 methods
+generic functions
 inheritance
 interfaces
 traits

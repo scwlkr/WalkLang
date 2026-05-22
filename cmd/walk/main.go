@@ -627,6 +627,11 @@ func checkPrograms(program *ast.Program, modules map[string]*checker.Module) ([]
 			return err
 		}
 		module.Exports = exports
+		genericExports, err := checker.ExportedGenericFunctions(module.Program)
+		if err != nil {
+			return err
+		}
+		module.GenericExports = genericExports
 		checked[name] = true
 		return nil
 	}

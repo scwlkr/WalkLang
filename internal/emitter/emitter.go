@@ -80,7 +80,7 @@ func (e *cEmitter) emit(program *ast.Program, testsOnly bool) (string, error) {
 		e.currentModule = name
 		for _, statement := range e.modules[name].Statements {
 			fn, ok := statement.(*ast.FuncDecl)
-			if !ok {
+			if !ok || len(fn.TypeParams) > 0 {
 				continue
 			}
 			prototype, err := e.emitFunctionSignature(fn, true)
@@ -94,7 +94,7 @@ func (e *cEmitter) emit(program *ast.Program, testsOnly bool) (string, error) {
 	e.currentModule = ""
 	for _, statement := range program.Statements {
 		fn, ok := statement.(*ast.FuncDecl)
-		if !ok {
+		if !ok || len(fn.TypeParams) > 0 {
 			continue
 		}
 		prototype, err := e.emitFunctionSignature(fn, true)
@@ -104,14 +104,26 @@ func (e *cEmitter) emit(program *ast.Program, testsOnly bool) (string, error) {
 		out.WriteString(prototype)
 		out.WriteString(";\n")
 	}
-	if hasFunctions(program) || hasModuleFunctions(e.modules) {
+	genericInstances, err := e.collectGenericInstances(program)
+	if err != nil {
+		return "", err
+	}
+	for _, instance := range genericInstances {
+		prototype, err := e.emitGenericInstanceSignature(instance)
+		if err != nil {
+			return "", err
+		}
+		out.WriteString(prototype)
+		out.WriteString(";\n")
+	}
+	if hasFunctions(program) || hasModuleFunctions(e.modules) || len(genericInstances) > 0 {
 		out.WriteString("\n")
 	}
 	for _, name := range sortedModuleNames(e.modules) {
 		e.currentModule = name
 		for _, statement := range e.modules[name].Statements {
 			fn, ok := statement.(*ast.FuncDecl)
-			if !ok {
+			if !ok || len(fn.TypeParams) > 0 {
 				continue
 			}
 			rendered, err := e.emitFunction(fn)
@@ -125,10 +137,18 @@ func (e *cEmitter) emit(program *ast.Program, testsOnly bool) (string, error) {
 	e.currentModule = ""
 	for _, statement := range program.Statements {
 		fn, ok := statement.(*ast.FuncDecl)
-		if !ok {
+		if !ok || len(fn.TypeParams) > 0 {
 			continue
 		}
 		rendered, err := e.emitFunction(fn)
+		if err != nil {
+			return "", err
+		}
+		out.WriteString(rendered)
+		out.WriteString("\n")
+	}
+	for _, instance := range genericInstances {
+		rendered, err := e.emitGenericInstance(instance)
 		if err != nil {
 			return "", err
 		}
@@ -200,7 +220,7 @@ func (e *cEmitter) emit(program *ast.Program, testsOnly bool) (string, error) {
 
 func hasFunctions(program *ast.Program) bool {
 	for _, statement := range program.Statements {
-		if _, ok := statement.(*ast.FuncDecl); ok {
+		if fn, ok := statement.(*ast.FuncDecl); ok && len(fn.TypeParams) == 0 {
 			return true
 		}
 	}
@@ -230,7 +250,7 @@ func collectModuleFunctionNames(modules map[string]*ast.Program) map[string]map[
 	for module, program := range modules {
 		result[module] = map[string]bool{}
 		for _, statement := range program.Statements {
-			if fn, ok := statement.(*ast.FuncDecl); ok && fn.Receiver == "" {
+			if fn, ok := statement.(*ast.FuncDecl); ok && fn.Receiver == "" && len(fn.TypeParams) == 0 {
 				result[module][fn.Name] = true
 			}
 		}
@@ -316,6 +336,436 @@ func structDependencies(typeName ast.Type) []string {
 	default:
 		return nil
 	}
+}
+
+type genericDecl struct {
+	module string
+	fn     *ast.FuncDecl
+}
+
+type genericInstance struct {
+	callee   string
+	module   string
+	fn       *ast.FuncDecl
+	typeArgs []ast.Type
+	cName    string
+}
+
+func (e *cEmitter) collectGenericInstances(program *ast.Program) ([]genericInstance, error) {
+	decls := e.collectGenericDecls(program)
+	instances := map[string]genericInstance{}
+	var queue []genericInstance
+	addCall := func(call *ast.Call, module string) error {
+		if len(call.TypeArgs) == 0 || containsGenericType(call.TypeArgs) {
+			return nil
+		}
+		callee := call.Callee
+		if module != "" && !strings.Contains(callee, ".") {
+			if _, ok := decls[module+"."+callee]; ok {
+				callee = module + "." + callee
+			}
+		}
+		decl, ok := decls[callee]
+		if !ok {
+			return errorAt(call.Loc(), "internal error: generic function %s is not defined", callee)
+		}
+		key := genericInstanceKey(callee, call.TypeArgs)
+		if _, ok := instances[key]; ok {
+			return nil
+		}
+		instance := genericInstance{
+			callee:   callee,
+			module:   decl.module,
+			fn:       decl.fn,
+			typeArgs: call.TypeArgs,
+			cName:    genericInstanceName(callee, call.TypeArgs),
+		}
+		instances[key] = instance
+		queue = append(queue, instance)
+		return nil
+	}
+	for _, name := range sortedModuleNames(e.modules) {
+		calls := collectGenericCalls(e.modules[name].Statements, true)
+		for _, call := range calls {
+			if err := addCall(call, name); err != nil {
+				return nil, err
+			}
+		}
+	}
+	for _, call := range collectGenericCalls(program.Statements, true) {
+		if err := addCall(call, ""); err != nil {
+			return nil, err
+		}
+	}
+	for i := 0; i < len(queue); i++ {
+		instance := queue[i]
+		clone := instantiateGeneric(instance)
+		for _, call := range collectGenericCalls(clone.Body, false) {
+			if err := addCall(call, instance.module); err != nil {
+				return nil, err
+			}
+		}
+	}
+	result := make([]genericInstance, 0, len(instances))
+	for _, instance := range instances {
+		result = append(result, instance)
+	}
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].cName < result[j].cName
+	})
+	return result, nil
+}
+
+func (e *cEmitter) collectGenericDecls(program *ast.Program) map[string]genericDecl {
+	decls := map[string]genericDecl{}
+	for _, name := range sortedModuleNames(e.modules) {
+		for _, statement := range e.modules[name].Statements {
+			fn, ok := statement.(*ast.FuncDecl)
+			if ok && len(fn.TypeParams) > 0 {
+				decls[name+"."+fn.Name] = genericDecl{module: name, fn: fn}
+			}
+		}
+	}
+	for _, statement := range program.Statements {
+		fn, ok := statement.(*ast.FuncDecl)
+		if ok && len(fn.TypeParams) > 0 {
+			decls[fn.Name] = genericDecl{fn: fn}
+		}
+	}
+	return decls
+}
+
+func collectGenericCalls(statements []ast.Statement, skipGenericFunctions bool) []*ast.Call {
+	var calls []*ast.Call
+	var visitStatement func(ast.Statement)
+	var visitExpression func(ast.Expression)
+	visitStatement = func(statement ast.Statement) {
+		switch s := statement.(type) {
+		case *ast.FuncDecl:
+			if skipGenericFunctions && len(s.TypeParams) > 0 {
+				return
+			}
+			for _, nested := range s.Body {
+				visitStatement(nested)
+			}
+		case *ast.VarDecl:
+			visitExpression(s.Value)
+		case *ast.Assignment:
+			visitExpression(s.Target)
+			visitExpression(s.Value)
+		case *ast.Out:
+			visitExpression(s.Value)
+		case *ast.TestDecl:
+			for _, nested := range s.Body {
+				visitStatement(nested)
+			}
+		case *ast.Assert:
+			visitExpression(s.Value)
+		case *ast.Return:
+			visitExpression(s.Value)
+		case *ast.If:
+			visitExpression(s.Cond)
+			for _, nested := range s.Then {
+				visitStatement(nested)
+			}
+			for _, nested := range s.Else {
+				visitStatement(nested)
+			}
+		case *ast.While:
+			visitExpression(s.Cond)
+			for _, nested := range s.Body {
+				visitStatement(nested)
+			}
+		case *ast.Repeat:
+			visitExpression(s.Count)
+			for _, nested := range s.Body {
+				visitStatement(nested)
+			}
+		case *ast.For:
+			visitExpression(s.Iterable)
+			for _, nested := range s.Body {
+				visitStatement(nested)
+			}
+		}
+	}
+	visitExpression = func(expression ast.Expression) {
+		switch e := expression.(type) {
+		case *ast.Prefix:
+			for _, arg := range e.Args {
+				visitExpression(arg)
+			}
+		case *ast.Call:
+			if len(e.TypeArgs) > 0 {
+				calls = append(calls, e)
+			}
+			if e.Receiver != nil {
+				visitExpression(e.Receiver)
+			}
+			for _, arg := range e.Args {
+				visitExpression(arg)
+			}
+		case *ast.ArrayLiteral:
+			for _, element := range e.Elements {
+				visitExpression(element)
+			}
+		case *ast.Index:
+			visitExpression(e.Target)
+			visitExpression(e.Index)
+		case *ast.FieldAccess:
+			visitExpression(e.Target)
+		}
+	}
+	for _, statement := range statements {
+		visitStatement(statement)
+	}
+	return calls
+}
+
+func (e *cEmitter) emitGenericInstanceSignature(instance genericInstance) (string, error) {
+	clone := instantiateGeneric(instance)
+	return e.emitFunctionSignature(clone, true)
+}
+
+func (e *cEmitter) emitGenericInstance(instance genericInstance) (string, error) {
+	clone := instantiateGeneric(instance)
+	previousModule := e.currentModule
+	e.currentModule = instance.module
+	rendered, err := e.emitFunction(clone)
+	e.currentModule = previousModule
+	return rendered, err
+}
+
+func instantiateGeneric(instance genericInstance) *ast.FuncDecl {
+	bindings := map[string]ast.Type{}
+	for i, param := range instance.fn.TypeParams {
+		bindings[param] = instance.typeArgs[i]
+	}
+	return cloneFuncDecl(instance.fn, bindings, instance.cName)
+}
+
+func cloneFuncDecl(fn *ast.FuncDecl, bindings map[string]ast.Type, cName string) *ast.FuncDecl {
+	params := make([]ast.Param, 0, len(fn.Params))
+	for _, param := range fn.Params {
+		params = append(params, ast.Param{Name: param.Name, Type: substituteType(param.Type, bindings)})
+	}
+	body := cloneStatements(fn.Body, bindings)
+	return &ast.FuncDecl{
+		Location:   fn.Location,
+		Name:       fn.Name,
+		Receiver:   fn.Receiver,
+		Params:     params,
+		ReturnType: substituteType(fn.ReturnType, bindings),
+		Body:       body,
+		CName:      cName,
+	}
+}
+
+func cloneStatements(statements []ast.Statement, bindings map[string]ast.Type) []ast.Statement {
+	result := make([]ast.Statement, 0, len(statements))
+	for _, statement := range statements {
+		result = append(result, cloneStatement(statement, bindings))
+	}
+	return result
+}
+
+func cloneStatement(statement ast.Statement, bindings map[string]ast.Type) ast.Statement {
+	switch s := statement.(type) {
+	case *ast.VarDecl:
+		return &ast.VarDecl{Location: s.Location, Name: s.Name, Annotation: substituteType(s.Annotation, bindings), Value: cloneExpression(s.Value, bindings), Mutable: s.Mutable}
+	case *ast.Assignment:
+		return &ast.Assignment{Location: s.Location, Target: cloneExpression(s.Target, bindings), Value: cloneExpression(s.Value, bindings)}
+	case *ast.Out:
+		return &ast.Out{Location: s.Location, Value: cloneExpression(s.Value, bindings)}
+	case *ast.TestDecl:
+		return &ast.TestDecl{Location: s.Location, Name: s.Name, Body: cloneStatements(s.Body, bindings)}
+	case *ast.Assert:
+		return &ast.Assert{Location: s.Location, Value: cloneExpression(s.Value, bindings)}
+	case *ast.Import:
+		return &ast.Import{Location: s.Location, Module: s.Module}
+	case *ast.Export:
+		return &ast.Export{Location: s.Location, Name: s.Name}
+	case *ast.FuncDecl:
+		return cloneFuncDecl(s, bindings, s.CName)
+	case *ast.StructDecl:
+		fields := make([]ast.StructField, 0, len(s.Fields))
+		for _, field := range s.Fields {
+			fields = append(fields, ast.StructField{Location: field.Location, Name: field.Name, Type: substituteType(field.Type, bindings)})
+		}
+		return &ast.StructDecl{Location: s.Location, Name: s.Name, Fields: fields}
+	case *ast.Return:
+		return &ast.Return{Location: s.Location, Value: cloneExpression(s.Value, bindings)}
+	case *ast.If:
+		return &ast.If{Location: s.Location, Cond: cloneExpression(s.Cond, bindings), Then: cloneStatements(s.Then, bindings), Else: cloneStatements(s.Else, bindings)}
+	case *ast.While:
+		return &ast.While{Location: s.Location, Cond: cloneExpression(s.Cond, bindings), Body: cloneStatements(s.Body, bindings)}
+	case *ast.Repeat:
+		return &ast.Repeat{Location: s.Location, Count: cloneExpression(s.Count, bindings), Body: cloneStatements(s.Body, bindings)}
+	case *ast.For:
+		return &ast.For{Location: s.Location, Name: s.Name, Iterable: cloneExpression(s.Iterable, bindings), Body: cloneStatements(s.Body, bindings)}
+	case *ast.Break:
+		return &ast.Break{Location: s.Location}
+	case *ast.Continue:
+		return &ast.Continue{Location: s.Location}
+	default:
+		return statement
+	}
+}
+
+func cloneExpression(expression ast.Expression, bindings map[string]ast.Type) ast.Expression {
+	base := cloneExprBase(expression, bindings)
+	switch e := expression.(type) {
+	case *ast.Literal:
+		return &ast.Literal{ExprBase: base, Kind: e.Kind, Value: e.Value}
+	case *ast.Name:
+		return &ast.Name{ExprBase: base, Identifier: e.Identifier}
+	case *ast.Prefix:
+		args := make([]ast.Expression, 0, len(e.Args))
+		for _, arg := range e.Args {
+			args = append(args, cloneExpression(arg, bindings))
+		}
+		return &ast.Prefix{ExprBase: base, Operator: e.Operator, Args: args}
+	case *ast.Call:
+		args := make([]ast.Expression, 0, len(e.Args))
+		for _, arg := range e.Args {
+			args = append(args, cloneExpression(arg, bindings))
+		}
+		typeArgs := make([]ast.Type, 0, len(e.TypeArgs))
+		for _, typeArg := range e.TypeArgs {
+			typeArgs = append(typeArgs, substituteType(typeArg, bindings))
+		}
+		var receiver ast.Expression
+		if e.Receiver != nil {
+			receiver = cloneExpression(e.Receiver, bindings)
+		}
+		return &ast.Call{ExprBase: base, Callee: e.Callee, Receiver: receiver, Method: e.Method, Args: args, TypeArgs: typeArgs}
+	case *ast.ArrayLiteral:
+		elements := make([]ast.Expression, 0, len(e.Elements))
+		for _, element := range e.Elements {
+			elements = append(elements, cloneExpression(element, bindings))
+		}
+		return &ast.ArrayLiteral{ExprBase: base, Elements: elements}
+	case *ast.Index:
+		return &ast.Index{ExprBase: base, Target: cloneExpression(e.Target, bindings), Index: cloneExpression(e.Index, bindings)}
+	case *ast.FieldAccess:
+		return &ast.FieldAccess{ExprBase: base, Target: cloneExpression(e.Target, bindings), Field: e.Field}
+	default:
+		return expression
+	}
+}
+
+func cloneExprBase(expression ast.Expression, bindings map[string]ast.Type) ast.ExprBase {
+	return ast.ExprBase{Location: expression.Loc(), Type: substituteType(expression.ExprType(), bindings)}
+}
+
+func substituteType(typeName ast.Type, bindings map[string]ast.Type) ast.Type {
+	switch typeName.Kind {
+	case ast.TypeGeneric:
+		if replacement, ok := bindings[typeName.Name]; ok {
+			if typeName.Nullable {
+				replacement.Nullable = true
+			}
+			return replacement
+		}
+		return typeName
+	case ast.TypeArray:
+		if typeName.Elem == nil {
+			return typeName
+		}
+		elem := substituteType(*typeName.Elem, bindings)
+		result := ast.ArrayOf(elem)
+		result.Nullable = typeName.Nullable
+		return result
+	case ast.TypeFunction:
+		params := make([]ast.Type, 0, len(typeName.Params))
+		for _, param := range typeName.Params {
+			params = append(params, substituteType(param, bindings))
+		}
+		if typeName.Return == nil {
+			return typeName
+		}
+		ret := substituteType(*typeName.Return, bindings)
+		result := ast.FuncType(params, ret)
+		result.Nullable = typeName.Nullable
+		return result
+	default:
+		return typeName
+	}
+}
+
+func containsGenericType(types []ast.Type) bool {
+	for _, typeName := range types {
+		if typeContainsGeneric(typeName) {
+			return true
+		}
+	}
+	return false
+}
+
+func typeContainsGeneric(typeName ast.Type) bool {
+	switch typeName.Kind {
+	case ast.TypeGeneric:
+		return true
+	case ast.TypeArray:
+		return typeName.Elem != nil && typeContainsGeneric(*typeName.Elem)
+	case ast.TypeFunction:
+		for _, param := range typeName.Params {
+			if typeContainsGeneric(param) {
+				return true
+			}
+		}
+		return typeName.Return != nil && typeContainsGeneric(*typeName.Return)
+	default:
+		return false
+	}
+}
+
+func genericInstanceKey(callee string, typeArgs []ast.Type) string {
+	parts := make([]string, 0, len(typeArgs)+1)
+	parts = append(parts, callee)
+	for _, typeArg := range typeArgs {
+		parts = append(parts, typeSignature(typeArg))
+	}
+	return strings.Join(parts, "|")
+}
+
+func genericInstanceName(callee string, typeArgs []ast.Type) string {
+	parts := make([]string, 0, len(typeArgs)+1)
+	parts = append(parts, strings.ReplaceAll(callee, ".", "__"))
+	for _, typeArg := range typeArgs {
+		parts = append(parts, typeSignature(typeArg))
+	}
+	return strings.Join(parts, "__")
+}
+
+func typeSignature(typeName ast.Type) string {
+	var out string
+	switch typeName.Kind {
+	case ast.TypeArray:
+		if typeName.Elem == nil {
+			out = "array_unknown"
+		} else {
+			out = "array_" + typeSignature(*typeName.Elem)
+		}
+	case ast.TypeFunction:
+		parts := make([]string, 0, len(typeName.Params)+1)
+		for _, param := range typeName.Params {
+			parts = append(parts, typeSignature(param))
+		}
+		ret := "void"
+		if typeName.Return != nil {
+			ret = typeSignature(*typeName.Return)
+		}
+		out = "func_" + strings.Join(parts, "_") + "_to_" + ret
+	case ast.TypeStruct, ast.TypeGeneric:
+		out = typeName.Name
+	default:
+		out = string(typeName.Kind)
+	}
+	out = strings.ReplaceAll(out, "?", "_nullable")
+	if typeName.Nullable {
+		out += "_nullable"
+	}
+	return out
 }
 
 func (e *cEmitter) emitStructDecl(decl *ast.StructDecl) (string, error) {
@@ -738,6 +1188,13 @@ func (e *cEmitter) emitCall(call *ast.Call) (string, error) {
 		args = append([]string{receiver}, args...)
 		return fmt.Sprintf("%s(%s)", cMethodName(call.Receiver.ExprType().Name, call.Method), strings.Join(args, ", ")), nil
 	}
+	if len(call.TypeArgs) > 0 {
+		callee := call.Callee
+		if e.currentModule != "" && !strings.Contains(callee, ".") {
+			callee = e.currentModule + "." + callee
+		}
+		return fmt.Sprintf("%s(%s)", genericInstanceName(callee, call.TypeArgs), strings.Join(args, ", ")), nil
+	}
 	switch call.Callee {
 	case "math.sqrt":
 		return fmt.Sprintf("sqrt(%s)", strings.Join(args, ", ")), nil
@@ -765,6 +1222,9 @@ func (e *cEmitter) emitCall(call *ast.Call) (string, error) {
 }
 
 func (e *cEmitter) cFunctionDeclName(fn *ast.FuncDecl) string {
+	if fn.CName != "" {
+		return fn.CName
+	}
 	if fn.Receiver != "" {
 		return cMethodName(fn.Receiver, fn.Name)
 	}

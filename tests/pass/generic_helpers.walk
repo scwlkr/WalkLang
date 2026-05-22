@@ -1,0 +1,4 @@
+func: first[T](items array[T]) T
+    return: items[0]
+
+exp: first

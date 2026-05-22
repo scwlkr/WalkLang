@@ -1,0 +1,4 @@
+imp: generic_helpers
+
+var: nums = [8, 9]
+out: generic_helpers.first(nums)

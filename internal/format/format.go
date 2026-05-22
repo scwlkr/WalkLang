@@ -51,19 +51,19 @@ func escapeString(value string) string {
 }
 
 func needsSpace(prev string, current string) bool {
-	if current == ")" || current == "]" || current == "," || current == ":" || current == "." {
+	if current == ")" || current == "]" || current == "," || current == ":" || current == "." || current == "?" {
 		return false
 	}
-	if current == "(" {
+	if prev == "=" || current == "=" {
+		return true
+	}
+	if current == "(" || current == "[" {
 		return false
 	}
 	if prev == "(" || prev == "[" || prev == "." {
 		return false
 	}
 	if prev == "," || prev == ":" {
-		return true
-	}
-	if prev == "=" || current == "=" {
 		return true
 	}
 	return true

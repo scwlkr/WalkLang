@@ -276,6 +276,69 @@ func TestV21MethodFailFixturesHaveExpectedDiagnostics(t *testing.T) {
 	}
 }
 
+func TestV22GenericFixturesBuildAndRun(t *testing.T) {
+	requireCC(t)
+	root := repoRoot(t)
+	cases := []struct {
+		file string
+		want string
+	}{
+		{
+			file: "generics.walk",
+			want: strings.Join([]string{
+				"1",
+				"Ada",
+				"Walker",
+				"true",
+				"",
+			}, "\n"),
+		},
+		{
+			file: "generics_modules.walk",
+			want: "8\n",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.file, func(t *testing.T) {
+			cCode, warnings, err := compileFileToCWithOptions(filepath.Join(root, "tests", "pass", tc.file), false)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(warnings) != 0 {
+				t.Fatalf("unexpected warnings: %#v", warnings)
+			}
+			if got := runCProgram(t, cCode); got != tc.want {
+				t.Fatalf("want %q, got %q\nC:\n%s", tc.want, got, cCode)
+			}
+		})
+	}
+}
+
+func TestV22GenericFailFixturesHaveExpectedDiagnostics(t *testing.T) {
+	root := repoRoot(t)
+	cases := []struct {
+		file string
+		want string
+	}{
+		{"bad_generic_arg.walk", "tests/fail/bad_generic_arg.walk:4:16: type error: arg 2 to choose needs T as int, got string"},
+		{"generic_function_value.walk", "tests/fail/generic_function_value.walk:4:10: type error: generic function id must be called directly"},
+		{"generic_method.walk", "tests/fail/generic_method.walk:4:1: type error: generic methods are not supported yet"},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.file, func(t *testing.T) {
+			_, err := checkFile(filepath.Join(root, "tests", "fail", tc.file))
+			if err == nil {
+				t.Fatal("expected fixture to fail")
+			}
+			if got := err.Error(); !strings.HasSuffix(got, tc.want) {
+				t.Fatalf("want suffix %q, got %q", tc.want, got)
+			}
+		})
+	}
+}
+
 func repoRoot(t *testing.T) string {
 	t.Helper()
 	wd, err := os.Getwd()

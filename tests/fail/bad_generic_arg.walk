@@ -1,0 +1,4 @@
+func: choose[T](left T, right T) T
+    return: left
+
+out: choose(1, 'one')

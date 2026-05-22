@@ -21,6 +21,7 @@ const (
 	TypeArray    TypeKind = "array"
 	TypeFunction TypeKind = "func"
 	TypeStruct   TypeKind = "struct"
+	TypeGeneric  TypeKind = "generic"
 )
 
 type Type struct {
@@ -52,6 +53,8 @@ func (t Type) String() string {
 		}
 		out = "func(" + strings.Join(parts, ", ") + ") " + returnType
 	case TypeStruct:
+		out = t.Name
+	case TypeGeneric:
 		out = t.Name
 	default:
 		out = string(t.Kind)
@@ -101,6 +104,10 @@ func FuncType(params []Type, ret Type) Type {
 
 func Struct(name string) Type {
 	return Type{Kind: TypeStruct, Name: name}
+}
+
+func Generic(name string) Type {
+	return Type{Kind: TypeGeneric, Name: name}
 }
 
 type Program struct {
@@ -189,9 +196,11 @@ type FuncDecl struct {
 	Location   Location
 	Name       string
 	Receiver   string
+	TypeParams []string
 	Params     []Param
 	ReturnType Type
 	Body       []Statement
+	CName      string
 }
 
 func (s *FuncDecl) Loc() Location  { return s.Location }
@@ -320,6 +329,7 @@ type Call struct {
 	Receiver Expression
 	Method   string
 	Args     []Expression
+	TypeArgs []Type
 }
 
 func (e *Call) expressionNode() {}

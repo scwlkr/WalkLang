@@ -29,9 +29,10 @@ type MethodDef struct {
 }
 
 type Module struct {
-	Name    string
-	Program *ast.Program
-	Exports map[string]ast.Type
+	Name           string
+	Program        *ast.Program
+	Exports        map[string]ast.Type
+	GenericExports map[string]*ast.FuncDecl
 }
 
 type Options struct {
@@ -55,6 +56,8 @@ type Checker struct {
 	modules       map[string]*Module
 	structs       map[string]StructDef
 	methods       map[string]map[string]MethodDef
+	genericFuncs  map[string]*ast.FuncDecl
+	typeParams    map[string]bool
 	warnings      []Warning
 	currentReturn ast.Type
 	inFunction    bool
@@ -85,11 +88,12 @@ func CheckWithOptions(program *ast.Program, options Options) ([]Warning, error) 
 		}
 	}
 	c := Checker{
-		scopes:  []map[string]symbol{{}},
-		imports: map[string]bool{},
-		modules: options.Modules,
-		structs: structs,
-		methods: methods,
+		scopes:       []map[string]symbol{{}},
+		imports:      map[string]bool{},
+		modules:      options.Modules,
+		structs:      structs,
+		methods:      methods,
+		genericFuncs: map[string]*ast.FuncDecl{},
 	}
 	if c.modules == nil {
 		c.modules = map[string]*Module{}
@@ -105,18 +109,41 @@ func (c *Checker) check(program *ast.Program) error {
 	if err := c.checkMethods(); err != nil {
 		return err
 	}
+	if err := c.registerFunctions(program); err != nil {
+		return err
+	}
+	for _, statement := range program.Statements {
+		if err := c.checkStatement(statement); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *Checker) registerFunctions(program *ast.Program) error {
 	for _, statement := range program.Statements {
 		fn, ok := statement.(*ast.FuncDecl)
 		if !ok || fn.Receiver != "" {
 			continue
 		}
+		if len(fn.TypeParams) > 0 {
+			if err := c.validateTypeParams(fn); err != nil {
+				return err
+			}
+			if c.currentScopeHas(fn.Name) {
+				return errorAt(fn.Location, "name error: %s is already defined", fn.Name)
+			}
+			if _, ok := c.structs[fn.Name]; ok {
+				return errorAt(fn.Location, "name error: %s is already defined as struct", fn.Name)
+			}
+			if _, ok := c.genericFuncs[fn.Name]; ok {
+				return errorAt(fn.Location, "name error: %s is already defined", fn.Name)
+			}
+			c.genericFuncs[fn.Name] = fn
+			continue
+		}
 		fnType := functionType(fn)
 		if err := c.define(fn.Name, fnType, false, fn.Location); err != nil {
-			return err
-		}
-	}
-	for _, statement := range program.Statements {
-		if err := c.checkStatement(statement); err != nil {
 			return err
 		}
 	}
@@ -234,6 +261,9 @@ func (c *Checker) checkMethods() error {
 			if fn == nil {
 				continue
 			}
+			if len(fn.TypeParams) > 0 {
+				return errorAt(fn.Location, "type error: generic methods are not supported yet")
+			}
 			if len(fn.Params) == 0 {
 				return errorAt(fn.Location, "type error: method %s needs receiver parameter", methodName(fn.Receiver, fn.Name))
 			}
@@ -289,10 +319,15 @@ func (c *Checker) checkStatement(statement ast.Statement) error {
 		return nil
 	case *ast.Export:
 		if _, ok := c.resolve(s.Name); !ok {
-			return errorAt(s.Location, "name error: %s is not defined", s.Name)
+			if _, ok := c.genericFuncs[s.Name]; !ok {
+				return errorAt(s.Location, "name error: %s is not defined", s.Name)
+			}
 		}
 		return nil
 	case *ast.FuncDecl:
+		if len(s.TypeParams) > 0 {
+			return c.checkGenericFuncDecl(s)
+		}
 		return c.checkFuncDecl(s)
 	case *ast.StructDecl:
 		if c.blockDepth > 0 {
@@ -439,6 +474,40 @@ func (c *Checker) checkFuncDecl(fn *ast.FuncDecl) error {
 	return nil
 }
 
+func (c *Checker) checkGenericFuncDecl(fn *ast.FuncDecl) error {
+	if fn.Receiver != "" {
+		return errorAt(fn.Location, "type error: generic methods are not supported yet")
+	}
+	if err := c.validateTypeParams(fn); err != nil {
+		return err
+	}
+	previous := c.typeParams
+	c.typeParams = typeParamSet(fn.TypeParams)
+	err := c.checkFuncDecl(fn)
+	c.typeParams = previous
+	return err
+}
+
+func (c *Checker) validateTypeParams(fn *ast.FuncDecl) error {
+	seen := map[string]bool{}
+	for _, param := range fn.TypeParams {
+		if reservedTypeName(param) {
+			return errorAt(fn.Location, "type error: %s cannot be used as a type parameter", param)
+		}
+		if reservedValueName(param) {
+			return errorAt(fn.Location, "type error: %s cannot be used as a type parameter", param)
+		}
+		if _, ok := c.structs[param]; ok {
+			return errorAt(fn.Location, "type error: %s is already a struct", param)
+		}
+		if seen[param] {
+			return errorAt(fn.Location, "type error: duplicate type parameter %s", param)
+		}
+		seen[param] = true
+	}
+	return nil
+}
+
 func (c *Checker) checkVarDecl(statement *ast.VarDecl) error {
 	if c.currentScopeHas(statement.Name) {
 		return errorAt(statement.Location, "name error: %s is already defined", statement.Name)
@@ -558,6 +627,9 @@ func (c *Checker) checkExpression(expression ast.Expression) (ast.Type, error) {
 	case *ast.Name:
 		sym, exists := c.resolve(e.Identifier)
 		if !exists {
+			if _, ok := c.genericFuncs[e.Identifier]; ok {
+				return ast.Type{}, errorAt(e.Loc(), "type error: generic function %s must be called directly", e.Identifier)
+			}
 			return ast.Type{}, errorAt(e.Loc(), "name error: %s is not defined", e.Identifier)
 		}
 		result = sym.typeName
@@ -674,6 +746,9 @@ func (c *Checker) checkCall(call *ast.Call) (ast.Type, error) {
 	if def, ok := c.structs[call.Callee]; ok {
 		return c.checkStructConstructor(call, def)
 	}
+	if fn, ok := c.genericFuncs[call.Callee]; ok {
+		return c.checkGenericFunctionCall(call, fn)
+	}
 	sym, ok := c.resolve(call.Callee)
 	if !ok {
 		return ast.Type{}, errorAt(call.Loc(), "name error: %s is not defined", call.Callee)
@@ -775,6 +850,11 @@ func (c *Checker) checkModuleCall(call *ast.Call) (ast.Type, error) {
 		return ast.Type{}, errorAt(call.Loc(), "name error: module %s is not imported", module)
 	}
 	if userModule, ok := c.modules[module]; ok {
+		if userModule.GenericExports != nil {
+			if fn, ok := userModule.GenericExports[name]; ok {
+				return c.checkGenericFunctionCall(call, fn)
+			}
+		}
 		fnType, ok := userModule.Exports[name]
 		if !ok {
 			return ast.Type{}, errorAt(call.Loc(), "name error: module %s does not export %s", module, name)
@@ -884,6 +964,74 @@ func (c *Checker) checkFunctionCall(call *ast.Call, fnType ast.Type) (ast.Type, 
 		}
 	}
 	return *fnType.Return, nil
+}
+
+func (c *Checker) checkGenericFunctionCall(call *ast.Call, fn *ast.FuncDecl) (ast.Type, error) {
+	if len(fn.TypeParams) == 0 {
+		return c.checkFunctionCall(call, functionType(fn))
+	}
+	if len(call.Args) != len(fn.Params) {
+		return ast.Type{}, errorAt(call.Loc(), "type error: %s expects %d args, got %d", call.Callee, len(fn.Params), len(call.Args))
+	}
+	bindings := map[string]ast.Type{}
+	for i, arg := range call.Args {
+		argType, err := c.checkExpression(arg)
+		if err != nil {
+			return ast.Type{}, err
+		}
+		if err := c.matchGenericArg(fn.Params[i].Type, argType, bindings, call.Callee, i+1, arg.Loc()); err != nil {
+			return ast.Type{}, err
+		}
+	}
+	typeArgs := make([]ast.Type, 0, len(fn.TypeParams))
+	for _, name := range fn.TypeParams {
+		bound, ok := bindings[name]
+		if !ok {
+			return ast.Type{}, errorAt(call.Loc(), "type error: cannot infer type %s for %s", name, call.Callee)
+		}
+		typeArgs = append(typeArgs, bound)
+	}
+	call.TypeArgs = typeArgs
+	return substituteType(fn.ReturnType, bindings), nil
+}
+
+func (c *Checker) matchGenericArg(paramType ast.Type, argType ast.Type, bindings map[string]ast.Type, callee string, index int, location ast.Location) error {
+	switch paramType.Kind {
+	case ast.TypeGeneric:
+		return bindGenericType(paramType, argType, bindings, callee, index, location)
+	case ast.TypeArray:
+		if argType.Kind != ast.TypeArray || argType.Elem == nil || paramType.Elem == nil {
+			return errorAt(location, "type error: arg %d to %s is %s, got %s", index, callee, paramType.String(), argType.String())
+		}
+		return c.matchGenericArg(*paramType.Elem, *argType.Elem, bindings, callee, index, location)
+	case ast.TypeFunction:
+		if argType.Kind != ast.TypeFunction || len(paramType.Params) != len(argType.Params) || paramType.Return == nil || argType.Return == nil {
+			return errorAt(location, "type error: arg %d to %s is %s, got %s", index, callee, paramType.String(), argType.String())
+		}
+		for i := range paramType.Params {
+			if err := c.matchGenericArg(paramType.Params[i], argType.Params[i], bindings, callee, index, location); err != nil {
+				return err
+			}
+		}
+		return c.matchGenericArg(*paramType.Return, *argType.Return, bindings, callee, index, location)
+	default:
+		if !assignable(argType, paramType) {
+			return errorAt(location, "type error: arg %d to %s is %s, got %s", index, callee, paramType.String(), argType.String())
+		}
+		return nil
+	}
+}
+
+func bindGenericType(paramType ast.Type, argType ast.Type, bindings map[string]ast.Type, callee string, index int, location ast.Location) error {
+	name := paramType.Name
+	if existing, ok := bindings[name]; ok {
+		if !argType.Equal(existing) {
+			return errorAt(location, "type error: arg %d to %s needs %s as %s, got %s", index, callee, name, existing.String(), argType.String())
+		}
+		return nil
+	}
+	bindings[name] = argType
+	return nil
 }
 
 func (c *Checker) checkArrayLiteral(array *ast.ArrayLiteral) (ast.Type, error) {
@@ -1018,6 +1166,11 @@ func (c *Checker) validateType(typeName ast.Type, location ast.Location) error {
 			return errorAt(location, "type error: function type needs return type")
 		}
 		return c.validateType(*typeName.Return, location)
+	case ast.TypeGeneric:
+		if c.typeParams[typeName.Name] {
+			return nil
+		}
+		return errorAt(location, "type error: unknown type %s", typeName.String())
 	}
 	return errorAt(location, "type error: unknown type %s", typeName.String())
 }
@@ -1044,6 +1197,9 @@ func assignable(source ast.Type, target ast.Type) bool {
 
 func comparable(left ast.Type, right ast.Type) bool {
 	if left.Kind == ast.TypeStruct || right.Kind == ast.TypeStruct {
+		return false
+	}
+	if left.Kind == ast.TypeGeneric || right.Kind == ast.TypeGeneric {
 		return false
 	}
 	if left.Kind == ast.TypeNull {
@@ -1130,9 +1286,14 @@ func IsBuiltinModule(name string) bool {
 
 func ExportedFunctions(program *ast.Program) (map[string]ast.Type, error) {
 	functions := map[string]ast.Type{}
+	genericFunctions := map[string]bool{}
 	for _, statement := range program.Statements {
 		fn, ok := statement.(*ast.FuncDecl)
 		if !ok || fn.Receiver != "" {
+			continue
+		}
+		if len(fn.TypeParams) > 0 {
+			genericFunctions[fn.Name] = true
 			continue
 		}
 		functions[fn.Name] = functionType(fn)
@@ -1145,10 +1306,37 @@ func ExportedFunctions(program *ast.Program) (map[string]ast.Type, error) {
 			continue
 		}
 		fnType, ok := functions[exp.Name]
+		if genericFunctions[exp.Name] {
+			continue
+		}
 		if !ok {
 			return nil, errorAt(exp.Location, "module error: %s is not an exported function", exp.Name)
 		}
 		exports[exp.Name] = fnType
+	}
+	return exports, nil
+}
+
+func ExportedGenericFunctions(program *ast.Program) (map[string]*ast.FuncDecl, error) {
+	functions := map[string]*ast.FuncDecl{}
+	for _, statement := range program.Statements {
+		fn, ok := statement.(*ast.FuncDecl)
+		if !ok || fn.Receiver != "" || len(fn.TypeParams) == 0 {
+			continue
+		}
+		functions[fn.Name] = fn
+	}
+
+	exports := map[string]*ast.FuncDecl{}
+	for _, statement := range program.Statements {
+		exp, ok := statement.(*ast.Export)
+		if !ok {
+			continue
+		}
+		fn, ok := functions[exp.Name]
+		if ok {
+			exports[exp.Name] = fn
+		}
 	}
 	return exports, nil
 }
@@ -1162,4 +1350,65 @@ func funcName(fn *ast.FuncDecl) string {
 		return methodName(fn.Receiver, fn.Name)
 	}
 	return fn.Name
+}
+
+func typeParamSet(params []string) map[string]bool {
+	result := map[string]bool{}
+	for _, param := range params {
+		result[param] = true
+	}
+	return result
+}
+
+func substituteType(typeName ast.Type, bindings map[string]ast.Type) ast.Type {
+	switch typeName.Kind {
+	case ast.TypeGeneric:
+		if replacement, ok := bindings[typeName.Name]; ok {
+			if typeName.Nullable {
+				replacement.Nullable = true
+			}
+			return replacement
+		}
+		return typeName
+	case ast.TypeArray:
+		if typeName.Elem == nil {
+			return typeName
+		}
+		elem := substituteType(*typeName.Elem, bindings)
+		result := ast.ArrayOf(elem)
+		result.Nullable = typeName.Nullable
+		return result
+	case ast.TypeFunction:
+		params := make([]ast.Type, 0, len(typeName.Params))
+		for _, param := range typeName.Params {
+			params = append(params, substituteType(param, bindings))
+		}
+		if typeName.Return == nil {
+			return typeName
+		}
+		ret := substituteType(*typeName.Return, bindings)
+		result := ast.FuncType(params, ret)
+		result.Nullable = typeName.Nullable
+		return result
+	default:
+		return typeName
+	}
+}
+
+func reservedTypeName(name string) bool {
+	switch name {
+	case string(ast.TypeVoid), string(ast.TypeInt), string(ast.TypeFloat), string(ast.TypeBool), string(ast.TypeString), string(ast.TypeNull), "array", "func":
+		return true
+	default:
+		return false
+	}
+}
+
+func reservedValueName(name string) bool {
+	switch name {
+	case "var", "const", "out", "if", "else", "while", "for", "repeat", "break", "continue", "func", "return", "imp", "exp", "true", "false", "null", "and", "or", "not", "in", "test", "assert", "struct":
+		return true
+	default:
+		return false
+	}
 }

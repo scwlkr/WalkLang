@@ -1079,6 +1079,7 @@ Example:
 ```text
 structs: experimental in v2
 methods: experimental in v2.1
+generic functions: experimental in v2.2
 basic modules: stable in v1
 ```
 

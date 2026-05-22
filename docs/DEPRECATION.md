@@ -51,10 +51,10 @@ Current draft or experimental areas include:
 file/json/matrix APIs
 structs
 methods
+generic functions
 traits
 interfaces
 closures
 package manager behavior
 debugger and full LSP behavior
 ```
-

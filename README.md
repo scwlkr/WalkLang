@@ -2,7 +2,7 @@
 
 WalkLang is a small compiled language implemented in Go with a C backend.
 
-This repo currently contains v2.1 data modeling and methods, the v1.5 compatibility release preparation, v1.4 diagnostics and developer experience, the v1.3 standard library foundation, v1.2 project mode, and the v1 language contract from `docs/ROADMAP.md`.
+This repo currently contains v2.2 data modeling, methods, and simple generics, the v1.5 compatibility release preparation, v1.4 diagnostics and developer experience, the v1.3 standard library foundation, v1.2 project mode, and the v1 language contract from `docs/ROADMAP.md`.
 It proves the pipeline:
 
 ```text
@@ -62,6 +62,9 @@ Experimental v2 surface:
 - method declarations namespaced by receiver type, such as `func: User.is_adult(self User) bool`
 - method calls on struct values, such as `user.is_adult()`
 - method calls emitted as predictable receiver functions, such as `User__is_adult(user)`
+- simple generic functions, such as `func: first[T](items array[T]) T`
+- inferred generic calls over scalar, array, and struct values
+- exported user-module generic functions
 
 Contract docs:
 
@@ -153,6 +156,13 @@ walk build tests/pass/methods.walk -o build/methods
 ./build/methods
 ```
 
+Run the v2.2 generic fixture:
+
+```bash
+walk build tests/pass/generics.walk -o build/generics
+./build/generics
+```
+
 Check warnings:
 
 ```bash
@@ -193,5 +203,5 @@ scripts/stress-v1.sh
 Build cross-platform CLI release artifacts:
 
 ```bash
-scripts/release.sh v2.1.0
+scripts/release.sh v2.2.0
 ```

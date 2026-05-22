@@ -1,5 +1,58 @@
 # WalkLang Release Notes
 
+## v2.2.0 - Simple Generic Composition
+
+Date: 2026-05-22
+
+v2.2.0 adds experimental simple generic functions as the next composition step after structs and methods.
+
+### Added
+
+- Generic function declarations with type parameters, such as `func: first[T](items array[T]) T`.
+- Call-site type inference for generic functions.
+- Generic functions over scalar values, arrays, structs, and method-returning struct expressions.
+- Exported user-module generic functions.
+- Predictable C monomorphization for concrete generic calls.
+- v2.2 generic pass/fail fixtures and formatter coverage.
+- `docs/V2.md` generic function documentation.
+
+### Changed
+
+- `exp:` may now export generic functions from user modules.
+- Formatter output keeps generic and array type brackets tight, such as `array[T]`.
+
+### Breaking Changes
+
+None.
+
+### Removed
+
+None.
+
+### Experimental Or Draft
+
+Structs, methods, and generic functions remain experimental in v2.2. The following remain future roadmap items:
+
+```text
+traits
+interfaces
+generic structs
+generic methods
+explicit type-argument calls
+named-field constructors
+file/json/matrix APIs
+```
+
+### Upgrade
+
+Run:
+
+```bash
+walk check --warnings=error <your entry file>
+walk test <your tests file>
+walk build <your entry file> -o build/app
+```
+
 ## v2.1.0 - Methods
 
 Date: 2026-05-22

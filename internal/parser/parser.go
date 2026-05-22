@@ -317,6 +317,11 @@ func parseFuncDecl(tokens []lexer.Token, children []lineNode, location ast.Locat
 	if reservedWords[name.Value] {
 		return nil, errorAt(name.Location, "syntax error: reserved word %q cannot be used as function name", name.Value)
 	}
+	typeParams, err := c.parseTypeParams()
+	if err != nil {
+		return nil, err
+	}
+	c.typeParams = typeParamSet(typeParams)
 	if err := c.expectSymbol("("); err != nil {
 		return nil, err
 	}
@@ -352,7 +357,7 @@ func parseFuncDecl(tokens []lexer.Token, children []lineNode, location ast.Locat
 	if err != nil {
 		return nil, err
 	}
-	return &ast.FuncDecl{Location: location, Name: name.Value, Receiver: receiver, Params: params, ReturnType: returnType, Body: body}, nil
+	return &ast.FuncDecl{Location: location, Name: name.Value, Receiver: receiver, TypeParams: typeParams, Params: params, ReturnType: returnType, Body: body}, nil
 }
 
 func parseStructDecl(tokens []lexer.Token, children []lineNode, location ast.Location) (ast.Statement, error) {
@@ -518,8 +523,9 @@ func findAssignment(tokens []lexer.Token) int {
 }
 
 type cursor struct {
-	tokens []lexer.Token
-	index  int
+	tokens     []lexer.Token
+	index      int
+	typeParams map[string]bool
 }
 
 func (c *cursor) peek() *lexer.Token {
@@ -745,6 +751,31 @@ func (c *cursor) parseCallArgs() ([]ast.Expression, error) {
 	return args, nil
 }
 
+func (c *cursor) parseTypeParams() ([]string, error) {
+	if c.peek() == nil || c.peek().Value != "[" {
+		return nil, nil
+	}
+	c.advance()
+	var params []string
+	for c.peek() != nil && c.peek().Value != "]" {
+		param, err := c.expectName("type parameter")
+		if err != nil {
+			return nil, err
+		}
+		params = append(params, param.Value)
+		if c.peek() != nil && c.peek().Value == "," {
+			c.advance()
+		}
+	}
+	if len(params) == 0 {
+		return nil, errorAt(c.currentLocation(), "syntax error: expected type parameter")
+	}
+	if err := c.expectSymbol("]"); err != nil {
+		return nil, err
+	}
+	return params, nil
+}
+
 func callFromTarget(target ast.Expression, args []ast.Expression) (*ast.Call, error) {
 	if field, ok := target.(*ast.FieldAccess); ok {
 		callee, _ := expressionCallee(target)
@@ -842,13 +873,25 @@ func (c *cursor) parseType() (ast.Type, error) {
 	case string(ast.TypeVoid), string(ast.TypeInt), string(ast.TypeFloat), string(ast.TypeBool), string(ast.TypeString):
 		result = ast.Basic(ast.TypeKind(token.Value))
 	default:
-		result = ast.Struct(token.Value)
+		if c.typeParams[token.Value] {
+			result = ast.Generic(token.Value)
+		} else {
+			result = ast.Struct(token.Value)
+		}
 	}
 	if c.peek() != nil && c.peek().Value == "?" {
 		c.advance()
 		result.Nullable = true
 	}
 	return result, nil
+}
+
+func typeParamSet(params []string) map[string]bool {
+	result := map[string]bool{}
+	for _, param := range params {
+		result[param] = true
+	}
+	return result
 }
 
 func parseCallee(tokens []lexer.Token) (string, error) {

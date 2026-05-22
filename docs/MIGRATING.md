@@ -1,5 +1,37 @@
 # WalkLang Migration Guide
 
+## v2.1 to v2.2
+
+v2.2 adds experimental simple generic functions. Existing v2.1 source should not need changes.
+
+Recommended upgrade check:
+
+```bash
+walk version
+walk check --warnings=error <entry.walk>
+walk test <tests.walk>
+walk build <entry.walk> -o build/app
+```
+
+For projects:
+
+```bash
+walk check --warnings=error
+walk test
+walk build
+```
+
+## What Changed In v2.2
+
+- Generic function declarations are accepted, such as `func: first[T](items array[T]) T`.
+- Generic calls infer type arguments from ordinary call arguments.
+- Generic functions can compose with arrays, structs, methods, and user-module exports.
+- Generated C specializes concrete generic calls into predictable ordinary functions.
+
+## What Is Still Future
+
+Traits, interfaces, generic structs, generic methods, explicit type-argument calls, and named-field constructors are not part of v2.2.
+
 ## v1.5 to v2.0
 
 v2.0 adds experimental structs and reserves the `struct` keyword.

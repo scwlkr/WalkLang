@@ -1,0 +1,27 @@
+struct: User
+    name string
+    age int
+
+func: User.is_adult(self User) bool
+    return: >= self.age 18
+
+func: choose[T](use_first bool, first T, second T) T
+    if: use_first
+        return: first
+    else:
+        return: second
+
+func: first[T](items array[T]) T
+    return: items[0]
+
+func: same[T](value T) T
+    return: value
+
+var: nums = [1, 2, 3]
+out: first(nums)
+out: choose(false, 'Walker', 'Ada')
+
+var: users = [User('Walker', 25), User('Ada', 37)]
+var: selected = choose(true, users[0], users[1])
+out: same(selected).name
+out: first(users).is_adult()

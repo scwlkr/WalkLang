@@ -69,6 +69,15 @@ var: user = User('Walker', 25)
 out: user.height # type error: User has no field height
 ```
 
+v2.2 generic diagnostics also use `type error`:
+
+```walk
+func: choose[T](left T, right T) T
+    return: left
+
+out: choose(1, 'one') # type error: arg 2 to choose needs T as int, got string
+```
+
 ## Name Errors
 
 Name errors come from missing names, missing imports, non-callable names, or unknown library functions.

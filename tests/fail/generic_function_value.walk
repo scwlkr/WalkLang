@@ -1,0 +1,4 @@
+func: id[T](value T) T
+    return: value
+
+var: f = id
