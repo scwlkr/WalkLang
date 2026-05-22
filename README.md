@@ -35,48 +35,57 @@ Supported now:
 - stdlib polish for `math.pow`, `string.len`, `array.len`, and `time.now`
 - `walk check` with `--warnings=off|default|error`
 - release native builds with `--release`, `--cc`, and `--cflag`
+- user-local `walk` command install
+- v1 stress script
 - cross-platform CLI release script
 
 ## Use
 
+Install the local `walk` command:
+
+```bash
+scripts/install-local.sh v1-local
+walk version
+```
+
 Emit C:
 
 ```bash
-go run ./cmd/walk emit-c examples/hello.walk -o build/hello.c
+walk emit-c examples/hello.walk -o build/hello.c
 ```
 
 Build a native executable:
 
 ```bash
-go run ./cmd/walk build examples/hello.walk -o build/hello
+walk build examples/hello.walk -o build/hello
 ./build/hello
 ```
 
 Run the v0 representative program:
 
 ```bash
-go run ./cmd/walk build examples/v0.walk -o build/v0
+walk build examples/v0.walk -o build/v0
 ./build/v0
 ```
 
 Run v0.1 tests:
 
 ```bash
-go run ./cmd/walk test examples/v0_1_tests.walk
+walk test examples/v0_1_tests.walk
 ```
 
 Run the v1 module example:
 
 ```bash
-go run ./cmd/walk build examples/v1.walk -o build/v1 --release
+walk build examples/v1.walk -o build/v1 --release
 ./build/v1
 ```
 
 Check warnings:
 
 ```bash
-go run ./cmd/walk check examples/v1.walk
-go run ./cmd/walk check --warnings=error examples/v1.walk
+walk check examples/v1.walk
+walk check --warnings=error examples/v1.walk
 ```
 
 Open the REPL:
@@ -88,13 +97,19 @@ go run ./cmd/walk repl
 Format a file:
 
 ```bash
-go run ./cmd/walk fmt examples/hello.walk
+walk fmt examples/hello.walk
 ```
 
 Run tests:
 
 ```bash
 go test ./...
+```
+
+Stress v1:
+
+```bash
+scripts/stress-v1.sh
 ```
 
 Build cross-platform CLI release artifacts:
