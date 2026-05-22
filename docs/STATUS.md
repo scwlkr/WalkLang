@@ -31,6 +31,19 @@ checksum lines; the host release binary reported `v5.5.0` from `walk version`;
 `git diff --check` is still blocked by the pre-existing unstaged
 `playground/hangman-v2.walk` trailing whitespace.
 
+Live docs TLS recovery on 2026-05-22: root cause was GitHub Pages serving the
+custom domain over HTTP while no Pages TLS certificate existed for
+`walklang.wlkrlabs.com`; DNS was already valid as the DNS-only
+`walklang -> scwlkr.github.io` CNAME and the Pages health check reported the
+domain as valid and HTTPS-eligible. Removed and re-added the Pages custom
+domain to restart certificate provisioning, confirmed the new Let's Encrypt
+certificate includes `walklang.wlkrlabs.com`, enabled HTTPS enforcement, and
+triggered a fresh Pages deployment to clear the cached HTTP homepage. Live
+verification passed with `http://walklang.wlkrlabs.com` returning `301` to
+`https://walklang.wlkrlabs.com/`, `https://walklang.wlkrlabs.com` returning
+`200`, GitHub Pages API reporting `https_enforced: true`, and Pages health
+reporting `responds_to_https: true` plus `enforces_https: true`.
+
 State: v5.4.1 fixes `random.choice` and `random.int` to use a runtime-owned
 PRNG seeded once per native process instead of the C runtime's unseeded default
 `rand()` state.
@@ -121,5 +134,4 @@ Playground example update on 2026-05-22: `playground/route_ranker.walk` now demo
 CLI run shortcut update on 2026-05-22: `walk run <source.walk>` now compiles a single file to a temporary native executable, runs it, streams program input and output, and removes the temporary build directory; `walk <source.walk>` is a direct shorthand for the same flow. Verification passed with focused `go test ./cmd/walk -run TestRunCommandRunsSingleFileAndDirectFileAlias -count=1`, `go build -o build/walk ./cmd/walk`, `./build/walk run playground/route_ranker.walk`, `./build/walk playground/route_ranker.walk`, full `go test -count=1 ./...`, `scripts/check-docs-site.sh`, `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh`, `scripts/release.sh v5.1.0 <temp>/release`, a 5-line `SHA256SUMS` check, host release binary `walk version` reporting `v5.1.0`, and `git diff --check`.
 
 Next: implement the existing IO Phase 0 `do:` effect-call decision point when
-IO work resumes; separately retry HTTPS enforcement after GitHub issues the
-Pages certificate for `walklang.wlkrlabs.com`.
+IO work resumes.
