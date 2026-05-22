@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"walklang/internal/checker"
 	"walklang/internal/emitter"
@@ -30,6 +32,10 @@ func run(args []string) error {
 		return emitCCommand(args[1:])
 	case "fmt":
 		return fmtCommand(args[1:])
+	case "test":
+		return testCommand(args[1:])
+	case "repl":
+		return replCommand(args[1:])
 	default:
 		return fmt.Errorf("unknown command %q", args[0])
 	}
@@ -47,20 +53,8 @@ func build(args []string) error {
 	if err != nil {
 		return err
 	}
-	if err := os.MkdirAll(filepath.Dir(cPath), 0o755); err != nil {
+	if err := buildC(cCode, cPath, output); err != nil {
 		return err
-	}
-	if err := os.MkdirAll(filepath.Dir(output), 0o755); err != nil {
-		return err
-	}
-	if err := os.WriteFile(cPath, []byte(cCode), 0o644); err != nil {
-		return err
-	}
-
-	command := exec.Command("cc", cPath, "-o", output, "-lm")
-	result, err := command.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("native build failed: %s", string(result))
 	}
 	fmt.Println(output)
 	return nil
@@ -117,6 +111,71 @@ func fmtCommand(args []string) error {
 	return nil
 }
 
+func testCommand(args []string) error {
+	if len(args) != 1 {
+		return fmt.Errorf("usage: walk test <source.walk>")
+	}
+	cCode, err := compileFileToC(args[0], true)
+	if err != nil {
+		return err
+	}
+	dir, err := os.MkdirTemp("", "walk-test-*")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(dir)
+
+	exePath := filepath.Join(dir, "tests")
+	if err := buildC(cCode, filepath.Join(dir, "tests.c"), exePath); err != nil {
+		return err
+	}
+	command := exec.Command(exePath)
+	command.Stdout = os.Stdout
+	command.Stderr = os.Stderr
+	if err := command.Run(); err != nil {
+		return fmt.Errorf("tests failed: %w", err)
+	}
+	return nil
+}
+
+func replCommand(args []string) error {
+	if len(args) != 0 {
+		return fmt.Errorf("usage: walk repl")
+	}
+	scanner := bufio.NewScanner(os.Stdin)
+	for {
+		fmt.Print("walk> ")
+		if !scanner.Scan() {
+			return scanner.Err()
+		}
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" {
+			continue
+		}
+		if line == ":quit" || line == ":exit" {
+			return nil
+		}
+		output, err := runSource(replSource(line), "<repl>")
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			continue
+		}
+		fmt.Print(output)
+	}
+}
+
+func replSource(expression string) string {
+	return strings.Join([]string{
+		"imp: math",
+		"imp: string",
+		"imp: array",
+		"imp: random",
+		"imp: time",
+		"out: " + expression,
+		"",
+	}, "\n")
+}
+
 func parseBuildArgs(args []string) (sourcePath string, output string, cOutput string, err error) {
 	for i := 0; i < len(args); i++ {
 		switch args[i] {
@@ -168,16 +227,66 @@ func parseEmitCArgs(args []string) (sourcePath string, output string, err error)
 }
 
 func compileToC(sourcePath string) (string, error) {
+	return compileFileToC(sourcePath, false)
+}
+
+func compileFileToC(sourcePath string, testsOnly bool) (string, error) {
 	source, err := os.ReadFile(sourcePath)
 	if err != nil {
 		return "", fmt.Errorf("source read failed: %w", err)
 	}
-	program, err := parser.ParseSource(string(source), sourcePath)
+	return compileSourceToC(string(source), sourcePath, testsOnly)
+}
+
+func compileSourceToC(source string, filename string, testsOnly bool) (string, error) {
+	program, err := parser.ParseSource(source, filename)
 	if err != nil {
 		return "", err
 	}
 	if err := checker.Check(program); err != nil {
 		return "", err
 	}
+	if testsOnly {
+		return emitter.EmitTestC(program)
+	}
 	return emitter.EmitC(program)
+}
+
+func buildC(cCode string, cPath string, output string) error {
+	if err := os.MkdirAll(filepath.Dir(cPath), 0o755); err != nil {
+		return err
+	}
+	if err := os.MkdirAll(filepath.Dir(output), 0o755); err != nil {
+		return err
+	}
+	if err := os.WriteFile(cPath, []byte(cCode), 0o644); err != nil {
+		return err
+	}
+	command := exec.Command("cc", cPath, "-o", output, "-lm")
+	result, err := command.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("native build failed: %s", string(result))
+	}
+	return nil
+}
+
+func runSource(source string, filename string) (string, error) {
+	cCode, err := compileSourceToC(source, filename, false)
+	if err != nil {
+		return "", err
+	}
+	dir, err := os.MkdirTemp("", "walk-repl-*")
+	if err != nil {
+		return "", err
+	}
+	defer os.RemoveAll(dir)
+	exePath := filepath.Join(dir, "repl")
+	if err := buildC(cCode, filepath.Join(dir, "repl.c"), exePath); err != nil {
+		return "", err
+	}
+	output, err := exec.Command(exePath).CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("program failed: %s", string(output))
+	}
+	return string(output), nil
 }

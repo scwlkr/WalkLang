@@ -9,7 +9,12 @@ import (
 
 func EmitC(program *ast.Program) (string, error) {
 	e := &cEmitter{}
-	return e.emit(program)
+	return e.emit(program, false)
+}
+
+func EmitTestC(program *ast.Program) (string, error) {
+	e := &cEmitter{}
+	return e.emit(program, true)
 }
 
 type cEmitter struct {
@@ -17,7 +22,7 @@ type cEmitter struct {
 	indent int
 }
 
-func (e *cEmitter) emit(program *ast.Program) (string, error) {
+func (e *cEmitter) emit(program *ast.Program, testsOnly bool) (string, error) {
 	var out strings.Builder
 	out.WriteString("#include <math.h>\n")
 	out.WriteString("#include <stdbool.h>\n")
@@ -25,6 +30,7 @@ func (e *cEmitter) emit(program *ast.Program) (string, error) {
 	out.WriteString("#include <stdio.h>\n")
 	out.WriteString("#include <stdlib.h>\n")
 	out.WriteString("#include <string.h>\n\n")
+	out.WriteString("#include <time.h>\n\n")
 	out.WriteString("typedef struct { long long *items; long long len; } WalkArrayInt;\n")
 	out.WriteString("typedef struct { double *items; long long len; } WalkArrayFloat;\n")
 	out.WriteString("typedef struct { bool *items; long long len; } WalkArrayBool;\n")
@@ -64,10 +70,41 @@ func (e *cEmitter) emit(program *ast.Program) (string, error) {
 
 	out.WriteString("int main(void) {\n")
 	e.indent = 1
+	if testsOnly {
+		out.WriteString("    long long __walk_tests = 0;\n")
+		out.WriteString("    long long __walk_failures = 0;\n")
+	}
 	for _, statement := range program.Statements {
-		switch statement.(type) {
+		switch s := statement.(type) {
 		case *ast.FuncDecl, *ast.Import, *ast.Export:
 			continue
+		case *ast.TestDecl:
+			if !testsOnly {
+				continue
+			}
+			lines, err := e.emitTestDecl(s)
+			if err != nil {
+				return "", err
+			}
+			for _, line := range lines {
+				out.WriteString(e.indentString())
+				out.WriteString(line)
+				out.WriteByte('\n')
+			}
+			continue
+		case *ast.Assert:
+			if !testsOnly {
+				continue
+			}
+		}
+		if testsOnly {
+			if _, ok := statement.(*ast.TestDecl); !ok {
+				switch statement.(type) {
+				case *ast.VarDecl, *ast.Assignment:
+				default:
+					continue
+				}
+			}
 		}
 		lines, err := e.emitStatement(statement)
 		if err != nil {
@@ -79,7 +116,16 @@ func (e *cEmitter) emit(program *ast.Program) (string, error) {
 			out.WriteByte('\n')
 		}
 	}
-	out.WriteString("    return 0;\n")
+	if testsOnly {
+		out.WriteString("    if (__walk_failures == 0) {\n")
+		out.WriteString("        printf(\"ok %lld tests\\n\", __walk_tests);\n")
+		out.WriteString("    } else {\n")
+		out.WriteString("        printf(\"failed %lld of %lld tests\\n\", __walk_failures, __walk_tests);\n")
+		out.WriteString("    }\n")
+		out.WriteString("    return __walk_failures == 0 ? 0 : 1;\n")
+	} else {
+		out.WriteString("    return 0;\n")
+	}
 	out.WriteString("}\n")
 	return out.String(), nil
 }
@@ -166,6 +212,8 @@ func (e *cEmitter) emitStatement(statement ast.Statement) ([]string, error) {
 	case *ast.Out:
 		line, err := e.emitOut(s.Value)
 		return []string{line}, err
+	case *ast.Assert:
+		return e.emitAssert(s)
 	case *ast.Return:
 		value, err := e.emitExpression(s.Value)
 		if err != nil {
@@ -187,6 +235,34 @@ func (e *cEmitter) emitStatement(statement ast.Statement) ([]string, error) {
 	default:
 		return nil, errorAt(statement.Loc(), "internal error: unknown statement")
 	}
+}
+
+func (e *cEmitter) emitTestDecl(test *ast.TestDecl) ([]string, error) {
+	lines := []string{
+		"__walk_tests++;",
+		fmt.Sprintf("printf(\"test: %s\\n\");", escapeCTestName(test.Name)),
+		"{",
+	}
+	body, err := e.emitBlock(test.Body)
+	if err != nil {
+		return nil, err
+	}
+	lines = appendIndented(lines, body)
+	lines = append(lines, "}")
+	return lines, nil
+}
+
+func (e *cEmitter) emitAssert(statement *ast.Assert) ([]string, error) {
+	value, err := e.emitExpression(statement.Value)
+	if err != nil {
+		return nil, err
+	}
+	return []string{
+		fmt.Sprintf("if (!(%s)) {", value),
+		fmt.Sprintf("    printf(\"FAIL %s:%d:%d\\n\");", escapeCString(statement.Location.Filename), statement.Location.Line, statement.Location.Column),
+		"    __walk_failures++;",
+		"}",
+	}, nil
 }
 
 func (e *cEmitter) emitVarDecl(statement *ast.VarDecl) ([]string, error) {
@@ -444,6 +520,14 @@ func (e *cEmitter) emitCall(call *ast.Call) (string, error) {
 	switch call.Callee {
 	case "math.sqrt":
 		return fmt.Sprintf("sqrt(%s)", strings.Join(args, ", ")), nil
+	case "math.pow":
+		return fmt.Sprintf("pow(%s)", strings.Join(args, ", ")), nil
+	case "string.len":
+		return fmt.Sprintf("(long long)strlen(%s)", args[0]), nil
+	case "array.len":
+		return fmt.Sprintf("%s.len", args[0]), nil
+	case "time.now":
+		return "(long long)time(NULL)", nil
 	case "random.int":
 		return fmt.Sprintf("__walk_random_int(%s)", strings.Join(args, ", ")), nil
 	default:
@@ -548,6 +632,10 @@ func escapeCString(value string) string {
 	return replacer.Replace(value)
 }
 
+func escapeCTestName(value string) string {
+	return escapeCString(value)
+}
+
 func errorAt(location ast.Location, format string, args ...any) error {
-	return fmt.Errorf("%s:%d: %s", location.Filename, location.Line, fmt.Sprintf(format, args...))
+	return fmt.Errorf("%s:%d:%d: %s", location.Filename, location.Line, location.Column, fmt.Sprintf(format, args...))
 }

@@ -185,6 +185,74 @@ func TestV0ControlFlowNullArraysAndFunctionValues(t *testing.T) {
 	}
 }
 
+func TestV01TestRunnerProgramBuildsAndRuns(t *testing.T) {
+	if _, err := exec.LookPath("cc"); err != nil {
+		t.Skip("cc is not available")
+	}
+
+	program, err := parser.ParseSource(strings.Join([]string{
+		"imp: math",
+		"imp: string",
+		"imp: array",
+		"imp: time",
+		"",
+		"func: add(a int, b int) int",
+		"    return: + a b",
+		"",
+		"test: 'add works'",
+		"    assert: == add(2, 3) 5",
+		"",
+		"test: 'stdlib polish works'",
+		"    var: nums = [1, 2, 3]",
+		"    assert: == array.len(nums) 3",
+		"    assert: == string.len('walk') 4",
+		"    assert: == math.pow(2, 3) 8",
+		"    assert: > time.now() 0",
+	}, "\n"), "main.walk")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := checker.Check(program); err != nil {
+		t.Fatal(err)
+	}
+	cCode, err := emitter.EmitTestC(program)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	dir := t.TempDir()
+	cPath := filepath.Join(dir, "tests.c")
+	exePath := filepath.Join(dir, "tests")
+	if err := os.WriteFile(cPath, []byte(cCode), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if output, err := exec.Command("cc", cPath, "-o", exePath, "-lm").CombinedOutput(); err != nil {
+		t.Fatalf("cc failed: %v\n%s\n%s", err, string(output), cCode)
+	}
+	output, err := exec.Command(exePath).CombinedOutput()
+	if err != nil {
+		t.Fatalf("test program failed: %v\n%s\n%s", err, string(output), cCode)
+	}
+	want := "test: add works\ntest: stdlib polish works\nok 2 tests\n"
+	if got := string(output); got != want {
+		t.Fatalf("output mismatch:\nwant %q\ngot  %q\nC:\n%s", want, got, cCode)
+	}
+}
+
+func TestV01DiagnosticsIncludeLineAndColumn(t *testing.T) {
+	program, err := parser.ParseSource("var: x = 1\nx = 'one'\n", "main.walk")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = checker.Check(program)
+	if err == nil {
+		t.Fatal("expected type error")
+	}
+	if got, want := err.Error(), "main.walk:2:1: type error: x is int, got string"; got != want {
+		t.Fatalf("want %q, got %q", want, got)
+	}
+}
+
 func TestFormatterNormalizesInitialSyntax(t *testing.T) {
 	formatted, err := walkfmt.Format("var:x=+ 1 2\nout:'hello'\n", "main.walk")
 	if err != nil {
@@ -222,7 +290,7 @@ func TestTypeErrors(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected type error")
 	}
-	if got, want := err.Error(), "main.walk:2: type error: x is int, got string"; got != want {
+	if got, want := err.Error(), "main.walk:2:1: type error: x is int, got string"; got != want {
 		t.Fatalf("want %q, got %q", want, got)
 	}
 }
@@ -236,7 +304,7 @@ func TestConstAssignmentIsRejected(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected const reassignment error")
 	}
-	if got, want := err.Error(), "main.walk:2: type error: x is const and cannot be reassigned"; got != want {
+	if got, want := err.Error(), "main.walk:2:1: type error: x is const and cannot be reassigned"; got != want {
 		t.Fatalf("want %q, got %q", want, got)
 	}
 }
@@ -246,7 +314,7 @@ func TestReservedWordsCannotBeNames(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected reserved word error")
 	}
-	if got, want := err.Error(), "main.walk:1: syntax error: reserved word \"return\" cannot be used as variable name"; got != want {
+	if got, want := err.Error(), "main.walk:1:6: syntax error: reserved word \"return\" cannot be used as variable name"; got != want {
 		t.Fatalf("want %q, got %q", want, got)
 	}
 }

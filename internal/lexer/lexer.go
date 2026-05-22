@@ -207,5 +207,5 @@ func readString(text string, i int, location ast.Location) (string, int, error) 
 }
 
 func errorAt(location ast.Location, format string, args ...any) error {
-	return fmt.Errorf("%s:%d: %s", location.Filename, location.Line, fmt.Sprintf(format, args...))
+	return fmt.Errorf("%s:%d:%d: %s", location.Filename, location.Line, location.Column, fmt.Sprintf(format, args...))
 }

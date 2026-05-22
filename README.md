@@ -2,14 +2,14 @@
 
 WalkLang is a small compiled language implemented in Go with a C backend.
 
-This repo currently contains the v0 compiler path from `docs/ROADMAP.md`.
+This repo currently contains the v0.1 compiler path from `docs/ROADMAP.md`.
 It proves the pipeline:
 
 ```text
 .walk source -> Go compiler -> generated C -> native executable
 ```
 
-## Current v0 Surface
+## Current v0.1 Surface
 
 Supported now:
 
@@ -28,6 +28,10 @@ Supported now:
 - `imp:` for built-in modules and `exp:` validation
 - `math.sqrt` and `random.int`
 - formatter command
+- test runner with `test:` and `assert:`
+- basic expression REPL
+- line/column diagnostics
+- stdlib polish for `math.pow`, `string.len`, `array.len`, and `time.now`
 
 ## Use
 
@@ -49,6 +53,18 @@ Run the v0 representative program:
 ```bash
 go run ./cmd/walk build examples/v0.walk -o build/v0
 ./build/v0
+```
+
+Run v0.1 tests:
+
+```bash
+go run ./cmd/walk test examples/v0_1_tests.walk
+```
+
+Open the REPL:
+
+```bash
+go run ./cmd/walk repl
 ```
 
 Format a file:

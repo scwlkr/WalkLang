@@ -144,6 +144,23 @@ type Out struct {
 func (s *Out) Loc() Location  { return s.Location }
 func (s *Out) statementNode() {}
 
+type TestDecl struct {
+	Location Location
+	Name     string
+	Body     []Statement
+}
+
+func (s *TestDecl) Loc() Location  { return s.Location }
+func (s *TestDecl) statementNode() {}
+
+type Assert struct {
+	Location Location
+	Value    Expression
+}
+
+func (s *Assert) Loc() Location  { return s.Location }
+func (s *Assert) statementNode() {}
+
 type Import struct {
 	Location Location
 	Module   string

@@ -80,6 +80,17 @@ func (c *Checker) checkStatement(statement ast.Statement) error {
 			return errorAt(s.Location, "type error: cannot output %s", valueType.String())
 		}
 		return nil
+	case *ast.TestDecl:
+		return c.checkNestedBlock(s.Body)
+	case *ast.Assert:
+		valueType, err := c.checkExpression(s.Value)
+		if err != nil {
+			return err
+		}
+		if !valueType.Equal(ast.Basic(ast.TypeBool)) {
+			return errorAt(s.Value.Loc(), "type error: assert needs bool, got %s", valueType.String())
+		}
+		return nil
 	case *ast.Return:
 		if !c.inFunction {
 			return errorAt(s.Location, "syntax error: return outside function")
@@ -435,6 +446,49 @@ func (c *Checker) checkModuleCall(call *ast.Call) (ast.Type, error) {
 			return ast.Type{}, errorAt(call.Args[0].Loc(), "type error: math.sqrt needs numeric arg, got %s", argType.String())
 		}
 		return ast.Basic(ast.TypeFloat), nil
+	case "math.pow":
+		if len(call.Args) != 2 {
+			return ast.Type{}, errorAt(call.Loc(), "type error: math.pow expects 2 args, got %d", len(call.Args))
+		}
+		for _, arg := range call.Args {
+			argType, err := c.checkExpression(arg)
+			if err != nil {
+				return ast.Type{}, err
+			}
+			if !isNumeric(argType) {
+				return ast.Type{}, errorAt(arg.Loc(), "type error: math.pow needs numeric args, got %s", argType.String())
+			}
+		}
+		return ast.Basic(ast.TypeFloat), nil
+	case "string.len":
+		if len(call.Args) != 1 {
+			return ast.Type{}, errorAt(call.Loc(), "type error: string.len expects 1 arg, got %d", len(call.Args))
+		}
+		argType, err := c.checkExpression(call.Args[0])
+		if err != nil {
+			return ast.Type{}, err
+		}
+		if argType.Kind != ast.TypeString {
+			return ast.Type{}, errorAt(call.Args[0].Loc(), "type error: string.len needs string arg, got %s", argType.String())
+		}
+		return ast.Basic(ast.TypeInt), nil
+	case "array.len":
+		if len(call.Args) != 1 {
+			return ast.Type{}, errorAt(call.Loc(), "type error: array.len expects 1 arg, got %d", len(call.Args))
+		}
+		argType, err := c.checkExpression(call.Args[0])
+		if err != nil {
+			return ast.Type{}, err
+		}
+		if argType.Kind != ast.TypeArray {
+			return ast.Type{}, errorAt(call.Args[0].Loc(), "type error: array.len needs array arg, got %s", argType.String())
+		}
+		return ast.Basic(ast.TypeInt), nil
+	case "time.now":
+		if len(call.Args) != 0 {
+			return ast.Type{}, errorAt(call.Loc(), "type error: time.now expects 0 args, got %d", len(call.Args))
+		}
+		return ast.Basic(ast.TypeInt), nil
 	case "random.int":
 		if len(call.Args) != 2 {
 			return ast.Type{}, errorAt(call.Loc(), "type error: random.int expects 2 args, got %d", len(call.Args))
@@ -611,5 +665,5 @@ func rootName(expression ast.Expression) (string, bool) {
 }
 
 func errorAt(location ast.Location, format string, args ...any) error {
-	return fmt.Errorf("%s:%d: %s", location.Filename, location.Line, fmt.Sprintf(format, args...))
+	return fmt.Errorf("%s:%d:%d: %s", location.Filename, location.Line, location.Column, fmt.Sprintf(format, args...))
 }

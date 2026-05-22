@@ -123,6 +123,12 @@ func parseStatementAt(nodes []lineNode, index int) (ast.Statement, int, error) {
 		case "out":
 			value, err := parseCommandExpression(payload, node.children, first.Location)
 			return &ast.Out{Location: first.Location, Value: value}, index + 1, err
+		case "test":
+			statement, err := parseTestDecl(payload, node.children, first.Location)
+			return statement, index + 1, err
+		case "assert":
+			value, err := parseCommandExpression(payload, node.children, first.Location)
+			return &ast.Assert{Location: first.Location, Value: value}, index + 1, err
 		case "func":
 			statement, err := parseFuncDecl(payload, node.children, first.Location)
 			return statement, index + 1, err
@@ -249,6 +255,26 @@ func parseVarDecl(tokens []lexer.Token, children []lineNode, location ast.Locati
 		return nil, err
 	}
 	return &ast.VarDecl{Location: location, Name: name.Value, Annotation: annotation, Value: value, Mutable: mutable}, nil
+}
+
+func parseTestDecl(tokens []lexer.Token, children []lineNode, location ast.Location) (ast.Statement, error) {
+	c := cursor{tokens: tokens}
+	name := "unnamed test"
+	if c.peek() != nil {
+		token := c.advance()
+		if token.Kind != lexer.TokenString {
+			return nil, errorAt(token.Location, "syntax error: test name must be a string")
+		}
+		name = token.Value
+	}
+	if err := c.expectEnd(); err != nil {
+		return nil, err
+	}
+	body, err := parseBlock(children)
+	if err != nil {
+		return nil, err
+	}
+	return &ast.TestDecl{Location: location, Name: name, Body: body}, nil
 }
 
 func parseFuncDecl(tokens []lexer.Token, children []lineNode, location ast.Location) (ast.Statement, error) {
@@ -733,5 +759,5 @@ func isCloseOnly(tokens []lexer.Token) bool {
 }
 
 func errorAt(location ast.Location, format string, args ...any) error {
-	return fmt.Errorf("%s:%d: %s", location.Filename, location.Line, fmt.Sprintf(format, args...))
+	return fmt.Errorf("%s:%d:%d: %s", location.Filename, location.Line, location.Column, fmt.Sprintf(format, args...))
 }

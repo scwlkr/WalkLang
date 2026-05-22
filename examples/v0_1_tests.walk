@@ -1,0 +1,17 @@
+imp: math
+imp: string
+imp: array
+imp: time
+
+func: add(a int, b int) int
+    return: + a b
+
+test: 'add works'
+    assert: == add(2, 3) 5
+
+test: 'stdlib polish works'
+    var: nums = [1, 2, 3]
+    assert: == array.len(nums) 3
+    assert: == string.len('walk') 4
+    assert: == math.pow(2, 3) 8
+    assert: > time.now() 0
