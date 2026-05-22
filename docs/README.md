@@ -31,11 +31,11 @@ these docs explain how to install, learn, use, verify, and evolve WalkLang.
 ## Track Versions
 
 WalkLang version names use separate stability layers. The stable language
-contract is `v1.7`. The current compiler, tooling, backend, release, and docs
-milestone is `v5.3.0`. Experimental v2 through v2.2 language features are
+contract is `v1.8`. The current compiler, tooling, backend, release, and docs
+milestone is `v5.4.0`. Experimental v2 through v2.2 language features are
 implemented, but they are not part of the stable v1 compatibility promise.
 
-- [v1 / v1.7 stable contract](V1.md)
+- [v1 / v1.8 stable contract](V1.md)
 - [v2 data modeling, methods, and generics](V2.md)
 - [v3 package ecosystem](V3.md)
 - [v4 professional tooling](V4.md)

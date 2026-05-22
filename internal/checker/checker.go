@@ -517,15 +517,23 @@ func (c *Checker) checkVarDecl(statement *ast.VarDecl) error {
 	if c.currentScopeHas(statement.Name) {
 		return errorAt(statement.Location, "name error: %s is already defined", statement.Name)
 	}
-	valueType, err := c.checkExpression(statement.Value)
+	if statement.Annotation.Kind != ast.TypeInvalid {
+		if err := c.validateType(statement.Annotation, statement.Location); err != nil {
+			return err
+		}
+	}
+	var valueType ast.Type
+	var err error
+	if array, ok := statement.Value.(*ast.ArrayLiteral); ok && statement.Annotation.Kind == ast.TypeArray {
+		valueType, err = c.checkArrayLiteralAs(array, statement.Annotation)
+	} else {
+		valueType, err = c.checkExpression(statement.Value)
+	}
 	if err != nil {
 		return err
 	}
 	declaredType := valueType
 	if statement.Annotation.Kind != ast.TypeInvalid {
-		if err := c.validateType(statement.Annotation, statement.Location); err != nil {
-			return err
-		}
 		declaredType = statement.Annotation
 	}
 	if !assignable(valueType, declaredType) {
@@ -676,13 +684,18 @@ func (c *Checker) checkExpression(expression ast.Expression) (ast.Type, error) {
 		if err != nil {
 			return ast.Type{}, err
 		}
-		if targetType.Kind != ast.TypeArray || targetType.Elem == nil {
-			return ast.Type{}, errorAt(e.Loc(), "type error: index target must be array, got %s", targetType.String())
-		}
 		if !indexType.Equal(ast.Basic(ast.TypeInt)) {
-			return ast.Type{}, errorAt(e.Index.Loc(), "type error: array index must be int, got %s", indexType.String())
+			return ast.Type{}, errorAt(e.Index.Loc(), "type error: index must be int, got %s", indexType.String())
 		}
-		result = *targetType.Elem
+		if targetType.Kind == ast.TypeArray && targetType.Elem != nil {
+			result = *targetType.Elem
+			break
+		}
+		if targetType.Kind == ast.TypeString {
+			result = ast.Basic(ast.TypeString)
+			break
+		}
+		return ast.Type{}, errorAt(e.Loc(), "type error: index target must be array or string, got %s", targetType.String())
 	case *ast.FieldAccess:
 		targetType, err := c.checkExpression(e.Target)
 		if err != nil {
@@ -915,6 +928,53 @@ func (c *Checker) checkModuleCall(call *ast.Call) (ast.Type, error) {
 			return ast.Type{}, errorAt(call.Args[0].Loc(), "type error: string.len needs string arg, got %s", argType.String())
 		}
 		return ast.Basic(ast.TypeInt), nil
+	case "string.at":
+		if len(call.Args) != 2 {
+			return ast.Type{}, errorAt(call.Loc(), "type error: string.at expects 2 args, got %d", len(call.Args))
+		}
+		textType, err := c.checkExpression(call.Args[0])
+		if err != nil {
+			return ast.Type{}, err
+		}
+		if textType.Kind != ast.TypeString {
+			return ast.Type{}, errorAt(call.Args[0].Loc(), "type error: string.at needs string first arg, got %s", textType.String())
+		}
+		indexType, err := c.checkExpression(call.Args[1])
+		if err != nil {
+			return ast.Type{}, err
+		}
+		if !indexType.Equal(ast.Basic(ast.TypeInt)) {
+			return ast.Type{}, errorAt(call.Args[1].Loc(), "type error: string.at index must be int, got %s", indexType.String())
+		}
+		return ast.Basic(ast.TypeString), nil
+	case "string.contains":
+		if len(call.Args) != 2 {
+			return ast.Type{}, errorAt(call.Loc(), "type error: string.contains expects 2 args, got %d", len(call.Args))
+		}
+		for i, arg := range call.Args {
+			argType, err := c.checkExpression(arg)
+			if err != nil {
+				return ast.Type{}, err
+			}
+			if argType.Kind != ast.TypeString {
+				return ast.Type{}, errorAt(arg.Loc(), "type error: arg %d to string.contains must be string, got %s", i+1, argType.String())
+			}
+		}
+		return ast.Basic(ast.TypeBool), nil
+	case "string.concat":
+		if len(call.Args) != 2 {
+			return ast.Type{}, errorAt(call.Loc(), "type error: string.concat expects 2 args, got %d", len(call.Args))
+		}
+		for i, arg := range call.Args {
+			argType, err := c.checkExpression(arg)
+			if err != nil {
+				return ast.Type{}, err
+			}
+			if argType.Kind != ast.TypeString {
+				return ast.Type{}, errorAt(arg.Loc(), "type error: arg %d to string.concat must be string, got %s", i+1, argType.String())
+			}
+		}
+		return ast.Basic(ast.TypeString), nil
 	case "array.len":
 		if len(call.Args) != 1 {
 			return ast.Type{}, errorAt(call.Loc(), "type error: array.len expects 1 arg, got %d", len(call.Args))
@@ -927,6 +987,50 @@ func (c *Checker) checkModuleCall(call *ast.Call) (ast.Type, error) {
 			return ast.Type{}, errorAt(call.Args[0].Loc(), "type error: array.len needs array arg, got %s", argType.String())
 		}
 		return ast.Basic(ast.TypeInt), nil
+	case "array.contains":
+		if len(call.Args) != 2 {
+			return ast.Type{}, errorAt(call.Loc(), "type error: array.contains expects 2 args, got %d", len(call.Args))
+		}
+		arrayType, err := c.checkExpression(call.Args[0])
+		if err != nil {
+			return ast.Type{}, err
+		}
+		if arrayType.Kind != ast.TypeArray || arrayType.Elem == nil {
+			return ast.Type{}, errorAt(call.Args[0].Loc(), "type error: array.contains needs array first arg, got %s", arrayType.String())
+		}
+		if !nativeArrayElement(*arrayType.Elem) {
+			return ast.Type{}, errorAt(call.Args[0].Loc(), "type error: array.contains needs array of int, float, bool, or string, got %s", arrayType.String())
+		}
+		itemType, err := c.checkExpression(call.Args[1])
+		if err != nil {
+			return ast.Type{}, err
+		}
+		if !assignable(itemType, *arrayType.Elem) {
+			return ast.Type{}, errorAt(call.Args[1].Loc(), "type error: arg 2 to array.contains is %s, got %s", arrayType.Elem.String(), itemType.String())
+		}
+		return ast.Basic(ast.TypeBool), nil
+	case "array.push":
+		if len(call.Args) != 2 {
+			return ast.Type{}, errorAt(call.Loc(), "type error: array.push expects 2 args, got %d", len(call.Args))
+		}
+		arrayType, err := c.checkExpression(call.Args[0])
+		if err != nil {
+			return ast.Type{}, err
+		}
+		if arrayType.Kind != ast.TypeArray || arrayType.Elem == nil {
+			return ast.Type{}, errorAt(call.Args[0].Loc(), "type error: array.push needs array first arg, got %s", arrayType.String())
+		}
+		if !nativeArrayElement(*arrayType.Elem) {
+			return ast.Type{}, errorAt(call.Args[0].Loc(), "type error: array.push needs array of int, float, bool, or string, got %s", arrayType.String())
+		}
+		itemType, err := c.checkExpression(call.Args[1])
+		if err != nil {
+			return ast.Type{}, err
+		}
+		if !assignable(itemType, *arrayType.Elem) {
+			return ast.Type{}, errorAt(call.Args[1].Loc(), "type error: arg 2 to array.push is %s, got %s", arrayType.Elem.String(), itemType.String())
+		}
+		return arrayType, nil
 	case "time.now":
 		if len(call.Args) != 0 {
 			return ast.Type{}, errorAt(call.Loc(), "type error: time.now expects 0 args, got %d", len(call.Args))
@@ -946,6 +1050,21 @@ func (c *Checker) checkModuleCall(call *ast.Call) (ast.Type, error) {
 			}
 		}
 		return ast.Basic(ast.TypeInt), nil
+	case "random.choice":
+		if len(call.Args) != 1 {
+			return ast.Type{}, errorAt(call.Loc(), "type error: random.choice expects 1 arg, got %d", len(call.Args))
+		}
+		arrayType, err := c.checkExpression(call.Args[0])
+		if err != nil {
+			return ast.Type{}, err
+		}
+		if arrayType.Kind != ast.TypeArray || arrayType.Elem == nil {
+			return ast.Type{}, errorAt(call.Args[0].Loc(), "type error: random.choice needs array arg, got %s", arrayType.String())
+		}
+		if !nativeArrayElement(*arrayType.Elem) {
+			return ast.Type{}, errorAt(call.Args[0].Loc(), "type error: random.choice needs array of int, float, bool, or string, got %s", arrayType.String())
+		}
+		return *arrayType.Elem, nil
 	case "testing.assert":
 		if len(call.Args) != 1 {
 			return ast.Type{}, errorAt(call.Loc(), "type error: testing.assert expects 1 arg, got %d", len(call.Args))
@@ -1075,6 +1194,22 @@ func (c *Checker) checkArrayLiteral(array *ast.ArrayLiteral) (ast.Type, error) {
 		}
 	}
 	return ast.ArrayOf(firstType), nil
+}
+
+func (c *Checker) checkArrayLiteralAs(array *ast.ArrayLiteral, expected ast.Type) (ast.Type, error) {
+	if expected.Kind != ast.TypeArray || expected.Elem == nil {
+		return ast.Type{}, errorAt(array.Loc(), "type error: array literal needs array type, got %s", expected.String())
+	}
+	for _, element := range array.Elements {
+		elementType, err := c.checkExpression(element)
+		if err != nil {
+			return ast.Type{}, err
+		}
+		if !assignable(elementType, *expected.Elem) {
+			return ast.Type{}, errorAt(element.Loc(), "type error: array element needs %s, got %s", expected.Elem.String(), elementType.String())
+		}
+	}
+	return expected, nil
 }
 
 func (c *Checker) lookupField(targetType ast.Type, fieldName string, location ast.Location) (ast.StructField, error) {
@@ -1245,6 +1380,10 @@ func containsKind(types []ast.Type, target ast.TypeKind) bool {
 		}
 	}
 	return false
+}
+
+func nativeArrayElement(typeName ast.Type) bool {
+	return !typeName.Nullable && (typeName.Kind == ast.TypeInt || typeName.Kind == ast.TypeFloat || typeName.Kind == ast.TypeBool || typeName.Kind == ast.TypeString)
 }
 
 func blockReturns(statements []ast.Statement) bool {

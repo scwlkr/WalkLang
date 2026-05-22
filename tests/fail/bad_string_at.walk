@@ -1,0 +1,2 @@
+imp: string
+out: string.at('dog', '0')

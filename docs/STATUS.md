@@ -1,19 +1,33 @@
 # WalkLang Status
 
-Stable language contract: v1.7.
+Stable language contract: v1.8.
 
-Current compiler/tooling/docs release: v5.3.0 stable required-line input.
+Current compiler/tooling/docs release: v5.4.0 terminal game helpers.
 
 Experimental implemented language surface: v2.2.
 
-Hangman readiness audit on 2026-05-22: WalkLang is not ready for the clean
-string-first Hangman shape because stable v1.7 has no `contains`, `push`,
-`random.choice`, string indexing, or string concatenation/building. A constrained
-terminal guessing game is possible today using `in:`, `out:`, `if:`, `while:`,
-arrays of one-character strings, array indexing, string equality, `array.len`,
-and `random.int`. Fresh proof: `go test -count=1 ./...` passed; stdlib and array
-compiler checks passed; `playground/hangman.walk` currently fails at standalone
-`in:` syntax because `in:` is an expression, not a statement.
+State: v5.4 is complete against the new v1.8 terminal-game helper surface.
+Stable v1.8 adds `string.at`, string indexing with `word[0]`,
+`string.contains`, `string.concat`, `array.contains`, `array.push`,
+explicitly typed empty arrays such as `var: guessed array[string] = []`, and
+`random.choice` for non-empty stable native arrays. The helpers keep the
+existing expression/module model: `array.push` returns a new array and string
+building uses `string.concat` instead of changing numeric `+`.
+
+Hangman readiness update on 2026-05-22: `playground/hangman.walk` is now a
+compiling terminal Hangman example using `in:`, `out:`, `if:`, `while:`,
+functions, string indexing, contains checks, functional array push, and random
+choice.
+
+v5.4 verification on 2026-05-22: full `go test -count=1 ./...` passed;
+`go build -o build/walk ./cmd/walk` passed; `WALK_BIN=$PWD/build/walk
+scripts/stress-v1.sh` passed and reported `v1.8 stress ok`; `./build/walk
+check --warnings=error playground/hangman.walk` passed; `./build/walk build
+playground/hangman.walk -o build/hangman` plus a piped wrong-guess smoke run
+passed; `scripts/build-docs-site.sh` passed; `scripts/release.sh v5.4.0
+<temp>/release` produced 5 platform artifacts plus `SHA256SUMS`; `wc -l
+<temp>/release/SHA256SUMS` reported 5 checksum lines; the host release binary
+reported `v5.4.0` from `walk version`; and `git diff --check` passed.
 
 State: v5.3 is complete against the new v1.7 stable `in:` input rule. `in:` is
 a core expression that returns `string`, can be used anywhere an expression is
@@ -58,14 +72,12 @@ v5 verification on 2026-05-22: baseline `go test -count=1 ./...` passed before i
 
 Previous v4.1 verification on 2026-05-22: focused `go test ./cmd/walk -run 'TestV4DocsAndDebugMapCommands|TestV4LSPDiagnosticsFormattingAndCompletion' -count=1`, lexer/parser `go test ./internal/lexer ./internal/parser -count=1`, focused `go test ./cmd/walk -run TestV4 -count=1`, full `go test -count=1 ./...`, `go build -o build/walk ./cmd/walk`, `./build/walk docs --strict -o build/v4.1-api.md examples/v1.walk`, `./build/walk docs --strict --format json -o build/v4.1-api.json examples/v1.walk`, `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh`, `scripts/release.sh v4.1.0 <temp>/release`, `SHA256SUMS` line count check, and `git diff --check` all passed.
 
-Release CI maintenance on 2026-05-22: GitHub Actions workflow uses Node 24 first-party actions, disables unnecessary Go dependency caching for this no-`go.sum` module, runs `scripts/check-docs-site.sh`, and now publishes v5.3.0-labeled release artifacts.
+Release CI maintenance on 2026-05-22: GitHub Actions workflow uses Node 24 first-party actions, disables unnecessary Go dependency caching for this no-`go.sum` module, runs `scripts/check-docs-site.sh`, and now publishes v5.4.0-labeled release artifacts.
 
 Playground example update on 2026-05-22: `playground/route_ranker.walk` now demonstrates a compact route-ranking program with structs, arrays, loops, typed helper functions, prefix math, and scalar output. Verification passed with `./build/walk check --warnings=error playground/route_ranker.walk`, `./build/walk build playground/route_ranker.walk -o build/route_ranker`, and `./build/route_ranker`, which printed `Library Lane` with score `46`; broader verification passed with `go test -count=1 ./...`, `scripts/check-docs-site.sh`, `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh`, `scripts/release.sh v5.1.0 <temp>/release`, a 5-line `SHA256SUMS` check, host release binary `walk version` reporting `v5.1.0`, and `git diff --check`.
 
 CLI run shortcut update on 2026-05-22: `walk run <source.walk>` now compiles a single file to a temporary native executable, runs it, streams program input and output, and removes the temporary build directory; `walk <source.walk>` is a direct shorthand for the same flow. Verification passed with focused `go test ./cmd/walk -run TestRunCommandRunsSingleFileAndDirectFileAlias -count=1`, `go build -o build/walk ./cmd/walk`, `./build/walk run playground/route_ranker.walk`, `./build/walk playground/route_ranker.walk`, full `go test -count=1 ./...`, `scripts/check-docs-site.sh`, `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh`, `scripts/release.sh v5.1.0 <temp>/release`, a 5-line `SHA256SUMS` check, host release binary `walk version` reporting `v5.1.0`, and `git diff --check`.
 
-Next: decide whether the next small language step should be Hangman ergonomics
-(`string.contains`, `string.at` or equivalent indexing, string building, and an
-array append story) or the existing IO Phase 0 `do:` effect-call decision point;
-separately retry HTTPS enforcement after GitHub issues the Pages certificate for
-`walklang.wlkrlabs.com`.
+Next: implement the existing IO Phase 0 `do:` effect-call decision point when
+IO work resumes; separately retry HTTPS enforcement after GitHub issues the
+Pages certificate for `walklang.wlkrlabs.com`.

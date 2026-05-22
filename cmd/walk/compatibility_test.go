@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestV17CompatibilitySuitePassPrograms(t *testing.T) {
+func TestV18CompatibilitySuitePassPrograms(t *testing.T) {
 	requireCC(t)
 	root := repoRoot(t)
 	cases := []struct {
@@ -25,8 +25,15 @@ func TestV17CompatibilitySuitePassPrograms(t *testing.T) {
 				"3",
 				"8",
 				"4",
+				"a",
+				"l",
+				"true",
+				"walklang",
 				"3",
+				"1",
+				"true",
 				"7",
+				"stable",
 				"true",
 				"1",
 				"9",
@@ -65,7 +72,7 @@ func TestV17CompatibilitySuitePassPrograms(t *testing.T) {
 	}
 }
 
-func TestV17CompatibilitySuiteStableFailures(t *testing.T) {
+func TestV18CompatibilitySuiteStableFailures(t *testing.T) {
 	root := repoRoot(t)
 	cases := []struct {
 		file string
@@ -89,7 +96,7 @@ func TestV17CompatibilitySuiteStableFailures(t *testing.T) {
 	}
 }
 
-func TestV17ReleaseDocsArePresent(t *testing.T) {
+func TestV18ReleaseDocsArePresent(t *testing.T) {
 	root := repoRoot(t)
 	cases := []struct {
 		file string
@@ -98,8 +105,8 @@ func TestV17ReleaseDocsArePresent(t *testing.T) {
 		{"docs/COMPATIBILITY.md", "Stable v1 code should continue to compile through the v1.x line"},
 		{"docs/INSTALL.md", "Official Install Instructions"},
 		{"docs/RELEASE_NOTES.md", "v1.5.0"},
-		{"docs/MIGRATING.md", "v1.6 to v1.7"},
-		{"docs/DEPRECATION.md", "Current v1.7 Deprecated Surface"},
+		{"docs/MIGRATING.md", "v1.7 to v1.8"},
+		{"docs/DEPRECATION.md", "Current v1.8 Deprecated Surface"},
 	}
 
 	for _, tc := range cases {

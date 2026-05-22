@@ -255,6 +255,9 @@ func (i *functionInferencer) inferExpression(expression ast.Expression, expected
 		if targetType.Kind == ast.TypeArray && targetType.Elem != nil {
 			return *targetType.Elem, nil
 		}
+		if targetType.Kind == ast.TypeString {
+			return ast.Basic(ast.TypeString), nil
+		}
 		return ast.Type{}, nil
 	case *ast.FieldAccess:
 		targetType, err := i.inferExpression(e.Target, ast.Type{})
@@ -423,6 +426,80 @@ func (i *functionInferencer) inferModuleCall(call *ast.Call) (ast.Type, error) {
 			}
 		}
 		return ast.Basic(ast.TypeInt), nil
+	case "string.at":
+		if len(call.Args) > 0 {
+			if _, err := i.inferExpression(call.Args[0], ast.Basic(ast.TypeString)); err != nil {
+				return ast.Type{}, err
+			}
+		}
+		if len(call.Args) > 1 {
+			if _, err := i.inferExpression(call.Args[1], ast.Basic(ast.TypeInt)); err != nil {
+				return ast.Type{}, err
+			}
+		}
+		return ast.Basic(ast.TypeString), nil
+	case "string.contains":
+		for _, arg := range call.Args {
+			if _, err := i.inferExpression(arg, ast.Basic(ast.TypeString)); err != nil {
+				return ast.Type{}, err
+			}
+		}
+		return ast.Basic(ast.TypeBool), nil
+	case "string.concat":
+		for _, arg := range call.Args {
+			if _, err := i.inferExpression(arg, ast.Basic(ast.TypeString)); err != nil {
+				return ast.Type{}, err
+			}
+		}
+		return ast.Basic(ast.TypeString), nil
+	case "array.len":
+		if len(call.Args) > 0 {
+			if _, err := i.inferExpression(call.Args[0], ast.Type{}); err != nil {
+				return ast.Type{}, err
+			}
+		}
+		return ast.Basic(ast.TypeInt), nil
+	case "array.contains":
+		var arrayType ast.Type
+		if len(call.Args) > 0 {
+			var err error
+			arrayType, err = i.inferExpression(call.Args[0], ast.Type{})
+			if err != nil {
+				return ast.Type{}, err
+			}
+		}
+		if len(call.Args) > 1 {
+			expected := ast.Type{}
+			if arrayType.Kind == ast.TypeArray && arrayType.Elem != nil {
+				expected = *arrayType.Elem
+			}
+			if _, err := i.inferExpression(call.Args[1], expected); err != nil {
+				return ast.Type{}, err
+			}
+		}
+		return ast.Basic(ast.TypeBool), nil
+	case "array.push":
+		var arrayType ast.Type
+		if len(call.Args) > 0 {
+			var err error
+			arrayType, err = i.inferExpression(call.Args[0], ast.Type{})
+			if err != nil {
+				return ast.Type{}, err
+			}
+		}
+		if len(call.Args) > 1 {
+			expected := ast.Type{}
+			if arrayType.Kind == ast.TypeArray && arrayType.Elem != nil {
+				expected = *arrayType.Elem
+			}
+			if _, err := i.inferExpression(call.Args[1], expected); err != nil {
+				return ast.Type{}, err
+			}
+		}
+		if arrayType.Kind == ast.TypeArray {
+			return arrayType, nil
+		}
+		return ast.Type{}, nil
 	case "random.int":
 		for _, arg := range call.Args {
 			if _, err := i.inferExpression(arg, ast.Basic(ast.TypeInt)); err != nil {
@@ -430,6 +507,19 @@ func (i *functionInferencer) inferModuleCall(call *ast.Call) (ast.Type, error) {
 			}
 		}
 		return ast.Basic(ast.TypeInt), nil
+	case "random.choice":
+		var arrayType ast.Type
+		if len(call.Args) > 0 {
+			var err error
+			arrayType, err = i.inferExpression(call.Args[0], ast.Type{})
+			if err != nil {
+				return ast.Type{}, err
+			}
+		}
+		if arrayType.Kind == ast.TypeArray && arrayType.Elem != nil {
+			return *arrayType.Elem, nil
+		}
+		return ast.Type{}, nil
 	case "time.now":
 		return ast.Basic(ast.TypeInt), nil
 	case "testing.assert":
@@ -447,6 +537,9 @@ func (i *functionInferencer) inferArrayLiteral(array *ast.ArrayLiteral, expected
 	var elementExpected ast.Type
 	if expected.Kind == ast.TypeArray && expected.Elem != nil {
 		elementExpected = *expected.Elem
+	}
+	if len(array.Elements) == 0 && knownType(elementExpected) {
+		return ast.ArrayOf(elementExpected), nil
 	}
 	var elementType ast.Type
 	for _, element := range array.Elements {
@@ -491,6 +584,9 @@ func (i *functionInferencer) inferAssignableTarget(target ast.Expression) (ast.T
 		}
 		if targetType.Kind == ast.TypeArray && targetType.Elem != nil {
 			return *targetType.Elem, nil
+		}
+		if targetType.Kind == ast.TypeString {
+			return ast.Basic(ast.TypeString), nil
 		}
 	case *ast.FieldAccess:
 		targetType, err := i.inferExpression(t.Target, ast.Type{})

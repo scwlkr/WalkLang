@@ -1,6 +1,6 @@
 # WalkLang v1 Specification
 
-This document is the stable WalkLang language contract for the v1 line. v1.7 keeps the v1.6 compatibility policy and adds required-line stdin input through the core `in:` expression.
+This document is the stable WalkLang language contract for the v1 line. v1.8 keeps the v1.7 compatibility policy and adds small terminal-game helpers for strings, arrays, and random choice.
 
 Core rule:
 
@@ -280,6 +280,16 @@ index expressions
 block expressions under commands
 ```
 
+Index expressions work on arrays and strings.
+
+```walk
+var: nums = [1, 2, 3]
+out: nums[0]
+out: 'walk'[1]
+```
+
+String indexing returns a one-character string by zero-based byte index and runtime-stops when the index is out of range.
+
 Grouping uses parentheses:
 
 ```walk
@@ -330,11 +340,12 @@ var: y = - 0 x
 
 ## 14. Arrays
 
-Array literals are homogeneous and non-empty.
+Array literals are homogeneous. Empty arrays need an explicit array annotation.
 
 ```walk
 var: nums = [1, 2, 3]
 var: words = ['a', 'b']
+var: guessed array[string] = []
 ```
 
 Stable native array element types:
@@ -353,7 +364,7 @@ out: nums[0]
 nums[1] = 9
 ```
 
-Empty arrays and nested array emission are not stable v1.1 native features.
+Nested array emission is not a stable v1.8 native feature.
 
 ---
 
@@ -459,6 +470,26 @@ time
 random
 testing
 ```
+
+Stable built-in functions:
+
+```text
+math.sqrt(number) -> float
+math.pow(number, number) -> float
+string.len(string) -> int
+string.at(string, int) -> string
+string.contains(string, string) -> bool
+string.concat(string, string) -> string
+array.len(array[T]) -> int
+array.contains(array[T], T) -> bool
+array.push(array[T], T) -> array[T]
+time.now() -> int
+random.int(int, int) -> int
+random.choice(array[T]) -> T
+testing.assert(bool) -> bool
+```
+
+`array.contains`, `array.push`, and `random.choice` are stable for arrays whose elements are `int`, `float`, `bool`, or `string`.
 
 User modules are sibling `.walk` files imported by bare module name.
 

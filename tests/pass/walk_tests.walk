@@ -3,17 +3,24 @@ imp: string
 imp: array
 imp: random
 imp: testing
-
 func: add(a int, b int) int
     return: + a b
-
 test: 'arithmetic works'
     assert: == add(2, 3) 5
-
 test: 'stdlib works'
     var: nums = [1, 2, 3]
+    var: letters array[string] = []
+    var: choices = ['only']
+    letters = array.push(letters, 'w')
     var: fixed_random = random.int(2, 2)
     assert: == array.len(nums) 3
+    assert: == array.len(letters) 1
+    assert: array.contains(letters, 'w')
     assert: == string.len('walk') 4
+    assert: == string.at('walk', 0) 'w'
+    assert: == 'walk'[1] 'a'
+    assert: string.contains('walk', 'al')
+    assert: == string.concat('walk', 'lang') 'walklang'
+    assert: == random.choice(choices) 'only'
     assert: == math.pow(2, 3) 8
     assert: testing.assert(== fixed_random 2)

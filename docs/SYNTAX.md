@@ -94,6 +94,20 @@ Strings are single-quoted.
 var: msg = 'don\'t stop'
 ```
 
+Strings can be indexed by zero-based byte position. The result is a one-character string.
+
+```walk
+out: 'walk'[1]
+```
+
+Use the `string` module for common string helpers.
+
+```walk
+imp: string
+out: string.contains('walk', 'al')
+out: string.concat('walk', 'lang')
+```
+
 ---
 
 ## Variables And Constants
@@ -365,14 +379,32 @@ var: nums = [1, 2, 3]
 var: names = ['a', 'b', 'c']
 ```
 
-Arrays must be homogeneous and non-empty.
+Arrays must be homogeneous. Empty arrays need an explicit array annotation.
 
 ```walk
 nums[1] = 99
 out: nums[0]
+var: guessed array[string] = []
 ```
 
 Stable native element types are `int`, `float`, `bool`, and `string`.
+
+Use the `array` module for common helpers. `array.push` returns a new array; assign it back when you want to keep the appended value.
+
+```walk
+imp: array
+var: guessed array[string] = []
+guessed = array.push(guessed, 'w')
+out: array.contains(guessed, 'w')
+```
+
+Use `random.choice` to pick an item from a non-empty stable native array.
+
+```walk
+imp: random
+var: words = ['dog', 'cat']
+out: random.choice(words)
+```
 
 ---
 

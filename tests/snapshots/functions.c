@@ -37,14 +37,107 @@ static WALK_UNUSED void *__walk_alloc_array(WalkSize len, size_t item_size) {
     return items;
 }
 
+static WALK_UNUSED void __walk_runtime_error(const char *message) {
+    fprintf(stderr, "walk runtime error: %s\n", message);
+    exit(1);
+}
+
 static WALK_UNUSED WalkInt __walk_random_int(WalkInt min, WalkInt max) {
     if (max < min) { return min; }
     return min + (rand() % (max - min + 1));
 }
 
+static WALK_UNUSED WalkSize __walk_random_index(WalkSize len) {
+    if (len <= 0) { __walk_runtime_error("random.choice on empty array"); }
+    return (WalkSize)(rand() % len);
+}
+
 static WALK_UNUSED WalkInt __walk_string_len(WalkString value) {
     return value == NULL ? 0 : (WalkInt)strlen(value);
 }
+
+static WALK_UNUSED WalkString __walk_string_at(WalkString value, WalkInt index) {
+    WalkSize len = (WalkSize)__walk_string_len(value);
+    if (index < 0 || index >= len) { __walk_runtime_error("string index out of range"); }
+    char *out = (char *)malloc(2);
+    if (out == NULL) { __walk_runtime_error("out of memory"); }
+    out[0] = value[index];
+    out[1] = '\0';
+    return out;
+}
+
+static WALK_UNUSED WalkBool __walk_string_contains(WalkString text, WalkString item) {
+    if (text == NULL) { text = ""; }
+    if (item == NULL) { item = ""; }
+    return strstr(text, item) != NULL;
+}
+
+static WALK_UNUSED WalkString __walk_string_concat(WalkString left, WalkString right) {
+    if (left == NULL) { left = ""; }
+    if (right == NULL) { right = ""; }
+    size_t left_len = strlen(left);
+    size_t right_len = strlen(right);
+    if (left_len > ((size_t)-1) - right_len - 1) { __walk_runtime_error("out of memory"); }
+    char *out = (char *)malloc(left_len + right_len + 1);
+    if (out == NULL) { __walk_runtime_error("out of memory"); }
+    memcpy(out, left, left_len);
+    memcpy(out + left_len, right, right_len);
+    out[left_len + right_len] = '\0';
+    return out;
+}
+
+static WALK_UNUSED WalkArrayInt __walk_array_push_int(WalkArrayInt array, WalkInt item) {
+    WalkInt *items = (WalkInt *)__walk_alloc_array(array.len + 1, sizeof(WalkInt));
+    for (WalkSize i = 0; i < array.len; i++) { items[i] = array.items[i]; }
+    items[array.len] = item;
+    return (WalkArrayInt){items, array.len + 1};
+}
+
+static WALK_UNUSED WalkArrayFloat __walk_array_push_float(WalkArrayFloat array, WalkFloat item) {
+    WalkFloat *items = (WalkFloat *)__walk_alloc_array(array.len + 1, sizeof(WalkFloat));
+    for (WalkSize i = 0; i < array.len; i++) { items[i] = array.items[i]; }
+    items[array.len] = item;
+    return (WalkArrayFloat){items, array.len + 1};
+}
+
+static WALK_UNUSED WalkArrayBool __walk_array_push_bool(WalkArrayBool array, WalkBool item) {
+    WalkBool *items = (WalkBool *)__walk_alloc_array(array.len + 1, sizeof(WalkBool));
+    for (WalkSize i = 0; i < array.len; i++) { items[i] = array.items[i]; }
+    items[array.len] = item;
+    return (WalkArrayBool){items, array.len + 1};
+}
+
+static WALK_UNUSED WalkArrayString __walk_array_push_string(WalkArrayString array, WalkString item) {
+    WalkString *items = (WalkString *)__walk_alloc_array(array.len + 1, sizeof(WalkString));
+    for (WalkSize i = 0; i < array.len; i++) { items[i] = array.items[i]; }
+    items[array.len] = item;
+    return (WalkArrayString){items, array.len + 1};
+}
+
+static WALK_UNUSED WalkBool __walk_array_contains_int(WalkArrayInt array, WalkInt item) {
+    for (WalkSize i = 0; i < array.len; i++) { if (array.items[i] == item) { return true; } }
+    return false;
+}
+
+static WALK_UNUSED WalkBool __walk_array_contains_float(WalkArrayFloat array, WalkFloat item) {
+    for (WalkSize i = 0; i < array.len; i++) { if (array.items[i] == item) { return true; } }
+    return false;
+}
+
+static WALK_UNUSED WalkBool __walk_array_contains_bool(WalkArrayBool array, WalkBool item) {
+    for (WalkSize i = 0; i < array.len; i++) { if (array.items[i] == item) { return true; } }
+    return false;
+}
+
+static WALK_UNUSED WalkBool __walk_array_contains_string(WalkArrayString array, WalkString item) {
+    for (WalkSize i = 0; i < array.len; i++) { if (strcmp(array.items[i], item) == 0) { return true; } }
+    return false;
+}
+
+static WALK_UNUSED WalkInt __walk_array_choice_int(WalkArrayInt array) { return array.items[__walk_random_index(array.len)]; }
+static WALK_UNUSED WalkFloat __walk_array_choice_float(WalkArrayFloat array) { return array.items[__walk_random_index(array.len)]; }
+static WALK_UNUSED WalkBool __walk_array_choice_bool(WalkArrayBool array) { return array.items[__walk_random_index(array.len)]; }
+static WALK_UNUSED WalkString __walk_array_choice_string(WalkArrayString array) { return array.items[__walk_random_index(array.len)]; }
 
 static WALK_UNUSED WalkString __walk_input(WalkString prompt) {
     if (prompt != NULL) {

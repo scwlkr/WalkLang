@@ -19,13 +19,13 @@
 <h2>Language</h2>
 <a href="SYNTAX.html">v1 Syntax Guide</a>
 <a href="SPEC.html">v1 Specification</a>
-<a href="STDLIB.html">v1.7 Standard Library</a>
+<a href="STDLIB.html">v1.8 Standard Library</a>
 <a href="ERRORS.html">v1 Diagnostics</a>
-<a href="COMPATIBILITY.html">v1.7 Compatibility</a>
+<a href="COMPATIBILITY.html">v1.8 Compatibility</a>
 <a href="MIGRATING.html" aria-current="page">Migration Guide</a>
 <a href="DEPRECATION.html">Deprecation Policy</a>
 <h2>Versions</h2>
-<a href="V1.html">v1 / v1.7</a>
+<a href="V1.html">v1 / v1.8</a>
 <a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
 <a href="V3.html">v3 Package Ecosystem</a>
 <h2>Tools</h2>
@@ -50,6 +50,24 @@
 <div class="page">
 <article class="doc">
 <h1 id="walklang-migration-guide">WalkLang Migration Guide</h1>
+<h2 id="v1-7-to-v1-8">v1.7 to v1.8</h2>
+<p>v1.8 adds stable helpers for simple terminal games and other string/array-heavy programs. Existing v1.7 source should not need changes.</p>
+<p>New code can index strings by zero-based byte position:</p>
+<pre><code class="language-walk">out: &#39;walk&#39;[1]</code></pre>
+<p>The <code>string</code>, <code>array</code>, and <code>random</code> modules add small helpers:</p>
+<pre><code class="language-walk">imp: string
+imp: array
+imp: random
+
+var: guessed array[string] = []
+var: words = [&#39;dog&#39;, &#39;cat&#39;]
+guessed = array.push(guessed, &#39;w&#39;)
+
+out: string.contains(&#39;walk&#39;, &#39;al&#39;)
+out: string.concat(&#39;walk&#39;, &#39;lang&#39;)
+out: array.contains(guessed, &#39;w&#39;)
+out: random.choice(words)</code></pre>
+<p><code>array.push</code> returns a new array. Assign it back when the program should keep the appended value.</p>
 <h2 id="v1-6-to-v1-7">v1.6 to v1.7</h2>
 <p>v1.7 adds the stable <code>in:</code> expression for required-line stdin input. Existing v1.6 source should not need changes.</p>
 <p>New code can read one line from stdin:</p>

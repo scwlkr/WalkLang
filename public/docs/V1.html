@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>WalkLang v1 / v1.7 - WalkLang</title>
+<title>WalkLang v1 / v1.8 - WalkLang</title>
 <link rel="icon" href="../assets/icon.svg">
 <link rel="stylesheet" href="../assets/site.css">
 </head>
@@ -19,13 +19,13 @@
 <h2>Language</h2>
 <a href="SYNTAX.html">v1 Syntax Guide</a>
 <a href="SPEC.html">v1 Specification</a>
-<a href="STDLIB.html">v1.7 Standard Library</a>
+<a href="STDLIB.html">v1.8 Standard Library</a>
 <a href="ERRORS.html">v1 Diagnostics</a>
-<a href="COMPATIBILITY.html">v1.7 Compatibility</a>
+<a href="COMPATIBILITY.html">v1.8 Compatibility</a>
 <a href="MIGRATING.html">Migration Guide</a>
 <a href="DEPRECATION.html">Deprecation Policy</a>
 <h2>Versions</h2>
-<a href="V1.html" aria-current="page">v1 / v1.7</a>
+<a href="V1.html" aria-current="page">v1 / v1.8</a>
 <a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
 <a href="V3.html">v3 Package Ecosystem</a>
 <h2>Tools</h2>
@@ -49,7 +49,7 @@
 <div class="topbar"><a href="index.html">Docs</a><a href="reference/api.html">Reference</a><a href="https://github.com/scwlkr/WalkLang">GitHub</a></div>
 <div class="page">
 <article class="doc">
-<h1 id="walklang-v1-v1-7">WalkLang v1 / v1.7</h1>
+<h1 id="walklang-v1-v1-8">WalkLang v1 / v1.8</h1>
 <p>v1 makes the current compiler path feel stable.</p>
 <p>v1.1 makes the stable surface explicit through contract docs and conformance fixtures. It does not add project mode or data modeling.</p>
 <p>v1.2 adds project mode without changing the v1.1 core syntax surface.</p>
@@ -58,6 +58,7 @@
 <p>v1.5 prepares the v1.x compatibility line with release notes, migration guidance, deprecation policy, official install instructions, and focused compatibility fixtures.</p>
 <p>v1.6 adds local function type inference for obvious helper functions without inferring public meaning from call sites.</p>
 <p>v1.7 adds the stable <code>in:</code> expression for required-line stdin input.</p>
+<p>v1.8 adds small terminal-game helpers on top of the existing string, array, and random modules.</p>
 <p>Contract docs:</p>
 <pre><code class="language-text">docs/SPEC.md
 docs/SYNTAX.md
@@ -87,6 +88,22 @@ docs/STATUS.md</code></pre>
 <pre><code class="language-walk">var: name = in:
 var: answer = in: &#39;Name? &#39;</code></pre>
 <p>The optional prompt is any <code>string</code> expression. It writes to stdout without a newline and flushes before reading. <code>in:</code> strips <code>\n</code> or <code>\r\n</code>, preserves all other whitespace, returns <code>&#39;&#39;</code> for an empty line, and treats immediate EOF as a runtime error.</p>
+<h2 id="terminal-game-helpers">Terminal Game Helpers</h2>
+<p>Strings can be indexed by zero-based byte position. The result is a one-character string.</p>
+<pre><code class="language-walk">out: &#39;walk&#39;[1]</code></pre>
+<p><code>array.push</code> returns a new array instead of mutating in place.</p>
+<pre><code class="language-walk">imp: array
+
+var: guessed array[string] = []
+guessed = array.push(guessed, &#39;w&#39;)</code></pre>
+<p>Use module helpers for contains checks, string building, and random choice:</p>
+<pre><code class="language-walk">imp: string
+imp: random
+
+var: words = [&#39;dog&#39;, &#39;cat&#39;]
+out: string.contains(&#39;dog&#39;, &#39;o&#39;)
+out: string.concat(&#39;walk&#39;, &#39;lang&#39;)
+out: random.choice(words)</code></pre>
 <h2 id="module-rules">Module Rules</h2>
 <p>User modules are sibling <code>.walk</code> files imported by bare name.</p>
 <pre><code class="language-walk"># math_extra.walk
@@ -110,9 +127,15 @@ out: math_extra.cube(3)</code></pre>
 <pre><code class="language-text">math.sqrt(number) -&gt; float
 math.pow(number, number) -&gt; float
 string.len(string) -&gt; int
+string.at(string, int) -&gt; string
+string.contains(string, string) -&gt; bool
+string.concat(string, string) -&gt; string
 array.len(array[T]) -&gt; int
+array.contains(array[T], T) -&gt; bool
+array.push(array[T], T) -&gt; array[T]
 time.now() -&gt; int
 random.int(int, int) -&gt; int
+random.choice(array[T]) -&gt; T
 testing.assert(bool) -&gt; bool</code></pre>
 <h2 id="diagnostics-and-warnings">Diagnostics And Warnings</h2>
 <p>The CLI prints the stable diagnostic first line, followed by source snippets, caret locations, and focused suggestions when obvious.</p>
@@ -123,7 +146,7 @@ go run ./cmd/walk check --warnings=error examples/v1.walk</code></pre>
 <h2 id="build-flow">Build Flow</h2>
 <p>Native builds still go through generated C and <code>cc</code>.</p>
 <p>Install the local CLI first:</p>
-<pre><code class="language-bash">scripts/install-local.sh v1.7-local
+<pre><code class="language-bash">scripts/install-local.sh v1.8-local
 walk version</code></pre>
 <pre><code class="language-bash">walk build examples/v1.walk -o build/v1 --release
 ./build/v1</code></pre>
@@ -132,9 +155,9 @@ walk version</code></pre>
 <p>Run the v1 stress path:</p>
 <pre><code class="language-bash">scripts/stress-v1.sh</code></pre>
 <p>Run the focused v1 compatibility suite:</p>
-<pre><code class="language-bash">go test ./cmd/walk -run TestV17CompatibilitySuite</code></pre>
+<pre><code class="language-bash">go test ./cmd/walk -run TestV18CompatibilitySuite</code></pre>
 <p>Build release CLI artifacts:</p>
-<pre><code class="language-bash">scripts/release.sh v1.7.0</code></pre>
+<pre><code class="language-bash">scripts/release.sh v1.8.0</code></pre>
 <h2 id="project-mode">Project Mode</h2>
 <pre><code class="language-bash">walk init hello
 cd hello

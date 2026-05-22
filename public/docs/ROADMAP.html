@@ -19,13 +19,13 @@
 <h2>Language</h2>
 <a href="SYNTAX.html">v1 Syntax Guide</a>
 <a href="SPEC.html">v1 Specification</a>
-<a href="STDLIB.html">v1.7 Standard Library</a>
+<a href="STDLIB.html">v1.8 Standard Library</a>
 <a href="ERRORS.html">v1 Diagnostics</a>
-<a href="COMPATIBILITY.html">v1.7 Compatibility</a>
+<a href="COMPATIBILITY.html">v1.8 Compatibility</a>
 <a href="MIGRATING.html">Migration Guide</a>
 <a href="DEPRECATION.html">Deprecation Policy</a>
 <h2>Versions</h2>
-<a href="V1.html">v1 / v1.7</a>
+<a href="V1.html">v1 / v1.8</a>
 <a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
 <a href="V3.html">v3 Package Ecosystem</a>
 <h2>Tools</h2>
@@ -60,6 +60,7 @@ v1.2: make projects and releases real
 v1.3: grow the standard library carefully
 v1.6: local function type inference
 v1.7: required-line stdin input
+v1.8: terminal game helpers
 v2: data modeling
 v2.1: methods and stronger composition
 v3: ecosystem
@@ -492,6 +493,34 @@ generated C reads stdin without a fixed line limit
 compatibility tests cover prompt, pipes, empty lines, CRLF, EOF, and final unterminated input
 SPEC, SYNTAX, migration, release notes, and status docs describe the rule</code></pre>
 <p>---</p>
+<h2 id="v1-8-terminal-game-helpers">v1.8 Terminal Game Helpers</h2>
+<p>Add small helpers needed for simple terminal games without changing WalkLang&#39;s statement model or adding broad runtime systems.</p>
+<p>Stable additions:</p>
+<pre><code class="language-text">string.at
+string.contains
+string.concat
+string indexing with word[0]
+array.contains
+array.push returning a new array
+empty arrays with explicit array annotations
+random.choice</code></pre>
+<p>Example:</p>
+<pre><code class="language-walk">imp: string
+imp: array
+imp: random
+
+var: words = [&#39;dog&#39;, &#39;cat&#39;]
+var: word = random.choice(words)
+var: guessed array[string] = []
+
+guessed = array.push(guessed, &#39;d&#39;)
+out: string.contains(word, guessed[0])</code></pre>
+<p>v1.8 done when:</p>
+<pre><code class="language-text">SPEC and STDLIB document the helpers
+pass/fail/compatibility fixtures cover the helpers
+a small Hangman playground program compiles
+the v1 stress script proves the helpers through native output</code></pre>
+<p>---</p>
 <h2 id="v2-data-modeling">v2 Data Modeling</h2>
 <p>Add structs after the v1 language contract is solid.</p>
 <p>Target syntax:</p>
@@ -845,6 +874,9 @@ v1.6
 
 v1.7
   required-line stdin input
+
+v1.8
+  terminal game helpers
 
 v2
   structs + data modeling

@@ -1,6 +1,6 @@
-# WalkLang v1.7 Standard Library
+# WalkLang v1.8 Standard Library
 
-This document lists the stable built-in modules and functions for the v1 line. These APIs became stable in v1.3 and remain compatibility-protected in v1.7.
+This document lists the stable built-in modules and functions for the v1 line. These APIs are compatibility-protected in v1.8.
 
 Import built-ins with `imp:` and call functions through their module namespace.
 
@@ -22,7 +22,7 @@ random
 testing
 ```
 
-No other built-in module is stable in v1.7.
+No other built-in module is stable in v1.8.
 
 ---
 
@@ -59,6 +59,39 @@ imp: string
 out: string.len('walk')
 ```
 
+### string.at(string, int) -> string
+
+Returns the one-character string at a zero-based byte index. Out-of-range indexes runtime-stop.
+
+```walk
+imp: string
+out: string.at('walk', 1)
+```
+
+String indexing is equivalent:
+
+```walk
+out: 'walk'[1]
+```
+
+### string.contains(string, string) -> bool
+
+Returns `true` when the second string appears inside the first. An empty search string returns `true`.
+
+```walk
+imp: string
+out: string.contains('walk', 'al')
+```
+
+### string.concat(string, string) -> string
+
+Returns a new string made from the left string followed by the right string.
+
+```walk
+imp: string
+out: string.concat('walk', 'lang')
+```
+
 ---
 
 ## array
@@ -71,6 +104,26 @@ Returns the length stored with a stable v1 array.
 imp: array
 var: nums = [1, 2, 3]
 out: array.len(nums)
+```
+
+### array.contains(array[T], T) -> bool
+
+Returns `true` when a stable native array contains an equal item. Supported stable element types are `int`, `float`, `bool`, and `string`.
+
+```walk
+imp: array
+var: letters = ['w', 'a']
+out: array.contains(letters, 'w')
+```
+
+### array.push(array[T], T) -> array[T]
+
+Returns a new array with the item appended. `array.push` does not mutate the input array in place.
+
+```walk
+imp: array
+var: guessed array[string] = []
+guessed = array.push(guessed, 'w')
 ```
 
 ---
@@ -99,6 +152,16 @@ Returns an integer in the inclusive range. If `max < min`, v1 returns `min`.
 ```walk
 imp: random
 out: random.int(1, 10)
+```
+
+### random.choice(array[T]) -> T
+
+Returns one item from a non-empty stable native array. Calling `random.choice` on an empty array runtime-stops.
+
+```walk
+imp: random
+var: words = ['dog', 'cat']
+out: random.choice(words)
 ```
 
 ---
@@ -139,7 +202,7 @@ walk test tests.walk
 
 ## Draft APIs
 
-These names are planned draft APIs only. They are documented here so naming can stay consistent, but they are not stable, not importable, and not compatibility-protected in v1.7.
+These names are planned draft APIs only. They are documented here so naming can stay consistent, but they are not stable, not importable, and not compatibility-protected in v1.8.
 
 ```text
 file.read

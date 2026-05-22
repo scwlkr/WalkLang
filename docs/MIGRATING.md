@@ -1,5 +1,34 @@
 # WalkLang Migration Guide
 
+## v1.7 to v1.8
+
+v1.8 adds stable helpers for simple terminal games and other string/array-heavy programs. Existing v1.7 source should not need changes.
+
+New code can index strings by zero-based byte position:
+
+```walk
+out: 'walk'[1]
+```
+
+The `string`, `array`, and `random` modules add small helpers:
+
+```walk
+imp: string
+imp: array
+imp: random
+
+var: guessed array[string] = []
+var: words = ['dog', 'cat']
+guessed = array.push(guessed, 'w')
+
+out: string.contains('walk', 'al')
+out: string.concat('walk', 'lang')
+out: array.contains(guessed, 'w')
+out: random.choice(words)
+```
+
+`array.push` returns a new array. Assign it back when the program should keep the appended value.
+
 ## v1.6 to v1.7
 
 v1.7 adds the stable `in:` expression for required-line stdin input. Existing v1.6 source should not need changes.

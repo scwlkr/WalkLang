@@ -19,13 +19,13 @@
 <h2>Language</h2>
 <a href="SYNTAX.html">v1 Syntax Guide</a>
 <a href="SPEC.html">v1 Specification</a>
-<a href="STDLIB.html">v1.7 Standard Library</a>
+<a href="STDLIB.html">v1.8 Standard Library</a>
 <a href="ERRORS.html">v1 Diagnostics</a>
-<a href="COMPATIBILITY.html">v1.7 Compatibility</a>
+<a href="COMPATIBILITY.html">v1.8 Compatibility</a>
 <a href="MIGRATING.html">Migration Guide</a>
 <a href="DEPRECATION.html">Deprecation Policy</a>
 <h2>Versions</h2>
-<a href="V1.html">v1 / v1.7</a>
+<a href="V1.html">v1 / v1.8</a>
 <a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
 <a href="V3.html">v3 Package Ecosystem</a>
 <h2>Tools</h2>
@@ -52,6 +52,32 @@
 <h1 id="walklang-release-notes">WalkLang Release Notes</h1>
 <h2 id="unreleased">Unreleased</h2>
 <p>No unreleased changes.</p>
+<h2 id="v5-4-0-terminal-game-helpers">v5.4.0 - Terminal Game Helpers</h2>
+<p>Date: 2026-05-22</p>
+<p>v5.4.0 adds the v1.8 stable helpers needed for simple terminal games such as Hangman while keeping the existing expression, module, and C-backend model.</p>
+<h3 id="added">Added</h3>
+<ul>
+<li><code>string.at(text, index)</code> and string indexing such as <code>word[0]</code>, both returning one-character strings.</li>
+<li><code>string.contains(text, piece)</code> for substring checks.</li>
+<li><code>string.concat(left, right)</code> for explicit string building without changing numeric <code>+</code>.</li>
+<li><code>array.contains(items, item)</code> for stable native arrays.</li>
+<li><code>array.push(items, item)</code>, which returns a new array with the item appended.</li>
+<li>Empty array literals when an explicit array annotation provides the element type, such as <code>var: guessed array[string] = []</code>.</li>
+<li><code>random.choice(items)</code> for non-empty stable native arrays.</li>
+<li>A compiling <code>playground/hangman.walk</code> example.</li>
+</ul>
+<h3 id="changed">Changed</h3>
+<ul>
+<li>README and docs front-door wording now separate the stable <code>v1.8</code> language contract from the current <code>v5.4.0</code> compiler/tooling/docs release.</li>
+<li>The v1 stress path now covers the terminal-game helpers.</li>
+</ul>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<p>None.</p>
+<h3 id="upgrade">Upgrade</h3>
+<p>Regenerate docs and release artifacts with:</p>
+<pre><code class="language-bash">scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.4.0 dist</code></pre>
 <h2 id="v5-3-0-stable-required-line-input">v5.3.0 - Stable Required-Line Input</h2>
 <p>Date: 2026-05-22</p>
 <p>v5.3.0 adds the v1.7 stable <code>in:</code> expression for required-line stdin input.</p>

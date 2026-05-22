@@ -124,12 +124,14 @@ walk check --warnings=error main.walk
 
 `walk test` builds and runs a native executable. Failed assertions print failure lines and make the executable exit non-zero.
 
-Stable v1.7 `in:` runtime failures include:
+Stable v1.8 runtime failures include:
 
 ```text
 walk runtime error: input reached EOF
 walk runtime error: stdin read failed
 walk runtime error: out of memory
+walk runtime error: string index out of range
+walk runtime error: random.choice on empty array
 ```
 
 Other native C runtime failures are outside the stable diagnostic contract unless a WalkLang conformance test explicitly covers them.

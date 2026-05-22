@@ -19,13 +19,13 @@
 <h2>Language</h2>
 <a href="SYNTAX.html" aria-current="page">v1 Syntax Guide</a>
 <a href="SPEC.html">v1 Specification</a>
-<a href="STDLIB.html">v1.7 Standard Library</a>
+<a href="STDLIB.html">v1.8 Standard Library</a>
 <a href="ERRORS.html">v1 Diagnostics</a>
-<a href="COMPATIBILITY.html">v1.7 Compatibility</a>
+<a href="COMPATIBILITY.html">v1.8 Compatibility</a>
 <a href="MIGRATING.html">Migration Guide</a>
 <a href="DEPRECATION.html">Deprecation Policy</a>
 <h2>Versions</h2>
-<a href="V1.html">v1 / v1.7</a>
+<a href="V1.html">v1 / v1.8</a>
 <a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
 <a href="V3.html">v3 Package Ecosystem</a>
 <h2>Tools</h2>
@@ -97,6 +97,12 @@ var: name = &#39;Walker&#39;
 var: optional_name string? = null</code></pre>
 <p>Strings are single-quoted.</p>
 <pre><code class="language-walk">var: msg = &#39;don\&#39;t stop&#39;</code></pre>
+<p>Strings can be indexed by zero-based byte position. The result is a one-character string.</p>
+<pre><code class="language-walk">out: &#39;walk&#39;[1]</code></pre>
+<p>Use the <code>string</code> module for common string helpers.</p>
+<pre><code class="language-walk">imp: string
+out: string.contains(&#39;walk&#39;, &#39;al&#39;)
+out: string.concat(&#39;walk&#39;, &#39;lang&#39;)</code></pre>
 <p>---</p>
 <h2 id="variables-and-constants">Variables And Constants</h2>
 <p><code>var:</code> creates a mutable binding.</p>
@@ -230,10 +236,20 @@ out: apply(inc, 4)</code></pre>
 <p>Arrays use brackets and commas.</p>
 <pre><code class="language-walk">var: nums = [1, 2, 3]
 var: names = [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;]</code></pre>
-<p>Arrays must be homogeneous and non-empty.</p>
+<p>Arrays must be homogeneous. Empty arrays need an explicit array annotation.</p>
 <pre><code class="language-walk">nums[1] = 99
-out: nums[0]</code></pre>
+out: nums[0]
+var: guessed array[string] = []</code></pre>
 <p>Stable native element types are <code>int</code>, <code>float</code>, <code>bool</code>, and <code>string</code>.</p>
+<p>Use the <code>array</code> module for common helpers. <code>array.push</code> returns a new array; assign it back when you want to keep the appended value.</p>
+<pre><code class="language-walk">imp: array
+var: guessed array[string] = []
+guessed = array.push(guessed, &#39;w&#39;)
+out: array.contains(guessed, &#39;w&#39;)</code></pre>
+<p>Use <code>random.choice</code> to pick an item from a non-empty stable native array.</p>
+<pre><code class="language-walk">imp: random
+var: words = [&#39;dog&#39;, &#39;cat&#39;]
+out: random.choice(words)</code></pre>
 <p>---</p>
 <h2 id="null">Null</h2>
 <p>Use nullable string annotations when assigning <code>null</code>.</p>

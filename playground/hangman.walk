@@ -1,19 +1,54 @@
-# system decides on a word
-var: wordBank = [ dog, cat, car, bike, motor, human, insect, elephant, zebra, girl, boy, toddler, baby, truck, mustang, silverado, cherokee ]
-
-# system decides how many chars in selcted word
-func: chars(letters in selectedWord)
-
-
-# print 'your word is x chars long
-out: 'your word is (chars) long'
-
-# input first guess
-in: 'input 1 letter: '
-
-
-# print correct/incorrect
-if:  
-
-# print current all guessed letters but hide unguessed
-out: 
+imp: string
+imp: array
+imp: random
+func: hidden_word(word string, guessed array[string]) string
+    var: display = ''
+    var: index = 0
+    while: < index string.len(word)
+        var: letter = word[index]
+        if: array.contains(guessed, letter)
+            display = string.concat(display, letter)
+        else:
+            display = string.concat(display, '_')
+        display = string.concat(display, ' ')
+        index = + index 1
+    return: display
+func: all_guessed(word string, guessed array[string]) bool
+    var: index = 0
+    while: < index string.len(word)
+        if: not array.contains(guessed, word[index])
+            return: false
+        index = + index 1
+    return: true
+var: word_bank = ['dog', 'cat', 'car', 'bike', 'motor']
+var: word = random.choice(word_bank)
+var: guessed array[string] = []
+var: misses = 0
+var: max_misses = 6
+var: done = false
+out: 'your word has this many letters:'
+out: string.len(word)
+while: < misses max_misses
+    if: done
+        break:
+    out: hidden_word(word, guessed)
+    var: guess = in: 'input 1 letter: '
+    if: != string.len(guess) 1
+        out: 'enter exactly 1 letter'
+    else:
+        if: array.contains(guessed, guess)
+            out: 'already guessed'
+        else:
+            guessed = array.push(guessed, guess)
+            if: string.contains(word, guess)
+                out: 'correct'
+            else:
+                out: 'incorrect'
+                misses = + misses 1
+            if: all_guessed(word, guessed)
+                done = true
+if: done
+    out: 'you win'
+else:
+    out: 'you lose'
+    out: word

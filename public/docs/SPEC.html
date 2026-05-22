@@ -19,13 +19,13 @@
 <h2>Language</h2>
 <a href="SYNTAX.html">v1 Syntax Guide</a>
 <a href="SPEC.html" aria-current="page">v1 Specification</a>
-<a href="STDLIB.html">v1.7 Standard Library</a>
+<a href="STDLIB.html">v1.8 Standard Library</a>
 <a href="ERRORS.html">v1 Diagnostics</a>
-<a href="COMPATIBILITY.html">v1.7 Compatibility</a>
+<a href="COMPATIBILITY.html">v1.8 Compatibility</a>
 <a href="MIGRATING.html">Migration Guide</a>
 <a href="DEPRECATION.html">Deprecation Policy</a>
 <h2>Versions</h2>
-<a href="V1.html">v1 / v1.7</a>
+<a href="V1.html">v1 / v1.8</a>
 <a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
 <a href="V3.html">v3 Package Ecosystem</a>
 <h2>Tools</h2>
@@ -50,7 +50,7 @@
 <div class="page">
 <article class="doc">
 <h1 id="walklang-v1-specification">WalkLang v1 Specification</h1>
-<p>This document is the stable WalkLang language contract for the v1 line. v1.7 keeps the v1.6 compatibility policy and adds required-line stdin input through the core <code>in:</code> expression.</p>
+<p>This document is the stable WalkLang language contract for the v1 line. v1.8 keeps the v1.7 compatibility policy and adds small terminal-game helpers for strings, arrays, and random choice.</p>
 <p>Core rule:</p>
 <pre><code class="language-text">If it is not in SPEC.md, it is not stable WalkLang.
 If the compiler disagrees with SPEC.md, either the compiler or the spec must change.</code></pre>
@@ -203,6 +203,11 @@ qualified module calls
 array literals
 index expressions
 block expressions under commands</code></pre>
+<p>Index expressions work on arrays and strings.</p>
+<pre><code class="language-walk">var: nums = [1, 2, 3]
+out: nums[0]
+out: &#39;walk&#39;[1]</code></pre>
+<p>String indexing returns a one-character string by zero-based byte index and runtime-stops when the index is out of range.</p>
 <p>Grouping uses parentheses:</p>
 <pre><code class="language-walk">var: x = * (+ 1 2) (- 9 4)</code></pre>
 <p>---</p>
@@ -225,9 +230,10 @@ not  exactly 1 bool arg</code></pre>
 <pre><code class="language-walk">var: y = - 0 x</code></pre>
 <p>---</p>
 <h2 id="14-arrays">14. Arrays</h2>
-<p>Array literals are homogeneous and non-empty.</p>
+<p>Array literals are homogeneous. Empty arrays need an explicit array annotation.</p>
 <pre><code class="language-walk">var: nums = [1, 2, 3]
-var: words = [&#39;a&#39;, &#39;b&#39;]</code></pre>
+var: words = [&#39;a&#39;, &#39;b&#39;]
+var: guessed array[string] = []</code></pre>
 <p>Stable native array element types:</p>
 <pre><code class="language-text">int
 float
@@ -236,7 +242,7 @@ string</code></pre>
 <p>Indexing is zero-based.</p>
 <pre><code class="language-walk">out: nums[0]
 nums[1] = 9</code></pre>
-<p>Empty arrays and nested array emission are not stable v1.1 native features.</p>
+<p>Nested array emission is not a stable v1.8 native feature.</p>
 <p>---</p>
 <h2 id="15-functions">15. Functions</h2>
 <p>Function declarations may use typed parameters.</p>
@@ -290,6 +296,21 @@ array
 time
 random
 testing</code></pre>
+<p>Stable built-in functions:</p>
+<pre><code class="language-text">math.sqrt(number) -&gt; float
+math.pow(number, number) -&gt; float
+string.len(string) -&gt; int
+string.at(string, int) -&gt; string
+string.contains(string, string) -&gt; bool
+string.concat(string, string) -&gt; string
+array.len(array[T]) -&gt; int
+array.contains(array[T], T) -&gt; bool
+array.push(array[T], T) -&gt; array[T]
+time.now() -&gt; int
+random.int(int, int) -&gt; int
+random.choice(array[T]) -&gt; T
+testing.assert(bool) -&gt; bool</code></pre>
+<p><code>array.contains</code>, <code>array.push</code>, and <code>random.choice</code> are stable for arrays whose elements are <code>int</code>, <code>float</code>, <code>bool</code>, or <code>string</code>.</p>
 <p>User modules are sibling <code>.walk</code> files imported by bare module name.</p>
 <pre><code class="language-walk">imp: calc
 out: calc.square(5)</code></pre>

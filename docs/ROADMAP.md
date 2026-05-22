@@ -13,6 +13,7 @@ v1.2: make projects and releases real
 v1.3: grow the standard library carefully
 v1.6: local function type inference
 v1.7: required-line stdin input
+v1.8: terminal game helpers
 v2: data modeling
 v2.1: methods and stronger composition
 v3: ecosystem
@@ -715,6 +716,49 @@ SPEC, SYNTAX, migration, release notes, and status docs describe the rule
 
 ---
 
+## v1.8 Terminal Game Helpers
+
+Add small helpers needed for simple terminal games without changing WalkLang's statement model or adding broad runtime systems.
+
+Stable additions:
+
+```text
+string.at
+string.contains
+string.concat
+string indexing with word[0]
+array.contains
+array.push returning a new array
+empty arrays with explicit array annotations
+random.choice
+```
+
+Example:
+
+```walk
+imp: string
+imp: array
+imp: random
+
+var: words = ['dog', 'cat']
+var: word = random.choice(words)
+var: guessed array[string] = []
+
+guessed = array.push(guessed, 'd')
+out: string.contains(word, guessed[0])
+```
+
+v1.8 done when:
+
+```text
+SPEC and STDLIB document the helpers
+pass/fail/compatibility fixtures cover the helpers
+a small Hangman playground program compiles
+the v1 stress script proves the helpers through native output
+```
+
+---
+
 ## v2 Data Modeling
 
 Add structs after the v1 language contract is solid.
@@ -1297,6 +1341,9 @@ v1.6
 
 v1.7
   required-line stdin input
+
+v1.8
+  terminal game helpers
 
 v2
   structs + data modeling

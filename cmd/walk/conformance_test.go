@@ -21,7 +21,7 @@ func TestV13PassFixturesBuildAndRun(t *testing.T) {
 		{"control_flow.walk", "1\n3\nr\nr\n2\n6\n"},
 		{"nullable.walk", "missing\nWalker\n"},
 		{"function_values.walk", "5\n"},
-		{"stdlib.walk", "3\n8\n4\n3\ntrue\n7\ntrue\n"},
+		{"stdlib.walk", "3\n8\n4\na\nl\ntrue\nfalse\nwalklang\n3\n2\ntrue\nfalse\ntrue\n7\nfixed\ntrue\n"},
 		{"modules.walk", "25\n10\n"},
 	}
 
@@ -77,6 +77,10 @@ func TestV13FailFixturesHaveExpectedDiagnostics(t *testing.T) {
 		{"non_bool_if.walk", "tests/fail/non_bool_if.walk:1:5: type error: if condition must be bool, got int"},
 		{"bad_assert.walk", "tests/fail/bad_assert.walk:2:13: type error: assert needs bool, got int"},
 		{"bad_testing_assert.walk", "tests/fail/bad_testing_assert.walk:4:28: type error: testing.assert needs bool arg, got int"},
+		{"bad_string_index.walk", "tests/fail/bad_string_index.walk:1:12: type error: index must be int, got string"},
+		{"bad_string_at.walk", "tests/fail/bad_string_at.walk:2:23: type error: string.at index must be int, got string"},
+		{"bad_array_push.walk", "tests/fail/bad_array_push.walk:3:25: type error: arg 2 to array.push is int, got string"},
+		{"bad_random_choice.walk", "tests/fail/bad_random_choice.walk:2:20: type error: random.choice needs array arg, got string"},
 		{"unknown_library.walk", "tests/fail/unknown_library.walk:2:6: name error: unknown library function math.nope"},
 		{"top_break.walk", "tests/fail/top_break.walk:1:1: syntax error: break outside loop"},
 	}

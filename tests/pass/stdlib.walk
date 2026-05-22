@@ -4,14 +4,25 @@ imp: array
 imp: time
 imp: random
 imp: testing
-
 var: nums = [1, 2, 3]
+var: letters array[string] = []
+var: choices = ['fixed']
 var: fixed_random = random.int(7, 7)
-
+letters = array.push(letters, 'd')
+letters = array.push(letters, 'o')
 out: math.sqrt(9)
 out: math.pow(2, 3)
 out: string.len('walk')
+out: string.at('walk', 1)
+out: 'walk'[2]
+out: string.contains('walk', 'al')
+out: string.contains('walk', 'zz')
+out: string.concat('walk', 'lang')
 out: array.len(nums)
+out: array.len(letters)
+out: array.contains(letters, 'd')
+out: array.contains(letters, 'g')
 out: > time.now() 0
 out: fixed_random
+out: random.choice(choices)
 out: testing.assert(== fixed_random 7)

@@ -4,6 +4,42 @@
 
 No unreleased changes.
 
+## v5.4.0 - Terminal Game Helpers
+
+Date: 2026-05-22
+
+v5.4.0 adds the v1.8 stable helpers needed for simple terminal games such as Hangman while keeping the existing expression, module, and C-backend model.
+
+### Added
+
+- `string.at(text, index)` and string indexing such as `word[0]`, both returning one-character strings.
+- `string.contains(text, piece)` for substring checks.
+- `string.concat(left, right)` for explicit string building without changing numeric `+`.
+- `array.contains(items, item)` for stable native arrays.
+- `array.push(items, item)`, which returns a new array with the item appended.
+- Empty array literals when an explicit array annotation provides the element type, such as `var: guessed array[string] = []`.
+- `random.choice(items)` for non-empty stable native arrays.
+- A compiling `playground/hangman.walk` example.
+
+### Changed
+
+- README and docs front-door wording now separate the stable `v1.8` language contract from the current `v5.4.0` compiler/tooling/docs release.
+- The v1 stress path now covers the terminal-game helpers.
+
+### Breaking Changes
+
+None.
+
+### Upgrade
+
+Regenerate docs and release artifacts with:
+
+```bash
+scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.4.0 dist
+```
+
 ## v5.3.0 - Stable Required-Line Input
 
 Date: 2026-05-22

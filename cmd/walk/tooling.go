@@ -104,19 +104,25 @@ var walkKeywords = []string{
 }
 
 var walkBuiltinDetails = map[string]string{
-	"math":           "built-in module",
-	"math.sqrt":      "func(number) float",
-	"math.pow":       "func(number, number) float",
-	"string":         "built-in module",
-	"string.len":     "func(string) int",
-	"array":          "built-in module",
-	"array.len":      "func(array[T]) int",
-	"time":           "built-in module",
-	"time.now":       "func() int",
-	"random":         "built-in module",
-	"random.int":     "func(int, int) int",
-	"testing":        "built-in module",
-	"testing.assert": "func(bool) bool",
+	"math":            "built-in module",
+	"math.sqrt":       "func(number) float",
+	"math.pow":        "func(number, number) float",
+	"string":          "built-in module",
+	"string.len":      "func(string) int",
+	"string.at":       "func(string, int) string",
+	"string.contains": "func(string, string) bool",
+	"string.concat":   "func(string, string) string",
+	"array":           "built-in module",
+	"array.len":       "func(array[T]) int",
+	"array.contains":  "func(array[T], T) bool",
+	"array.push":      "func(array[T], T) array[T]",
+	"time":            "built-in module",
+	"time.now":        "func() int",
+	"random":          "built-in module",
+	"random.int":      "func(int, int) int",
+	"random.choice":   "func(array[T]) T",
+	"testing":         "built-in module",
+	"testing.assert":  "func(bool) bool",
 }
 
 func docsCommand(args []string) error {

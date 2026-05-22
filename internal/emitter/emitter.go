@@ -93,13 +93,92 @@ func (e *cEmitter) emit(program *ast.Program, testsOnly bool) (string, error) {
 	out.WriteString("    }\n")
 	out.WriteString("    return items;\n")
 	out.WriteString("}\n\n")
+	out.WriteString("static WALK_UNUSED void __walk_runtime_error(const char *message) {\n")
+	out.WriteString("    fprintf(stderr, \"walk runtime error: %s\\n\", message);\n")
+	out.WriteString("    exit(1);\n")
+	out.WriteString("}\n\n")
 	out.WriteString("static WALK_UNUSED WalkInt __walk_random_int(WalkInt min, WalkInt max) {\n")
 	out.WriteString("    if (max < min) { return min; }\n")
 	out.WriteString("    return min + (rand() % (max - min + 1));\n")
 	out.WriteString("}\n\n")
+	out.WriteString("static WALK_UNUSED WalkSize __walk_random_index(WalkSize len) {\n")
+	out.WriteString("    if (len <= 0) { __walk_runtime_error(\"random.choice on empty array\"); }\n")
+	out.WriteString("    return (WalkSize)(rand() % len);\n")
+	out.WriteString("}\n\n")
 	out.WriteString("static WALK_UNUSED WalkInt __walk_string_len(WalkString value) {\n")
 	out.WriteString("    return value == NULL ? 0 : (WalkInt)strlen(value);\n")
 	out.WriteString("}\n\n")
+	out.WriteString("static WALK_UNUSED WalkString __walk_string_at(WalkString value, WalkInt index) {\n")
+	out.WriteString("    WalkSize len = (WalkSize)__walk_string_len(value);\n")
+	out.WriteString("    if (index < 0 || index >= len) { __walk_runtime_error(\"string index out of range\"); }\n")
+	out.WriteString("    char *out = (char *)malloc(2);\n")
+	out.WriteString("    if (out == NULL) { __walk_runtime_error(\"out of memory\"); }\n")
+	out.WriteString("    out[0] = value[index];\n")
+	out.WriteString("    out[1] = '\\0';\n")
+	out.WriteString("    return out;\n")
+	out.WriteString("}\n\n")
+	out.WriteString("static WALK_UNUSED WalkBool __walk_string_contains(WalkString text, WalkString item) {\n")
+	out.WriteString("    if (text == NULL) { text = \"\"; }\n")
+	out.WriteString("    if (item == NULL) { item = \"\"; }\n")
+	out.WriteString("    return strstr(text, item) != NULL;\n")
+	out.WriteString("}\n\n")
+	out.WriteString("static WALK_UNUSED WalkString __walk_string_concat(WalkString left, WalkString right) {\n")
+	out.WriteString("    if (left == NULL) { left = \"\"; }\n")
+	out.WriteString("    if (right == NULL) { right = \"\"; }\n")
+	out.WriteString("    size_t left_len = strlen(left);\n")
+	out.WriteString("    size_t right_len = strlen(right);\n")
+	out.WriteString("    if (left_len > ((size_t)-1) - right_len - 1) { __walk_runtime_error(\"out of memory\"); }\n")
+	out.WriteString("    char *out = (char *)malloc(left_len + right_len + 1);\n")
+	out.WriteString("    if (out == NULL) { __walk_runtime_error(\"out of memory\"); }\n")
+	out.WriteString("    memcpy(out, left, left_len);\n")
+	out.WriteString("    memcpy(out + left_len, right, right_len);\n")
+	out.WriteString("    out[left_len + right_len] = '\\0';\n")
+	out.WriteString("    return out;\n")
+	out.WriteString("}\n\n")
+	out.WriteString("static WALK_UNUSED WalkArrayInt __walk_array_push_int(WalkArrayInt array, WalkInt item) {\n")
+	out.WriteString("    WalkInt *items = (WalkInt *)__walk_alloc_array(array.len + 1, sizeof(WalkInt));\n")
+	out.WriteString("    for (WalkSize i = 0; i < array.len; i++) { items[i] = array.items[i]; }\n")
+	out.WriteString("    items[array.len] = item;\n")
+	out.WriteString("    return (WalkArrayInt){items, array.len + 1};\n")
+	out.WriteString("}\n\n")
+	out.WriteString("static WALK_UNUSED WalkArrayFloat __walk_array_push_float(WalkArrayFloat array, WalkFloat item) {\n")
+	out.WriteString("    WalkFloat *items = (WalkFloat *)__walk_alloc_array(array.len + 1, sizeof(WalkFloat));\n")
+	out.WriteString("    for (WalkSize i = 0; i < array.len; i++) { items[i] = array.items[i]; }\n")
+	out.WriteString("    items[array.len] = item;\n")
+	out.WriteString("    return (WalkArrayFloat){items, array.len + 1};\n")
+	out.WriteString("}\n\n")
+	out.WriteString("static WALK_UNUSED WalkArrayBool __walk_array_push_bool(WalkArrayBool array, WalkBool item) {\n")
+	out.WriteString("    WalkBool *items = (WalkBool *)__walk_alloc_array(array.len + 1, sizeof(WalkBool));\n")
+	out.WriteString("    for (WalkSize i = 0; i < array.len; i++) { items[i] = array.items[i]; }\n")
+	out.WriteString("    items[array.len] = item;\n")
+	out.WriteString("    return (WalkArrayBool){items, array.len + 1};\n")
+	out.WriteString("}\n\n")
+	out.WriteString("static WALK_UNUSED WalkArrayString __walk_array_push_string(WalkArrayString array, WalkString item) {\n")
+	out.WriteString("    WalkString *items = (WalkString *)__walk_alloc_array(array.len + 1, sizeof(WalkString));\n")
+	out.WriteString("    for (WalkSize i = 0; i < array.len; i++) { items[i] = array.items[i]; }\n")
+	out.WriteString("    items[array.len] = item;\n")
+	out.WriteString("    return (WalkArrayString){items, array.len + 1};\n")
+	out.WriteString("}\n\n")
+	out.WriteString("static WALK_UNUSED WalkBool __walk_array_contains_int(WalkArrayInt array, WalkInt item) {\n")
+	out.WriteString("    for (WalkSize i = 0; i < array.len; i++) { if (array.items[i] == item) { return true; } }\n")
+	out.WriteString("    return false;\n")
+	out.WriteString("}\n\n")
+	out.WriteString("static WALK_UNUSED WalkBool __walk_array_contains_float(WalkArrayFloat array, WalkFloat item) {\n")
+	out.WriteString("    for (WalkSize i = 0; i < array.len; i++) { if (array.items[i] == item) { return true; } }\n")
+	out.WriteString("    return false;\n")
+	out.WriteString("}\n\n")
+	out.WriteString("static WALK_UNUSED WalkBool __walk_array_contains_bool(WalkArrayBool array, WalkBool item) {\n")
+	out.WriteString("    for (WalkSize i = 0; i < array.len; i++) { if (array.items[i] == item) { return true; } }\n")
+	out.WriteString("    return false;\n")
+	out.WriteString("}\n\n")
+	out.WriteString("static WALK_UNUSED WalkBool __walk_array_contains_string(WalkArrayString array, WalkString item) {\n")
+	out.WriteString("    for (WalkSize i = 0; i < array.len; i++) { if (strcmp(array.items[i], item) == 0) { return true; } }\n")
+	out.WriteString("    return false;\n")
+	out.WriteString("}\n\n")
+	out.WriteString("static WALK_UNUSED WalkInt __walk_array_choice_int(WalkArrayInt array) { return array.items[__walk_random_index(array.len)]; }\n")
+	out.WriteString("static WALK_UNUSED WalkFloat __walk_array_choice_float(WalkArrayFloat array) { return array.items[__walk_random_index(array.len)]; }\n")
+	out.WriteString("static WALK_UNUSED WalkBool __walk_array_choice_bool(WalkArrayBool array) { return array.items[__walk_random_index(array.len)]; }\n")
+	out.WriteString("static WALK_UNUSED WalkString __walk_array_choice_string(WalkArrayString array) { return array.items[__walk_random_index(array.len)]; }\n\n")
 	out.WriteString("static WALK_UNUSED WalkString __walk_input(WalkString prompt) {\n")
 	out.WriteString("    if (prompt != NULL) {\n")
 	out.WriteString("        fputs(prompt, stdout);\n")
@@ -1218,6 +1297,9 @@ func (e *cEmitter) emitExpression(expression ast.Expression) (string, error) {
 		if err != nil {
 			return "", err
 		}
+		if ex.Target.ExprType().Kind == ast.TypeString {
+			return fmt.Sprintf("__walk_string_at(%s, %s)", target, index), nil
+		}
 		return fmt.Sprintf("%s.items[%s]", target, index), nil
 	case *ast.FieldAccess:
 		target, err := e.emitExpression(ex.Target)
@@ -1330,12 +1412,36 @@ func (e *cEmitter) emitCall(call *ast.Call) (string, error) {
 		return fmt.Sprintf("pow(%s)", strings.Join(args, ", ")), nil
 	case "string.len":
 		return fmt.Sprintf("__walk_string_len(%s)", args[0]), nil
+	case "string.at":
+		return fmt.Sprintf("__walk_string_at(%s, %s)", args[0], args[1]), nil
+	case "string.contains":
+		return fmt.Sprintf("__walk_string_contains(%s, %s)", args[0], args[1]), nil
+	case "string.concat":
+		return fmt.Sprintf("__walk_string_concat(%s, %s)", args[0], args[1]), nil
 	case "array.len":
 		return fmt.Sprintf("%s.len", args[0]), nil
+	case "array.contains":
+		suffix, err := nativeArrayHelperSuffix(*call.Args[0].ExprType().Elem)
+		if err != nil {
+			return "", err
+		}
+		return fmt.Sprintf("__walk_array_contains_%s(%s, %s)", suffix, args[0], args[1]), nil
+	case "array.push":
+		suffix, err := nativeArrayHelperSuffix(*call.Args[0].ExprType().Elem)
+		if err != nil {
+			return "", err
+		}
+		return fmt.Sprintf("__walk_array_push_%s(%s, %s)", suffix, args[0], args[1]), nil
 	case "time.now":
 		return "(long long)time(NULL)", nil
 	case "random.int":
 		return fmt.Sprintf("__walk_random_int(%s)", strings.Join(args, ", ")), nil
+	case "random.choice":
+		suffix, err := nativeArrayHelperSuffix(*call.Args[0].ExprType().Elem)
+		if err != nil {
+			return "", err
+		}
+		return fmt.Sprintf("__walk_array_choice_%s(%s)", suffix, args[0]), nil
 	case "testing.assert":
 		return args[0], nil
 	default:
@@ -1459,6 +1565,21 @@ func cArrayItemType(typeName ast.Type) (string, error) {
 		return cStructName(typeName.Name), nil
 	default:
 		return "", fmt.Errorf("internal error: unsupported array element type %s", typeName.String())
+	}
+}
+
+func nativeArrayHelperSuffix(typeName ast.Type) (string, error) {
+	switch typeName.Kind {
+	case ast.TypeInt:
+		return "int", nil
+	case ast.TypeFloat:
+		return "float", nil
+	case ast.TypeBool:
+		return "bool", nil
+	case ast.TypeString:
+		return "string", nil
+	default:
+		return "", fmt.Errorf("internal error: unsupported native array helper type %s", typeName.String())
 	}
 }
 

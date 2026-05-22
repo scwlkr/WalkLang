@@ -40,7 +40,7 @@ expect_failure() {
     fi
 }
 
-go test ./cmd/walk -run TestV17CompatibilitySuite
+go test ./cmd/walk -run TestV18CompatibilitySuite
 go test ./...
 
 "$walk_bin" check --warnings=error examples/v1.walk
@@ -58,9 +58,18 @@ true"
 expect_output "$work_dir/stdlib" "3
 8
 4
+a
+l
+true
+false
+walklang
 3
+2
+true
+false
 true
 7
+fixed
 true"
 
 "$walk_bin" build examples/v0.walk -o "$work_dir/v0"
@@ -164,4 +173,4 @@ project_dir="$work_dir/hello_project"
     test ! -d build
 )
 
-echo "v1.7 stress ok"
+echo "v1.8 stress ok"
