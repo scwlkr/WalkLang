@@ -19,13 +19,13 @@
 <h2>Language</h2>
 <a href="SYNTAX.html">v1 Syntax Guide</a>
 <a href="SPEC.html">v1 Specification</a>
-<a href="STDLIB.html">v1.5 Standard Library</a>
+<a href="STDLIB.html">v1.6 Standard Library</a>
 <a href="ERRORS.html">v1 Diagnostics</a>
-<a href="COMPATIBILITY.html">v1.5 Compatibility</a>
+<a href="COMPATIBILITY.html">v1.6 Compatibility</a>
 <a href="MIGRATING.html" aria-current="page">Migration Guide</a>
 <a href="DEPRECATION.html">Deprecation Policy</a>
 <h2>Versions</h2>
-<a href="V1.html">v1 / v1.5</a>
+<a href="V1.html">v1 / v1.6</a>
 <a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
 <a href="V3.html">v3 Package Ecosystem</a>
 <h2>Tools</h2>
@@ -50,6 +50,17 @@
 <div class="page">
 <article class="doc">
 <h1 id="walklang-migration-guide">WalkLang Migration Guide</h1>
+<h2 id="v1-5-to-v1-6">v1.5 to v1.6</h2>
+<p>v1.6 adds local function type inference. Existing v1.5 source should not need changes.</p>
+<p>Typed function signatures remain valid:</p>
+<pre><code class="language-walk">func: add(a int, b int) int
+    return: + a b</code></pre>
+<p>New code may omit parameter and return types when the function body proves the types clearly:</p>
+<pre><code class="language-walk">func: power_four(n)
+    return: ^ n 4</code></pre>
+<p>Ambiguous helper functions still need annotations. WalkLang does not infer ordinary function signatures from later call sites:</p>
+<pre><code class="language-walk">func: identity(value int)
+    return: value</code></pre>
 <h2 id="v2-1-to-v2-2">v2.1 to v2.2</h2>
 <p>v2.2 adds experimental simple generic functions. Existing v2.1 source should not need changes.</p>
 <p>Recommended upgrade check:</p>

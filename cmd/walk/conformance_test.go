@@ -339,6 +339,68 @@ func TestV22GenericFailFixturesHaveExpectedDiagnostics(t *testing.T) {
 	}
 }
 
+func TestFunctionTypeInferenceBuildsAndRuns(t *testing.T) {
+	requireCC(t)
+	dir := t.TempDir()
+	sourcePath := filepath.Join(dir, "main.walk")
+	writeFile(t, sourcePath, strings.Join([]string{
+		"func: power_four(n)",
+		"    return: ^ n 4",
+		"",
+		"func: add(a, b)",
+		"    return: + a b",
+		"",
+		"func: half(n float)",
+		"    return: / n 2",
+		"",
+		"func: is_adult(age)",
+		"    return: >= age 18",
+		"",
+		"out: power_four(2)",
+		"out: add(2, 3)",
+		"out: half(5)",
+		"out: is_adult(20)",
+		"",
+	}, "\n"))
+
+	cCode, warnings, err := compileFileToCWithOptions(sourcePath, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(warnings) != 0 {
+		t.Fatalf("unexpected warnings: %#v", warnings)
+	}
+	if got, want := runCProgram(t, cCode), "16\n5\n2.5\ntrue\n"; got != want {
+		t.Fatalf("want %q, got %q\nC:\n%s", want, got, cCode)
+	}
+	if !strings.Contains(cCode, "WalkInt power_four(WalkInt n)") {
+		t.Fatalf("inferred int signature missing from generated C:\n%s", cCode)
+	}
+	if !strings.Contains(cCode, "WalkFloat half(WalkFloat n)") {
+		t.Fatalf("explicit float plus inferred return signature missing from generated C:\n%s", cCode)
+	}
+}
+
+func TestFunctionTypeInferenceRequiresAmbiguousParamAnnotation(t *testing.T) {
+	dir := t.TempDir()
+	sourcePath := filepath.Join(dir, "main.walk")
+	writeFile(t, sourcePath, strings.Join([]string{
+		"func: identity(value)",
+		"    return: value",
+		"",
+		"out: identity(3)",
+		"",
+	}, "\n"))
+
+	_, err := checkFile(sourcePath)
+	if err == nil {
+		t.Fatal("expected ambiguous function parameter inference error")
+	}
+	if got, want := err.Error(), "main.walk:1:1: type error: cannot infer type for parameter value in function identity; add an annotation"; !strings.HasSuffix(got, want) {
+		t.Fatalf("want suffix %q, got %q", want, got)
+	}
+}
+
 func TestV5RuntimeGeneratedCIsInspectableAndArrayStorageIsOwned(t *testing.T) {
 	requireCC(t)
 	dir := t.TempDir()

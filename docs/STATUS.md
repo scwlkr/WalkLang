@@ -1,14 +1,14 @@
 # WalkLang Status
 
-Stable language contract: v1.5.
+Stable language contract: v1.6.
 
-Current compiler/tooling/docs release: v5.1.0 public docs and reference site.
+Current compiler/tooling/docs release: v5.2.0 local function type inference.
 
 Experimental implemented language surface: v2.2.
 
-State: v5.1 is complete against `docs/ROADMAP.md`. The repo now owns a static public docs and reference site: `scripts/build-docs-site.sh` regenerates `docs/reference/api.md`, `docs/reference/api.json`, and the static `public/` tree; `scripts/check-docs-site.sh` rebuilds and checks generated artifacts plus static-site links; `public/CNAME` targets `walklang.wlkrlabs.com`; and `.github/workflows/pages.yml` deploys `public/` through GitHub Pages from `main`. Generated reference docs now use repo-relative source paths instead of local absolute paths. C remains the primary backend, and the v5 runtime/backend contract remains documented in `docs/V5.md` and `docs/ARCHITECTURE.md`.
+State: v5.2 is complete against the new v1.6 local function type inference rule. Ordinary functions may omit parameter and return types when the local body proves the types; ambiguous omitted parameter types now fail with a direct annotation diagnostic; normal typed signatures remain valid; inference does not use later call sites; and C remains the primary backend.
 
-v5.1 verification on 2026-05-22: focused `go test ./cmd/walk -run 'TestV4DocsAndDebugMapCommands|TestV51DocsUseRelativePublishablePaths' -count=1` passed; `scripts/check-docs-site.sh` passed; full `go test -count=1 ./...` passed; `go build -o build/walk ./cmd/walk` passed; `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh` passed; `scripts/release.sh v5.1.0 <temp>/release` produced 5 platform artifacts plus `SHA256SUMS`; `wc -l <temp>/release/SHA256SUMS` reported 5 checksum lines; the host release binary reported `v5.1.0` from `walk version`; `git diff --check` passed; and a temporary local HTTP server served `/`, `/docs/`, `/docs/reference/api.html`, and `/docs/reference/api.json` with expected v5.1 docs and repo-relative reference paths.
+v5.2 verification on 2026-05-22: focused `go test ./cmd/walk -run 'TestFunctionTypeInference|TestV15ReleasePrepDocsArePresent' -count=1` passed; full `go test -count=1 ./...` passed; `go build -o build/walk ./cmd/walk` passed; `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh` passed and reported `v1.6 stress ok`; `scripts/check-docs-site.sh` passed after generated site artifacts were staged; `scripts/release.sh v5.2.0 <temp>/release` produced 5 platform artifacts plus `SHA256SUMS`; `wc -l <temp>/release/SHA256SUMS` reported 5 checksum lines; the host release binary reported `v5.2.0` from `walk version`; and `git diff --check` passed.
 
 Live docs verification on 2026-05-22: `walklang.wlkrlabs.com` resolves through the DNS-only `walklang -> scwlkr.github.io` CNAME to GitHub Pages addresses; `http://walklang.wlkrlabs.com/docs/` returns `200 OK` from GitHub Pages and includes the v5.1 docs content; `http://walklang.wlkrlabs.com/docs/reference/api.json` returns repo-relative source paths. HTTPS is not enforced yet because GitHub Pages still reports `The certificate does not exist yet` when enabling HTTPS and `https://walklang.wlkrlabs.com/docs/` still fails certificate hostname validation.
 
@@ -24,7 +24,7 @@ v5 verification on 2026-05-22: baseline `go test -count=1 ./...` passed before i
 
 Previous v4.1 verification on 2026-05-22: focused `go test ./cmd/walk -run 'TestV4DocsAndDebugMapCommands|TestV4LSPDiagnosticsFormattingAndCompletion' -count=1`, lexer/parser `go test ./internal/lexer ./internal/parser -count=1`, focused `go test ./cmd/walk -run TestV4 -count=1`, full `go test -count=1 ./...`, `go build -o build/walk ./cmd/walk`, `./build/walk docs --strict -o build/v4.1-api.md examples/v1.walk`, `./build/walk docs --strict --format json -o build/v4.1-api.json examples/v1.walk`, `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh`, `scripts/release.sh v4.1.0 <temp>/release`, `SHA256SUMS` line count check, and `git diff --check` all passed.
 
-Release CI maintenance on 2026-05-22: GitHub Actions workflow uses Node 24 first-party actions, disables unnecessary Go dependency caching for this no-`go.sum` module, runs `scripts/check-docs-site.sh`, and now publishes v5.1.0-labeled release artifacts.
+Release CI maintenance on 2026-05-22: GitHub Actions workflow uses Node 24 first-party actions, disables unnecessary Go dependency caching for this no-`go.sum` module, runs `scripts/check-docs-site.sh`, and now publishes v5.2.0-labeled release artifacts.
 
 Playground example update on 2026-05-22: `playground/route_ranker.walk` now demonstrates a compact route-ranking program with structs, arrays, loops, typed helper functions, prefix math, and scalar output. Verification passed with `./build/walk check --warnings=error playground/route_ranker.walk`, `./build/walk build playground/route_ranker.walk -o build/route_ranker`, and `./build/route_ranker`, which printed `Library Lane` with score `46`; broader verification passed with `go test -count=1 ./...`, `scripts/check-docs-site.sh`, `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh`, `scripts/release.sh v5.1.0 <temp>/release`, a 5-line `SHA256SUMS` check, host release binary `walk version` reporting `v5.1.0`, and `git diff --check`.
 

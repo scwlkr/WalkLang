@@ -272,14 +272,35 @@ for: n in nums
 
 ## Functions
 
-Parameters must have types.
+Parameters may have explicit types.
 
 ```walk
 func: add(a int, b int) int
     return: + a b
 ```
 
-Omitting the return type makes the function `void`.
+Obvious local helper functions can omit parameter and return types when the body proves the types clearly.
+
+```walk
+func: power_four(n)
+    return: ^ n 4
+```
+
+This infers `n int` and an `int` return. Use an annotation when the obvious type is not the intended type:
+
+```walk
+func: half(n float)
+    return: / n 2
+```
+
+Ambiguous parameters need annotations. Types are not inferred from later call sites.
+
+```walk
+func: identity(value) # add a type for value
+    return: value
+```
+
+Omitting the return type on a function with no value returns makes the function `void`.
 
 ```walk
 func: say(message string)

@@ -37,7 +37,7 @@ the migration steps
 
 Removal of stable behavior normally waits for `v2.0.0`. A v1.x release may break stable behavior only for a documented safety or correctness fix.
 
-## Current v1.5 Deprecated Surface
+## Current v1.6 Deprecated Surface
 
 None.
 

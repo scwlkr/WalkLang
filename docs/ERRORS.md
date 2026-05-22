@@ -58,6 +58,13 @@ var: x = 1
 x = 'one'
 ```
 
+v1.6 function inference diagnostics also use `type error`:
+
+```walk
+func: identity(value)
+    return: value # type error: cannot infer type for parameter value
+```
+
 v2 struct diagnostics also use `type error`:
 
 ```walk

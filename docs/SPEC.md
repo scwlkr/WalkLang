@@ -1,6 +1,6 @@
 # WalkLang v1 Specification
 
-This document is the stable WalkLang language contract for the v1 line. v1.5 keeps the v1.4 language surface and adds explicit compatibility-release policy around it.
+This document is the stable WalkLang language contract for the v1 line. v1.6 keeps the v1.5 compatibility policy and adds local function type inference for obvious function bodies.
 
 Core rule:
 
@@ -170,6 +170,8 @@ x = 'two'  # type error
 
 `int` values may initialize or assign to `float` values. Other implicit conversions are not stable.
 
+Function parameters and return types may also be inferred from the function body when the result is local and unambiguous. Omitted function parameter types are not inferred from call sites.
+
 ---
 
 ## 9. Variables And Constants
@@ -309,14 +311,28 @@ Empty arrays and nested array emission are not stable v1.1 native features.
 
 ## 14. Functions
 
-Function declarations use typed parameters.
+Function declarations may use typed parameters.
 
 ```walk
 func: add(a int, b int) int
     return: + a b
 ```
 
-If a return type is omitted, the function returns `void` and should end normally.
+Obvious local functions may omit parameter and return types. Whole-number arithmetic infers `int`; float contexts infer `float`; boolean contexts infer `bool`.
+
+```walk
+func: power_four(n)
+    return: ^ n 4
+```
+
+If a parameter type cannot be inferred from the function body, the parameter needs an explicit annotation. Function types are not inferred from later call sites.
+
+```walk
+func: identity(value) # type error until value is annotated
+    return: value
+```
+
+If a return type is omitted and the function has no `return:` value, the function returns `void` and should end normally.
 
 ```walk
 func: say(message string)

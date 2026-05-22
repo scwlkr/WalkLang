@@ -19,13 +19,13 @@
 <h2>Language</h2>
 <a href="SYNTAX.html">v1 Syntax Guide</a>
 <a href="SPEC.html">v1 Specification</a>
-<a href="STDLIB.html">v1.5 Standard Library</a>
+<a href="STDLIB.html">v1.6 Standard Library</a>
 <a href="ERRORS.html">v1 Diagnostics</a>
-<a href="COMPATIBILITY.html">v1.5 Compatibility</a>
+<a href="COMPATIBILITY.html">v1.6 Compatibility</a>
 <a href="MIGRATING.html">Migration Guide</a>
 <a href="DEPRECATION.html">Deprecation Policy</a>
 <h2>Versions</h2>
-<a href="V1.html">v1 / v1.5</a>
+<a href="V1.html">v1 / v1.6</a>
 <a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
 <a href="V3.html">v3 Package Ecosystem</a>
 <h2>Tools</h2>
@@ -58,6 +58,7 @@ v1: harden and grow
 v1.1: stabilize the language contract
 v1.2: make projects and releases real
 v1.3: grow the standard library carefully
+v1.6: local function type inference
 v2: data modeling
 v2.1: methods and stronger composition
 v3: ecosystem
@@ -453,6 +454,22 @@ releases are repeatable
 users can tell stable features from experimental features
 breaking changes require a version boundary</code></pre>
 <p>---</p>
+<h2 id="v1-6-local-function-type-inference">v1.6 Local Function Type Inference</h2>
+<p>Make obvious helper functions short without hiding type decisions at call sites.</p>
+<p>Add:</p>
+<pre><code class="language-text">omitted parameter types inferred from local body evidence
+omitted return types inferred from value returns
+clear errors for ambiguous omitted parameter types
+no ordinary function inference from later call sites</code></pre>
+<p>Example:</p>
+<pre><code class="language-walk">func: power_four(n)
+    return: ^ n 4</code></pre>
+<p>v1.6 done when:</p>
+<pre><code class="language-text">inferred helpers build through generated C
+ambiguous helpers ask for annotations
+SPEC, SYNTAX, migration, release notes, and status docs describe the rule
+compatibility tests continue to pass</code></pre>
+<p>---</p>
 <h2 id="v2-data-modeling">v2 Data Modeling</h2>
 <p>Add structs after the v1 language contract is solid.</p>
 <p>Target syntax:</p>
@@ -800,6 +817,9 @@ v1.4
 
 v1.5
   compatibility release preparation
+
+v1.6
+  local function type inference
 
 v2
   structs + data modeling

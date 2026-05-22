@@ -19,13 +19,13 @@
 <h2>Language</h2>
 <a href="SYNTAX.html" aria-current="page">v1 Syntax Guide</a>
 <a href="SPEC.html">v1 Specification</a>
-<a href="STDLIB.html">v1.5 Standard Library</a>
+<a href="STDLIB.html">v1.6 Standard Library</a>
 <a href="ERRORS.html">v1 Diagnostics</a>
-<a href="COMPATIBILITY.html">v1.5 Compatibility</a>
+<a href="COMPATIBILITY.html">v1.6 Compatibility</a>
 <a href="MIGRATING.html">Migration Guide</a>
 <a href="DEPRECATION.html">Deprecation Policy</a>
 <h2>Versions</h2>
-<a href="V1.html">v1 / v1.5</a>
+<a href="V1.html">v1 / v1.6</a>
 <a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
 <a href="V3.html">v3 Package Ecosystem</a>
 <h2>Tools</h2>
@@ -187,10 +187,19 @@ for: n in nums
 <p><code>break:</code> and <code>continue:</code> are valid only inside loops.</p>
 <p>---</p>
 <h2 id="functions">Functions</h2>
-<p>Parameters must have types.</p>
+<p>Parameters may have explicit types.</p>
 <pre><code class="language-walk">func: add(a int, b int) int
     return: + a b</code></pre>
-<p>Omitting the return type makes the function <code>void</code>.</p>
+<p>Obvious local helper functions can omit parameter and return types when the body proves the types clearly.</p>
+<pre><code class="language-walk">func: power_four(n)
+    return: ^ n 4</code></pre>
+<p>This infers <code>n int</code> and an <code>int</code> return. Use an annotation when the obvious type is not the intended type:</p>
+<pre><code class="language-walk">func: half(n float)
+    return: / n 2</code></pre>
+<p>Ambiguous parameters need annotations. Types are not inferred from later call sites.</p>
+<pre><code class="language-walk">func: identity(value) # add a type for value
+    return: value</code></pre>
+<p>Omitting the return type on a function with no value returns makes the function <code>void</code>.</p>
 <pre><code class="language-walk">func: say(message string)
     out: message</code></pre>
 <p>Non-void functions must return on all paths.</p>

@@ -357,9 +357,12 @@ func parseFuncDecl(tokens []lexer.Token, children []lineNode, location ast.Locat
 		if err != nil {
 			return nil, err
 		}
-		paramType, err := c.parseType()
-		if err != nil {
-			return nil, err
+		paramType := ast.Type{}
+		if c.peek() != nil && c.peek().Value != "," && c.peek().Value != ")" {
+			paramType, err = c.parseType()
+			if err != nil {
+				return nil, err
+			}
 		}
 		params = append(params, ast.Param{Name: paramName.Value, Type: paramType})
 		if c.peek() != nil && c.peek().Value == "," {
@@ -369,7 +372,7 @@ func parseFuncDecl(tokens []lexer.Token, children []lineNode, location ast.Locat
 	if err := c.expectSymbol(")"); err != nil {
 		return nil, err
 	}
-	returnType := ast.Basic(ast.TypeVoid)
+	returnType := ast.Type{}
 	if c.peek() != nil {
 		returnType, err = c.parseType()
 		if err != nil {

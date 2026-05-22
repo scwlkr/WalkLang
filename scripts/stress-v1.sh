@@ -141,4 +141,4 @@ project_dir="$work_dir/hello_project"
     test ! -d build
 )
 
-echo "v1.5 stress ok"
+echo "v1.6 stress ok"

@@ -98,8 +98,8 @@ func TestV15ReleasePrepDocsArePresent(t *testing.T) {
 		{"docs/COMPATIBILITY.md", "Stable v1 code should continue to compile through the v1.x line"},
 		{"docs/INSTALL.md", "Official Install Instructions"},
 		{"docs/RELEASE_NOTES.md", "v1.5.0"},
-		{"docs/MIGRATING.md", "v1.4 to v1.5"},
-		{"docs/DEPRECATION.md", "Current v1.5 Deprecated Surface"},
+		{"docs/MIGRATING.md", "v1.5 to v1.6"},
+		{"docs/DEPRECATION.md", "Current v1.6 Deprecated Surface"},
 	}
 
 	for _, tc := range cases {

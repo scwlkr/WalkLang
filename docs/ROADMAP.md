@@ -11,6 +11,7 @@ v1: harden and grow
 v1.1: stabilize the language contract
 v1.2: make projects and releases real
 v1.3: grow the standard library carefully
+v1.6: local function type inference
 v2: data modeling
 v2.1: methods and stronger composition
 v3: ecosystem
@@ -646,6 +647,37 @@ breaking changes require a version boundary
 
 ---
 
+## v1.6 Local Function Type Inference
+
+Make obvious helper functions short without hiding type decisions at call sites.
+
+Add:
+
+```text
+omitted parameter types inferred from local body evidence
+omitted return types inferred from value returns
+clear errors for ambiguous omitted parameter types
+no ordinary function inference from later call sites
+```
+
+Example:
+
+```walk
+func: power_four(n)
+    return: ^ n 4
+```
+
+v1.6 done when:
+
+```text
+inferred helpers build through generated C
+ambiguous helpers ask for annotations
+SPEC, SYNTAX, migration, release notes, and status docs describe the rule
+compatibility tests continue to pass
+```
+
+---
+
 ## v2 Data Modeling
 
 Add structs after the v1 language contract is solid.
@@ -1222,6 +1254,9 @@ v1.4
 
 v1.5
   compatibility release preparation
+
+v1.6
+  local function type inference
 
 v2
   structs + data modeling

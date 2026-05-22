@@ -107,6 +107,10 @@ func (c *Checker) check(program *ast.Program) error {
 	if err := c.checkStructs(); err != nil {
 		return err
 	}
+	if err := c.inferFunctionTypes(program); err != nil {
+		return err
+	}
+	c.refreshMethodTypes(program)
 	if err := c.checkMethods(); err != nil {
 		return err
 	}

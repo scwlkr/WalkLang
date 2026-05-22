@@ -1,5 +1,30 @@
 # WalkLang Migration Guide
 
+## v1.5 to v1.6
+
+v1.6 adds local function type inference. Existing v1.5 source should not need changes.
+
+Typed function signatures remain valid:
+
+```walk
+func: add(a int, b int) int
+    return: + a b
+```
+
+New code may omit parameter and return types when the function body proves the types clearly:
+
+```walk
+func: power_four(n)
+    return: ^ n 4
+```
+
+Ambiguous helper functions still need annotations. WalkLang does not infer ordinary function signatures from later call sites:
+
+```walk
+func: identity(value int)
+    return: value
+```
+
 ## v2.1 to v2.2
 
 v2.2 adds experimental simple generic functions. Existing v2.1 source should not need changes.

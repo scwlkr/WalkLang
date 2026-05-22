@@ -1,6 +1,6 @@
-# WalkLang v1.5 Compatibility
+# WalkLang v1.6 Compatibility
 
-WalkLang v1.5 defines the compatibility promise for the v1.x language line. v1.5 does not intentionally change stable v1 syntax or standard-library behavior; it makes the release boundary explicit.
+WalkLang v1.6 defines the compatibility promise for the v1.x language line. v1.6 keeps the v1.5 release boundary and adds local function type inference as a compatible syntax improvement.
 
 ## Compatibility Promise
 
@@ -97,7 +97,7 @@ any generated C details outside snapshots
 
 ## Deprecation Policy
 
-`docs/DEPRECATION.md` owns the deprecation lifecycle. Current v1.5 deprecated surface: none.
+`docs/DEPRECATION.md` owns the deprecation lifecycle. Current v1.6 deprecated surface: none.
 
 ## Changing The Contract
 

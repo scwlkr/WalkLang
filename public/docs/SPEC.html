@@ -19,13 +19,13 @@
 <h2>Language</h2>
 <a href="SYNTAX.html">v1 Syntax Guide</a>
 <a href="SPEC.html" aria-current="page">v1 Specification</a>
-<a href="STDLIB.html">v1.5 Standard Library</a>
+<a href="STDLIB.html">v1.6 Standard Library</a>
 <a href="ERRORS.html">v1 Diagnostics</a>
-<a href="COMPATIBILITY.html">v1.5 Compatibility</a>
+<a href="COMPATIBILITY.html">v1.6 Compatibility</a>
 <a href="MIGRATING.html">Migration Guide</a>
 <a href="DEPRECATION.html">Deprecation Policy</a>
 <h2>Versions</h2>
-<a href="V1.html">v1 / v1.5</a>
+<a href="V1.html">v1 / v1.6</a>
 <a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
 <a href="V3.html">v3 Package Ecosystem</a>
 <h2>Tools</h2>
@@ -50,7 +50,7 @@
 <div class="page">
 <article class="doc">
 <h1 id="walklang-v1-specification">WalkLang v1 Specification</h1>
-<p>This document is the stable WalkLang language contract for the v1 line. v1.5 keeps the v1.4 language surface and adds explicit compatibility-release policy around it.</p>
+<p>This document is the stable WalkLang language contract for the v1 line. v1.6 keeps the v1.5 compatibility policy and adds local function type inference for obvious function bodies.</p>
 <p>Core rule:</p>
 <pre><code class="language-text">If it is not in SPEC.md, it is not stable WalkLang.
 If the compiler disagrees with SPEC.md, either the compiler or the spec must change.</code></pre>
@@ -145,6 +145,7 @@ const: name = &#39;Walker&#39;</code></pre>
 x = 2      # ok
 x = &#39;two&#39;  # type error</code></pre>
 <p><code>int</code> values may initialize or assign to <code>float</code> values. Other implicit conversions are not stable.</p>
+<p>Function parameters and return types may also be inferred from the function body when the result is local and unambiguous. Omitted function parameter types are not inferred from call sites.</p>
 <p>---</p>
 <h2 id="9-variables-and-constants">9. Variables And Constants</h2>
 <p><code>var:</code> creates a mutable binding.</p>
@@ -213,10 +214,16 @@ nums[1] = 9</code></pre>
 <p>Empty arrays and nested array emission are not stable v1.1 native features.</p>
 <p>---</p>
 <h2 id="14-functions">14. Functions</h2>
-<p>Function declarations use typed parameters.</p>
+<p>Function declarations may use typed parameters.</p>
 <pre><code class="language-walk">func: add(a int, b int) int
     return: + a b</code></pre>
-<p>If a return type is omitted, the function returns <code>void</code> and should end normally.</p>
+<p>Obvious local functions may omit parameter and return types. Whole-number arithmetic infers <code>int</code>; float contexts infer <code>float</code>; boolean contexts infer <code>bool</code>.</p>
+<pre><code class="language-walk">func: power_four(n)
+    return: ^ n 4</code></pre>
+<p>If a parameter type cannot be inferred from the function body, the parameter needs an explicit annotation. Function types are not inferred from later call sites.</p>
+<pre><code class="language-walk">func: identity(value) # type error until value is annotated
+    return: value</code></pre>
+<p>If a return type is omitted and the function has no <code>return:</code> value, the function returns <code>void</code> and should end normally.</p>
 <pre><code class="language-walk">func: say(message string)
     out: message</code></pre>
 <p><code>return:</code> requires a value and is valid only inside a function with a compatible return type.</p>

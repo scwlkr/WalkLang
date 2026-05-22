@@ -2,15 +2,40 @@
 
 ## Unreleased
 
+No unreleased changes.
+
+## v5.2.0 - Local Function Type Inference
+
+Date: 2026-05-22
+
+v5.2.0 adds the v1.6 local function type inference rule: obvious helper functions can omit parameter and return types, while ambiguous functions ask for annotations instead of guessing from call sites.
+
 ### Added
 
+- Local function parameter and return type inference for function bodies such as `func: power_four(n)`.
+- Clear diagnostics for ambiguous omitted parameter types, such as `cannot infer type for parameter value in function identity; add an annotation`.
 - `walk run <source.walk>` compiles a single file to a temporary native executable, runs it, streams program input and output, and cleans up the temporary build directory.
 - `walk <source.walk>` is a direct shorthand for `walk run <source.walk>`.
 
 ### Changed
 
-- README and docs front-door wording now separate the stable `v1.5` language contract from the current `v5.1.0` compiler/tooling/docs release.
+- README and docs front-door wording now separate the stable `v1.6` language contract from the current `v5.2.0` compiler/tooling/docs release.
 - README now includes a small WalkLang code example and a concise "What works today" section for public readers.
+- The stable syntax/spec docs now describe local function inference as a compatible v1.x improvement.
+
+### Breaking Changes
+
+None.
+
+### Upgrade
+
+Regenerate docs and release artifacts with:
+
+```bash
+scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.2.0 dist
+```
 
 ## v5.1.0 - Public Docs And Reference Site
 

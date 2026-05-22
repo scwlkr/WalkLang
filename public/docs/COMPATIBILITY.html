@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>WalkLang v1.5 Compatibility - WalkLang</title>
+<title>WalkLang v1.6 Compatibility - WalkLang</title>
 <link rel="icon" href="../assets/icon.svg">
 <link rel="stylesheet" href="../assets/site.css">
 </head>
@@ -19,13 +19,13 @@
 <h2>Language</h2>
 <a href="SYNTAX.html">v1 Syntax Guide</a>
 <a href="SPEC.html">v1 Specification</a>
-<a href="STDLIB.html">v1.5 Standard Library</a>
+<a href="STDLIB.html">v1.6 Standard Library</a>
 <a href="ERRORS.html">v1 Diagnostics</a>
-<a href="COMPATIBILITY.html" aria-current="page">v1.5 Compatibility</a>
+<a href="COMPATIBILITY.html" aria-current="page">v1.6 Compatibility</a>
 <a href="MIGRATING.html">Migration Guide</a>
 <a href="DEPRECATION.html">Deprecation Policy</a>
 <h2>Versions</h2>
-<a href="V1.html">v1 / v1.5</a>
+<a href="V1.html">v1 / v1.6</a>
 <a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
 <a href="V3.html">v3 Package Ecosystem</a>
 <h2>Tools</h2>
@@ -49,8 +49,8 @@
 <div class="topbar"><a href="index.html">Docs</a><a href="reference/api.html">Reference</a><a href="https://github.com/scwlkr/WalkLang">GitHub</a></div>
 <div class="page">
 <article class="doc">
-<h1 id="walklang-v1-5-compatibility">WalkLang v1.5 Compatibility</h1>
-<p>WalkLang v1.5 defines the compatibility promise for the v1.x language line. v1.5 does not intentionally change stable v1 syntax or standard-library behavior; it makes the release boundary explicit.</p>
+<h1 id="walklang-v1-6-compatibility">WalkLang v1.6 Compatibility</h1>
+<p>WalkLang v1.6 defines the compatibility promise for the v1.x language line. v1.6 keeps the v1.5 release boundary and adds local function type inference as a compatible syntax improvement.</p>
 <h2 id="compatibility-promise">Compatibility Promise</h2>
 <p>Stable v1 code should continue to compile through the v1.x line unless one of these applies:</p>
 <pre><code class="language-text">the behavior was undocumented
@@ -110,7 +110,7 @@ project config behavior
 LSP/debugger behavior
 any generated C details outside snapshots</code></pre>
 <h2 id="deprecation-policy">Deprecation Policy</h2>
-<p><code>docs/DEPRECATION.md</code> owns the deprecation lifecycle. Current v1.5 deprecated surface: none.</p>
+<p><code>docs/DEPRECATION.md</code> owns the deprecation lifecycle. Current v1.6 deprecated surface: none.</p>
 <h2 id="changing-the-contract">Changing The Contract</h2>
 <p>When changing stable behavior:</p>
 <p>1. Update <code>docs/SPEC.md</code>. 2. Update syntax, stdlib, diagnostics, compatibility, migration, or deprecation docs when relevant. 3. Add or update pass/fail and compatibility fixtures. 4. Update generated C snapshots when backend output intentionally changes. 5. Update release notes when the change affects users. 6. Update <code>docs/STATUS.md</code> with the new project state.</p>
