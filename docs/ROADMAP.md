@@ -8,7 +8,24 @@ Build the smallest useful language first.
 v0: compile real programs
 v0.1: test and explore
 v1: harden and grow
-later: ecosystem
+v1.1: stabilize the language contract
+v1.2: make projects and releases real
+v1.3: grow the standard library carefully
+v2: data modeling
+v2.1: methods and stronger composition
+v3: ecosystem
+v4: professional tooling
+later: advanced language/runtime work
+````
+
+WalkLang should become real in layers:
+
+```text
+first: programs compile
+second: behavior is specified
+third: tools are reliable
+fourth: users can build projects
+fifth: ecosystem grows around stable rules
 ```
 
 ---
@@ -265,6 +282,16 @@ walk> + 1 2
 3
 ```
 
+v0.1 done when:
+
+```text
+walk test runs .walk tests
+walk repl evaluates basic expressions
+diagnostics include file, line, and column
+basic stdlib functions are documented
+example programs can be tested automatically
+```
+
 ---
 
 ## v1 Goal
@@ -314,9 +341,314 @@ docs describe the stable v1 surface
 
 ---
 
-## v1 Data Modeling
+# Next Phases
 
-Add structs after v0 is solid.
+## v1.1 Language Contract
+
+Make the language less like “whatever the compiler accepts” and more like a real contract.
+
+Add:
+
+```text
+complete v1 spec
+syntax guide
+stdlib reference
+diagnostic guide
+compatibility rules
+conformance tests
+negative test fixtures
+generated C snapshot tests
+```
+
+Required docs:
+
+```text
+docs/SPEC.md
+docs/SYNTAX.md
+docs/STDLIB.md
+docs/ERRORS.md
+docs/DESIGN_RULES.md
+docs/COMPATIBILITY.md
+```
+
+Core rule:
+
+```text
+If it is not in SPEC.md, it is not stable WalkLang.
+If the compiler disagrees with SPEC.md, either the compiler or the spec must change.
+```
+
+Test layout target:
+
+```text
+tests/pass/
+  hello.walk
+  functions.walk
+  arrays.walk
+  modules.walk
+
+tests/fail/
+  type_mismatch.walk
+  unknown_name.walk
+  bad_indent.walk
+  private_module_func.walk
+
+tests/snapshots/
+  hello.c
+  functions.c
+```
+
+v1.1 done when:
+
+```text
+every stable feature has spec text
+every stable feature has tests
+known invalid programs fail with expected diagnostics
+generated C is predictable enough for snapshot testing
+README clearly says what version is implemented
+```
+
+---
+
+## v1.2 Project Mode
+
+Make WalkLang useful for more than single-file experiments.
+
+Add:
+
+```text
+walk init
+walk build
+walk check
+walk test
+walk fmt
+walk clean
+project config file
+multi-file project builds
+examples as testable fixtures
+official release binaries
+GitHub Actions CI
+```
+
+Possible project file:
+
+```toml
+name = "hello"
+version = "0.1.0"
+entry = "src/main.walk"
+
+[build]
+output = "build/hello"
+release = false
+```
+
+Project layout target:
+
+```text
+hello/
+  walk.toml
+  src/
+    main.walk
+    math_extra.walk
+  tests/
+    main_test.walk
+  build/
+```
+
+Command target:
+
+```bash
+walk init hello
+cd hello
+walk build
+walk test
+walk fmt
+```
+
+v1.2 done when:
+
+```text
+a stranger can install walk
+create a project
+write source
+build it
+test it
+format it
+and understand failures
+```
+
+---
+
+## v1.3 Standard Library Foundation
+
+Grow the standard library carefully without making it huge.
+
+Stable first:
+
+```text
+math.sqrt
+math.pow
+
+string.len
+
+array.len
+
+time.now
+
+random.int
+
+testing.assert
+```
+
+Draft next:
+
+```text
+file.read
+file.write
+file.exists
+
+json.parse
+json.stringify
+
+matrix.rows
+matrix.cols
+matrix.get
+```
+
+Rules for stdlib APIs:
+
+```text
+small names
+clear behavior
+no hidden global state unless documented
+no magic conversions
+errors must be predictable
+APIs must have examples and tests
+```
+
+Example:
+
+```walk
+imp: string
+imp: array
+
+var: name = 'Walker'
+var: nums = [1, 2, 3]
+
+out: string.len(name)
+out: array.len(nums)
+```
+
+v1.3 done when:
+
+```text
+STDLIB.md documents every stable function
+stdlib tests run in CI
+draft APIs are clearly marked
+stdlib naming is consistent across modules
+```
+
+---
+
+## v1.4 Diagnostics and Developer Experience
+
+Make errors feel professional.
+
+Improve diagnostics:
+
+```text
+file name
+line number
+column number
+error category
+clear message
+source snippet
+caret location
+suggested fix when obvious
+```
+
+Target diagnostic:
+
+```text
+main.walk:3:14: type error: expected int, got string
+
+var: age int = 'old'
+             ^ string cannot initialize int
+```
+
+Warning examples:
+
+```text
+shadowed name
+unused variable
+unused import
+unreachable code
+missing return
+deprecated API
+```
+
+Warning modes:
+
+```text
+--warnings=off
+--warnings=default
+--warnings=error
+```
+
+v1.4 done when:
+
+```text
+common mistakes produce clear messages
+tests verify important diagnostics exactly
+warnings help without feeling noisy
+walk check is useful before build
+```
+
+---
+
+## v1.5 Compatibility Release
+
+Prepare for a real stable release.
+
+Add:
+
+```text
+versioned language surface
+release notes
+migration guide
+deprecation policy
+compatibility test suite
+official install instructions
+```
+
+Compatibility rule:
+
+```text
+Stable v1 code should keep compiling through the v1.x line unless a documented safety fix requires a breaking change.
+```
+
+Version meanings:
+
+```text
+v1.0.x: bug fixes only
+v1.x.0: compatible improvements
+v2.0.0: breaking language changes allowed
+```
+
+v1.5 done when:
+
+```text
+WalkLang can promise basic compatibility
+releases are repeatable
+users can tell stable features from experimental features
+breaking changes require a version boundary
+```
+
+---
+
+## v2 Data Modeling
+
+Add structs after the v1 language contract is solid.
 
 Target syntax:
 
@@ -329,14 +661,288 @@ var: user = User('Walker', 25)
 out: user.name
 ```
 
-No inheritance.
-
-Preferred future model:
+Struct rules:
 
 ```text
-structs + methods later
+fields have fixed types
+field access uses dot syntax
+struct values have named types
+constructors are predictable
+missing fields are compile errors
+unknown fields are compile errors
+```
+
+Possible named-field constructor:
+
+```walk
+var: user = User(
+    name: 'Walker',
+    age: 25
+)
+```
+
+No inheritance.
+
+Preferred model:
+
+```text
+structs first
+methods later
 traits maybe later
 inheritance no
+```
+
+v2 done when:
+
+```text
+struct declarations compile
+struct values can be created
+fields can be read
+fields can be assigned when mutable
+structs work in arrays
+structs work across modules
+diagnostics explain field errors
+```
+
+---
+
+## v2.1 Methods
+
+Add methods without turning WalkLang into class-based OOP.
+
+Target syntax:
+
+```walk
+struct: User
+    name string
+    age int
+
+func: User.is_adult(self User) bool
+    return: >= self.age 18
+
+var: user = User('Walker', 25)
+
+if: user.is_adult()
+    out: 'adult'
+```
+
+Method rules:
+
+```text
+methods are functions with receiver syntax
+methods do not imply inheritance
+methods do not hide state
+method calls compile predictably to functions
+```
+
+Possible emitted shape:
+
+```text
+user.is_adult() -> User__is_adult(user)
+```
+
+v2.1 done when:
+
+```text
+methods work on structs
+method names are namespaced by type
+method calls have clear type checking
+methods remain explainable as functions
+```
+
+---
+
+## v2.2 Stronger Composition
+
+Add composition features only if structs and methods prove useful.
+
+Possible features:
+
+```text
+traits
+interfaces
+protocol-like behavior
+generic functions
+generic arrays/functions
+```
+
+Preferred order:
+
+```text
+1. structs
+2. methods
+3. simple generics
+4. traits or interfaces
+```
+
+Non-goal:
+
+```text
+inheritance
+deep class hierarchies
+magic dispatch
+complex metaprogramming
+```
+
+Trait target, if accepted later:
+
+```walk
+trait: Printable
+    func: print(self) string
+```
+
+v2.2 done when:
+
+```text
+composition solves real examples
+syntax remains readable
+type errors remain understandable
+generated C remains predictable
+```
+
+---
+
+## v3 Package Ecosystem
+
+Add packages only after local modules are stable.
+
+Add:
+
+```text
+package manifest
+package versioning
+dependency resolver
+package cache
+package publish flow
+package docs
+package tests
+```
+
+Possible package file:
+
+```toml
+name = "geometry"
+version = "0.1.0"
+
+[dependencies]
+```
+
+Import target:
+
+```walk
+imp: geometry.distance
+```
+
+Package rules:
+
+```text
+packages use semantic versions
+package names are globally unique or namespaced
+dependencies are locked
+builds are reproducible
+package code is tested before publish
+```
+
+v3 done when:
+
+```text
+a user can create a package
+import a package
+pin dependency versions
+build reproducibly
+publish documented library code
+```
+
+---
+
+## v4 Professional Tooling
+
+Make WalkLang comfortable in editors and larger projects.
+
+Add:
+
+```text
+language server
+syntax highlighting
+formatter integration
+diagnostics in editor
+go-to-definition
+hover docs
+rename symbol
+project-wide check
+debugger foundation
+docs generator
+```
+
+Editor targets:
+
+```text
+VS Code extension
+Neovim support
+JetBrains syntax support later
+```
+
+LSP features:
+
+```text
+document diagnostics
+format document
+hover type info
+go to definition
+find references
+completion
+```
+
+v4 done when:
+
+```text
+WalkLang feels usable in a normal editor
+errors appear while editing
+formatter works from editor
+users can navigate larger projects
+```
+
+---
+
+## v5 Runtime and Backend Maturity
+
+Improve the generated output and runtime model.
+
+Possible work:
+
+```text
+runtime library cleanup
+better memory ownership rules
+faster generated C
+debuggable generated C
+optimized release builds
+portable runtime layer
+alternative backend research
+```
+
+Keep C backend as the primary target unless there is a strong reason to change.
+
+Backend rule:
+
+```text
+Generated output must remain predictable, portable, and debuggable.
+```
+
+Possible future backend targets:
+
+```text
+C primary
+LLVM later maybe
+WASM later maybe
+```
+
+v5 done when:
+
+```text
+release builds are meaningfully optimized
+runtime behavior is documented
+memory behavior is predictable
+generated C remains understandable enough to inspect
 ```
 
 ---
@@ -352,12 +958,69 @@ debugger
 networking
 project templates
 docs generator
+playground
+online package index
+formatter service
+compiler explorer
 ```
 
 Package example target:
 
 ```walk
 imp: http # later only
+```
+
+Networking target:
+
+```walk
+imp: http
+
+var: body = http.get('https://example.com')
+out: body
+```
+
+Only add networking when:
+
+```text
+error handling is mature
+stdlib design is stable
+package/project model exists
+security rules are documented
+```
+
+---
+
+## Advanced Future Ideas
+
+These are not promises.
+
+Possible later features:
+
+```text
+closures
+anonymous functions
+pattern matching
+async
+concurrency
+error values
+result types
+generics
+traits
+WASM backend
+self-hosted compiler experiments
+```
+
+Hold these until the simple language is strong.
+
+Rejected until proven necessary:
+
+```text
+inheritance
+macro system
+operator overloading
+complex implicit conversions
+reflection-heavy runtime
+magic package behavior
 ```
 
 ---
@@ -371,6 +1034,9 @@ Can it be explained with one small example?
 Does it keep code readable at a glance?
 Does it avoid magic?
 Does it compile predictably to C/native output?
+Can it produce clear errors?
+Can it be tested?
+Can it be documented without special pleading?
 ```
 
 Example accepted:
@@ -383,6 +1049,90 @@ Example rejected:
 
 ```text
 a clever shortcut that hides behavior
+```
+
+---
+
+## Stability Labels
+
+Every feature should have a stability label.
+
+```text
+experimental
+  may change anytime
+
+draft
+  likely shape, but may still change
+
+stable
+  part of the compatibility promise
+
+deprecated
+  still works, but should be replaced
+
+removed
+  no longer accepted
+```
+
+Example:
+
+```text
+structs: experimental in v2
+methods: experimental in v2.1
+basic modules: stable in v1
+```
+
+---
+
+## Release Principles
+
+Each release should answer:
+
+```text
+What changed?
+What broke?
+What was added?
+What was removed?
+What is still experimental?
+How does a user upgrade?
+```
+
+Release artifacts:
+
+```text
+walk-linux-amd64
+walk-linux-arm64
+walk-darwin-amd64
+walk-darwin-arm64
+walk-windows-amd64.exe
+checksums
+release notes
+```
+
+Install goal:
+
+```bash
+walk version
+walk build examples/hello.walk -o build/hello
+./build/hello
+```
+
+---
+
+## Real Language Definition
+
+WalkLang becomes a real language when this is true:
+
+```text
+A stranger can install walk,
+read the docs,
+write a .walk file,
+compile it,
+understand errors,
+run tests,
+format code,
+build a small project,
+and trust that stable code will not randomly break.
 ```
 
 ---
@@ -400,9 +1150,51 @@ v0.1
 v1
   stable modules + stdlib + docs + build flow
 
+v1.1
+  complete language contract + conformance tests
+
+v1.2
+  project mode + release/install workflow
+
+v1.3
+  standard library foundation
+
+v1.4
+  professional diagnostics + developer experience
+
+v1.5
+  compatibility release preparation
+
 v2
-  structs + methods
+  structs + data modeling
+
+v2.1
+  methods
+
+v2.2
+  stronger composition, maybe traits/generics
+
+v3
+  package ecosystem
+
+v4
+  LSP + editor tooling + debugger foundation
+
+v5
+  runtime/backend maturity
 
 later
-  package manager + LSP + debugger
+  networking + docs generator + playground + advanced features
 ```
+
+````
+
+I would make this the new roadmap, then split some of the detail into separate docs later:
+
+```text
+docs/ROADMAP.md
+docs/DESIGN_RULES.md
+docs/COMPATIBILITY.md
+docs/STDLIB.md
+docs/ERRORS.md
+````
