@@ -20,3 +20,8 @@ For named `docs/ROADMAP.md` phase work, read only:
 Do not reload public scwlkr context docs unless access, integrations, secrets, or missing repo context make them necessary.
 
 For ordinary WalkLang roadmap phases, default to Tall Talents `plan-execution` plus `verification-gate`. Inspect the full Tall Talents index only if the task type changes, a named skill/talent is requested, or there is evidence another talent may apply.
+
+# Side Notes
+
+- WalkLang source code will be located on github
+- WalkLang will have an official minimal website at walklang.wlkrlabs.com
