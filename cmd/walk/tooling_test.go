@@ -110,26 +110,67 @@ func TestV4DocsAndDebugMapCommands(t *testing.T) {
 	dir := t.TempDir()
 	sourcePath := filepath.Join(dir, "main.walk")
 	writeFile(t, sourcePath, strings.Join([]string{
+		"/// Summary: Stores two integer coordinates.",
+		"/// Example:",
+		"/// ```walk",
+		"/// var: point = Point(1, 2)",
+		"/// ```",
+		"/// Since: v4.1.0",
 		"struct: Point",
 		"    x int",
 		"    y int",
 		"",
+		"/// Summary: Doubles an integer.",
+		"/// Params:",
+		"/// - x: value to multiply",
+		"/// Returns: the doubled value.",
+		"/// Example:",
+		"/// ```walk",
+		"/// out: double(4)",
+		"/// ```",
+		"/// Since: v4.1.0",
 		"func: double(x int) int",
 		"    return: * x 2",
+		"",
+		"/// Summary: Exposes double from this module.",
+		"/// Example:",
+		"/// ```walk",
+		"/// exp: double",
+		"/// ```",
+		"/// Since: v4.1.0",
+		"exp: double",
 		"",
 		"out: double(4)",
 		"",
 	}, "\n"))
 
 	docsPath := filepath.Join(dir, "api.md")
-	if err := docsCommand([]string{"-o", docsPath, sourcePath}); err != nil {
+	if err := docsCommand([]string{"--strict", "-o", docsPath, sourcePath}); err != nil {
 		t.Fatal(err)
 	}
 	docs := readText(t, docsPath)
-	for _, want := range []string{"# WalkLang API", "struct Point", "func double(x int) int"} {
+	for _, want := range []string{"# WalkLang API", "struct Point", "func double(x int) int", "Doubles an integer.", "Since: `v4.1.0`"} {
 		if !strings.Contains(docs, want) {
 			t.Fatalf("docs missing %q:\n%s", want, docs)
 		}
+	}
+
+	docsJSONPath := filepath.Join(dir, "api.json")
+	if err := docsCommand([]string{"--strict", "--format", "json", "-o", docsJSONPath, sourcePath}); err != nil {
+		t.Fatal(err)
+	}
+	var docsPayload docsIndex
+	if err := json.Unmarshal([]byte(readText(t, docsJSONPath)), &docsPayload); err != nil {
+		t.Fatal(err)
+	}
+	if docsPayload.Version != 1 || len(docsPayload.Symbols) != 3 || docsPayload.Symbols[1].Summary != "Doubles an integer." {
+		t.Fatalf("unexpected docs json: %#v", docsPayload)
+	}
+
+	undocumentedPath := filepath.Join(dir, "undocumented.walk")
+	writeFile(t, undocumentedPath, "func: missing_docs() int\n    return: 1\n")
+	if err := docsCommand([]string{"--strict", undocumentedPath}); err == nil || !strings.Contains(err.Error(), "missing Summary") {
+		t.Fatalf("expected strict docs failure, got %v", err)
 	}
 
 	debugPath := filepath.Join(dir, "debug.json")

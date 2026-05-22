@@ -1,5 +1,37 @@
 # WalkLang Release Notes
 
+## v4.1.0 - Documentation Generator Hardening
+
+Date: 2026-05-22
+
+v4.1.0 keeps v5 focused on runtime/backend maturity while tightening the v4 docs generator into a small structured-doc slice.
+
+### Added
+
+- `///` structured comments above public WalkLang symbols.
+- `walk docs --format json` for machine-readable docs index output.
+- `walk docs --strict` for failing when generated public symbols are missing required docs fields.
+- Structured docs for the v1 example module.
+- Roadmap clarification that broad docs overhaul work waits until v5 runtime behavior is stable.
+
+### Changed
+
+- `walk docs` now renders Markdown from the same symbol index used for JSON output.
+- The default `walk docs` path remains compatible with signature-only sources.
+
+### Breaking Changes
+
+None.
+
+### Upgrade
+
+Use the default Markdown path as before, or opt into strict generated reference docs:
+
+```bash
+walk docs -o docs/api.md src/main.walk
+walk docs --strict --format json -o docs/api.json src/main.walk
+```
+
 ## v4.0.0 - Professional Tooling
 
 Date: 2026-05-22

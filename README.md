@@ -54,7 +54,7 @@ Supported now:
 - `walk lsp` language server for editor diagnostics, formatting, hover, definition, references, completion, and rename
 - VS Code extension scaffold with syntax highlighting and LSP startup
 - Neovim filetype, syntax, formatter, and LSP setup files
-- `walk docs` Markdown API documentation generator
+- `walk docs` Markdown API documentation generator with structured-comment, JSON, and strict-check modes
 - `walk debug-map` source symbol map for debugger-adapter groundwork
 - examples covered as testable fixtures
 - GitHub Actions CI for tests, stress, and release artifacts
@@ -148,6 +148,7 @@ Generate API docs and a debugger foundation map:
 
 ```bash
 walk docs -o docs/api.md src/main.walk
+walk docs --strict --format json -o docs/api.json src/main.walk
 walk debug-map -o build/debug-map.json src/main.walk
 ```
 

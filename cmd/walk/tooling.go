@@ -50,6 +50,8 @@ type toolingSymbol struct {
 type docsArgs struct {
 	sourcePath string
 	outputPath string
+	format     string
+	strict     bool
 }
 
 type debugMapArgs struct {
@@ -70,6 +72,29 @@ type debugMap struct {
 	Version int           `json:"version"`
 	Source  string        `json:"source"`
 	Symbols []debugSymbol `json:"symbols"`
+}
+
+type docsIndex struct {
+	Version int          `json:"version"`
+	Source  string       `json:"source"`
+	Symbols []docsSymbol `json:"symbols"`
+}
+
+type docsParam struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+type docsSymbol struct {
+	Kind      string      `json:"kind"`
+	Name      string      `json:"name"`
+	Path      string      `json:"path"`
+	Signature string      `json:"signature"`
+	Summary   string      `json:"summary"`
+	Params    []docsParam `json:"params"`
+	Returns   string      `json:"returns"`
+	Examples  []string    `json:"examples"`
+	Since     string      `json:"since"`
 }
 
 var walkKeywords = []string{
@@ -110,15 +135,24 @@ func docsCommand(args []string) error {
 	if analysis.Err != nil {
 		return analysis.Err
 	}
-	markdown := generateDocsMarkdown(sourcePath, analysis)
+	index := generateDocsIndex(sourcePath, analysis)
+	if parsed.strict {
+		if err := validateDocsIndex(index); err != nil {
+			return err
+		}
+	}
+	payload, err := renderDocsOutput(index, parsed.format)
+	if err != nil {
+		return err
+	}
 	if parsed.outputPath == "" {
-		fmt.Print(markdown)
+		fmt.Print(payload)
 		return nil
 	}
 	if err := os.MkdirAll(filepath.Dir(parsed.outputPath), 0o755); err != nil {
 		return err
 	}
-	return os.WriteFile(parsed.outputPath, []byte(markdown), 0o644)
+	return os.WriteFile(parsed.outputPath, []byte(payload), 0o644)
 }
 
 func debugMapCommand(args []string) error {
@@ -153,7 +187,7 @@ func debugMapCommand(args []string) error {
 }
 
 func parseDocsArgs(args []string) (docsArgs, error) {
-	var parsed docsArgs
+	parsed := docsArgs{format: "markdown"}
 	for i := 0; i < len(args); i++ {
 		switch args[i] {
 		case "-o", "--output":
@@ -162,9 +196,20 @@ func parseDocsArgs(args []string) (docsArgs, error) {
 				return docsArgs{}, fmt.Errorf("docs requires a value after %s", args[i-1])
 			}
 			parsed.outputPath = args[i]
+		case "--format":
+			i++
+			if i >= len(args) {
+				return docsArgs{}, fmt.Errorf("docs requires a value after %s", args[i-1])
+			}
+			parsed.format = args[i]
+			if parsed.format != "markdown" && parsed.format != "json" {
+				return docsArgs{}, fmt.Errorf("docs format must be markdown or json")
+			}
+		case "--strict":
+			parsed.strict = true
 		default:
 			if parsed.sourcePath != "" {
-				return docsArgs{}, fmt.Errorf("usage: walk docs [-o output.md] [source.walk]")
+				return docsArgs{}, fmt.Errorf("usage: walk docs [--strict] [--format markdown|json] [-o output] [source.walk]")
 			}
 			parsed.sourcePath = args[i]
 		}
@@ -596,11 +641,8 @@ func structSignature(decl *ast.StructDecl) string {
 	return fmt.Sprintf("struct %s { %s }", decl.Name, strings.Join(fields, ", "))
 }
 
-func generateDocsMarkdown(sourcePath string, analysis toolingAnalysis) string {
-	var out strings.Builder
-	out.WriteString("# WalkLang API\n\n")
-	out.WriteString("Source: `" + filepath.ToSlash(sourcePath) + "`\n\n")
-
+func generateDocsIndex(sourcePath string, analysis toolingAnalysis) docsIndex {
+	index := docsIndex{Version: 1, Source: filepath.ToSlash(sourcePath)}
 	paths := make([]string, 0, len(analysis.Documents))
 	for path := range analysis.Documents {
 		paths = append(paths, path)
@@ -608,56 +650,261 @@ func generateDocsMarkdown(sourcePath string, analysis toolingAnalysis) string {
 	sort.Strings(paths)
 	for _, path := range paths {
 		program := analysis.Documents[path]
-		out.WriteString("## " + filepath.ToSlash(path) + "\n\n")
-		writeDocSection(&out, "Structs", structDocs(program))
-		writeDocSection(&out, "Functions", functionDocs(program))
-		writeDocSection(&out, "Exports", exportDocs(program))
+		source := analysis.Sources[path]
+		for _, statement := range program.Statements {
+			switch decl := statement.(type) {
+			case *ast.StructDecl:
+				index.Symbols = append(index.Symbols, docsSymbolForDecl("struct", decl.Name, path, structSignature(decl), source, decl.Location))
+			case *ast.FuncDecl:
+				index.Symbols = append(index.Symbols, docsSymbolForDecl("function", functionDocName(decl), path, functionSignature(decl), source, decl.Location))
+			case *ast.Export:
+				index.Symbols = append(index.Symbols, docsSymbolForDecl("export", decl.Name, path, "exp "+decl.Name, source, decl.Location))
+			}
+		}
+	}
+	return index
+}
+
+func functionDocName(decl *ast.FuncDecl) string {
+	if decl.Receiver != "" {
+		return decl.Receiver + "." + decl.Name
+	}
+	return decl.Name
+}
+
+func docsSymbolForDecl(kind string, name string, path string, signature string, source string, location ast.Location) docsSymbol {
+	doc := parseDocsComment(docCommentBefore(source, location.Line))
+	return docsSymbol{
+		Kind:      kind,
+		Name:      name,
+		Path:      filepath.ToSlash(path),
+		Signature: signature,
+		Summary:   doc.Summary,
+		Params:    doc.Params,
+		Returns:   doc.Returns,
+		Examples:  doc.Examples,
+		Since:     doc.Since,
+	}
+}
+
+type docsComment struct {
+	Summary  string
+	Params   []docsParam
+	Returns  string
+	Examples []string
+	Since    string
+}
+
+func docCommentBefore(source string, oneBasedLine int) []string {
+	if source == "" || oneBasedLine <= 1 {
+		return nil
+	}
+	lines := strings.Split(source, "\n")
+	index := oneBasedLine - 2
+	var block []string
+	for index >= 0 && index < len(lines) {
+		trimmed := strings.TrimSpace(lines[index])
+		if !strings.HasPrefix(trimmed, "///") {
+			break
+		}
+		block = append(block, strings.TrimSpace(strings.TrimPrefix(trimmed, "///")))
+		index--
+	}
+	for i, j := 0, len(block)-1; i < j; i, j = i+1, j-1 {
+		block[i], block[j] = block[j], block[i]
+	}
+	return block
+}
+
+func parseDocsComment(lines []string) docsComment {
+	doc := docsComment{Params: []docsParam{}, Examples: []string{}}
+	var exampleLines []string
+	mode := ""
+	flushExample := func() {
+		if len(exampleLines) == 0 {
+			return
+		}
+		doc.Examples = append(doc.Examples, strings.TrimSpace(strings.Join(exampleLines, "\n")))
+		exampleLines = nil
+	}
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		switch {
+		case strings.HasPrefix(trimmed, "Summary:"):
+			flushExample()
+			mode = ""
+			doc.Summary = strings.TrimSpace(strings.TrimPrefix(trimmed, "Summary:"))
+		case strings.HasPrefix(trimmed, "Params:"):
+			flushExample()
+			mode = "params"
+		case mode == "params" && strings.HasPrefix(trimmed, "-"):
+			param := strings.TrimSpace(strings.TrimPrefix(trimmed, "-"))
+			parts := strings.SplitN(param, ":", 2)
+			if len(parts) == 2 {
+				doc.Params = append(doc.Params, docsParam{Name: strings.TrimSpace(parts[0]), Description: strings.TrimSpace(parts[1])})
+			}
+		case strings.HasPrefix(trimmed, "Returns:"):
+			flushExample()
+			mode = ""
+			doc.Returns = strings.TrimSpace(strings.TrimPrefix(trimmed, "Returns:"))
+		case strings.HasPrefix(trimmed, "Example:"):
+			flushExample()
+			mode = "example"
+			rest := strings.TrimSpace(strings.TrimPrefix(trimmed, "Example:"))
+			if rest != "" {
+				exampleLines = append(exampleLines, rest)
+			}
+		case strings.HasPrefix(trimmed, "Since:"):
+			flushExample()
+			mode = ""
+			doc.Since = strings.TrimSpace(strings.TrimPrefix(trimmed, "Since:"))
+		case mode == "example":
+			if strings.HasPrefix(trimmed, "```") {
+				continue
+			}
+			exampleLines = append(exampleLines, line)
+		}
+	}
+	flushExample()
+	return doc
+}
+
+func renderDocsOutput(index docsIndex, format string) (string, error) {
+	switch format {
+	case "", "markdown":
+		return renderDocsMarkdown(index), nil
+	case "json":
+		payload, err := json.MarshalIndent(index, "", "  ")
+		if err != nil {
+			return "", err
+		}
+		return string(append(payload, '\n')), nil
+	default:
+		return "", fmt.Errorf("docs format must be markdown or json")
+	}
+}
+
+func renderDocsMarkdown(index docsIndex) string {
+	var out strings.Builder
+	out.WriteString("# WalkLang API\n\n")
+	out.WriteString("Source: `" + index.Source + "`\n\n")
+
+	paths := docsIndexPaths(index)
+	for _, path := range paths {
+		out.WriteString("## " + path + "\n\n")
+		for _, kind := range []string{"struct", "function", "export"} {
+			symbols := docsSymbolsForPathAndKind(index, path, kind)
+			if len(symbols) == 0 {
+				continue
+			}
+			out.WriteString("### " + docsSectionTitle(kind) + "\n\n")
+			for _, symbol := range symbols {
+				writeDocsSymbolMarkdown(&out, symbol)
+			}
+		}
 	}
 	return out.String()
 }
 
-func writeDocSection(out *strings.Builder, title string, entries []string) {
-	if len(entries) == 0 {
-		return
+func docsIndexPaths(index docsIndex) []string {
+	seen := map[string]bool{}
+	var paths []string
+	for _, symbol := range index.Symbols {
+		if seen[symbol.Path] {
+			continue
+		}
+		seen[symbol.Path] = true
+		paths = append(paths, symbol.Path)
 	}
-	out.WriteString("### " + title + "\n\n")
-	for _, entry := range entries {
-		out.WriteString("- `" + entry + "`\n")
-	}
-	out.WriteString("\n")
+	sort.Strings(paths)
+	return paths
 }
 
-func structDocs(program *ast.Program) []string {
-	var docs []string
-	for _, statement := range program.Statements {
-		if decl, ok := statement.(*ast.StructDecl); ok {
-			docs = append(docs, structSignature(decl))
+func docsSymbolsForPathAndKind(index docsIndex, path string, kind string) []docsSymbol {
+	var symbols []docsSymbol
+	for _, symbol := range index.Symbols {
+		if symbol.Path == path && symbol.Kind == kind {
+			symbols = append(symbols, symbol)
 		}
 	}
-	sort.Strings(docs)
-	return docs
+	sort.Slice(symbols, func(i, j int) bool {
+		return symbols[i].Name < symbols[j].Name
+	})
+	return symbols
 }
 
-func functionDocs(program *ast.Program) []string {
-	var docs []string
-	for _, statement := range program.Statements {
-		if decl, ok := statement.(*ast.FuncDecl); ok {
-			docs = append(docs, functionSignature(decl))
-		}
+func docsSectionTitle(kind string) string {
+	switch kind {
+	case "struct":
+		return "Structs"
+	case "function":
+		return "Functions"
+	case "export":
+		return "Exports"
+	default:
+		return kind
 	}
-	sort.Strings(docs)
-	return docs
 }
 
-func exportDocs(program *ast.Program) []string {
-	var docs []string
-	for _, statement := range program.Statements {
-		if decl, ok := statement.(*ast.Export); ok {
-			docs = append(docs, decl.Name)
+func writeDocsSymbolMarkdown(out *strings.Builder, symbol docsSymbol) {
+	out.WriteString("#### `" + symbol.Signature + "`\n\n")
+	if symbol.Summary != "" {
+		out.WriteString(symbol.Summary + "\n\n")
+	}
+	if len(symbol.Params) > 0 {
+		out.WriteString("Params:\n\n")
+		for _, param := range symbol.Params {
+			out.WriteString("- `" + param.Name + "`: " + param.Description + "\n")
+		}
+		out.WriteString("\n")
+	}
+	if symbol.Returns != "" {
+		out.WriteString("Returns: " + symbol.Returns + "\n\n")
+	}
+	for _, example := range symbol.Examples {
+		out.WriteString("Example:\n\n")
+		out.WriteString("```walk\n")
+		out.WriteString(strings.TrimSpace(example) + "\n")
+		out.WriteString("```\n\n")
+	}
+	if symbol.Since != "" {
+		out.WriteString("Since: `" + symbol.Since + "`\n\n")
+	}
+}
+
+func validateDocsIndex(index docsIndex) error {
+	var missing []string
+	for _, symbol := range index.Symbols {
+		label := symbol.Kind + " " + symbol.Name
+		if symbol.Summary == "" {
+			missing = append(missing, label+" missing Summary")
+		}
+		if signatureHasParams(symbol.Signature) && len(symbol.Params) == 0 {
+			missing = append(missing, label+" missing Params")
+		}
+		if symbol.Kind == "function" && !strings.HasSuffix(symbol.Signature, " void") && symbol.Returns == "" {
+			missing = append(missing, label+" missing Returns")
+		}
+		if len(symbol.Examples) == 0 {
+			missing = append(missing, label+" missing Example")
+		}
+		if symbol.Since == "" {
+			missing = append(missing, label+" missing Since")
 		}
 	}
-	sort.Strings(docs)
-	return docs
+	if len(missing) > 0 {
+		return fmt.Errorf("docs strict check failed: %s", strings.Join(missing, "; "))
+	}
+	return nil
+}
+
+func signatureHasParams(signature string) bool {
+	start := strings.Index(signature, "(")
+	end := strings.Index(signature, ")")
+	if start < 0 || end < 0 || end <= start {
+		return false
+	}
+	return strings.TrimSpace(signature[start+1:end]) != ""
 }
 
 func generateDebugMap(sourcePath string, analysis toolingAnalysis) debugMap {

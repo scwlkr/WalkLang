@@ -73,6 +73,9 @@ func stripComment(line string) string {
 			inString = true
 			continue
 		}
+		if r == '/' && strings.HasPrefix(line[i:], "///") {
+			return line[:i]
+		}
 		if r == '#' {
 			return line[:i]
 		}

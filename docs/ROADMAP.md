@@ -871,7 +871,7 @@ hover docs
 rename symbol
 project-wide check
 debugger foundation
-docs generator
+MVP docs generator
 ```
 
 Editor targets:
@@ -900,6 +900,33 @@ WalkLang feels usable in a normal editor
 errors appear while editing
 formatter works from editor
 users can navigate larger projects
+```
+
+---
+
+## v4.1 Documentation Generator Hardening
+
+Make the v4 docs generator useful enough to support generated reference docs without doing a broad docs overhaul before v5 runtime truth is stable.
+
+Add:
+
+```text
+structured /// doc comments above public symbols
+docs.json output for tools and future sites
+Markdown rendered from the same docs index
+opt-in strict checks for missing public symbol docs
+2-3 existing symbols documented end-to-end
+```
+
+Keep this slice narrow. Do not rewrite the whole docs set until v5 runtime and backend behavior have been clarified.
+
+v4.1 done when:
+
+```text
+walk docs still generates Markdown by default
+walk docs --format json writes the machine-readable docs index
+walk docs --strict fails on undocumented public symbols
+the v1 example module proves structured comments end-to-end
 ```
 
 ---
@@ -1176,13 +1203,16 @@ v3
   package ecosystem
 
 v4
-  LSP + editor tooling + debugger foundation
+  LSP + editor tooling + debugger foundation + MVP docs generator
+
+v4.1
+  structured docs generator hardening
 
 v5
   runtime/backend maturity
 
 later
-  networking + docs generator + playground + advanced features
+  networking + reference site + playground + advanced features
 ```
 
 ````
