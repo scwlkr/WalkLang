@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WalkLang v1 Diagnostics - WalkLang</title>
+<link rel="icon" href="../assets/icon.svg">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+<a class="brand" href="../index.html"><img src="../assets/logo.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>
+<nav class="nav" aria-label="Documentation">
+<h2>Start</h2>
+<a href="index.html">Documentation</a>
+<a href="INSTALL.html">Install Instructions</a>
+<a href="PROJECTS.html">Project Mode</a>
+<h2>Language</h2>
+<a href="SYNTAX.html">v1 Syntax Guide</a>
+<a href="SPEC.html">v1 Specification</a>
+<a href="STDLIB.html">v1.5 Standard Library</a>
+<a href="ERRORS.html" aria-current="page">v1 Diagnostics</a>
+<a href="COMPATIBILITY.html">v1.5 Compatibility</a>
+<a href="MIGRATING.html">Migration Guide</a>
+<a href="DEPRECATION.html">Deprecation Policy</a>
+<h2>Versions</h2>
+<a href="V1.html">v1 / v1.5</a>
+<a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
+<a href="V3.html">v3 Package Ecosystem</a>
+<h2>Tools</h2>
+<a href="V4.html">v4 Professional Tooling</a>
+<a href="V5.html">v5 Runtime and Backend Maturity</a>
+<a href="V5_1.html">v5.1 Public Docs And Reference Site</a>
+<h2>Reference</h2>
+<a href="reference/api.html">API Reference</a>
+<a href="reference/index.html">Reference index</a>
+<h2>Project</h2>
+<a href="ARCHITECTURE.html">ARCHITECTURE.md</a>
+<a href="DESIGN_RULES.html">v1 Design Rules</a>
+<a href="DOCS_STYLE_GUIDE.html">Docs Style Guide</a>
+<a href="PURPOSE.html">Purpose</a>
+<a href="RELEASE_NOTES.html">Release Notes</a>
+<a href="ROADMAP.html">ROADMAP.md</a>
+<a href="STATUS.html">Status</a>
+</nav>
+</aside>
+<main class="content">
+<div class="topbar"><a href="index.html">Docs</a><a href="reference/api.html">Reference</a><a href="https://github.com/scwlkr/WalkLang">GitHub</a></div>
+<div class="page">
+<article class="doc">
+<h1 id="walklang-v1-diagnostics">WalkLang v1 Diagnostics</h1>
+<p>WalkLang diagnostics are intended to be deterministic enough for conformance tests.</p>
+<h2 id="shape">Shape</h2>
+<p>Compiler diagnostics keep this stable first line:</p>
+<pre><code class="language-text">file.walk:line:column: category: message</code></pre>
+<p>Example:</p>
+<pre><code class="language-text">main.walk:1:16: type error: age is int, got string</code></pre>
+<p>The command-line display also includes the source line, a caret, and a focused suggestion when one is obvious:</p>
+<pre><code class="language-text">main.walk:1:16: type error: age is int, got string
+
+var: age int = &#39;old&#39;
+               ^ string cannot initialize int</code></pre>
+<h2 id="categories">Categories</h2>
+<p>Stable categories:</p>
+<pre><code class="language-text">syntax error
+type error
+name error
+module error
+warning
+internal error</code></pre>
+<p><code>internal error</code> means the compiler reached an unsupported path after parsing or checking. It is a compiler defect or unstable surface, not a user-facing language feature.</p>
+<h2 id="syntax-errors">Syntax Errors</h2>
+<p>Syntax errors come from invalid tokens, indentation, statements, expressions, or type syntax.</p>
+<pre><code class="language-walk">if: true
+	out: &#39;tab&#39; # tabs are invalid</code></pre>
+<h2 id="type-errors">Type Errors</h2>
+<p>Type errors come from incompatible assignments, bad conditions, bad operators, bad calls, invalid output types, unsupported array use, or invalid struct field use.</p>
+<pre><code class="language-walk">var: x = 1
+x = &#39;one&#39;</code></pre>
+<p>v2 struct diagnostics also use <code>type error</code>:</p>
+<pre><code class="language-walk">struct: User
+    name string
+    age int
+
+var: user = User(&#39;Walker&#39;, 25)
+out: user.height # type error: User has no field height</code></pre>
+<p>v2.2 generic diagnostics also use <code>type error</code>:</p>
+<pre><code class="language-walk">func: choose[T](left T, right T) T
+    return: left
+
+out: choose(1, &#39;one&#39;) # type error: arg 2 to choose needs T as int, got string</code></pre>
+<h2 id="name-errors">Name Errors</h2>
+<p>Name errors come from missing names, missing imports, non-callable names, or unknown library functions.</p>
+<pre><code class="language-walk">out: missing_name</code></pre>
+<h2 id="module-errors">Module Errors</h2>
+<p>Module errors come from unavailable modules, invalid module top-level statements, import cycles, or invalid exports.</p>
+<pre><code class="language-walk">imp: calc
+out: calc.hidden(1)</code></pre>
+<h2 id="warnings">Warnings</h2>
+<p>Warnings are non-fatal unless promoted.</p>
+<pre><code class="language-walk">var: x = 1
+if: true
+    var: x = 2</code></pre>
+<p>Stable warnings cover shadowing an outer name and unreachable statements after a block-terminating statement such as <code>return:</code>, <code>break</code>, or <code>continue</code>.</p>
+<pre><code class="language-bash">walk check --warnings=off main.walk
+walk check --warnings=default main.walk
+walk check --warnings=error main.walk</code></pre>
+<h2 id="runtime-failures">Runtime Failures</h2>
+<p><code>walk test</code> builds and runs a native executable. Failed assertions print failure lines and make the executable exit non-zero.</p>
+<p>Native C runtime failures are outside the stable diagnostic contract unless a WalkLang conformance test explicitly covers them.</p>
+</article>
+<footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
+</div>
+</main>
+</div>
+</body>
+</html>

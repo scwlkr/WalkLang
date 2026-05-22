@@ -974,6 +974,39 @@ generated C remains understandable enough to inspect
 
 ---
 
+## v5.1 Public Docs and Reference Site
+
+Publish the documentation and generated reference surface as a static site.
+
+Add:
+
+```text
+repo-owned static site build
+public docs root
+generated API Markdown and JSON artifacts
+generated reference page
+static-site link check
+GitHub Pages deployment workflow
+custom-domain CNAME
+```
+
+Keep this slice focused on publishing docs and reference material. Do not add
+networking, a playground, a package index, or a compiler explorer here.
+
+v5.1 done when:
+
+```text
+scripts/build-docs-site.sh regenerates docs/reference and public site files
+scripts/check-docs-site.sh verifies generated docs and static links
+generated reference docs use publishable repo-relative source paths
+public/docs/index.html is the hosted docs front door
+public/docs/reference/api.html renders the generated API reference
+CI runs the docs-site check before release artifacts
+Pages workflow can deploy public/ from main
+```
+
+---
+
 ## Later Ecosystem
 
 Later tools:
@@ -1210,6 +1243,9 @@ v4.1
 
 v5
   runtime/backend maturity
+
+v5.1
+  public docs + generated reference site
 
 later
   networking + reference site + playground + advanced features

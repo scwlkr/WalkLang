@@ -1,5 +1,48 @@
 # WalkLang Release Notes
 
+## v5.1.0 - Public Docs And Reference Site
+
+Date: 2026-05-22
+
+v5.1.0 turns the docs and generated reference output into a repo-owned static
+site for `https://walklang.wlkrlabs.com/docs`.
+
+### Added
+
+- `scripts/build-docs-site.sh` for rebuilding generated reference docs and the
+  static site.
+- `scripts/check-docs-site.sh` for stale generated-artifact and static-link
+  checks.
+- Generated `docs/reference/api.md` and `docs/reference/api.json` from
+  structured comments in real WalkLang source.
+- Static site output in `public/`, including the docs front door, rendered docs
+  pages, API reference HTML, raw Markdown, JSON, assets, `.nojekyll`, and CNAME.
+- GitHub Pages workflow that builds `public/` and deploys it from `main`.
+- `docs/V5_1.md` describing the public docs and reference-site contract.
+
+### Changed
+
+- `walk docs` now renders repository-relative source paths when sources are
+  under the current working directory, which keeps public reference output from
+  exposing local absolute paths.
+- CI now runs the docs-site check and labels release artifacts as `v5.1.0`.
+- README and docs front doors now point at the hosted docs path as the public
+  docs surface.
+
+### Breaking Changes
+
+None.
+
+### Upgrade
+
+Regenerate docs and release artifacts with:
+
+```bash
+scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.1.0 dist
+```
+
 ## v5.0.0 - Runtime and Backend Maturity
 
 Date: 2026-05-22

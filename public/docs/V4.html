@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WalkLang v4 Professional Tooling - WalkLang</title>
+<link rel="icon" href="../assets/icon.svg">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+<a class="brand" href="../index.html"><img src="../assets/logo.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>
+<nav class="nav" aria-label="Documentation">
+<h2>Start</h2>
+<a href="index.html">Documentation</a>
+<a href="INSTALL.html">Install Instructions</a>
+<a href="PROJECTS.html">Project Mode</a>
+<h2>Language</h2>
+<a href="SYNTAX.html">v1 Syntax Guide</a>
+<a href="SPEC.html">v1 Specification</a>
+<a href="STDLIB.html">v1.5 Standard Library</a>
+<a href="ERRORS.html">v1 Diagnostics</a>
+<a href="COMPATIBILITY.html">v1.5 Compatibility</a>
+<a href="MIGRATING.html">Migration Guide</a>
+<a href="DEPRECATION.html">Deprecation Policy</a>
+<h2>Versions</h2>
+<a href="V1.html">v1 / v1.5</a>
+<a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
+<a href="V3.html">v3 Package Ecosystem</a>
+<h2>Tools</h2>
+<a href="V4.html" aria-current="page">v4 Professional Tooling</a>
+<a href="V5.html">v5 Runtime and Backend Maturity</a>
+<a href="V5_1.html">v5.1 Public Docs And Reference Site</a>
+<h2>Reference</h2>
+<a href="reference/api.html">API Reference</a>
+<a href="reference/index.html">Reference index</a>
+<h2>Project</h2>
+<a href="ARCHITECTURE.html">ARCHITECTURE.md</a>
+<a href="DESIGN_RULES.html">v1 Design Rules</a>
+<a href="DOCS_STYLE_GUIDE.html">Docs Style Guide</a>
+<a href="PURPOSE.html">Purpose</a>
+<a href="RELEASE_NOTES.html">Release Notes</a>
+<a href="ROADMAP.html">ROADMAP.md</a>
+<a href="STATUS.html">Status</a>
+</nav>
+</aside>
+<main class="content">
+<div class="topbar"><a href="index.html">Docs</a><a href="reference/api.html">Reference</a><a href="https://github.com/scwlkr/WalkLang">GitHub</a></div>
+<div class="page">
+<article class="doc">
+<h1 id="walklang-v4-professional-tooling">WalkLang v4 Professional Tooling</h1>
+<p>v4 makes WalkLang usable from normal editor workflows without changing the language surface.</p>
+<h2 id="language-server">Language Server</h2>
+<p>Start the language server:</p>
+<pre><code class="language-bash">walk lsp</code></pre>
+<p>The server speaks JSON-RPC over stdio and supports:</p>
+<pre><code class="language-text">document diagnostics
+format document
+hover type info
+go to definition
+find references
+completion
+rename symbol</code></pre>
+<p>Diagnostics reuse the compiler parser, module loader, package cache checks, and checker. Open files are checked using their project context when a <code>walk.toml</code> is available.</p>
+<h2 id="vs-code">VS Code</h2>
+<p>The first-party VS Code extension scaffold lives in:</p>
+<pre><code class="language-text">editors/vscode/</code></pre>
+<p>It contributes:</p>
+<pre><code class="language-text">.walk file association
+TextMate syntax highlighting
+editor indentation/comment rules
+WalkLang LSP startup through walk lsp</code></pre>
+<p>Install the extension during local development:</p>
+<pre><code class="language-bash">cd editors/vscode
+npm install
+npx @vscode/vsce package
+code --install-extension walklang-0.1.0.vsix</code></pre>
+<p>The extension expects <code>walk</code> on <code>PATH</code>. Override the server binary with:</p>
+<pre><code class="language-json">{
+  &#34;walklang.serverPath&#34;: &#34;/absolute/path/to/walk&#34;
+}</code></pre>
+<h2 id="neovim">Neovim</h2>
+<p>Neovim support lives in:</p>
+<pre><code class="language-text">editors/neovim/</code></pre>
+<p>It includes:</p>
+<pre><code class="language-text">ftdetect/walk.vim
+syntax/walk.vim
+ftplugin/walk.vim</code></pre>
+<p>Use the README in that directory for a minimal <code>vim.lsp.start</code> setup that runs <code>walk lsp</code>.</p>
+<h2 id="formatter-integration">Formatter Integration</h2>
+<p>Editor formatting calls the same formatter as:</p>
+<pre><code class="language-bash">walk fmt &lt;source.walk&gt;</code></pre>
+<p>Project formatting still works from the project root:</p>
+<pre><code class="language-bash">walk fmt</code></pre>
+<h2 id="project-wide-check">Project-Wide Check</h2>
+<p>Inside a project, the editor and command line share the same project search behavior:</p>
+<pre><code class="language-bash">walk check --warnings=error</code></pre>
+<p>The project check validates the configured entry file, <code>tests/*_test.walk</code>, local modules, and locked package dependencies.</p>
+<h2 id="docs-generator">Docs Generator</h2>
+<p>Generate Markdown API documentation:</p>
+<pre><code class="language-bash">walk docs src/main.walk
+walk docs -o docs/api.md src/main.walk</code></pre>
+<p>Generate a machine-readable docs index:</p>
+<pre><code class="language-bash">walk docs --format json -o docs/api.json src/main.walk</code></pre>
+<p>Require structured <code>///</code> docs for every generated public symbol:</p>
+<pre><code class="language-bash">walk docs --strict -o docs/api.md src/main.walk
+walk docs --strict --format json -o docs/api.json src/main.walk</code></pre>
+<p>Inside a project, omit the source file to document the configured entry:</p>
+<pre><code class="language-bash">walk docs -o docs/api.md</code></pre>
+<p>The generator includes loaded user modules, top-level structs, functions, and <code>exp:</code> exports. By default it remains compatible with signature-only sources. In strict mode, public symbols need structured comments with <code>Summary</code>, <code>Example</code>, and <code>Since</code>; functions with parameters need <code>Params</code>, and non-void functions need <code>Returns</code>.</p>
+<h2 id="debugger-foundation">Debugger Foundation</h2>
+<p>Generate a deterministic source symbol map:</p>
+<pre><code class="language-bash">walk debug-map src/main.walk
+walk debug-map -o build/debug-map.json src/main.walk</code></pre>
+<p>The map records source files, symbol names, symbol kinds, and line/column locations. It is a foundation for debugger adapters and generated-C source mapping in later backend work.</p>
+<h2 id="non-goals">Non-Goals</h2>
+<p>v4 does not add:</p>
+<pre><code class="language-text">JetBrains plugin implementation
+step-through debugger adapter
+generated C source maps
+remote package registry integration
+new language syntax</code></pre>
+</article>
+<footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
+</div>
+</main>
+</div>
+</body>
+</html>

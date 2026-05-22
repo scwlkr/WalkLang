@@ -1,7 +1,8 @@
 # WalkLang Documentation
 
-WalkLang docs are planned for <https://walklang.wlkrlabs.com/docs>. This
-directory is the source for that hosted documentation path.
+WalkLang docs are built into a static site for
+<https://walklang.wlkrlabs.com/docs>. This directory remains the source for the
+hosted documentation path.
 
 Use this page as the docs front door. The root README explains the repository;
 these docs explain how to install, learn, use, verify, and evolve WalkLang.
@@ -35,6 +36,7 @@ these docs explain how to install, learn, use, verify, and evolve WalkLang.
 - [v3 package ecosystem](V3.md)
 - [v4 professional tooling](V4.md)
 - [v5 runtime and backend maturity](V5.md)
+- [v5.1 public docs and reference site](V5_1.md)
 - [Release notes](RELEASE_NOTES.md)
 - [Current status](STATUS.md)
 
@@ -51,22 +53,21 @@ WalkLang supports rustdoc-style structured comments on public symbols. Generate
 Markdown and JSON reference output from real source with:
 
 ```bash
-walk docs --strict -o docs/reference/api.md src/main.walk
-walk docs --strict --format json -o docs/reference/api.json src/main.walk
+scripts/build-docs-site.sh
 ```
 
-Reference docs under `docs/reference/` are generated artifacts. Keep source
-comments and registries authoritative, then regenerate reference output from the
-compiler.
+Reference docs under `docs/reference/` are generated artifacts. The static site
+under `public/` publishes the rendered docs pages, generated API reference, raw
+Markdown, and `api.json` from the same compiler output.
 
 ## Hosting Contract
 
-The planned public docs home is:
+The public docs home is:
 
 ```text
 https://walklang.wlkrlabs.com/docs
 ```
 
 Use stable, relative links inside this directory so the same Markdown works in
-GitHub and on the hosted site. Do not describe unshipped website routes as live
-docs pages until the website publishes them.
+GitHub and on the hosted site. Run `scripts/check-docs-site.sh` before publishing
+docs changes.

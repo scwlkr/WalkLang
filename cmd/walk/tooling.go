@@ -642,7 +642,7 @@ func structSignature(decl *ast.StructDecl) string {
 }
 
 func generateDocsIndex(sourcePath string, analysis toolingAnalysis) docsIndex {
-	index := docsIndex{Version: 1, Source: filepath.ToSlash(sourcePath)}
+	index := docsIndex{Version: 1, Source: docsDisplayPath(sourcePath)}
 	paths := make([]string, 0, len(analysis.Documents))
 	for path := range analysis.Documents {
 		paths = append(paths, path)
@@ -654,15 +654,31 @@ func generateDocsIndex(sourcePath string, analysis toolingAnalysis) docsIndex {
 		for _, statement := range program.Statements {
 			switch decl := statement.(type) {
 			case *ast.StructDecl:
-				index.Symbols = append(index.Symbols, docsSymbolForDecl("struct", decl.Name, path, structSignature(decl), source, decl.Location))
+				index.Symbols = append(index.Symbols, docsSymbolForDecl("struct", decl.Name, docsDisplayPath(path), structSignature(decl), source, decl.Location))
 			case *ast.FuncDecl:
-				index.Symbols = append(index.Symbols, docsSymbolForDecl("function", functionDocName(decl), path, functionSignature(decl), source, decl.Location))
+				index.Symbols = append(index.Symbols, docsSymbolForDecl("function", functionDocName(decl), docsDisplayPath(path), functionSignature(decl), source, decl.Location))
 			case *ast.Export:
-				index.Symbols = append(index.Symbols, docsSymbolForDecl("export", decl.Name, path, "exp "+decl.Name, source, decl.Location))
+				index.Symbols = append(index.Symbols, docsSymbolForDecl("export", decl.Name, docsDisplayPath(path), "exp "+decl.Name, source, decl.Location))
 			}
 		}
 	}
 	return index
+}
+
+func docsDisplayPath(path string) string {
+	absPath, err := filepath.Abs(path)
+	if err != nil {
+		return filepath.ToSlash(path)
+	}
+	cwd, err := os.Getwd()
+	if err != nil {
+		return filepath.ToSlash(absPath)
+	}
+	rel, err := filepath.Rel(cwd, absPath)
+	if err != nil || rel == "." || rel == "" || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+		return filepath.ToSlash(absPath)
+	}
+	return filepath.ToSlash(rel)
 }
 
 func functionDocName(decl *ast.FuncDecl) string {

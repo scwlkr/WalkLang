@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WalkLang Deprecation Policy - WalkLang</title>
+<link rel="icon" href="../assets/icon.svg">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+<a class="brand" href="../index.html"><img src="../assets/logo.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>
+<nav class="nav" aria-label="Documentation">
+<h2>Start</h2>
+<a href="index.html">Documentation</a>
+<a href="INSTALL.html">Install Instructions</a>
+<a href="PROJECTS.html">Project Mode</a>
+<h2>Language</h2>
+<a href="SYNTAX.html">v1 Syntax Guide</a>
+<a href="SPEC.html">v1 Specification</a>
+<a href="STDLIB.html">v1.5 Standard Library</a>
+<a href="ERRORS.html">v1 Diagnostics</a>
+<a href="COMPATIBILITY.html">v1.5 Compatibility</a>
+<a href="MIGRATING.html">Migration Guide</a>
+<a href="DEPRECATION.html" aria-current="page">Deprecation Policy</a>
+<h2>Versions</h2>
+<a href="V1.html">v1 / v1.5</a>
+<a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
+<a href="V3.html">v3 Package Ecosystem</a>
+<h2>Tools</h2>
+<a href="V4.html">v4 Professional Tooling</a>
+<a href="V5.html">v5 Runtime and Backend Maturity</a>
+<a href="V5_1.html">v5.1 Public Docs And Reference Site</a>
+<h2>Reference</h2>
+<a href="reference/api.html">API Reference</a>
+<a href="reference/index.html">Reference index</a>
+<h2>Project</h2>
+<a href="ARCHITECTURE.html">ARCHITECTURE.md</a>
+<a href="DESIGN_RULES.html">v1 Design Rules</a>
+<a href="DOCS_STYLE_GUIDE.html">Docs Style Guide</a>
+<a href="PURPOSE.html">Purpose</a>
+<a href="RELEASE_NOTES.html">Release Notes</a>
+<a href="ROADMAP.html">ROADMAP.md</a>
+<a href="STATUS.html">Status</a>
+</nav>
+</aside>
+<main class="content">
+<div class="topbar"><a href="index.html">Docs</a><a href="reference/api.html">Reference</a><a href="https://github.com/scwlkr/WalkLang">GitHub</a></div>
+<div class="page">
+<article class="doc">
+<h1 id="walklang-deprecation-policy">WalkLang Deprecation Policy</h1>
+<p>Deprecation is how WalkLang warns users before a stable feature changes or leaves the language.</p>
+<h2 id="stability-labels">Stability Labels</h2>
+<pre><code class="language-text">experimental
+  may change anytime and is not compatibility-protected
+
+draft
+  intended shape, but still not compatibility-protected
+
+stable
+  part of the v1 compatibility promise
+
+deprecated
+  still works, but has a documented replacement
+
+removed
+  no longer accepted</code></pre>
+<h2 id="policy">Policy</h2>
+<p>Stable v1 features should not be removed during the v1.x line.</p>
+<p>A stable feature can become deprecated only when release notes and docs name:</p>
+<pre><code class="language-text">the deprecated feature
+the replacement
+the first version where the deprecation applies
+the earliest version where removal is allowed
+the migration steps</code></pre>
+<p>Removal of stable behavior normally waits for <code>v2.0.0</code>. A v1.x release may break stable behavior only for a documented safety or correctness fix.</p>
+<h2 id="current-v1-5-deprecated-surface">Current v1.5 Deprecated Surface</h2>
+<p>None.</p>
+<h2 id="draft-and-experimental-features">Draft And Experimental Features</h2>
+<p>Draft or experimental features can change without a deprecation period. They should still be called out in release notes when the change may surprise users.</p>
+<p>Current draft or experimental areas include:</p>
+<pre><code class="language-text">file/json/matrix APIs
+structs
+methods
+generic functions
+traits
+interfaces
+closures
+package manager behavior
+debugger and full LSP behavior</code></pre>
+</article>
+<footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
+</div>
+</main>
+</div>
+</body>
+</html>

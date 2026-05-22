@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WalkLang Migration Guide - WalkLang</title>
+<link rel="icon" href="../assets/icon.svg">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+<a class="brand" href="../index.html"><img src="../assets/logo.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>
+<nav class="nav" aria-label="Documentation">
+<h2>Start</h2>
+<a href="index.html">Documentation</a>
+<a href="INSTALL.html">Install Instructions</a>
+<a href="PROJECTS.html">Project Mode</a>
+<h2>Language</h2>
+<a href="SYNTAX.html">v1 Syntax Guide</a>
+<a href="SPEC.html">v1 Specification</a>
+<a href="STDLIB.html">v1.5 Standard Library</a>
+<a href="ERRORS.html">v1 Diagnostics</a>
+<a href="COMPATIBILITY.html">v1.5 Compatibility</a>
+<a href="MIGRATING.html" aria-current="page">Migration Guide</a>
+<a href="DEPRECATION.html">Deprecation Policy</a>
+<h2>Versions</h2>
+<a href="V1.html">v1 / v1.5</a>
+<a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
+<a href="V3.html">v3 Package Ecosystem</a>
+<h2>Tools</h2>
+<a href="V4.html">v4 Professional Tooling</a>
+<a href="V5.html">v5 Runtime and Backend Maturity</a>
+<a href="V5_1.html">v5.1 Public Docs And Reference Site</a>
+<h2>Reference</h2>
+<a href="reference/api.html">API Reference</a>
+<a href="reference/index.html">Reference index</a>
+<h2>Project</h2>
+<a href="ARCHITECTURE.html">ARCHITECTURE.md</a>
+<a href="DESIGN_RULES.html">v1 Design Rules</a>
+<a href="DOCS_STYLE_GUIDE.html">Docs Style Guide</a>
+<a href="PURPOSE.html">Purpose</a>
+<a href="RELEASE_NOTES.html">Release Notes</a>
+<a href="ROADMAP.html">ROADMAP.md</a>
+<a href="STATUS.html">Status</a>
+</nav>
+</aside>
+<main class="content">
+<div class="topbar"><a href="index.html">Docs</a><a href="reference/api.html">Reference</a><a href="https://github.com/scwlkr/WalkLang">GitHub</a></div>
+<div class="page">
+<article class="doc">
+<h1 id="walklang-migration-guide">WalkLang Migration Guide</h1>
+<h2 id="v2-1-to-v2-2">v2.1 to v2.2</h2>
+<p>v2.2 adds experimental simple generic functions. Existing v2.1 source should not need changes.</p>
+<p>Recommended upgrade check:</p>
+<pre><code class="language-bash">walk version
+walk check --warnings=error &lt;entry.walk&gt;
+walk test &lt;tests.walk&gt;
+walk build &lt;entry.walk&gt; -o build/app</code></pre>
+<p>For projects:</p>
+<pre><code class="language-bash">walk check --warnings=error
+walk test
+walk build</code></pre>
+<h2 id="what-changed-in-v2-2">What Changed In v2.2</h2>
+<ul>
+<li>Generic function declarations are accepted, such as <code>func: first[T](items array[T]) T</code>.</li>
+<li>Generic calls infer type arguments from ordinary call arguments.</li>
+<li>Generic functions can compose with arrays, structs, methods, and user-module exports.</li>
+<li>Generated C specializes concrete generic calls into predictable ordinary functions.</li>
+</ul>
+<h2 id="what-is-still-future">What Is Still Future</h2>
+<p>Traits, interfaces, generic structs, generic methods, explicit type-argument calls, and named-field constructors are not part of v2.2.</p>
+<h2 id="v1-5-to-v2-0">v1.5 to v2.0</h2>
+<p>v2.0 adds experimental structs and reserves the <code>struct</code> keyword.</p>
+<p>Recommended upgrade check:</p>
+<pre><code class="language-bash">walk version
+walk check --warnings=error &lt;entry.walk&gt;
+walk test &lt;tests.walk&gt;
+walk build &lt;entry.walk&gt; -o build/app</code></pre>
+<p>For projects:</p>
+<pre><code class="language-bash">walk check --warnings=error
+walk test
+walk build</code></pre>
+<h2 id="what-changed-in-v2-0">What Changed In v2.0</h2>
+<ul>
+<li><code>struct:</code> declarations compile.</li>
+<li>Struct values can be constructed, read through dot fields, and assigned through mutable fields.</li>
+<li>Structs work as function parameters, return values, array elements, and values returned by module functions.</li>
+<li>User modules may contain top-level <code>struct:</code> declarations.</li>
+</ul>
+<h2 id="breaking-change-in-v2-0">Breaking Change In v2.0</h2>
+<p><code>struct</code> is now reserved. Rename any user-defined variable, function, field, or expression name called <code>struct</code>.</p>
+<p>Named-field constructors, methods, traits, interfaces, and generic structs are not part of v2.0.</p>
+<h2 id="v1-4-to-v1-5">v1.4 to v1.5</h2>
+<p>v1.5 is a compatibility release-preparation pass. Stable v1.4 code should not need source changes.</p>
+<p>Recommended upgrade check:</p>
+<pre><code class="language-bash">walk version
+walk check --warnings=error &lt;entry.walk&gt;
+walk test &lt;tests.walk&gt;
+walk build &lt;entry.walk&gt; -o build/app</code></pre>
+<p>For projects:</p>
+<pre><code class="language-bash">walk check --warnings=error
+walk test
+walk build</code></pre>
+<h2 id="what-changed">What Changed</h2>
+<ul>
+<li>Compatibility policy is now explicit.</li>
+<li>Release notes, install instructions, and deprecation policy are now documented.</li>
+<li>Stable v1 behavior has a dedicated compatibility test suite.</li>
+</ul>
+<h2 id="what-did-not-change">What Did Not Change</h2>
+<ul>
+<li>No stable syntax was removed.</li>
+<li>No stable standard-library API was removed.</li>
+<li>No stable diagnostic category was removed.</li>
+<li>No project-mode command was removed.</li>
+</ul>
+<h2 id="stable-versus-draft">Stable Versus Draft</h2>
+<p>Before depending on a feature, check:</p>
+<pre><code class="language-text">docs/SPEC.md
+docs/SYNTAX.md
+docs/STDLIB.md
+docs/ERRORS.md
+docs/COMPATIBILITY.md</code></pre>
+<p>If a feature is accepted by the compiler but absent from those docs and the compatibility tests, treat it as experimental.</p>
+<h2 id="breaking-changes">Breaking Changes</h2>
+<p>Breaking changes to stable v1 behavior require one of these:</p>
+<pre><code class="language-text">a v2.0.0 language boundary
+a documented safety or correctness fix
+proof that the behavior was never part of the stable v1 surface</code></pre>
+<p>When a documented safety fix breaks stable code, release notes must name the break and this guide must describe the migration.</p>
+</article>
+<footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
+</div>
+</main>
+</div>
+</body>
+</html>

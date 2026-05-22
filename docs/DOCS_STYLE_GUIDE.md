@@ -5,7 +5,7 @@ short front doors, clear version boundaries, practical examples, and generated
 reference pages that come from documented public symbols instead of handwritten
 API lists.
 
-The planned hosted docs entry point is:
+The hosted docs entry point is:
 
 ```text
 https://walklang.wlkrlabs.com/docs
@@ -52,7 +52,8 @@ source code/registries
   -> docs.json
   -> Markdown renderer
   -> docs/reference/*.md
-  -> docs-check in CI
+  -> public/docs/reference/*.html
+  -> docs-site check in CI
 ```
 
 Required comment format:
@@ -78,15 +79,8 @@ kind, name, path, signature, summary, params, returns, examples, since
 ## Current Commands
 
 ```bash
-walk docs --strict -o docs/reference/api.md src/main.walk
-walk docs --strict --format json -o docs/reference/api.json src/main.walk
-```
-
-Future stable commands:
-
-```bash
-make docs
-make docs-check
+scripts/build-docs-site.sh
+scripts/check-docs-site.sh
 ```
 
 ## Reference Rules
@@ -94,6 +88,7 @@ make docs-check
 - Public symbol without docs = failure.
 - Missing required field = failure.
 - Stale generated docs = failure.
+- Broken static-site links = failure.
 - Reference docs are generated, not hand-written.
 - Start by documenting 2-3 existing public symbols end-to-end.
 
@@ -113,6 +108,7 @@ a real source file:
 go build -o build/walk ./cmd/walk
 ./build/walk docs --strict -o build/api.md examples/v1.walk
 ./build/walk docs --strict --format json -o build/api.json examples/v1.walk
+scripts/check-docs-site.sh
 ```
 
 For hosted docs changes, verify local Markdown links and keep links relative

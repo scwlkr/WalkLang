@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WalkLang v3 Package Ecosystem - WalkLang</title>
+<link rel="icon" href="../assets/icon.svg">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+<a class="brand" href="../index.html"><img src="../assets/logo.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>
+<nav class="nav" aria-label="Documentation">
+<h2>Start</h2>
+<a href="index.html">Documentation</a>
+<a href="INSTALL.html">Install Instructions</a>
+<a href="PROJECTS.html">Project Mode</a>
+<h2>Language</h2>
+<a href="SYNTAX.html">v1 Syntax Guide</a>
+<a href="SPEC.html">v1 Specification</a>
+<a href="STDLIB.html">v1.5 Standard Library</a>
+<a href="ERRORS.html">v1 Diagnostics</a>
+<a href="COMPATIBILITY.html">v1.5 Compatibility</a>
+<a href="MIGRATING.html">Migration Guide</a>
+<a href="DEPRECATION.html">Deprecation Policy</a>
+<h2>Versions</h2>
+<a href="V1.html">v1 / v1.5</a>
+<a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
+<a href="V3.html" aria-current="page">v3 Package Ecosystem</a>
+<h2>Tools</h2>
+<a href="V4.html">v4 Professional Tooling</a>
+<a href="V5.html">v5 Runtime and Backend Maturity</a>
+<a href="V5_1.html">v5.1 Public Docs And Reference Site</a>
+<h2>Reference</h2>
+<a href="reference/api.html">API Reference</a>
+<a href="reference/index.html">Reference index</a>
+<h2>Project</h2>
+<a href="ARCHITECTURE.html">ARCHITECTURE.md</a>
+<a href="DESIGN_RULES.html">v1 Design Rules</a>
+<a href="DOCS_STYLE_GUIDE.html">Docs Style Guide</a>
+<a href="PURPOSE.html">Purpose</a>
+<a href="RELEASE_NOTES.html">Release Notes</a>
+<a href="ROADMAP.html">ROADMAP.md</a>
+<a href="STATUS.html">Status</a>
+</nav>
+</aside>
+<main class="content">
+<div class="topbar"><a href="index.html">Docs</a><a href="reference/api.html">Reference</a><a href="https://github.com/scwlkr/WalkLang">GitHub</a></div>
+<div class="page">
+<article class="doc">
+<h1 id="walklang-v3-package-ecosystem">WalkLang v3 Package Ecosystem</h1>
+<p>v3 adds a local package workflow on top of project mode and user modules.</p>
+<p>Packages are ordinary WalkLang projects with:</p>
+<pre><code class="language-text">walk.toml
+README.md
+src/&lt;package&gt;/&lt;module&gt;.walk
+tests/*_test.walk</code></pre>
+<p>The package manager is intentionally local and file-backed in v3. It does not add a remote public registry protocol yet.</p>
+<h2 id="create-a-package">Create A Package</h2>
+<p>Create a package project:</p>
+<pre><code class="language-bash">walk package init geometry
+cd geometry</code></pre>
+<p>Generated layout:</p>
+<pre><code class="language-text">geometry/
+  README.md
+  walk.toml
+  src/
+    main.walk
+    geometry/
+      core.walk
+  tests/
+    main_test.walk
+  build/</code></pre>
+<p>Package names must contain only letters, numbers, and <code>_</code>, and must start with a letter or <code>_</code>. This keeps package names usable as import namespaces.</p>
+<h2 id="package-modules">Package Modules</h2>
+<p>Package modules are imported with dotted names:</p>
+<pre><code class="language-walk">imp: geometry.core
+
+out: geometry.core.double(3)</code></pre>
+<p>The import maps to:</p>
+<pre><code class="language-text">src/geometry/core.walk</code></pre>
+<p>Exports still use <code>exp:</code> inside the module.</p>
+<pre><code class="language-walk">func: double(x int) int
+    return: * x 2
+
+exp: double</code></pre>
+<h2 id="pin-dependencies">Pin Dependencies</h2>
+<p>Project dependencies live in <code>walk.toml</code>.</p>
+<pre><code class="language-toml">name = &#34;shape_app&#34;
+version = &#34;0.1.0&#34;
+entry = &#34;src/main.walk&#34;
+
+[build]
+output = &#34;build/shape_app&#34;
+release = false
+
+[dependencies]
+geometry = &#34;0.1.0&#34;</code></pre>
+<p>Dependency versions must use <code>MAJOR.MINOR.PATCH</code>.</p>
+<h2 id="resolve-dependencies">Resolve Dependencies</h2>
+<p>Resolve from a local registry directory:</p>
+<pre><code class="language-bash">walk package resolve ../registry</code></pre>
+<p>The resolver copies packages into:</p>
+<pre><code class="language-text">.walk/packages/&lt;name&gt;/&lt;version&gt;/</code></pre>
+<p>It writes <code>walk.lock</code> with each package name, version, and checksum. Project <code>walk check</code>, <code>walk test</code>, and <code>walk build</code> require the lock and verify cached package contents against it.</p>
+<p>If the cache changes after locking, project commands fail until dependencies are resolved again.</p>
+<h2 id="publish-a-package">Publish A Package</h2>
+<p>Publish to a local registry directory:</p>
+<pre><code class="language-bash">walk package publish ../registry</code></pre>
+<p>Publish rules:</p>
+<pre><code class="language-text">README.md is required and must be non-empty
+package name must be import-safe
+package version must be MAJOR.MINOR.PATCH
+walk check --warnings=error must pass
+walk test --warnings=error must pass
+existing registry versions are not overwritten
+build/, .walk/, .git/, and walk.lock are not published</code></pre>
+<p>The published package lands at:</p>
+<pre><code class="language-text">&lt;registry&gt;/&lt;name&gt;/&lt;version&gt;/</code></pre>
+<h2 id="reproducibility">Reproducibility</h2>
+<p>v3 reproducibility comes from:</p>
+<pre><code class="language-text">explicit dependency versions in walk.toml
+locked package checksums in walk.lock
+local package cache verification before build/check/test
+deterministic package source lookup
+publish-time check and test gates</code></pre>
+<h2 id="non-goals">Non-Goals</h2>
+<p>v3 does not add:</p>
+<pre><code class="language-text">remote registry protocol
+package account authentication
+version range solving
+multiple versions of the same package in one build
+automatic package download during build</code></pre>
+</article>
+<footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
+</div>
+</main>
+</div>
+</body>
+</html>

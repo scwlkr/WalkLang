@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WalkLang v2 Data Modeling, Methods, And Simple Generics - WalkLang</title>
+<link rel="icon" href="../assets/icon.svg">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+<a class="brand" href="../index.html"><img src="../assets/logo.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>
+<nav class="nav" aria-label="Documentation">
+<h2>Start</h2>
+<a href="index.html">Documentation</a>
+<a href="INSTALL.html">Install Instructions</a>
+<a href="PROJECTS.html">Project Mode</a>
+<h2>Language</h2>
+<a href="SYNTAX.html">v1 Syntax Guide</a>
+<a href="SPEC.html">v1 Specification</a>
+<a href="STDLIB.html">v1.5 Standard Library</a>
+<a href="ERRORS.html">v1 Diagnostics</a>
+<a href="COMPATIBILITY.html">v1.5 Compatibility</a>
+<a href="MIGRATING.html">Migration Guide</a>
+<a href="DEPRECATION.html">Deprecation Policy</a>
+<h2>Versions</h2>
+<a href="V1.html">v1 / v1.5</a>
+<a href="V2.html" aria-current="page">v2 Data Modeling, Methods, And Simple Generics</a>
+<a href="V3.html">v3 Package Ecosystem</a>
+<h2>Tools</h2>
+<a href="V4.html">v4 Professional Tooling</a>
+<a href="V5.html">v5 Runtime and Backend Maturity</a>
+<a href="V5_1.html">v5.1 Public Docs And Reference Site</a>
+<h2>Reference</h2>
+<a href="reference/api.html">API Reference</a>
+<a href="reference/index.html">Reference index</a>
+<h2>Project</h2>
+<a href="ARCHITECTURE.html">ARCHITECTURE.md</a>
+<a href="DESIGN_RULES.html">v1 Design Rules</a>
+<a href="DOCS_STYLE_GUIDE.html">Docs Style Guide</a>
+<a href="PURPOSE.html">Purpose</a>
+<a href="RELEASE_NOTES.html">Release Notes</a>
+<a href="ROADMAP.html">ROADMAP.md</a>
+<a href="STATUS.html">Status</a>
+</nav>
+</aside>
+<main class="content">
+<div class="topbar"><a href="index.html">Docs</a><a href="reference/api.html">Reference</a><a href="https://github.com/scwlkr/WalkLang">GitHub</a></div>
+<div class="page">
+<article class="doc">
+<h1 id="walklang-v2-data-modeling-methods-and-simple-generics">WalkLang v2 Data Modeling, Methods, And Simple Generics</h1>
+<p>v2 adds experimental structs after the v1 compatibility line. v2.1 adds experimental methods as explicit receiver functions. v2.2 adds simple generic functions for composition without inheritance or magic dispatch.</p>
+<p><code>docs/SPEC.md</code> still defines stable v1. Structs are implemented in v2, but they are not part of the v1 compatibility promise.</p>
+<h2 id="structs">Structs</h2>
+<p>Declare a struct with fixed fields:</p>
+<pre><code class="language-walk">struct: User
+    name string
+    age int</code></pre>
+<p>Create values with the positional constructor. Constructor values follow field order.</p>
+<pre><code class="language-walk">var: user = User(&#39;Walker&#39;, 25)
+out: user.name</code></pre>
+<p>Rules:</p>
+<pre><code class="language-text">field names are fixed by the declaration
+field types are fixed by the declaration
+constructor values are checked against field order
+missing constructor values are compile errors
+extra constructor values are compile errors
+unknown fields are compile errors</code></pre>
+<p>Named-field constructors remain a future design candidate. v2.0 uses positional constructors only.</p>
+<h2 id="field-access-and-assignment">Field Access And Assignment</h2>
+<p>Read fields with dot syntax:</p>
+<pre><code class="language-walk">out: user.name
+out: user.age</code></pre>
+<p>Assign fields through mutable roots:</p>
+<pre><code class="language-walk">var: user = User(&#39;Walker&#39;, 25)
+user.age = 26</code></pre>
+<p>Field assignment is rejected when the root binding is <code>const:</code>.</p>
+<pre><code class="language-walk">const: user = User(&#39;Walker&#39;, 25)
+user.age = 26 # type error</code></pre>
+<h2 id="functions">Functions</h2>
+<p>Structs can be function parameters and return values.</p>
+<pre><code class="language-walk">func: birthday(user User) User
+    user.age = + user.age 1
+    return: user</code></pre>
+<h2 id="methods">Methods</h2>
+<p>Methods are functions namespaced by receiver type. They do not add inheritance, hidden state, or class-based dispatch.</p>
+<pre><code class="language-walk">struct: User
+    name string
+    age int
+
+func: User.is_adult(self User) bool
+    return: &gt;= self.age 18
+
+var: user = User(&#39;Walker&#39;, 25)
+
+if: user.is_adult()
+    out: &#39;adult&#39;</code></pre>
+<p>The receiver remains an explicit first parameter in the method declaration. A method call passes the receiver as that first argument.</p>
+<pre><code class="language-text">user.is_adult() compiles like User__is_adult(user)</code></pre>
+<p>Rules:</p>
+<pre><code class="language-text">methods must be declared on a struct type
+the first parameter must match the receiver struct type
+method names are namespaced by receiver type
+different structs may use the same method name
+ordinary method arguments are checked after the receiver
+method calls on non-struct values are compile errors
+unknown methods are compile errors</code></pre>
+<h2 id="arrays">Arrays</h2>
+<p>Struct values can be stored in arrays, indexed, looped over, and updated through mutable array elements.</p>
+<pre><code class="language-walk">var: users = [User(&#39;Walker&#39;, 25), User(&#39;Ada&#39;, 37)]
+users[1].age = 38
+
+for: user in users
+    out: user.name</code></pre>
+<h2 id="modules">Modules</h2>
+<p>Modules may declare structs and export functions that return them.</p>
+<pre><code class="language-walk"># profile.walk
+struct: User
+    name string
+    age int
+
+func: make_user(name string, age int) User
+    return: User(name, age)
+
+exp: make_user</code></pre>
+<pre><code class="language-walk"># main.walk
+imp: profile
+
+var: user = profile.make_user(&#39;Walker&#39;, 25)
+out: user.name</code></pre>
+<h2 id="simple-generic-functions">Simple Generic Functions</h2>
+<p>Generic functions declare type parameters after the function name.</p>
+<pre><code class="language-walk">func: same[T](value T) T
+    return: value
+
+out: same(1)
+out: same(&#39;walk&#39;)</code></pre>
+<p>Type arguments are inferred from the ordinary call arguments. There is no explicit type-argument call syntax in v2.2.</p>
+<p>Generic functions can compose with arrays and structs.</p>
+<pre><code class="language-walk">struct: User
+    name string
+    age int
+
+func: first[T](items array[T]) T
+    return: items[0]
+
+var: users = [User(&#39;Walker&#39;, 25), User(&#39;Ada&#39;, 37)]
+out: first(users).name</code></pre>
+<p>Generic functions can be exported from user modules.</p>
+<pre><code class="language-walk"># helpers.walk
+func: first[T](items array[T]) T
+    return: items[0]
+
+exp: first</code></pre>
+<pre><code class="language-walk"># main.walk
+imp: helpers
+
+var: nums = [1, 2, 3]
+out: helpers.first(nums)</code></pre>
+<p>Rules:</p>
+<pre><code class="language-text">generic functions are checked with named type parameters
+call sites infer one concrete type per type parameter
+all uses of a type parameter in one call must agree
+generic functions are emitted as predictable specialized C functions
+generic functions must be called directly and cannot be passed as values
+generic methods are not supported yet</code></pre>
+<h2 id="non-goals">Non-Goals</h2>
+<p>v2.2 does not add:</p>
+<pre><code class="language-text">inheritance
+traits
+interfaces
+generic structs
+generic methods
+explicit type-argument calls
+named-field constructors
+magic dispatch</code></pre>
+<p>Structs, methods, and generic functions remain experimental. Traits, interfaces, generic structs, generic methods, named-field constructors, inheritance, and magic dispatch remain outside the implemented v2.2 surface.</p>
+</article>
+<footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
+</div>
+</main>
+</div>
+</body>
+</html>

@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ARCHITECTURE.md - WalkLang</title>
+<link rel="icon" href="../assets/icon.svg">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+<a class="brand" href="../index.html"><img src="../assets/logo.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>
+<nav class="nav" aria-label="Documentation">
+<h2>Start</h2>
+<a href="index.html">Documentation</a>
+<a href="INSTALL.html">Install Instructions</a>
+<a href="PROJECTS.html">Project Mode</a>
+<h2>Language</h2>
+<a href="SYNTAX.html">v1 Syntax Guide</a>
+<a href="SPEC.html">v1 Specification</a>
+<a href="STDLIB.html">v1.5 Standard Library</a>
+<a href="ERRORS.html">v1 Diagnostics</a>
+<a href="COMPATIBILITY.html">v1.5 Compatibility</a>
+<a href="MIGRATING.html">Migration Guide</a>
+<a href="DEPRECATION.html">Deprecation Policy</a>
+<h2>Versions</h2>
+<a href="V1.html">v1 / v1.5</a>
+<a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
+<a href="V3.html">v3 Package Ecosystem</a>
+<h2>Tools</h2>
+<a href="V4.html">v4 Professional Tooling</a>
+<a href="V5.html">v5 Runtime and Backend Maturity</a>
+<a href="V5_1.html">v5.1 Public Docs And Reference Site</a>
+<h2>Reference</h2>
+<a href="reference/api.html">API Reference</a>
+<a href="reference/index.html">Reference index</a>
+<h2>Project</h2>
+<a href="ARCHITECTURE.html" aria-current="page">ARCHITECTURE.md</a>
+<a href="DESIGN_RULES.html">v1 Design Rules</a>
+<a href="DOCS_STYLE_GUIDE.html">Docs Style Guide</a>
+<a href="PURPOSE.html">Purpose</a>
+<a href="RELEASE_NOTES.html">Release Notes</a>
+<a href="ROADMAP.html">ROADMAP.md</a>
+<a href="STATUS.html">Status</a>
+</nav>
+</aside>
+<main class="content">
+<div class="topbar"><a href="index.html">Docs</a><a href="reference/api.html">Reference</a><a href="https://github.com/scwlkr/WalkLang">GitHub</a></div>
+<div class="page">
+<article class="doc">
+<p>Fixed gaps embedded:</p>
+<pre><code class="language-text">Typing: static with inference
+Variables can change type: no
+Optional explicit types: yes</code></pre>
+<h1 id="architecture-md">ARCHITECTURE.md</h1>
+<h2 id="walklang-architecture">WalkLang Architecture</h2>
+<p>WalkLang is a compiled, general-purpose language for readable native programs on any OS.</p>
+<pre><code class="language-text">main.walk -&gt; lexer -&gt; parser -&gt; typed IR -&gt; C -&gt; native executable</code></pre>
+<p>Example:</p>
+<pre><code class="language-walk"># main.walk
+out: &#39;hello&#39;</code></pre>
+<p>Build shape:</p>
+<pre><code class="language-text">main.walk -&gt; main.c -&gt; main / main.exe</code></pre>
+<p>---</p>
+<h2 id="1-identity">1. Identity</h2>
+<pre><code class="language-text">Name: WalkLang
+Ext:  .walk
+Kind: compiled
+Target: C
+Output: native executable
+VM: no
+GC: no public v1.1 promise</code></pre>
+<p>Purpose:</p>
+<pre><code class="language-text">Readable source.
+Native output.
+Small rules.
+No syntax ideology maze.</code></pre>
+<p>Example:</p>
+<pre><code class="language-walk">var: a = 5
+var: b = 10
+out: + a b</code></pre>
+<p>Means:</p>
+<pre><code class="language-text">create a
+create b
+print a + b</code></pre>
+<p>---</p>
+<h2 id="2-design-priorities">2. Design Priorities</h2>
+<p>Order matters:</p>
+<pre><code class="language-text">1. readability
+2. speed
+3. simplicity
+4. safety
+5. flexibility</code></pre>
+<p>Example:</p>
+<pre><code class="language-walk">var: result = * (+ a b) (- c d)</code></pre>
+<p>Preferred over:</p>
+<pre><code class="language-text">dense precedence tricks</code></pre>
+<p>WalkLang chooses visible structure over clever syntax.</p>
+<p>---</p>
+<h2 id="3-language-shape">3. Language Shape</h2>
+<p>WalkLang v1.1 is:</p>
+<pre><code class="language-text">procedural first
+limited functional
+not OOP
+not class-based
+not inheritance-based</code></pre>
+<p>Example:</p>
+<pre><code class="language-walk">func: add(a int, b int) int
+    return: + a b
+
+out: add(2, 3)</code></pre>
+<p>Not v1.1:</p>
+<pre><code class="language-walk">class: Person       # error in v1.1</code></pre>
+<p>v2 adds structs, methods, and simple generic functions for composition without classes or inheritance.</p>
+<p>---</p>
+<h2 id="4-syntax-model">4. Syntax Model</h2>
+<p>Core visual rules:</p>
+<pre><code class="language-text">blocks: indentation
+commands: keyword:
+math: prefix
+calls: name(a, b)
+strings: &#39;single quotes&#39;
+lines: newline-terminated
+grouping: (), []</code></pre>
+<p>Example:</p>
+<pre><code class="language-walk">if: &gt; score 90
+    out: &#39;A&#39;
+else:
+    out: &#39;not A&#39;</code></pre>
+<p>No braces, no semicolons:</p>
+<pre><code class="language-walk">if: &gt; score 90 { out: &#39;A&#39;; }   # error</code></pre>
+<p>---</p>
+<h2 id="5-type-model">5. Type Model</h2>
+<p>WalkLang v1.1 is statically typed.</p>
+<p>Types are inferred unless written.</p>
+<pre><code class="language-walk">var: age = 25        # inferred int
+var: score float = 9 # explicit float
+
+age = 26             # ok
+age = &#39;old&#39;          # error: int name cannot hold string</code></pre>
+<p>Rule:</p>
+<pre><code class="language-text">A name gets one type at declaration.
+That type never changes.</code></pre>
+<p>---</p>
+<h2 id="6-core-types">6. Core Types</h2>
+<pre><code class="language-text">int
+float
+bool
+string
+array
+null
+function
+struct (experimental in v2)</code></pre>
+<p>Example:</p>
+<pre><code class="language-walk">var: count = 10
+var: price = 3.14
+var: ok = true
+var: name = &#39;Walker&#39;
+var: nums = [1, 2, 3]</code></pre>
+<p>Null needs a nullable type:</p>
+<pre><code class="language-walk">var: nickname string? = null
+nickname = &#39;scwlkr&#39;</code></pre>
+<p>Invalid:</p>
+<pre><code class="language-walk">var: nickname = null    # error: unknown nullable type</code></pre>
+<p>---</p>
+<h2 id="7-memory-model">7. Memory Model</h2>
+<p>WalkLang has no public memory syntax.</p>
+<pre><code class="language-text">No malloc.
+No free.
+No pointers in source.
+No GC promise.</code></pre>
+<p>Memory is internal to compiler/runtime output.</p>
+<p>Example:</p>
+<pre><code class="language-walk">var: names = [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;]
+out: names[0]</code></pre>
+<p>The user writes array logic, not allocation logic.</p>
+<p>v5 makes array storage explicit inside generated C:</p>
+<pre><code class="language-text">array literals allocate item storage through the generated walk runtime helper
+array item storage is owned for the process lifetime
+arrays can be returned from functions without pointing at expired stack storage</code></pre>
+<p>This is still not source-level memory management. WalkLang programs do not call <code>malloc</code>, <code>free</code>, or pointer APIs.</p>
+<p>---</p>
+<h2 id="8-modules">8. Modules</h2>
+<p>Imports use namespaces.</p>
+<pre><code class="language-walk">imp: math
+
+out: math.sqrt(9)</code></pre>
+<p>Exports name public values.</p>
+<pre><code class="language-walk"># calc.walk
+func: square(x int) int
+    return: * x x
+
+exp: square</code></pre>
+<p>Use:</p>
+<pre><code class="language-walk">imp: calc
+
+out: calc.square(4)</code></pre>
+<p>v1 module loading is file-local:</p>
+<pre><code class="language-text">main.walk imp: calc -&gt; calc.walk
+calc.square -&gt; generated C symbol calc__square</code></pre>
+<p>v3 package imports are still module imports, but the module name is dotted and resolved through the package cache:</p>
+<pre><code class="language-walk">imp: geometry.core
+
+out: geometry.core.double(3)</code></pre>
+<p>Resolution shape:</p>
+<pre><code class="language-text">walk.toml [dependencies] geometry = &#34;0.1.0&#34;
+walk package resolve &lt;registry&gt;
+walk.lock verifies geometry@0.1.0
+.walk/packages/geometry/0.1.0/src/geometry/core.walk
+geometry.core.double -&gt; generated C symbol geometry__core__double</code></pre>
+<p>---</p>
+<h2 id="9-standard-library">9. Standard Library</h2>
+<p>v1.3 stable libraries:</p>
+<pre><code class="language-text">math
+string
+array
+time
+random
+testing</code></pre>
+<p>Example:</p>
+<pre><code class="language-walk">imp: math
+imp: random
+
+var: x = random.int(1, 10)
+out: math.sqrt(x)</code></pre>
+<p><code>testing.assert(bool)</code> is stable as a namespaced assertion helper for <code>walk test</code>.</p>
+<p>Draft library areas are not stable until they appear in <code>docs/STDLIB.md</code> and pass conformance tests.</p>
+<pre><code class="language-text">file
+json
+matrix</code></pre>
+<p>---</p>
+<h2 id="10-error-model">10. Error Model</h2>
+<p>v1.1 has compiler errors, warnings, and native runtime stops.</p>
+<p>Compile error:</p>
+<pre><code class="language-walk">var: age = 25
+age = &#39;old&#39;</code></pre>
+<p>Diagnostic:</p>
+<pre><code class="language-text">main.walk:2:1
+type error: age is int, got string</code></pre>
+<p>Runtime stop:</p>
+<pre><code class="language-walk">var: x = / 5 0</code></pre>
+<p>Diagnostic:</p>
+<pre><code class="language-text">runtime error: divide by zero</code></pre>
+<p>No v1.1 recovery:</p>
+<pre><code class="language-walk">try:          # error in v1.1
+catch:</code></pre>
+<p>---</p>
+<h2 id="11-tooling-architecture">11. Tooling Architecture</h2>
+<p>v0:</p>
+<pre><code class="language-text">compiler
+formatter
+clear errors</code></pre>
+<p>v0.1:</p>
+<pre><code class="language-text">test runner
+basic REPL</code></pre>
+<p>v1:</p>
+<pre><code class="language-text">module loader
+warning levels
+release build flags
+cross-platform CLI release script</code></pre>
+<p>v1.1:</p>
+<pre><code class="language-text">stable contract docs
+pass/fail conformance fixtures
+generated C snapshots
+current status doc</code></pre>
+<p>v4:</p>
+<pre><code class="language-text">language server
+editor integration
+docs generator
+debug map</code></pre>
+<p>v5:</p>
+<pre><code class="language-text">small generated C runtime layer
+process-lifetime array storage
+source comments in generated C
+optimized native release builds
+runtime/backend contract docs</code></pre>
+<p>Later:</p>
+<pre><code class="language-text">debugger
+reference site
+playground
+advanced backends</code></pre>
+<p>Formatter example:</p>
+<pre><code class="language-walk">var:nums=[1,2,3]</code></pre>
+<p>Becomes:</p>
+<pre><code class="language-walk">var: nums = [1, 2, 3]</code></pre>
+<p>---</p>
+<h2 id="12-non-negotiables">12. Non-Negotiables</h2>
+<p>WalkLang must feel:</p>
+<pre><code class="language-text">readable
+consistent
+explicit
+professional
+command-oriented
+common-sense natural</code></pre>
+<p>WalkLang must not become:</p>
+<pre><code class="language-text">symbol soup
+magic-heavy
+overly implicit
+visually noisy
+ideology-heavy
+hard to explain</code></pre>
+<p>Example of accepted style:</p>
+<pre><code class="language-walk">func: total(a int, b int, fee int) int
+    return: + a b fee</code></pre>
+<p>Rejected style:</p>
+<pre><code class="language-text">clever symbols that save 3 chars but cost understanding</code></pre>
+</article>
+<footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
+</div>
+</main>
+</div>
+</body>
+</html>

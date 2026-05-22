@@ -186,6 +186,51 @@ func TestV4DocsAndDebugMapCommands(t *testing.T) {
 	}
 }
 
+func TestV51DocsUseRelativePublishablePaths(t *testing.T) {
+	dir := t.TempDir()
+	t.Chdir(dir)
+
+	sourcePath := filepath.Join(dir, "src", "main.walk")
+	if err := os.MkdirAll(filepath.Dir(sourcePath), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	writeFile(t, sourcePath, strings.Join([]string{
+		"/// Summary: Returns the project answer.",
+		"/// Returns: the answer value.",
+		"/// Example:",
+		"/// ```walk",
+		"/// out: answer()",
+		"/// ```",
+		"/// Since: v5.1.0",
+		"func: answer() int",
+		"    return: 42",
+		"",
+		"out: answer()",
+		"",
+	}, "\n"))
+
+	docsPath := filepath.Join(dir, "api.md")
+	if err := docsCommand([]string{"--strict", "-o", docsPath, sourcePath}); err != nil {
+		t.Fatal(err)
+	}
+	docs := readText(t, docsPath)
+	if !strings.Contains(docs, "Source: `src/main.walk`") || strings.Contains(docs, dir) {
+		t.Fatalf("docs should use relative publishable paths:\n%s", docs)
+	}
+
+	jsonPath := filepath.Join(dir, "api.json")
+	if err := docsCommand([]string{"--strict", "--format", "json", "-o", jsonPath, sourcePath}); err != nil {
+		t.Fatal(err)
+	}
+	var payload docsIndex
+	if err := json.Unmarshal([]byte(readText(t, jsonPath)), &payload); err != nil {
+		t.Fatal(err)
+	}
+	if payload.Source != "src/main.walk" || payload.Symbols[0].Path != "src/main.walk" {
+		t.Fatalf("docs json should use relative publishable paths: %#v", payload)
+	}
+}
+
 func hasCompletion(items []toolingSymbol, label string) bool {
 	for _, item := range items {
 		if item.Name == label {

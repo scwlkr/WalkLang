@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WalkLang Project Mode - WalkLang</title>
+<link rel="icon" href="../assets/icon.svg">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+<a class="brand" href="../index.html"><img src="../assets/logo.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>
+<nav class="nav" aria-label="Documentation">
+<h2>Start</h2>
+<a href="index.html">Documentation</a>
+<a href="INSTALL.html">Install Instructions</a>
+<a href="PROJECTS.html" aria-current="page">Project Mode</a>
+<h2>Language</h2>
+<a href="SYNTAX.html">v1 Syntax Guide</a>
+<a href="SPEC.html">v1 Specification</a>
+<a href="STDLIB.html">v1.5 Standard Library</a>
+<a href="ERRORS.html">v1 Diagnostics</a>
+<a href="COMPATIBILITY.html">v1.5 Compatibility</a>
+<a href="MIGRATING.html">Migration Guide</a>
+<a href="DEPRECATION.html">Deprecation Policy</a>
+<h2>Versions</h2>
+<a href="V1.html">v1 / v1.5</a>
+<a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
+<a href="V3.html">v3 Package Ecosystem</a>
+<h2>Tools</h2>
+<a href="V4.html">v4 Professional Tooling</a>
+<a href="V5.html">v5 Runtime and Backend Maturity</a>
+<a href="V5_1.html">v5.1 Public Docs And Reference Site</a>
+<h2>Reference</h2>
+<a href="reference/api.html">API Reference</a>
+<a href="reference/index.html">Reference index</a>
+<h2>Project</h2>
+<a href="ARCHITECTURE.html">ARCHITECTURE.md</a>
+<a href="DESIGN_RULES.html">v1 Design Rules</a>
+<a href="DOCS_STYLE_GUIDE.html">Docs Style Guide</a>
+<a href="PURPOSE.html">Purpose</a>
+<a href="RELEASE_NOTES.html">Release Notes</a>
+<a href="ROADMAP.html">ROADMAP.md</a>
+<a href="STATUS.html">Status</a>
+</nav>
+</aside>
+<main class="content">
+<div class="topbar"><a href="index.html">Docs</a><a href="reference/api.html">Reference</a><a href="https://github.com/scwlkr/WalkLang">GitHub</a></div>
+<div class="page">
+<article class="doc">
+<h1 id="walklang-project-mode">WalkLang Project Mode</h1>
+<p>Project mode starts when a directory contains <code>walk.toml</code>.</p>
+<p>Create a project:</p>
+<pre><code class="language-bash">walk init hello
+cd hello</code></pre>
+<p>Generated layout:</p>
+<pre><code class="language-text">hello/
+  walk.toml
+  src/
+    main.walk
+    math_extra.walk
+  tests/
+    main_test.walk
+  build/</code></pre>
+<h2 id="config">Config</h2>
+<p><code>walk.toml</code> is intentionally small:</p>
+<pre><code class="language-toml">name = &#34;hello&#34;
+version = &#34;0.1.0&#34;
+entry = &#34;src/main.walk&#34;
+
+[build]
+output = &#34;build/hello&#34;
+release = false</code></pre>
+<p>Rules:</p>
+<ul>
+<li><code>name</code> is required and may contain letters, numbers, <code>_</code>, and <code>-</code>.</li>
+<li><code>version</code> defaults to <code>0.1.0</code>.</li>
+<li><code>entry</code> defaults to <code>src/main.walk</code>.</li>
+<li><code>build.output</code> defaults to <code>build/&lt;name&gt;</code>.</li>
+<li>project paths must be relative and stay inside the project root.</li>
+<li><code>[dependencies]</code> pins package dependencies by exact <code>MAJOR.MINOR.PATCH</code> version.</li>
+</ul>
+<p>Package dependency example:</p>
+<pre><code class="language-toml">[dependencies]
+geometry = &#34;0.1.0&#34;</code></pre>
+<h2 id="commands">Commands</h2>
+<p>Inside a project:</p>
+<pre><code class="language-bash">walk check
+walk build
+walk test
+walk fmt
+walk clean</code></pre>
+<p>Behavior:</p>
+<ul>
+<li><code>walk check</code> checks the entry file and <code>tests/*_test.walk</code>.</li>
+<li><code>walk build</code> compiles the configured entry and writes the native executable plus generated C next to <code>build.output</code>.</li>
+<li><code>walk test</code> runs every <code>tests/*_test.walk</code>.</li>
+<li><code>walk fmt</code> formats <code>.walk</code> files under the entry directory and <code>tests/</code>.</li>
+<li><code>walk clean</code> removes <code>build/</code> when the configured output lives there.</li>
+</ul>
+<p>Single-file commands still work:</p>
+<pre><code class="language-bash">walk build examples/hello.walk -o build/hello
+walk test examples/v0_1_tests.walk
+walk fmt examples/hello.walk</code></pre>
+<h2 id="module-search">Module Search</h2>
+<p>Project tests can import modules from <code>src/</code>.</p>
+<pre><code class="language-walk">imp: math_extra
+
+test: &#39;cube works&#39;
+    assert: == math_extra.cube(3) 27</code></pre>
+<p>The importing file&#39;s directory is searched first. The project entry directory is searched next.</p>
+<p>Package dependencies add locked package <code>src/</code> directories after local project search paths. Package imports use dotted module names:</p>
+<pre><code class="language-walk">imp: geometry.core
+
+out: geometry.core.double(3)</code></pre>
+<p>This import resolves from:</p>
+<pre><code class="language-text">.walk/packages/geometry/0.1.0/src/geometry/core.walk</code></pre>
+<h2 id="packages">Packages</h2>
+<p>Create a package project:</p>
+<pre><code class="language-bash">walk package init geometry</code></pre>
+<p>Publish a documented package to a local registry:</p>
+<pre><code class="language-bash">cd geometry
+walk package publish ../registry</code></pre>
+<p>Resolve an app&#39;s pinned dependencies from that registry:</p>
+<pre><code class="language-bash">cd ../shape_app
+walk package resolve ../registry</code></pre>
+<p>Package behavior:</p>
+<ul>
+<li><code>walk package publish</code> requires non-empty <code>README.md</code>.</li>
+<li>Publish runs <code>walk check --warnings=error</code> and <code>walk test --warnings=error</code>.</li>
+<li>Published packages are copied to <code>&lt;registry&gt;/&lt;name&gt;/&lt;version&gt;/</code>.</li>
+<li><code>walk package resolve</code> copies packages into <code>.walk/packages/</code> and writes <code>walk.lock</code>.</li>
+<li><code>walk check</code>, <code>walk test</code>, and <code>walk build</code> verify package cache checksums before using dependencies.</li>
+<li>Build commands do not download packages automatically.</li>
+</ul>
+</article>
+<footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
+</div>
+</main>
+</div>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WalkLang Documentation - WalkLang</title>
+<link rel="icon" href="../assets/icon.svg">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+<a class="brand" href="../index.html"><img src="../assets/logo.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>
+<nav class="nav" aria-label="Documentation">
+<h2>Start</h2>
+<a href="index.html" aria-current="page">Documentation</a>
+<a href="INSTALL.html">Install Instructions</a>
+<a href="PROJECTS.html">Project Mode</a>
+<h2>Language</h2>
+<a href="SYNTAX.html">v1 Syntax Guide</a>
+<a href="SPEC.html">v1 Specification</a>
+<a href="STDLIB.html">v1.5 Standard Library</a>
+<a href="ERRORS.html">v1 Diagnostics</a>
+<a href="COMPATIBILITY.html">v1.5 Compatibility</a>
+<a href="MIGRATING.html">Migration Guide</a>
+<a href="DEPRECATION.html">Deprecation Policy</a>
+<h2>Versions</h2>
+<a href="V1.html">v1 / v1.5</a>
+<a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
+<a href="V3.html">v3 Package Ecosystem</a>
+<h2>Tools</h2>
+<a href="V4.html">v4 Professional Tooling</a>
+<a href="V5.html">v5 Runtime and Backend Maturity</a>
+<a href="V5_1.html">v5.1 Public Docs And Reference Site</a>
+<h2>Reference</h2>
+<a href="reference/api.html">API Reference</a>
+<a href="reference/index.html">Reference index</a>
+<h2>Project</h2>
+<a href="ARCHITECTURE.html">ARCHITECTURE.md</a>
+<a href="DESIGN_RULES.html">v1 Design Rules</a>
+<a href="DOCS_STYLE_GUIDE.html">Docs Style Guide</a>
+<a href="PURPOSE.html">Purpose</a>
+<a href="RELEASE_NOTES.html">Release Notes</a>
+<a href="ROADMAP.html">ROADMAP.md</a>
+<a href="STATUS.html">Status</a>
+</nav>
+</aside>
+<main class="content">
+<div class="topbar"><a href="index.html">Docs</a><a href="reference/api.html">Reference</a><a href="https://github.com/scwlkr/WalkLang">GitHub</a></div>
+<div class="page">
+<article class="doc">
+<h1 id="walklang-documentation">WalkLang Documentation</h1>
+<p>WalkLang docs are built into a static site for &lt;https://walklang.wlkrlabs.com/docs&gt;. This directory remains the source for the hosted documentation path.</p>
+<p>Use this page as the docs front door. The root README explains the repository; these docs explain how to install, learn, use, verify, and evolve WalkLang.</p>
+<h2 id="get-started">Get Started</h2>
+<ul>
+<li><a href="INSTALL.html">Install WalkLang</a></li>
+<li><a href="PROJECTS.html">Build projects</a></li>
+<li><a href="SYNTAX.html">Learn the v1 syntax</a></li>
+<li><a href="SPEC.html">Read the v1 language contract</a></li>
+</ul>
+<h2 id="use-the-language">Use The Language</h2>
+<ul>
+<li><a href="STDLIB.html">Standard library</a></li>
+<li><a href="ERRORS.html">Diagnostics and warnings</a></li>
+<li><a href="COMPATIBILITY.html">Compatibility promise</a></li>
+<li><a href="MIGRATING.html">Migration guide</a></li>
+<li><a href="DEPRECATION.html">Deprecation policy</a></li>
+</ul>
+<h2 id="use-the-tools">Use The Tools</h2>
+<ul>
+<li><a href="PROJECTS.html">Project mode and packages</a></li>
+<li><a href="V4.html">Editor tooling, LSP, docs generation, and debug maps</a></li>
+<li><a href="V5.html">Runtime and backend model</a></li>
+<li><a href="ARCHITECTURE.html">Architecture</a></li>
+</ul>
+<h2 id="track-versions">Track Versions</h2>
+<ul>
+<li><a href="V1.html">v1 / v1.5 stable contract</a></li>
+<li><a href="V2.html">v2 data modeling, methods, and generics</a></li>
+<li><a href="V3.html">v3 package ecosystem</a></li>
+<li><a href="V4.html">v4 professional tooling</a></li>
+<li><a href="V5.html">v5 runtime and backend maturity</a></li>
+<li><a href="V5_1.html">v5.1 public docs and reference site</a></li>
+<li><a href="RELEASE_NOTES.html">Release notes</a></li>
+<li><a href="STATUS.html">Current status</a></li>
+</ul>
+<h2 id="project-direction">Project Direction</h2>
+<ul>
+<li><a href="ROADMAP.html">Roadmap</a></li>
+<li><a href="DESIGN_RULES.html">Design rules</a></li>
+<li><a href="PURPOSE.html">Purpose</a></li>
+<li><a href="DOCS_STYLE_GUIDE.html">Docs style guide</a></li>
+</ul>
+<h2 id="generated-reference-docs">Generated Reference Docs</h2>
+<p>WalkLang supports rustdoc-style structured comments on public symbols. Generate Markdown and JSON reference output from real source with:</p>
+<pre><code class="language-bash">scripts/build-docs-site.sh</code></pre>
+<p>Reference docs under <code>docs/reference/</code> are generated artifacts. The static site under <code>public/</code> publishes the rendered docs pages, generated API reference, raw Markdown, and <code>api.json</code> from the same compiler output.</p>
+<h2 id="hosting-contract">Hosting Contract</h2>
+<p>The public docs home is:</p>
+<pre><code class="language-text">https://walklang.wlkrlabs.com/docs</code></pre>
+<p>Use stable, relative links inside this directory so the same Markdown works in GitHub and on the hosted site. Run <code>scripts/check-docs-site.sh</code> before publishing docs changes.</p>
+</article>
+<footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
+</div>
+</main>
+</div>
+</body>
+</html>

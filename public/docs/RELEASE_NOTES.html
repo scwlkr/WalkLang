@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WalkLang Release Notes - WalkLang</title>
+<link rel="icon" href="../assets/icon.svg">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+<a class="brand" href="../index.html"><img src="../assets/logo.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>
+<nav class="nav" aria-label="Documentation">
+<h2>Start</h2>
+<a href="index.html">Documentation</a>
+<a href="INSTALL.html">Install Instructions</a>
+<a href="PROJECTS.html">Project Mode</a>
+<h2>Language</h2>
+<a href="SYNTAX.html">v1 Syntax Guide</a>
+<a href="SPEC.html">v1 Specification</a>
+<a href="STDLIB.html">v1.5 Standard Library</a>
+<a href="ERRORS.html">v1 Diagnostics</a>
+<a href="COMPATIBILITY.html">v1.5 Compatibility</a>
+<a href="MIGRATING.html">Migration Guide</a>
+<a href="DEPRECATION.html">Deprecation Policy</a>
+<h2>Versions</h2>
+<a href="V1.html">v1 / v1.5</a>
+<a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
+<a href="V3.html">v3 Package Ecosystem</a>
+<h2>Tools</h2>
+<a href="V4.html">v4 Professional Tooling</a>
+<a href="V5.html">v5 Runtime and Backend Maturity</a>
+<a href="V5_1.html">v5.1 Public Docs And Reference Site</a>
+<h2>Reference</h2>
+<a href="reference/api.html">API Reference</a>
+<a href="reference/index.html">Reference index</a>
+<h2>Project</h2>
+<a href="ARCHITECTURE.html">ARCHITECTURE.md</a>
+<a href="DESIGN_RULES.html">v1 Design Rules</a>
+<a href="DOCS_STYLE_GUIDE.html">Docs Style Guide</a>
+<a href="PURPOSE.html">Purpose</a>
+<a href="RELEASE_NOTES.html" aria-current="page">Release Notes</a>
+<a href="ROADMAP.html">ROADMAP.md</a>
+<a href="STATUS.html">Status</a>
+</nav>
+</aside>
+<main class="content">
+<div class="topbar"><a href="index.html">Docs</a><a href="reference/api.html">Reference</a><a href="https://github.com/scwlkr/WalkLang">GitHub</a></div>
+<div class="page">
+<article class="doc">
+<h1 id="walklang-release-notes">WalkLang Release Notes</h1>
+<h2 id="v5-1-0-public-docs-and-reference-site">v5.1.0 - Public Docs And Reference Site</h2>
+<p>Date: 2026-05-22</p>
+<p>v5.1.0 turns the docs and generated reference output into a repo-owned static site for <code>https://walklang.wlkrlabs.com/docs</code>.</p>
+<h3 id="added">Added</h3>
+<ul>
+<li><code>scripts/build-docs-site.sh</code> for rebuilding generated reference docs and the</li>
+<p>static site.</p>
+<li><code>scripts/check-docs-site.sh</code> for stale generated-artifact and static-link</li>
+<p>checks.</p>
+<li>Generated <code>docs/reference/api.md</code> and <code>docs/reference/api.json</code> from</li>
+<p>structured comments in real WalkLang source.</p>
+<li>Static site output in <code>public/</code>, including the docs front door, rendered docs</li>
+<p>pages, API reference HTML, raw Markdown, JSON, assets, <code>.nojekyll</code>, and CNAME.</p>
+<li>GitHub Pages workflow that builds <code>public/</code> and deploys it from <code>main</code>.</li>
+<li><code>docs/V5_1.md</code> describing the public docs and reference-site contract.</li>
+</ul>
+<h3 id="changed">Changed</h3>
+<ul>
+<li><code>walk docs</code> now renders repository-relative source paths when sources are</li>
+<p>under the current working directory, which keeps public reference output from exposing local absolute paths.</p>
+<li>CI now runs the docs-site check and labels release artifacts as <code>v5.1.0</code>.</li>
+<li>README and docs front doors now point at the hosted docs path as the public</li>
+<p>docs surface.</p>
+</ul>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<p>None.</p>
+<h3 id="upgrade">Upgrade</h3>
+<p>Regenerate docs and release artifacts with:</p>
+<pre><code class="language-bash">scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.1.0 dist</code></pre>
+<h2 id="v5-0-0-runtime-and-backend-maturity">v5.0.0 - Runtime and Backend Maturity</h2>
+<p>Date: 2026-05-22</p>
+<p>v5.0.0 keeps C as the primary backend and makes generated output easier to inspect, optimize, and reason about at runtime.</p>
+<h3 id="added">Added</h3>
+<ul>
+<li><code>docs/V5.md</code> runtime/backend contract documentation.</li>
+<li>A small generated C runtime section with WalkLang scalar aliases, array structs, print helpers, string length helper, random helper, and array allocation helper.</li>
+<li>Source-location comments in emitted C statements, such as <code>/* source: main.walk:6:1 */</code>.</li>
+<li>Focused v5 conformance coverage for generated-C runtime helpers, source comments, and array returns.</li>
+</ul>
+<h3 id="changed">Changed</h3>
+<ul>
+<li><code>walk build --release</code> now uses <code>-O3 -DNDEBUG</code> for native C builds.</li>
+<li>Array literals now allocate item storage through the generated runtime helper instead of pointing array structs at stack-local item buffers.</li>
+<li>Generated C snapshots now cover the v5 runtime section and source comments.</li>
+<li>Official install and CI release artifact labels now target <code>v5.0.0</code>.</li>
+</ul>
+<h3 id="runtime-and-memory">Runtime And Memory</h3>
+<p>WalkLang source still has no <code>malloc</code>, <code>free</code>, pointer syntax, or public garbage collector promise. Array literal item storage is owned by the generated program for the process lifetime, which makes returned arrays predictable without adding source-level ownership syntax.</p>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<p>None.</p>
+<h3 id="upgrade">Upgrade</h3>
+<p>Regenerate emitted C and release binaries with the v5 compiler:</p>
+<pre><code class="language-bash">walk build main.walk -o build/main --release
+scripts/release.sh v5.0.0 dist</code></pre>
+<h2 id="v4-1-0-documentation-generator-hardening">v4.1.0 - Documentation Generator Hardening</h2>
+<p>Date: 2026-05-22</p>
+<p>v4.1.0 keeps v5 focused on runtime/backend maturity while tightening the v4 docs generator into a small structured-doc slice.</p>
+<h3 id="added">Added</h3>
+<ul>
+<li><code>///</code> structured comments above public WalkLang symbols.</li>
+<li><code>walk docs --format json</code> for machine-readable docs index output.</li>
+<li><code>walk docs --strict</code> for failing when generated public symbols are missing required docs fields.</li>
+<li>Structured docs for the v1 example module.</li>
+<li>Roadmap clarification that broad docs overhaul work waits until v5 runtime behavior is stable.</li>
+</ul>
+<h3 id="changed">Changed</h3>
+<ul>
+<li><code>walk docs</code> now renders Markdown from the same symbol index used for JSON output.</li>
+<li>The default <code>walk docs</code> path remains compatible with signature-only sources.</li>
+</ul>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<p>None.</p>
+<h3 id="upgrade">Upgrade</h3>
+<p>Use the default Markdown path as before, or opt into strict generated reference docs:</p>
+<pre><code class="language-bash">walk docs -o docs/api.md src/main.walk
+walk docs --strict --format json -o docs/api.json src/main.walk</code></pre>
+<h2 id="v4-0-0-professional-tooling">v4.0.0 - Professional Tooling</h2>
+<p>Date: 2026-05-22</p>
+<p>v4.0.0 adds first-party editor and project tooling on top of the stable project/package workflow.</p>
+<h3 id="added">Added</h3>
+<ul>
+<li><code>walk lsp</code> stdio language server.</li>
+<li>LSP document diagnostics, formatter integration, hover, go-to-definition, find references, completion, and rename.</li>
+<li>VS Code extension scaffold in <code>editors/vscode/</code> with syntax highlighting and LSP startup.</li>
+<li>Neovim filetype, syntax, formatter, and LSP setup files in <code>editors/neovim/</code>.</li>
+<li><code>walk docs</code> Markdown API documentation generator.</li>
+<li><code>walk debug-map</code> JSON source symbol map as debugger-adapter groundwork.</li>
+<li>v4 tooling documentation in <code>docs/V4.md</code>.</li>
+<li>Focused v4 tests for diagnostics, formatting, completion, navigation, rename, docs, and debug maps.</li>
+</ul>
+<h3 id="changed">Changed</h3>
+<ul>
+<li>Module metadata now records resolved source paths so editor navigation can jump from imports and calls to module files.</li>
+<li>README current-surface docs now include the v4 professional tooling commands.</li>
+</ul>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<p>None.</p>
+<h3 id="removed">Removed</h3>
+<p>None.</p>
+<h3 id="experimental-or-draft">Experimental Or Draft</h3>
+<p>The v4 editor layer is intentionally local-first. The following remain future roadmap items:</p>
+<pre><code class="language-text">JetBrains plugin implementation
+step-through debugger adapter
+generated C source maps
+remote package registry integration</code></pre>
+<h3 id="upgrade">Upgrade</h3>
+<p>Install or build the v4 <code>walk</code> binary, then point editor integrations at it:</p>
+<pre><code class="language-bash">walk lsp
+walk docs -o docs/api.md
+walk debug-map -o build/debug-map.json</code></pre>
+<h2 id="v3-0-0-package-ecosystem">v3.0.0 - Package Ecosystem</h2>
+<p>Date: 2026-05-22</p>
+<p>v3.0.0 adds a local, file-backed package ecosystem on top of project mode.</p>
+<h3 id="added">Added</h3>
+<ul>
+<li><code>walk package init &lt;name&gt;</code> for package project scaffolding.</li>
+<li><code>[dependencies]</code> in <code>walk.toml</code> with exact <code>MAJOR.MINOR.PATCH</code> pins.</li>
+<li><code>walk package resolve &lt;registry-dir&gt;</code> for copying pinned dependencies into <code>.walk/packages/</code>.</li>
+<li><code>walk.lock</code> with package names, versions, and checksums.</li>
+<li>Package cache verification before project <code>walk check</code>, <code>walk test</code>, and <code>walk build</code>.</li>
+<li>Dotted package imports such as <code>imp: geometry.core</code>.</li>
+<li><code>walk package publish &lt;registry-dir&gt;</code> for local registry publishing.</li>
+<li>Publish-time <code>README.md</code>, check, and test gates.</li>
+<li>v3 package documentation in <code>docs/V3.md</code> and <code>docs/PROJECTS.md</code>.</li>
+<li>End-to-end v3 package lifecycle tests.</li>
+</ul>
+<h3 id="changed">Changed</h3>
+<ul>
+<li>Module loading can resolve dotted module paths such as <code>geometry/core.walk</code>.</li>
+<li>Qualified call checking now treats the final dotted segment as the exported function and the preceding path as the imported module.</li>
+</ul>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<p>None.</p>
+<h3 id="removed">Removed</h3>
+<p>None.</p>
+<h3 id="experimental-or-draft">Experimental Or Draft</h3>
+<p>The v3 package ecosystem is local-registry based. The following remain future roadmap items:</p>
+<pre><code class="language-text">remote public package registry
+registry authentication
+version range solving
+multiple package versions in one build
+automatic package download during build</code></pre>
+<h3 id="upgrade">Upgrade</h3>
+<p>For project dependencies, pin exact versions and resolve before checking or building:</p>
+<pre><code class="language-bash">walk package resolve &lt;registry-dir&gt;
+walk check --warnings=error
+walk test --warnings=error
+walk build</code></pre>
+<h2 id="v2-2-0-simple-generic-composition">v2.2.0 - Simple Generic Composition</h2>
+<p>Date: 2026-05-22</p>
+<p>v2.2.0 adds experimental simple generic functions as the next composition step after structs and methods.</p>
+<h3 id="added">Added</h3>
+<ul>
+<li>Generic function declarations with type parameters, such as <code>func: first[T](items array[T]) T</code>.</li>
+<li>Call-site type inference for generic functions.</li>
+<li>Generic functions over scalar values, arrays, structs, and method-returning struct expressions.</li>
+<li>Exported user-module generic functions.</li>
+<li>Predictable C monomorphization for concrete generic calls.</li>
+<li>v2.2 generic pass/fail fixtures and formatter coverage.</li>
+<li><code>docs/V2.md</code> generic function documentation.</li>
+</ul>
+<h3 id="changed">Changed</h3>
+<ul>
+<li><code>exp:</code> may now export generic functions from user modules.</li>
+<li>Formatter output keeps generic and array type brackets tight, such as <code>array[T]</code>.</li>
+</ul>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<p>None.</p>
+<h3 id="removed">Removed</h3>
+<p>None.</p>
+<h3 id="experimental-or-draft">Experimental Or Draft</h3>
+<p>Structs, methods, and generic functions remain experimental in v2.2. The following remain future roadmap items:</p>
+<pre><code class="language-text">traits
+interfaces
+generic structs
+generic methods
+explicit type-argument calls
+named-field constructors
+file/json/matrix APIs</code></pre>
+<h3 id="upgrade">Upgrade</h3>
+<p>Run:</p>
+<pre><code class="language-bash">walk check --warnings=error &lt;your entry file&gt;
+walk test &lt;your tests file&gt;
+walk build &lt;your entry file&gt; -o build/app</code></pre>
+<h2 id="v2-1-0-methods">v2.1.0 - Methods</h2>
+<p>Date: 2026-05-22</p>
+<p>v2.1.0 adds experimental methods on top of the v2 struct surface. Methods are receiver functions, not class-based OOP.</p>
+<h3 id="added">Added</h3>
+<ul>
+<li>Method declarations with receiver syntax, such as <code>func: User.is_adult(self User) bool</code>.</li>
+<li>Method calls on struct values, such as <code>user.is_adult()</code>.</li>
+<li>Receiver-type namespacing so different structs may use the same method name.</li>
+<li>Type checking for method receivers and ordinary method arguments.</li>
+<li>Generated C lowering that keeps method calls explainable as receiver functions, such as <code>User__is_adult(user)</code>.</li>
+<li>v2.1 method pass/fail fixtures and formatter coverage.</li>
+<li><code>docs/V2.md</code> method documentation.</li>
+</ul>
+<h3 id="changed">Changed</h3>
+<ul>
+<li>Dotted calls now preserve receiver expressions so struct method calls can be distinguished from imported module calls.</li>
+</ul>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<p>None.</p>
+<h3 id="removed">Removed</h3>
+<p>None.</p>
+<h3 id="experimental-or-draft">Experimental Or Draft</h3>
+<p>Structs and methods remain experimental in v2.1. The following remain future roadmap items:</p>
+<pre><code class="language-text">traits
+interfaces
+generic structs
+named-field constructors
+file/json/matrix APIs</code></pre>
+<h3 id="upgrade">Upgrade</h3>
+<p>Run:</p>
+<pre><code class="language-bash">walk check --warnings=error &lt;your entry file&gt;
+walk test &lt;your tests file&gt;
+walk build &lt;your entry file&gt; -o build/app</code></pre>
+<h2 id="v2-0-0-data-modeling">v2.0.0 - Data Modeling</h2>
+<p>Date: 2026-05-22</p>
+<p>v2.0.0 adds experimental struct-based data modeling. The v1 compatibility contract remains documented separately in <code>docs/SPEC.md</code> and <code>docs/COMPATIBILITY.md</code>.</p>
+<h3 id="added">Added</h3>
+<ul>
+<li><code>struct:</code> declarations with fixed typed fields.</li>
+<li>Positional struct constructors.</li>
+<li>Dot field reads and mutable field assignment.</li>
+<li>Structs as function parameters and return values.</li>
+<li>Arrays of structs, indexed field access, and mutable array-element fields.</li>
+<li>Module-declared structs returned by exported module functions.</li>
+<li>v2 struct pass/fail fixtures and formatter coverage.</li>
+<li><code>docs/V2.md</code> for the experimental v2 data-modeling surface.</li>
+</ul>
+<h3 id="changed">Changed</h3>
+<ul>
+<li>User modules may now contain <code>struct:</code> declarations at top level.</li>
+<li><code>struct</code> is now a reserved word.</li>
+<li>Generated C includes typedefs for WalkLang structs and arrays of structs.</li>
+</ul>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<ul>
+<li><code>struct</code> can no longer be used as a variable, function, field, or expression name.</li>
+</ul>
+<h3 id="removed">Removed</h3>
+<p>None.</p>
+<h3 id="experimental-or-draft">Experimental Or Draft</h3>
+<p>Structs are implemented but remain experimental in v2.0. The following remain future roadmap items:</p>
+<pre><code class="language-text">methods
+traits
+interfaces
+generic structs
+named-field constructors
+file/json/matrix APIs</code></pre>
+<h3 id="upgrade">Upgrade</h3>
+<p>Run:</p>
+<pre><code class="language-bash">walk check --warnings=error &lt;your entry file&gt;
+walk test &lt;your tests file&gt;
+walk build &lt;your entry file&gt; -o build/app</code></pre>
+<p>Rename any user-defined binding named <code>struct</code>.</p>
+<h2 id="v1-5-0-compatibility-release-preparation">v1.5.0 - Compatibility Release Preparation</h2>
+<p>Date: 2026-05-22</p>
+<p>v1.5 prepares WalkLang for a stable v1.x line. It does not intentionally change the v1 language syntax or stable standard-library behavior.</p>
+<h3 id="added">Added</h3>
+<ul>
+<li>Versioned v1 compatibility policy in <code>docs/COMPATIBILITY.md</code>.</li>
+<li>Official install instructions in <code>docs/INSTALL.md</code>.</li>
+<li>Migration guide in <code>docs/MIGRATING.md</code>.</li>
+<li>Deprecation policy in <code>docs/DEPRECATION.md</code>.</li>
+<li>v1 compatibility fixtures under <code>tests/compat/v1/</code>.</li>
+<li><code>TestV15CompatibilitySuite...</code> tests that compile/run stable v1 programs and check representative stable diagnostics.</li>
+</ul>
+<h3 id="changed">Changed</h3>
+<ul>
+<li><code>README.md</code> and <code>docs/V1.md</code> now describe the current surface as v1.5.</li>
+<li>CI release artifact generation now uses <code>v1.5.0</code>.</li>
+<li><code>scripts/stress-v1.sh</code> reports the v1.5 stress path.</li>
+</ul>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<p>None.</p>
+<h3 id="removed">Removed</h3>
+<p>None.</p>
+<h3 id="experimental-or-draft">Experimental Or Draft</h3>
+<p>The following remain outside the v1.5 compatibility promise:</p>
+<pre><code class="language-text">file/json/matrix APIs
+structs
+methods
+traits
+interfaces
+closures
+package manager behavior
+debugger and full LSP behavior</code></pre>
+<h3 id="upgrade">Upgrade</h3>
+<p>Install or build the v1.5 CLI, then run:</p>
+<pre><code class="language-bash">walk check --warnings=error &lt;your entry file&gt;
+walk test &lt;your tests file&gt;</code></pre>
+<p>Project users should also run:</p>
+<pre><code class="language-bash">walk check --warnings=error
+walk test
+walk build</code></pre>
+</article>
+<footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
+</div>
+</main>
+</div>
+</body>
+</html>

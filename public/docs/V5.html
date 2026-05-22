@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WalkLang v5 Runtime and Backend Maturity - WalkLang</title>
+<link rel="icon" href="../assets/icon.svg">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+<a class="brand" href="../index.html"><img src="../assets/logo.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>
+<nav class="nav" aria-label="Documentation">
+<h2>Start</h2>
+<a href="index.html">Documentation</a>
+<a href="INSTALL.html">Install Instructions</a>
+<a href="PROJECTS.html">Project Mode</a>
+<h2>Language</h2>
+<a href="SYNTAX.html">v1 Syntax Guide</a>
+<a href="SPEC.html">v1 Specification</a>
+<a href="STDLIB.html">v1.5 Standard Library</a>
+<a href="ERRORS.html">v1 Diagnostics</a>
+<a href="COMPATIBILITY.html">v1.5 Compatibility</a>
+<a href="MIGRATING.html">Migration Guide</a>
+<a href="DEPRECATION.html">Deprecation Policy</a>
+<h2>Versions</h2>
+<a href="V1.html">v1 / v1.5</a>
+<a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
+<a href="V3.html">v3 Package Ecosystem</a>
+<h2>Tools</h2>
+<a href="V4.html">v4 Professional Tooling</a>
+<a href="V5.html" aria-current="page">v5 Runtime and Backend Maturity</a>
+<a href="V5_1.html">v5.1 Public Docs And Reference Site</a>
+<h2>Reference</h2>
+<a href="reference/api.html">API Reference</a>
+<a href="reference/index.html">Reference index</a>
+<h2>Project</h2>
+<a href="ARCHITECTURE.html">ARCHITECTURE.md</a>
+<a href="DESIGN_RULES.html">v1 Design Rules</a>
+<a href="DOCS_STYLE_GUIDE.html">Docs Style Guide</a>
+<a href="PURPOSE.html">Purpose</a>
+<a href="RELEASE_NOTES.html">Release Notes</a>
+<a href="ROADMAP.html">ROADMAP.md</a>
+<a href="STATUS.html">Status</a>
+</nav>
+</aside>
+<main class="content">
+<div class="topbar"><a href="index.html">Docs</a><a href="reference/api.html">Reference</a><a href="https://github.com/scwlkr/WalkLang">GitHub</a></div>
+<div class="page">
+<article class="doc">
+<h1 id="walklang-v5-runtime-and-backend-maturity">WalkLang v5 Runtime and Backend Maturity</h1>
+<p>v5 keeps C as the primary backend and tightens the runtime model around generated output that can be built, inspected, and shipped.</p>
+<h2 id="backend-contract">Backend Contract</h2>
+<p>Generated C must stay:</p>
+<pre><code class="language-text">predictable
+portable
+debuggable
+readable enough to inspect</code></pre>
+<p>WalkLang source still follows the same pipeline:</p>
+<pre><code class="language-text">.walk -&gt; generated C -&gt; native executable</code></pre>
+<h2 id="release-builds">Release Builds</h2>
+<p>Release builds use the native C compiler with optimization enabled:</p>
+<pre><code class="language-bash">walk build main.walk -o build/main --release</code></pre>
+<p><code>--release</code> adds:</p>
+<pre><code class="language-text">-O3
+-DNDEBUG</code></pre>
+<p>Custom compiler flags still work and are appended after the release defaults:</p>
+<pre><code class="language-bash">walk build main.walk -o build/main --release --cflag -DWALK_TRACE=0</code></pre>
+<p>Use <code>--cc</code> or <code>WALK_CC</code> to choose the native compiler.</p>
+<h2 id="runtime-layer">Runtime Layer</h2>
+<p>Generated C includes a small <code>walk runtime</code> section before user code. It defines:</p>
+<pre><code class="language-text">WalkInt
+WalkFloat
+WalkBool
+WalkString
+WalkSize
+WalkArray*
+runtime print helpers
+runtime string length helper
+runtime random helper
+runtime array allocation helper</code></pre>
+<p>The helper layer keeps compiler-emitted code predictable without exposing pointers, allocation calls, or runtime ownership to WalkLang source.</p>
+<h2 id="memory-model">Memory Model</h2>
+<p>WalkLang v5 still has no source-level memory management.</p>
+<pre><code class="language-text">no malloc syntax
+no free syntax
+no pointer syntax
+no public garbage collector promise</code></pre>
+<p>Array literals allocate item storage through the generated runtime helper. That storage is owned by the generated program for the process lifetime, so arrays can be returned from functions without pointing at expired stack memory.</p>
+<p>Example:</p>
+<pre><code class="language-walk">func: numbers() array[int]
+    var: nums = [4, 5, 6]
+    return: nums
+
+var: got = numbers()
+out: got[0]</code></pre>
+<p>The generated C keeps the allocation explicit in the runtime layer and keeps user statements tagged with source comments.</p>
+<h2 id="generated-c-inspectability">Generated C Inspectability</h2>
+<p>Generated C starts with a short backend comment and runtime section. Emitted source statements include comments like:</p>
+<pre><code class="language-c">/* source: main.walk:6:1 */</code></pre>
+<p>These comments do not change runtime behavior. They make emitted functions and <code>main</code> easier to inspect while preserving predictable C output and snapshot coverage.</p>
+<h2 id="non-goals">Non-Goals</h2>
+<p>v5 does not add:</p>
+<pre><code class="language-text">LLVM backend
+WASM backend
+manual memory management syntax
+garbage collection
+ownership annotations in WalkLang source
+step-through debugger adapter</code></pre>
+</article>
+<footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
+</div>
+</main>
+</div>
+</body>
+</html>

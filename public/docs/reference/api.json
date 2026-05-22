@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "source": "examples/v1.walk",
+  "symbols": [
+    {
+      "kind": "function",
+      "name": "cube",
+      "path": "examples/math_extra.walk",
+      "signature": "func cube(x int) int",
+      "summary": "Cubes an integer.",
+      "params": [
+        {
+          "name": "x",
+          "description": "value to multiply by itself twice"
+        }
+      ],
+      "returns": "the cubed value.",
+      "examples": [
+        "out: cube(3)"
+      ],
+      "since": "v4.1.0"
+    },
+    {
+      "kind": "function",
+      "name": "bump",
+      "path": "examples/math_extra.walk",
+      "signature": "func bump(x int) int",
+      "summary": "Increments an integer by one.",
+      "params": [
+        {
+          "name": "x",
+          "description": "value to increment"
+        }
+      ],
+      "returns": "the incremented value.",
+      "examples": [
+        "out: bump(4)"
+      ],
+      "since": "v4.1.0"
+    },
+    {
+      "kind": "export",
+      "name": "cube",
+      "path": "examples/math_extra.walk",
+      "signature": "exp cube",
+      "summary": "Exposes cube from the math_extra example module.",
+      "params": [],
+      "returns": "",
+      "examples": [
+        "exp: cube"
+      ],
+      "since": "v4.1.0"
+    }
+  ]
+}

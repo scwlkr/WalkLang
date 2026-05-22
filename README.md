@@ -48,10 +48,10 @@ If you want to install from this repository, see [INSTALL.md](docs/INSTALL.md).
 
 ## Getting Help
 
-Start with the docs index at [docs/README.md](docs/README.md). The planned
-hosted docs path is <https://walklang.wlkrlabs.com/docs>. Until public community
-channels exist, use this repository's issue tracker for bugs and design
-questions.
+Start with the docs index at [docs/README.md](docs/README.md). The hosted docs
+path is <https://walklang.wlkrlabs.com/docs>, built from `docs/` and `public/`
+in this repository. Until public community channels exist, use this repository's
+issue tracker for bugs and design questions.
 
 ## Contributing
 

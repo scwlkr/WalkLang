@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WalkLang Docs Style Guide - WalkLang</title>
+<link rel="icon" href="../assets/icon.svg">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+<a class="brand" href="../index.html"><img src="../assets/logo.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>
+<nav class="nav" aria-label="Documentation">
+<h2>Start</h2>
+<a href="index.html">Documentation</a>
+<a href="INSTALL.html">Install Instructions</a>
+<a href="PROJECTS.html">Project Mode</a>
+<h2>Language</h2>
+<a href="SYNTAX.html">v1 Syntax Guide</a>
+<a href="SPEC.html">v1 Specification</a>
+<a href="STDLIB.html">v1.5 Standard Library</a>
+<a href="ERRORS.html">v1 Diagnostics</a>
+<a href="COMPATIBILITY.html">v1.5 Compatibility</a>
+<a href="MIGRATING.html">Migration Guide</a>
+<a href="DEPRECATION.html">Deprecation Policy</a>
+<h2>Versions</h2>
+<a href="V1.html">v1 / v1.5</a>
+<a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
+<a href="V3.html">v3 Package Ecosystem</a>
+<h2>Tools</h2>
+<a href="V4.html">v4 Professional Tooling</a>
+<a href="V5.html">v5 Runtime and Backend Maturity</a>
+<a href="V5_1.html">v5.1 Public Docs And Reference Site</a>
+<h2>Reference</h2>
+<a href="reference/api.html">API Reference</a>
+<a href="reference/index.html">Reference index</a>
+<h2>Project</h2>
+<a href="ARCHITECTURE.html">ARCHITECTURE.md</a>
+<a href="DESIGN_RULES.html">v1 Design Rules</a>
+<a href="DOCS_STYLE_GUIDE.html" aria-current="page">Docs Style Guide</a>
+<a href="PURPOSE.html">Purpose</a>
+<a href="RELEASE_NOTES.html">Release Notes</a>
+<a href="ROADMAP.html">ROADMAP.md</a>
+<a href="STATUS.html">Status</a>
+</nav>
+</aside>
+<main class="content">
+<div class="topbar"><a href="index.html">Docs</a><a href="reference/api.html">Reference</a><a href="https://github.com/scwlkr/WalkLang">GitHub</a></div>
+<div class="page">
+<article class="doc">
+<h1 id="walklang-docs-style-guide">WalkLang Docs Style Guide</h1>
+<p>Build docs in narrow, source-grounded slices. The style target is Rust-like: short front doors, clear version boundaries, practical examples, and generated reference pages that come from documented public symbols instead of handwritten API lists.</p>
+<p>The hosted docs entry point is:</p>
+<pre><code class="language-text">https://walklang.wlkrlabs.com/docs</code></pre>
+<h2 id="page-roles">Page Roles</h2>
+<p>Use one primary role per page:</p>
+<ul>
+<li>**Root README:** repository identity, quick start, source install, help,</li>
+<p>contribution, license, and trademark.</p>
+<li>**docs/README.md:** hosted docs front door and map.</li>
+<li>**Tutorial/how-to docs:** task-first guidance with runnable commands.</li>
+<li>**Reference docs:** generated from <code>walk docs</code> and structured comments.</li>
+<li>**Explanation docs:** architecture, design rules, compatibility, roadmap, and</li>
+<p>release context.</p>
+</ul>
+<p>Do not turn one page into all of these at once.</p>
+<h2 id="writing-rules">Writing Rules</h2>
+<ul>
+<li>Lead with what the page is for.</li>
+<li>Use present tense and active voice.</li>
+<li>Prefer short sections with one concept each.</li>
+<li>Keep examples small enough to run or inspect.</li>
+<li>Mark experimental, draft, stable, deprecated, and removed features clearly.</li>
+<li>Link to adjacent docs instead of duplicating long explanations.</li>
+<li>Do not claim a command, website route, package workflow, or language feature</li>
+<p>exists unless the repo proves it.</p>
+<li>Keep root README prose short. Put detailed usage in <code>docs/</code>.</li>
+</ul>
+<h2 id="generated-reference-pipeline">Generated Reference Pipeline</h2>
+<p>Docs are written as structured comments directly above public symbols. A generator extracts those comments plus real symbol metadata from source and registries, writes Markdown and JSON reference docs, and CI should fail when public symbols are undocumented or generated docs are stale.</p>
+<p>Required pipeline:</p>
+<pre><code class="language-text">source code/registries
+  -&gt; doc extractor
+  -&gt; docs.json
+  -&gt; Markdown renderer
+  -&gt; docs/reference/*.md
+  -&gt; public/docs/reference/*.html
+  -&gt; docs-site check in CI</code></pre>
+<p>Required comment format:</p>
+<pre><code class="language-walk">/// Summary: One sentence.
+/// Params:
+/// - x: meaning
+/// Returns: meaning
+/// Example:
+/// ```walk
+/// ...
+/// ```
+/// Since: 0.1.0</code></pre>
+<p>Required JSON fields:</p>
+<pre><code class="language-text">kind, name, path, signature, summary, params, returns, examples, since</code></pre>
+<h2 id="current-commands">Current Commands</h2>
+<pre><code class="language-bash">scripts/build-docs-site.sh
+scripts/check-docs-site.sh</code></pre>
+<h2 id="reference-rules">Reference Rules</h2>
+<ul>
+<li>Public symbol without docs = failure.</li>
+<li>Missing required field = failure.</li>
+<li>Stale generated docs = failure.</li>
+<li>Broken static-site links = failure.</li>
+<li>Reference docs are generated, not hand-written.</li>
+<li>Start by documenting 2-3 existing public symbols end-to-end.</li>
+</ul>
+<h2 id="docs-qa">Docs QA</h2>
+<p>Before shipping a docs pass:</p>
+<pre><code class="language-bash">git diff --check
+go test -count=1 ./...</code></pre>
+<p>For docs that mention generated API output, also prove the command works against a real source file:</p>
+<pre><code class="language-bash">go build -o build/walk ./cmd/walk
+./build/walk docs --strict -o build/api.md examples/v1.walk
+./build/walk docs --strict --format json -o build/api.json examples/v1.walk
+scripts/check-docs-site.sh</code></pre>
+<p>For hosted docs changes, verify local Markdown links and keep links relative inside <code>docs/</code> unless the target is intentionally external.</p>
+</article>
+<footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
+</div>
+</main>
+</div>
+</body>
+</html>

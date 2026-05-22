@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WalkLang v1 / v1.5 - WalkLang</title>
+<link rel="icon" href="../assets/icon.svg">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+<a class="brand" href="../index.html"><img src="../assets/logo.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>
+<nav class="nav" aria-label="Documentation">
+<h2>Start</h2>
+<a href="index.html">Documentation</a>
+<a href="INSTALL.html">Install Instructions</a>
+<a href="PROJECTS.html">Project Mode</a>
+<h2>Language</h2>
+<a href="SYNTAX.html">v1 Syntax Guide</a>
+<a href="SPEC.html">v1 Specification</a>
+<a href="STDLIB.html">v1.5 Standard Library</a>
+<a href="ERRORS.html">v1 Diagnostics</a>
+<a href="COMPATIBILITY.html">v1.5 Compatibility</a>
+<a href="MIGRATING.html">Migration Guide</a>
+<a href="DEPRECATION.html">Deprecation Policy</a>
+<h2>Versions</h2>
+<a href="V1.html" aria-current="page">v1 / v1.5</a>
+<a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
+<a href="V3.html">v3 Package Ecosystem</a>
+<h2>Tools</h2>
+<a href="V4.html">v4 Professional Tooling</a>
+<a href="V5.html">v5 Runtime and Backend Maturity</a>
+<a href="V5_1.html">v5.1 Public Docs And Reference Site</a>
+<h2>Reference</h2>
+<a href="reference/api.html">API Reference</a>
+<a href="reference/index.html">Reference index</a>
+<h2>Project</h2>
+<a href="ARCHITECTURE.html">ARCHITECTURE.md</a>
+<a href="DESIGN_RULES.html">v1 Design Rules</a>
+<a href="DOCS_STYLE_GUIDE.html">Docs Style Guide</a>
+<a href="PURPOSE.html">Purpose</a>
+<a href="RELEASE_NOTES.html">Release Notes</a>
+<a href="ROADMAP.html">ROADMAP.md</a>
+<a href="STATUS.html">Status</a>
+</nav>
+</aside>
+<main class="content">
+<div class="topbar"><a href="index.html">Docs</a><a href="reference/api.html">Reference</a><a href="https://github.com/scwlkr/WalkLang">GitHub</a></div>
+<div class="page">
+<article class="doc">
+<h1 id="walklang-v1-v1-5">WalkLang v1 / v1.5</h1>
+<p>v1 makes the current compiler path feel stable.</p>
+<p>v1.1 makes the stable surface explicit through contract docs and conformance fixtures. It does not add project mode or data modeling.</p>
+<p>v1.2 adds project mode without changing the v1.1 core syntax surface.</p>
+<p>v1.3 grows the stable standard library foundation without adding file/json/matrix yet.</p>
+<p>v1.4 makes diagnostics and <code>walk check</code> more useful without changing the v1 core syntax.</p>
+<p>v1.5 prepares the v1.x compatibility line with release notes, migration guidance, deprecation policy, official install instructions, and focused compatibility fixtures.</p>
+<p>Contract docs:</p>
+<pre><code class="language-text">docs/SPEC.md
+docs/SYNTAX.md
+docs/STDLIB.md
+docs/ERRORS.md
+docs/DESIGN_RULES.md
+docs/COMPATIBILITY.md
+docs/DEPRECATION.md
+docs/INSTALL.md
+docs/MIGRATING.md
+docs/PROJECTS.md
+docs/RELEASE_NOTES.md
+docs/STATUS.md</code></pre>
+<h2 id="module-rules">Module Rules</h2>
+<p>User modules are sibling <code>.walk</code> files imported by bare name.</p>
+<pre><code class="language-walk"># math_extra.walk
+func: cube(x int) int
+    return: * x x x
+
+exp: cube</code></pre>
+<pre><code class="language-walk"># main.walk
+imp: math_extra
+
+out: math_extra.cube(3)</code></pre>
+<p>Rules:</p>
+<ul>
+<li><code>imp: name</code> loads <code>name.walk</code> from the importing file&#39;s directory unless <code>name</code> is a built-in module.</li>
+<li>Imported calls stay namespaced: <code>math_extra.cube(3)</code>.</li>
+<li>Only functions named by <code>exp:</code> are callable from another file.</li>
+<li>Private helper functions may be used inside the module but not through the imported namespace.</li>
+<li>Module files may contain only <code>imp:</code>, <code>func:</code>, and <code>exp:</code> at top level.</li>
+</ul>
+<h2 id="stable-built-in-apis">Stable Built-In APIs</h2>
+<pre><code class="language-text">math.sqrt(number) -&gt; float
+math.pow(number, number) -&gt; float
+string.len(string) -&gt; int
+array.len(array[T]) -&gt; int
+time.now() -&gt; int
+random.int(int, int) -&gt; int
+testing.assert(bool) -&gt; bool</code></pre>
+<h2 id="diagnostics-and-warnings">Diagnostics And Warnings</h2>
+<p>The CLI prints the stable diagnostic first line, followed by source snippets, caret locations, and focused suggestions when obvious.</p>
+<p>The checker emits warnings for shadowing outer names and unreachable statements.</p>
+<pre><code class="language-bash">go run ./cmd/walk check examples/v1.walk
+go run ./cmd/walk check --warnings=off examples/v1.walk
+go run ./cmd/walk check --warnings=error examples/v1.walk</code></pre>
+<h2 id="build-flow">Build Flow</h2>
+<p>Native builds still go through generated C and <code>cc</code>.</p>
+<p>Install the local CLI first:</p>
+<pre><code class="language-bash">scripts/install-local.sh v1.5-local
+walk version</code></pre>
+<pre><code class="language-bash">walk build examples/v1.walk -o build/v1 --release
+./build/v1</code></pre>
+<p>Use a different C compiler or flags when needed:</p>
+<pre><code class="language-bash">walk build examples/v1.walk -o build/v1 --cc clang --cflag -Wall</code></pre>
+<p>Run the v1 stress path:</p>
+<pre><code class="language-bash">scripts/stress-v1.sh</code></pre>
+<p>Run the focused v1 compatibility suite:</p>
+<pre><code class="language-bash">go test ./cmd/walk -run TestV15CompatibilitySuite</code></pre>
+<p>Build release CLI artifacts:</p>
+<pre><code class="language-bash">scripts/release.sh v1.5.0</code></pre>
+<h2 id="project-mode">Project Mode</h2>
+<pre><code class="language-bash">walk init hello
+cd hello
+walk check
+walk build
+walk test
+walk fmt
+walk clean</code></pre>
+<p>Project mode is defined in <code>docs/PROJECTS.md</code>.</p>
+<p>Run v1 conformance:</p>
+<pre><code class="language-bash">go test ./...</code></pre>
+</article>
+<footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
+</div>
+</main>
+</div>
+</body>
+</html>

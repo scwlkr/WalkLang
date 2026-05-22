@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WalkLang Status - WalkLang</title>
+<link rel="icon" href="../assets/icon.svg">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+<a class="brand" href="../index.html"><img src="../assets/logo.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>
+<nav class="nav" aria-label="Documentation">
+<h2>Start</h2>
+<a href="index.html">Documentation</a>
+<a href="INSTALL.html">Install Instructions</a>
+<a href="PROJECTS.html">Project Mode</a>
+<h2>Language</h2>
+<a href="SYNTAX.html">v1 Syntax Guide</a>
+<a href="SPEC.html">v1 Specification</a>
+<a href="STDLIB.html">v1.5 Standard Library</a>
+<a href="ERRORS.html">v1 Diagnostics</a>
+<a href="COMPATIBILITY.html">v1.5 Compatibility</a>
+<a href="MIGRATING.html">Migration Guide</a>
+<a href="DEPRECATION.html">Deprecation Policy</a>
+<h2>Versions</h2>
+<a href="V1.html">v1 / v1.5</a>
+<a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
+<a href="V3.html">v3 Package Ecosystem</a>
+<h2>Tools</h2>
+<a href="V4.html">v4 Professional Tooling</a>
+<a href="V5.html">v5 Runtime and Backend Maturity</a>
+<a href="V5_1.html">v5.1 Public Docs And Reference Site</a>
+<h2>Reference</h2>
+<a href="reference/api.html">API Reference</a>
+<a href="reference/index.html">Reference index</a>
+<h2>Project</h2>
+<a href="ARCHITECTURE.html">ARCHITECTURE.md</a>
+<a href="DESIGN_RULES.html">v1 Design Rules</a>
+<a href="DOCS_STYLE_GUIDE.html">Docs Style Guide</a>
+<a href="PURPOSE.html">Purpose</a>
+<a href="RELEASE_NOTES.html">Release Notes</a>
+<a href="ROADMAP.html">ROADMAP.md</a>
+<a href="STATUS.html" aria-current="page">Status</a>
+</nav>
+</aside>
+<main class="content">
+<div class="topbar"><a href="index.html">Docs</a><a href="reference/api.html">Reference</a><a href="https://github.com/scwlkr/WalkLang">GitHub</a></div>
+<div class="page">
+<article class="doc">
+<h1 id="walklang-status">WalkLang Status</h1>
+<p>Current version: v5.1 public docs and reference site.</p>
+<p>State: v5.1 is complete against <code>docs/ROADMAP.md</code>. The repo now owns a static public docs and reference site: <code>scripts/build-docs-site.sh</code> regenerates <code>docs/reference/api.md</code>, <code>docs/reference/api.json</code>, and the static <code>public/</code> tree; <code>scripts/check-docs-site.sh</code> rebuilds and checks generated artifacts plus static-site links; <code>public/CNAME</code> targets <code>walklang.wlkrlabs.com</code>; and <code>.github/workflows/pages.yml</code> deploys <code>public/</code> through GitHub Pages from <code>main</code>. Generated reference docs now use repo-relative source paths instead of local absolute paths. C remains the primary backend, and the v5 runtime/backend contract remains documented in <code>docs/V5.md</code> and <code>docs/ARCHITECTURE.md</code>.</p>
+<p>v5.1 verification on 2026-05-22: focused <code>go test ./cmd/walk -run &#39;TestV4DocsAndDebugMapCommands|TestV51DocsUseRelativePublishablePaths&#39; -count=1</code> passed; <code>scripts/check-docs-site.sh</code> passed; full <code>go test -count=1 ./...</code> passed; <code>go build -o build/walk ./cmd/walk</code> passed; <code>WALK_BIN=$PWD/build/walk scripts/stress-v1.sh</code> passed; <code>scripts/release.sh v5.1.0 &lt;temp&gt;/release</code> produced 5 platform artifacts plus <code>SHA256SUMS</code>; <code>wc -l &lt;temp&gt;/release/SHA256SUMS</code> reported 5 checksum lines; the host release binary reported <code>v5.1.0</code> from <code>walk version</code>; <code>git diff --check</code> passed; and a temporary local HTTP server served <code>/</code>, <code>/docs/</code>, <code>/docs/reference/api.html</code>, and <code>/docs/reference/api.json</code> with expected v5.1 docs and repo-relative reference paths.</p>
+<p>Docs setup on 2026-05-22: the root README now follows a Rust-style repository landing-page shape, <code>docs/README.md</code> is the canonical docs front door and source for the <code>https://walklang.wlkrlabs.com/docs</code> hosted path, <code>CONTRIBUTING.md</code> documents the local contribution and verification path, and <code>docs/DOCS_STYLE_GUIDE.md</code> records the source-grounded docs rules plus generated-reference expectations.</p>
+<p>Docs setup verification on 2026-05-22: <code>curl -I --max-time 10 https://walklang.wlkrlabs.com/docs</code> failed with <code>Could not resolve host</code>, so the hosted docs URL remains a planned publish target; changed-doc local Markdown links passed; <code>git diff --check</code> passed; <code>go test -count=1 ./...</code> passed; <code>go build -o build/walk ./cmd/walk</code> passed; <code>./build/walk docs --strict -o build/docs-check-api.md examples/v1.walk</code> passed; <code>./build/walk docs --strict --format json -o build/docs-check-api.json examples/v1.walk</code> passed; <code>WALK_BIN=$PWD/build/walk scripts/stress-v1.sh</code> passed; and <code>scripts/release.sh v5.0.0 &lt;temp&gt;/release</code> produced 5 platform artifacts plus 5 checksum lines.</p>
+<p>v5 verification on 2026-05-22: baseline <code>go test -count=1 ./...</code> passed before implementation; focused <code>go test ./cmd/walk -run &#39;TestV5|TestV13GeneratedCSnapshots&#39; -count=1</code> passed; full <code>go test -count=1 ./...</code> passed after the final code/test changes; <code>go build -o build/walk ./cmd/walk</code> passed; <code>WALK_BIN=$PWD/build/walk scripts/stress-v1.sh</code> passed; <code>scripts/release.sh v5.0.0 &lt;temp&gt;/release</code> produced 5 platform artifacts plus <code>SHA256SUMS</code>; <code>wc -l &lt;temp&gt;/release/SHA256SUMS</code> reported 5 checksum lines; the host release binary reported <code>v5.0.0</code> from <code>walk version</code>; and <code>git diff --check</code> passed.</p>
+<p>Previous v4.1 verification on 2026-05-22: focused <code>go test ./cmd/walk -run &#39;TestV4DocsAndDebugMapCommands|TestV4LSPDiagnosticsFormattingAndCompletion&#39; -count=1</code>, lexer/parser <code>go test ./internal/lexer ./internal/parser -count=1</code>, focused <code>go test ./cmd/walk -run TestV4 -count=1</code>, full <code>go test -count=1 ./...</code>, <code>go build -o build/walk ./cmd/walk</code>, <code>./build/walk docs --strict -o build/v4.1-api.md examples/v1.walk</code>, <code>./build/walk docs --strict --format json -o build/v4.1-api.json examples/v1.walk</code>, <code>WALK_BIN=$PWD/build/walk scripts/stress-v1.sh</code>, <code>scripts/release.sh v4.1.0 &lt;temp&gt;/release</code>, <code>SHA256SUMS</code> line count check, and <code>git diff --check</code> all passed.</p>
+<p>Release CI maintenance on 2026-05-22: GitHub Actions workflow uses Node 24 first-party actions, disables unnecessary Go dependency caching for this no-<code>go.sum</code> module, runs <code>scripts/check-docs-site.sh</code>, and now publishes v5.1.0-labeled release artifacts.</p>
+<p>Next: after the Pages deployment and custom-domain DNS are verified live, continue later ecosystem work with the playground/compiler explorer before networking.</p>
+</article>
+<footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
+</div>
+</main>
+</div>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WalkLang v1.5 Compatibility - WalkLang</title>
+<link rel="icon" href="../assets/icon.svg">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+<a class="brand" href="../index.html"><img src="../assets/logo.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>
+<nav class="nav" aria-label="Documentation">
+<h2>Start</h2>
+<a href="index.html">Documentation</a>
+<a href="INSTALL.html">Install Instructions</a>
+<a href="PROJECTS.html">Project Mode</a>
+<h2>Language</h2>
+<a href="SYNTAX.html">v1 Syntax Guide</a>
+<a href="SPEC.html">v1 Specification</a>
+<a href="STDLIB.html">v1.5 Standard Library</a>
+<a href="ERRORS.html">v1 Diagnostics</a>
+<a href="COMPATIBILITY.html" aria-current="page">v1.5 Compatibility</a>
+<a href="MIGRATING.html">Migration Guide</a>
+<a href="DEPRECATION.html">Deprecation Policy</a>
+<h2>Versions</h2>
+<a href="V1.html">v1 / v1.5</a>
+<a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
+<a href="V3.html">v3 Package Ecosystem</a>
+<h2>Tools</h2>
+<a href="V4.html">v4 Professional Tooling</a>
+<a href="V5.html">v5 Runtime and Backend Maturity</a>
+<a href="V5_1.html">v5.1 Public Docs And Reference Site</a>
+<h2>Reference</h2>
+<a href="reference/api.html">API Reference</a>
+<a href="reference/index.html">Reference index</a>
+<h2>Project</h2>
+<a href="ARCHITECTURE.html">ARCHITECTURE.md</a>
+<a href="DESIGN_RULES.html">v1 Design Rules</a>
+<a href="DOCS_STYLE_GUIDE.html">Docs Style Guide</a>
+<a href="PURPOSE.html">Purpose</a>
+<a href="RELEASE_NOTES.html">Release Notes</a>
+<a href="ROADMAP.html">ROADMAP.md</a>
+<a href="STATUS.html">Status</a>
+</nav>
+</aside>
+<main class="content">
+<div class="topbar"><a href="index.html">Docs</a><a href="reference/api.html">Reference</a><a href="https://github.com/scwlkr/WalkLang">GitHub</a></div>
+<div class="page">
+<article class="doc">
+<h1 id="walklang-v1-5-compatibility">WalkLang v1.5 Compatibility</h1>
+<p>WalkLang v1.5 defines the compatibility promise for the v1.x language line. v1.5 does not intentionally change stable v1 syntax or standard-library behavior; it makes the release boundary explicit.</p>
+<h2 id="compatibility-promise">Compatibility Promise</h2>
+<p>Stable v1 code should continue to compile through the v1.x line unless one of these applies:</p>
+<pre><code class="language-text">the behavior was undocumented
+the behavior failed conformance or compatibility tests
+the behavior relied on internal generated C shape outside snapshots
+a safety or correctness fix requires a documented break</code></pre>
+<p>When a safety or correctness fix breaks stable code, the release notes and migration guide must name the break.</p>
+<h2 id="version-meanings">Version Meanings</h2>
+<pre><code class="language-text">v1.0.x: bug fixes only
+v1.x.0: compatible improvements to stable v1 behavior
+v2.0.0: breaking language changes allowed</code></pre>
+<h2 id="stability-labels">Stability Labels</h2>
+<pre><code class="language-text">experimental
+  may change anytime and is not compatibility-protected
+
+draft
+  intended shape, but still not compatibility-protected
+
+stable
+  part of the v1 compatibility promise
+
+deprecated
+  still works, but has a documented replacement
+
+removed
+  no longer accepted</code></pre>
+<h2 id="stable-surface">Stable Surface</h2>
+<p>Stable v1 behavior is defined by:</p>
+<pre><code class="language-text">docs/SPEC.md
+docs/SYNTAX.md
+docs/STDLIB.md
+docs/ERRORS.md
+docs/COMPATIBILITY.md
+tests/pass/
+tests/fail/
+tests/compat/v1/
+tests/snapshots/</code></pre>
+<p>If a feature is accepted by the compiler but absent from those files, treat it as experimental.</p>
+<h2 id="compatibility-test-suite">Compatibility Test Suite</h2>
+<p>Run the focused v1 compatibility suite with:</p>
+<pre><code class="language-bash">go test ./cmd/walk -run TestV15CompatibilitySuite</code></pre>
+<p>The full repository test command also runs it:</p>
+<pre><code class="language-bash">go test ./...</code></pre>
+<p>The suite covers representative stable programs, test syntax, user-module exports, stable stdlib APIs, and selected stable diagnostic first lines.</p>
+<h2 id="experimental-or-future-features">Experimental Or Future Features</h2>
+<p>These are not compatibility-protected in v1:</p>
+<pre><code class="language-text">structs (implemented as experimental in v2)
+methods (implemented as experimental in v2.1)
+generic functions (implemented as experimental in v2.2)
+traits
+interfaces
+closures
+anonymous functions
+file/json/matrix APIs
+package manager behavior
+project config behavior
+LSP/debugger behavior
+any generated C details outside snapshots</code></pre>
+<h2 id="deprecation-policy">Deprecation Policy</h2>
+<p><code>docs/DEPRECATION.md</code> owns the deprecation lifecycle. Current v1.5 deprecated surface: none.</p>
+<h2 id="changing-the-contract">Changing The Contract</h2>
+<p>When changing stable behavior:</p>
+<p>1. Update <code>docs/SPEC.md</code>. 2. Update syntax, stdlib, diagnostics, compatibility, migration, or deprecation docs when relevant. 3. Add or update pass/fail and compatibility fixtures. 4. Update generated C snapshots when backend output intentionally changes. 5. Update release notes when the change affects users. 6. Update <code>docs/STATUS.md</code> with the new project state.</p>
+<h2 id="snapshot-compatibility">Snapshot Compatibility</h2>
+<p>Generated C snapshots are regression tests for selected backend shapes. They do not freeze every byte of every generated program, but they do make covered output changes explicit.</p>
+</article>
+<footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
+</div>
+</main>
+</div>
+</body>
+</html>
