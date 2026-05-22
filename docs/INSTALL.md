@@ -1,6 +1,6 @@
 # WalkLang Official Install Instructions
 
-WalkLang v2.0 supports two install paths:
+WalkLang v2.1 supports two install paths:
 
 ```text
 release artifact install
@@ -14,11 +14,11 @@ Use `walk version` after either path. The reported version should match the rele
 Release artifacts are produced by `scripts/release.sh` and named:
 
 ```text
-walk-v2.0.0-darwin-arm64
-walk-v2.0.0-darwin-amd64
-walk-v2.0.0-linux-amd64
-walk-v2.0.0-linux-arm64
-walk-v2.0.0-windows-amd64.exe
+walk-v2.1.0-darwin-arm64
+walk-v2.1.0-darwin-amd64
+walk-v2.1.0-linux-amd64
+walk-v2.1.0-linux-arm64
+walk-v2.1.0-windows-amd64.exe
 SHA256SUMS
 ```
 
@@ -26,12 +26,12 @@ Install on macOS or Linux:
 
 ```bash
 mkdir -p ~/.local/bin
-cp walk-v2.0.0-<os>-<arch> ~/.local/bin/walk
+cp walk-v2.1.0-<os>-<arch> ~/.local/bin/walk
 chmod +x ~/.local/bin/walk
 walk version
 ```
 
-Install on Windows by placing `walk-v2.0.0-windows-amd64.exe` somewhere on `PATH` as `walk.exe`, then run:
+Install on Windows by placing `walk-v2.1.0-windows-amd64.exe` somewhere on `PATH` as `walk.exe`, then run:
 
 ```powershell
 walk version
@@ -74,6 +74,7 @@ walk build examples/hello.walk -o build/hello
 walk check --warnings=error examples/v1.walk
 walk test examples/v0_1_tests.walk
 walk build tests/pass/structs.walk -o build/structs
+walk build tests/pass/methods.walk -o build/methods
 ```
 
 Expected `examples/hello.walk` output:
@@ -89,7 +90,7 @@ true
 Maintainers can produce the release artifact set with:
 
 ```bash
-scripts/release.sh v2.0.0 dist
+scripts/release.sh v2.1.0 dist
 ```
 
 The command writes the platform binaries and `dist/SHA256SUMS`.
