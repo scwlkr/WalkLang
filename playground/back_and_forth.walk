@@ -1,0 +1,6 @@
+out: 'Walker: hello WalkLang'
+out: 'WalkLang: hello Walker'
+out: 'Walker: can you do math?'
+out: 'WalkLang: yes'
+out: + 2 3
+out: 'Walker: nice'
