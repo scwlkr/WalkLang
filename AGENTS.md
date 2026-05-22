@@ -6,6 +6,7 @@ Compiler target: `.walk` → Go compiler → C backend → native executable
 # General Guide
 
 After each non-trivial project conversation, update `docs/STATUS.md` with the current version, verification, and next step.
+After each successfully completed task proceed with commiting/syncing changes and going through the new release flow
 
 # Agent Context Shortcuts
 
