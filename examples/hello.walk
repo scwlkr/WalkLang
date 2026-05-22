@@ -1,0 +1,5 @@
+var: x = + 1 2
+out: x
+out: 'hello from WalkLang'
+out: > x 2
+
