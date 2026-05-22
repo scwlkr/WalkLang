@@ -1,0 +1,3 @@
+# WalkLang Purpose 
+
+WalkLang is a compiled language designed to make source code structurally obvious. It compiles to C and then to native executables, giving it a portable, proven backend while keeping the language itself small, regular, and readable. Instead of relying on dense punctuation, overloaded symbols, or hidden precedence rules, WalkLang uses clear indentation, single-quoted strings, prefix math, and visually distinct forms for each core construct. The result is code that can be scanned by shape, understood with minimal context, and written reliably by both humans and AI.

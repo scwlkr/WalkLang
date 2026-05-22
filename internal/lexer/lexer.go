@@ -118,7 +118,7 @@ func tokenizeLine(text string, filename string, line int, startColumn int) ([]To
 			}
 		}
 
-		if strings.ContainsRune("()[],:=+-*/^><?", ch) {
+		if strings.ContainsRune("()[],:=+-*/^><?.", ch) {
 			tokens = append(tokens, Token{Kind: TokenSymbol, Value: string(ch), Location: location})
 			i++
 			continue

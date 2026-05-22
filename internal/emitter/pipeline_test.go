@@ -9,6 +9,7 @@ import (
 
 	"walklang/internal/checker"
 	"walklang/internal/emitter"
+	walkfmt "walklang/internal/format"
 	"walklang/internal/parser"
 )
 
@@ -75,6 +76,122 @@ func TestGeneratedCBuildsAndRuns(t *testing.T) {
 	}
 	if got, want := string(output), "3\nok\n2.5\n"; got != want {
 		t.Fatalf("output mismatch:\nwant %q\ngot  %q", want, got)
+	}
+}
+
+func TestV0RoadmapRepresentativeProgramBuildsAndRuns(t *testing.T) {
+	if _, err := exec.LookPath("cc"); err != nil {
+		t.Skip("cc is not available")
+	}
+
+	cCode := compileToC(t, strings.Join([]string{
+		"imp: math",
+		"",
+		"func: add(a int, b int) int",
+		"    return: + a b",
+		"",
+		"func: distance(x1 float, y1 float, x2 float, y2 float) float",
+		"    return:",
+		"        math.sqrt(",
+		"            +:",
+		"                ^ (- x2 x1) 2",
+		"                ^ (- y2 y1) 2",
+		"        )",
+		"",
+		"var: nums = [1, 2, 3]",
+		"",
+		"for: n in nums",
+		"    out: add(n, 10)",
+		"",
+		"var: d = distance(0, 0, 3, 4)",
+		"",
+		"if: == d 5",
+		"    out: 'distance is 5'",
+		"else:",
+		"    out: 'distance is not 5'",
+	}, "\n"))
+
+	dir := t.TempDir()
+	cPath := filepath.Join(dir, "v0.c")
+	exePath := filepath.Join(dir, "v0")
+	if err := os.WriteFile(cPath, []byte(cCode), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if output, err := exec.Command("cc", cPath, "-o", exePath, "-lm").CombinedOutput(); err != nil {
+		t.Fatalf("cc failed: %v\n%s\n%s", err, string(output), cCode)
+	}
+	output, err := exec.Command(exePath).CombinedOutput()
+	if err != nil {
+		t.Fatalf("program failed: %v\n%s", err, string(output))
+	}
+	if got, want := string(output), "11\n12\n13\ndistance is 5\n"; got != want {
+		t.Fatalf("output mismatch:\nwant %q\ngot  %q\nC:\n%s", want, got, cCode)
+	}
+}
+
+func TestV0ControlFlowNullArraysAndFunctionValues(t *testing.T) {
+	if _, err := exec.LookPath("cc"); err != nil {
+		t.Skip("cc is not available")
+	}
+
+	cCode := compileToC(t, strings.Join([]string{
+		"func: inc(x int) int",
+		"    return: + x 1",
+		"",
+		"func: apply(f func(int) int, x int) int",
+		"    return: f(x)",
+		"",
+		"var: nums = [1, 2, 3]",
+		"nums[1] = 9",
+		"for: n in nums",
+		"    out: n",
+		"",
+		"var: count = 0",
+		"while: < count 3",
+		"    count = + count 1",
+		"    if: == count 2",
+		"        continue:",
+		"    out: count",
+		"",
+		"repeat: 2",
+		"    out: 'r'",
+		"",
+		"var: name string? = null",
+		"if: == name null",
+		"    out: 'null'",
+		"name = 'ok'",
+		"if: != name null",
+		"    out: name",
+		"",
+		"out: apply(inc, 4)",
+	}, "\n"))
+
+	dir := t.TempDir()
+	cPath := filepath.Join(dir, "features.c")
+	exePath := filepath.Join(dir, "features")
+	if err := os.WriteFile(cPath, []byte(cCode), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if output, err := exec.Command("cc", cPath, "-o", exePath, "-lm").CombinedOutput(); err != nil {
+		t.Fatalf("cc failed: %v\n%s\n%s", err, string(output), cCode)
+	}
+	output, err := exec.Command(exePath).CombinedOutput()
+	if err != nil {
+		t.Fatalf("program failed: %v\n%s", err, string(output))
+	}
+	want := "1\n9\n3\n1\n3\nr\nr\nnull\nok\n5\n"
+	if got := string(output); got != want {
+		t.Fatalf("output mismatch:\nwant %q\ngot  %q\nC:\n%s", want, got, cCode)
+	}
+}
+
+func TestFormatterNormalizesInitialSyntax(t *testing.T) {
+	formatted, err := walkfmt.Format("var:x=+ 1 2\nout:'hello'\n", "main.walk")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := formatted, "var: x = + 1 2\nout: 'hello'\n"; got != want {
+		t.Fatalf("want %q, got %q", want, got)
 	}
 }
 

@@ -8,6 +8,7 @@ import (
 
 	"walklang/internal/checker"
 	"walklang/internal/emitter"
+	walkfmt "walklang/internal/format"
 	"walklang/internal/parser"
 )
 
@@ -27,6 +28,8 @@ func run(args []string) error {
 		return build(args[1:])
 	case "emit-c":
 		return emitCCommand(args[1:])
+	case "fmt":
+		return fmtCommand(args[1:])
 	default:
 		return fmt.Errorf("unknown command %q", args[0])
 	}
@@ -80,6 +83,37 @@ func emitCCommand(args []string) error {
 		return err
 	}
 	fmt.Println(output)
+	return nil
+}
+
+func fmtCommand(args []string) error {
+	write := false
+	var sourcePath string
+	for _, arg := range args {
+		if arg == "-w" {
+			write = true
+			continue
+		}
+		if sourcePath != "" {
+			return fmt.Errorf("usage: walk fmt [-w] <source.walk>")
+		}
+		sourcePath = arg
+	}
+	if sourcePath == "" {
+		return fmt.Errorf("usage: walk fmt [-w] <source.walk>")
+	}
+	source, err := os.ReadFile(sourcePath)
+	if err != nil {
+		return fmt.Errorf("source read failed: %w", err)
+	}
+	formatted, err := walkfmt.Format(string(source), sourcePath)
+	if err != nil {
+		return err
+	}
+	if write {
+		return os.WriteFile(sourcePath, []byte(formatted), 0o644)
+	}
+	fmt.Print(formatted)
 	return nil
 }
 
