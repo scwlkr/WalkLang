@@ -1,0 +1,19 @@
+# system decides on a word
+var: wordBank = [ dog, cat, car, bike, motor, human, insect, elephant, zebra, girl, boy, toddler, baby, truck, mustang, silverado, cherokee ]
+
+# system decides how many chars in selcted word
+func: chars(letters in selectedWord)
+
+
+# print 'your word is x chars long
+out: 'your word is (chars) long'
+
+# input first guess
+in: 'input 1 letter: '
+
+
+# print correct/incorrect
+if:  
+
+# print current all guessed letters but hide unguessed
+out: 

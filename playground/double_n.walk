@@ -1,0 +1,18 @@
+var: x =
+       *: 
+            10
+            23
+            50
+            2
+
+var: value = x
+func: powerTwo(n)
+      return: * n 2
+
+func: powerFour(n)
+      return: ^ n 4
+
+out: 'n^4'
+out: powerTwo(value)
+out: 'n^4'
+out: powerFour(value) 
