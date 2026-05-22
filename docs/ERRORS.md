@@ -124,12 +124,13 @@ walk check --warnings=error main.walk
 
 `walk test` builds and runs a native executable. Failed assertions print failure lines and make the executable exit non-zero.
 
-Stable v1.8 runtime failures include:
+Stable v1.9 runtime failures include:
 
 ```text
 walk runtime error: input reached EOF
 walk runtime error: stdin read failed
 walk runtime error: out of memory
+walk runtime error: format failed
 walk runtime error: string index out of range
 walk runtime error: random.choice on empty array
 ```

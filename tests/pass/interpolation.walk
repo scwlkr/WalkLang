@@ -1,0 +1,12 @@
+imp: string
+
+var: word = 'paddle'
+var: wordLength = string.len(word)
+
+out: 'the secret word is {wordLength} characters long'
+out: 'secret: {word}'
+out: 'score {+ 1 2} ok {true}'
+out: 'plural {string.concat(word, 's')}'
+out: '{{word}}'
+out: '{{'
+out: '}}'

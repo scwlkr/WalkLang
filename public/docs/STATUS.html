@@ -19,13 +19,13 @@
 <h2>Language</h2>
 <a href="SYNTAX.html">v1 Syntax Guide</a>
 <a href="SPEC.html">v1 Specification</a>
-<a href="STDLIB.html">v1.8 Standard Library</a>
+<a href="STDLIB.html">v1.9 Standard Library</a>
 <a href="ERRORS.html">v1 Diagnostics</a>
-<a href="COMPATIBILITY.html">v1.8 Compatibility</a>
+<a href="COMPATIBILITY.html">v1.9 Compatibility</a>
 <a href="MIGRATING.html">Migration Guide</a>
 <a href="DEPRECATION.html">Deprecation Policy</a>
 <h2>Versions</h2>
-<a href="V1.html">v1 / v1.8</a>
+<a href="V1.html">v1 / v1.9</a>
 <a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
 <a href="V3.html">v3 Package Ecosystem</a>
 <h2>Tools</h2>
@@ -50,9 +50,11 @@
 <div class="page">
 <article class="doc">
 <h1 id="walklang-status">WalkLang Status</h1>
-<p>Stable language contract: v1.8.</p>
-<p>Current compiler/tooling/docs release: v5.4.1 random seed fix.</p>
+<p>Stable language contract: v1.9.</p>
+<p>Current compiler/tooling/docs release: v5.5.0 string interpolation.</p>
 <p>Experimental implemented language surface: v2.2.</p>
+<p>State: v5.5.0 adds the v1.9 stable string interpolation surface. Single-quoted strings can include <code>{expression}</code> display values, interpolation supports <code>int</code>, <code>float</code>, <code>bool</code>, <code>string</code>, and nullable string values, and doubled braces such as <code>{{word}}</code> print literal braces.</p>
+<p>v5.5.0 verification on 2026-05-22: focused interpolation conformance failed before implementation because strings printed literally and bad interpolation values were accepted; after the fix, <code>go test ./cmd/walk -run &#39;TestV13PassFixturesBuildAndRun|TestV13FailFixturesHaveExpectedDiagnostics&#39; -count=1</code> passed; <code>go test ./cmd/walk -run &#39;TestV13PassFixturesBuildAndRun|TestV19CompatibilitySuite&#39; -count=1</code> passed; full <code>go test -count=1 ./...</code> passed; <code>go build -trimpath -ldflags &#34;-X main.version=v5.5.0&#34; -o build/walk ./cmd/walk</code> passed; <code>./build/walk version</code> reported <code>v5.5.0</code>; <code>./build/walk check --warnings=error tests/pass/interpolation.walk</code> passed; <code>./build/walk tests/pass/interpolation.walk</code> printed the expected interpolated lines; <code>WALK_BIN=$PWD/build/walk scripts/stress-v1.sh</code> passed and reported <code>v1.9 stress ok</code>; <code>scripts/release.sh v5.5.0 &lt;temp&gt;/release</code> produced 5 platform artifacts plus <code>SHA256SUMS</code>; <code>wc -l &lt;temp&gt;/release/SHA256SUMS</code> reported 5 checksum lines; the host release binary reported <code>v5.5.0</code> from <code>walk version</code>; <code>scripts/build-docs-site.sh</code> passed; <code>scripts/check-docs-site.sh</code> passed; and <code>git diff --check --cached</code> passed for the staged release diff. Full worktree <code>git diff --check</code> is still blocked by the pre-existing unstaged <code>playground/hangman-v2.walk</code> trailing whitespace.</p>
 <p>State: v5.4.1 fixes <code>random.choice</code> and <code>random.int</code> to use a runtime-owned PRNG seeded once per native process instead of the C runtime&#39;s unseeded default <code>rand()</code> state.</p>
 <p>v5.4.1 verification on 2026-05-22: added <code>TestRandomChoiceSeedsFreshProcesses</code> and confirmed it failed before the runtime fix because fresh native processes all produced the same first <code>random.choice</code> value; after the fix, full <code>go test -count=1 ./...</code> passed; <code>go build -trimpath -ldflags &#34;-X main.version=v5.4.1&#34; -o build/walk ./cmd/walk</code> passed and <code>./build/walk version</code> reported <code>v5.4.1</code>; <code>WALK_BIN=$PWD/build/walk scripts/stress-v1.sh</code> passed and reported <code>v1.8 stress ok</code>; <code>scripts/release.sh v5.4.1 &lt;temp&gt;/release</code> produced 5 platform artifacts plus <code>SHA256SUMS</code>; <code>wc -l &lt;temp&gt;/release/SHA256SUMS</code> reported 5 checksum lines; the host release binary reported <code>v5.4.1</code> from <code>walk version</code>; <code>scripts/install-local.sh v5.4.1</code> installed <code>/Users/shanewalker/.local/bin/walk</code>; and twelve fresh installed <code>walk hangman-v2.walk</code> runs from <code>playground/</code> produced multiple choices.</p>
 <p>State: v5.4 is complete against the new v1.8 terminal-game helper surface. Stable v1.8 adds <code>string.at</code>, string indexing with <code>word[0]</code>, <code>string.contains</code>, <code>string.concat</code>, <code>array.contains</code>, <code>array.push</code>, explicitly typed empty arrays such as <code>var: guessed array[string] = []</code>, and <code>random.choice</code> for non-empty stable native arrays. The helpers keep the existing expression/module model: <code>array.push</code> returns a new array and string building uses <code>string.concat</code> instead of changing numeric <code>+</code>.</p>

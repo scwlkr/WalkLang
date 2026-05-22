@@ -1,5 +1,25 @@
 # WalkLang Migration Guide
 
+## v1.8 to v1.9
+
+v1.9 adds string interpolation for simple display text. Existing v1.8 source should not need changes.
+
+New code can put display expressions inside single-quoted strings:
+
+```walk
+imp: string
+
+var: word = 'paddle'
+var: wordLength = string.len(word)
+out: 'the secret word is {wordLength} characters long'
+```
+
+Interpolation accepts `int`, `float`, `bool`, `string`, and nullable string values. Use doubled braces when the output should contain literal braces:
+
+```walk
+out: '{{word}}'
+```
+
 ## v1.7 to v1.8
 
 v1.8 adds stable helpers for simple terminal games and other string/array-heavy programs. Existing v1.7 source should not need changes.

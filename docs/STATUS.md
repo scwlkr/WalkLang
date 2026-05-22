@@ -1,10 +1,35 @@
 # WalkLang Status
 
-Stable language contract: v1.8.
+Stable language contract: v1.9.
 
-Current compiler/tooling/docs release: v5.4.1 random seed fix.
+Current compiler/tooling/docs release: v5.5.0 string interpolation.
 
 Experimental implemented language surface: v2.2.
+
+State: v5.5.0 adds the v1.9 stable string interpolation surface. Single-quoted
+strings can include `{expression}` display values, interpolation supports
+`int`, `float`, `bool`, `string`, and nullable string values, and doubled braces
+such as `{{word}}` print literal braces.
+
+v5.5.0 verification on 2026-05-22: focused interpolation conformance failed
+before implementation because strings printed literally and bad interpolation
+values were accepted; after the fix, `go test ./cmd/walk -run
+'TestV13PassFixturesBuildAndRun|TestV13FailFixturesHaveExpectedDiagnostics'
+-count=1` passed; `go test ./cmd/walk -run
+'TestV13PassFixturesBuildAndRun|TestV19CompatibilitySuite' -count=1` passed;
+full `go test -count=1 ./...` passed; `go build -trimpath -ldflags "-X
+main.version=v5.5.0" -o build/walk ./cmd/walk` passed; `./build/walk version`
+reported `v5.5.0`; `./build/walk check --warnings=error
+tests/pass/interpolation.walk` passed; `./build/walk
+tests/pass/interpolation.walk` printed the expected interpolated lines;
+`WALK_BIN=$PWD/build/walk scripts/stress-v1.sh` passed and reported `v1.9
+stress ok`; `scripts/release.sh v5.5.0 <temp>/release` produced 5 platform
+artifacts plus `SHA256SUMS`; `wc -l <temp>/release/SHA256SUMS` reported 5
+checksum lines; the host release binary reported `v5.5.0` from `walk version`;
+`scripts/build-docs-site.sh` passed; `scripts/check-docs-site.sh` passed; and
+`git diff --check --cached` passed for the staged release diff. Full worktree
+`git diff --check` is still blocked by the pre-existing unstaged
+`playground/hangman-v2.walk` trailing whitespace.
 
 State: v5.4.1 fixes `random.choice` and `random.int` to use a runtime-owned
 PRNG seeded once per native process instead of the C runtime's unseeded default

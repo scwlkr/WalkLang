@@ -4,6 +4,33 @@
 
 No unreleased changes.
 
+## v5.5.0 - String Interpolation
+
+Date: 2026-05-22
+
+v5.5.0 adds the v1.9 stable string interpolation syntax for simple display text.
+
+### Added
+
+- Single-quoted strings may include `{expression}` interpolation.
+- Interpolation formats `int`, `float`, `bool`, `string`, and nullable string values.
+- Doubled braces such as `{{word}}` output literal braces.
+- Compatibility and conformance fixtures now cover interpolation output and unsupported interpolation values.
+
+### Breaking Changes
+
+None.
+
+### Upgrade
+
+Regenerate docs and release artifacts with:
+
+```bash
+scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.5.0 dist
+```
+
 ## v5.4.1 - Random Seed Fix
 
 Date: 2026-05-22

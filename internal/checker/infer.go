@@ -217,6 +217,16 @@ func (i *functionInferencer) inferExpression(expression ast.Expression, expected
 	switch e := expression.(type) {
 	case *ast.Literal:
 		return literalType(e), nil
+	case *ast.InterpolatedString:
+		for _, part := range e.Parts {
+			if part.Expression == nil {
+				continue
+			}
+			if _, err := i.inferExpression(part.Expression, ast.Type{}); err != nil {
+				return ast.Type{}, err
+			}
+		}
+		return ast.Basic(ast.TypeString), nil
 	case *ast.Name:
 		if sym, ok := i.resolve(e.Identifier); ok {
 			if knownType(expected) && !knownType(sym.typeName) {

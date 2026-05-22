@@ -1,6 +1,6 @@
-# WalkLang v1.8 Compatibility
+# WalkLang v1.9 Compatibility
 
-WalkLang v1.8 defines the compatibility promise for the v1.x language line. v1.8 keeps the v1.7 release boundary and adds stable terminal-game helpers for strings, arrays, and random choice.
+WalkLang v1.9 defines the compatibility promise for the v1.x language line. v1.9 keeps the v1.8 release boundary and adds stable string interpolation for display text.
 
 ## Compatibility Promise
 
@@ -65,7 +65,7 @@ If a feature is accepted by the compiler but absent from those files, treat it a
 Run the focused v1 compatibility suite with:
 
 ```bash
-go test ./cmd/walk -run TestV18CompatibilitySuite
+go test ./cmd/walk -run TestV19CompatibilitySuite
 ```
 
 The full repository test command also runs it:
@@ -97,7 +97,7 @@ any generated C details outside snapshots
 
 ## Deprecation Policy
 
-`docs/DEPRECATION.md` owns the deprecation lifecycle. Current v1.8 deprecated surface: none.
+`docs/DEPRECATION.md` owns the deprecation lifecycle. Current v1.9 deprecated surface: none.
 
 ## Changing The Contract
 

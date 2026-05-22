@@ -308,6 +308,18 @@ type Literal struct {
 
 func (e *Literal) expressionNode() {}
 
+type InterpolatedStringPart struct {
+	Literal    string
+	Expression Expression
+}
+
+type InterpolatedString struct {
+	ExprBase
+	Parts []InterpolatedStringPart
+}
+
+func (e *InterpolatedString) expressionNode() {}
+
 type Name struct {
 	ExprBase
 	Identifier string

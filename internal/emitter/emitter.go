@@ -168,6 +168,30 @@ func (e *cEmitter) emit(program *ast.Program, testsOnly bool) (string, error) {
 	out.WriteString("    out[left_len + right_len] = '\\0';\n")
 	out.WriteString("    return out;\n")
 	out.WriteString("}\n\n")
+	out.WriteString("static WALK_UNUSED WalkString __walk_format_int(WalkInt value) {\n")
+	out.WriteString("    char buffer[64];\n")
+	out.WriteString("    int len = snprintf(buffer, sizeof(buffer), \"%lld\", (long long)value);\n")
+	out.WriteString("    if (len < 0 || (size_t)len >= sizeof(buffer)) { __walk_runtime_error(\"format failed\"); }\n")
+	out.WriteString("    char *out = (char *)malloc((size_t)len + 1);\n")
+	out.WriteString("    if (out == NULL) { __walk_runtime_error(\"out of memory\"); }\n")
+	out.WriteString("    memcpy(out, buffer, (size_t)len + 1);\n")
+	out.WriteString("    return out;\n")
+	out.WriteString("}\n\n")
+	out.WriteString("static WALK_UNUSED WalkString __walk_format_float(WalkFloat value) {\n")
+	out.WriteString("    char buffer[64];\n")
+	out.WriteString("    int len = snprintf(buffer, sizeof(buffer), \"%g\", (double)value);\n")
+	out.WriteString("    if (len < 0 || (size_t)len >= sizeof(buffer)) { __walk_runtime_error(\"format failed\"); }\n")
+	out.WriteString("    char *out = (char *)malloc((size_t)len + 1);\n")
+	out.WriteString("    if (out == NULL) { __walk_runtime_error(\"out of memory\"); }\n")
+	out.WriteString("    memcpy(out, buffer, (size_t)len + 1);\n")
+	out.WriteString("    return out;\n")
+	out.WriteString("}\n\n")
+	out.WriteString("static WALK_UNUSED WalkString __walk_format_bool(WalkBool value) {\n")
+	out.WriteString("    return value ? \"true\" : \"false\";\n")
+	out.WriteString("}\n\n")
+	out.WriteString("static WALK_UNUSED WalkString __walk_format_string(WalkString value) {\n")
+	out.WriteString("    return value == NULL ? \"null\" : value;\n")
+	out.WriteString("}\n\n")
 	out.WriteString("static WALK_UNUSED WalkArrayInt __walk_array_push_int(WalkArrayInt array, WalkInt item) {\n")
 	out.WriteString("    WalkInt *items = (WalkInt *)__walk_alloc_array(array.len + 1, sizeof(WalkInt));\n")
 	out.WriteString("    for (WalkSize i = 0; i < array.len; i++) { items[i] = array.items[i]; }\n")
@@ -821,6 +845,16 @@ func cloneExpression(expression ast.Expression, bindings map[string]ast.Type) as
 	switch e := expression.(type) {
 	case *ast.Literal:
 		return &ast.Literal{ExprBase: base, Kind: e.Kind, Value: e.Value}
+	case *ast.InterpolatedString:
+		parts := make([]ast.InterpolatedStringPart, 0, len(e.Parts))
+		for _, part := range e.Parts {
+			var expression ast.Expression
+			if part.Expression != nil {
+				expression = cloneExpression(part.Expression, bindings)
+			}
+			parts = append(parts, ast.InterpolatedStringPart{Literal: part.Literal, Expression: expression})
+		}
+		return &ast.InterpolatedString{ExprBase: base, Parts: parts}
 	case *ast.Name:
 		return &ast.Name{ExprBase: base, Identifier: e.Identifier}
 	case *ast.Prefix:
@@ -1302,6 +1336,8 @@ func (e *cEmitter) emitExpression(expression ast.Expression) (string, error) {
 	switch ex := expression.(type) {
 	case *ast.Literal:
 		return emitLiteral(ex)
+	case *ast.InterpolatedString:
+		return e.emitInterpolatedString(ex)
 	case *ast.Name:
 		if e.currentModule != "" && e.moduleFunctionNames[e.currentModule][ex.Identifier] {
 			return mangleModuleName(e.currentModule, ex.Identifier), nil
@@ -1344,6 +1380,42 @@ func (e *cEmitter) emitExpression(expression ast.Expression) (string, error) {
 		return "", errorAt(ex.Loc(), "internal error: array literal cannot be emitted inline")
 	default:
 		return "", errorAt(expression.Loc(), "internal error: unknown expression")
+	}
+}
+
+func (e *cEmitter) emitInterpolatedString(expression *ast.InterpolatedString) (string, error) {
+	value := `""`
+	for _, part := range expression.Parts {
+		var rendered string
+		if part.Expression == nil {
+			rendered = `"` + escapeCString(part.Literal) + `"`
+		} else {
+			expr, err := e.emitExpression(part.Expression)
+			if err != nil {
+				return "", err
+			}
+			rendered, err = e.emitInterpolatedExpression(part.Expression, expr)
+			if err != nil {
+				return "", err
+			}
+		}
+		value = fmt.Sprintf("__walk_string_concat(%s, %s)", value, rendered)
+	}
+	return value, nil
+}
+
+func (e *cEmitter) emitInterpolatedExpression(expression ast.Expression, rendered string) (string, error) {
+	switch expression.ExprType().Kind {
+	case ast.TypeInt:
+		return fmt.Sprintf("__walk_format_int((WalkInt)(%s))", rendered), nil
+	case ast.TypeFloat:
+		return fmt.Sprintf("__walk_format_float((WalkFloat)(%s))", rendered), nil
+	case ast.TypeBool:
+		return fmt.Sprintf("__walk_format_bool((WalkBool)(%s))", rendered), nil
+	case ast.TypeString:
+		return fmt.Sprintf("__walk_format_string((WalkString)(%s))", rendered), nil
+	default:
+		return "", errorAt(expression.Loc(), "internal error: cannot interpolate %s", expression.ExprType().String())
 	}
 }
 

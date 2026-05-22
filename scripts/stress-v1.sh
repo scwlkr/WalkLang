@@ -40,7 +40,7 @@ expect_failure() {
     fi
 }
 
-go test ./cmd/walk -run TestV18CompatibilitySuite
+go test ./cmd/walk -run TestV19CompatibilitySuite
 go test ./...
 
 "$walk_bin" check --warnings=error examples/v1.walk
@@ -71,6 +71,15 @@ true
 7
 fixed
 true"
+
+"$walk_bin" build tests/pass/interpolation.walk -o "$work_dir/interpolation"
+expect_output "$work_dir/interpolation" "the secret word is 6 characters long
+secret: paddle
+score 3 ok true
+plural paddles
+{word}
+{
+}"
 
 "$walk_bin" build examples/v0.walk -o "$work_dir/v0"
 expect_output "$work_dir/v0" "11
@@ -173,4 +182,4 @@ project_dir="$work_dir/hello_project"
     test ! -d build
 )
 
-echo "v1.8 stress ok"
+echo "v1.9 stress ok"

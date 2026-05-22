@@ -19,13 +19,13 @@
 <h2>Language</h2>
 <a href="SYNTAX.html">v1 Syntax Guide</a>
 <a href="SPEC.html" aria-current="page">v1 Specification</a>
-<a href="STDLIB.html">v1.8 Standard Library</a>
+<a href="STDLIB.html">v1.9 Standard Library</a>
 <a href="ERRORS.html">v1 Diagnostics</a>
-<a href="COMPATIBILITY.html">v1.8 Compatibility</a>
+<a href="COMPATIBILITY.html">v1.9 Compatibility</a>
 <a href="MIGRATING.html">Migration Guide</a>
 <a href="DEPRECATION.html">Deprecation Policy</a>
 <h2>Versions</h2>
-<a href="V1.html">v1 / v1.8</a>
+<a href="V1.html">v1 / v1.9</a>
 <a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
 <a href="V3.html">v3 Package Ecosystem</a>
 <h2>Tools</h2>
@@ -50,7 +50,7 @@
 <div class="page">
 <article class="doc">
 <h1 id="walklang-v1-specification">WalkLang v1 Specification</h1>
-<p>This document is the stable WalkLang language contract for the v1 line. v1.8 keeps the v1.7 compatibility policy and adds small terminal-game helpers for strings, arrays, and random choice.</p>
+<p>This document is the stable WalkLang language contract for the v1 line. v1.9 keeps the v1.8 compatibility policy and adds string interpolation for display text.</p>
 <p>Core rule:</p>
 <pre><code class="language-text">If it is not in SPEC.md, it is not stable WalkLang.
 If the compiler disagrees with SPEC.md, either the compiler or the spec must change.</code></pre>
@@ -94,6 +94,12 @@ comments    # outside strings</code></pre>
 \\ backslash
 \n newline
 \t tab</code></pre>
+<p>Strings support interpolation with <code>{expression}</code>. Interpolation formats <code>int</code>, <code>float</code>, <code>bool</code>, <code>string</code>, and nullable string values into the surrounding string.</p>
+<pre><code class="language-walk">var: name = &#39;Walker&#39;
+var: length = string.len(name)
+out: &#39;name {name} has {length} characters&#39;</code></pre>
+<p>Use doubled braces for literal braces:</p>
+<pre><code class="language-walk">out: &#39;{{name}}&#39;</code></pre>
 <p>Double-quoted strings are not valid WalkLang.</p>
 <p>---</p>
 <h2 id="5-statements">5. Statements</h2>

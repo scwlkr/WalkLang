@@ -123,6 +123,34 @@ static WALK_UNUSED WalkString __walk_string_concat(WalkString left, WalkString r
     return out;
 }
 
+static WALK_UNUSED WalkString __walk_format_int(WalkInt value) {
+    char buffer[64];
+    int len = snprintf(buffer, sizeof(buffer), "%lld", (long long)value);
+    if (len < 0 || (size_t)len >= sizeof(buffer)) { __walk_runtime_error("format failed"); }
+    char *out = (char *)malloc((size_t)len + 1);
+    if (out == NULL) { __walk_runtime_error("out of memory"); }
+    memcpy(out, buffer, (size_t)len + 1);
+    return out;
+}
+
+static WALK_UNUSED WalkString __walk_format_float(WalkFloat value) {
+    char buffer[64];
+    int len = snprintf(buffer, sizeof(buffer), "%g", (double)value);
+    if (len < 0 || (size_t)len >= sizeof(buffer)) { __walk_runtime_error("format failed"); }
+    char *out = (char *)malloc((size_t)len + 1);
+    if (out == NULL) { __walk_runtime_error("out of memory"); }
+    memcpy(out, buffer, (size_t)len + 1);
+    return out;
+}
+
+static WALK_UNUSED WalkString __walk_format_bool(WalkBool value) {
+    return value ? "true" : "false";
+}
+
+static WALK_UNUSED WalkString __walk_format_string(WalkString value) {
+    return value == NULL ? "null" : value;
+}
+
 static WALK_UNUSED WalkArrayInt __walk_array_push_int(WalkArrayInt array, WalkInt item) {
     WalkInt *items = (WalkInt *)__walk_alloc_array(array.len + 1, sizeof(WalkInt));
     for (WalkSize i = 0; i < array.len; i++) { items[i] = array.items[i]; }

@@ -6,6 +6,8 @@ imp: testing
 test: 'stdlib assert stays compatible'
     var: letters array[string] = []
     var: choices = ['stable']
+    var: word = 'walk'
+    var: wordLength = string.len(word)
     letters = array.push(letters, 'w')
     assert: testing.assert(== string.len('walk') 4)
     assert: == string.at('walk', 0) 'w'
@@ -13,5 +15,7 @@ test: 'stdlib assert stays compatible'
     assert: == string.concat('walk', 'lang') 'walklang'
     assert: array.contains(letters, 'w')
     assert: == random.choice(choices) 'stable'
+    assert: == 'length {wordLength}' 'length 4'
+    assert: == 'plural {string.concat(word, 's')}' 'plural walks'
 test: 'module export stays compatible'
     assert: == math_extra.cube(3) 27

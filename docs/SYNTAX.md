@@ -94,6 +94,23 @@ Strings are single-quoted.
 var: msg = 'don\'t stop'
 ```
 
+Put an expression inside `{}` when a string should include a value.
+
+```walk
+imp: string
+
+var: secretWord = 'paddle'
+var: secretWordLength = string.len(secretWord)
+out: 'the secret word is {secretWordLength} characters long'
+```
+
+Interpolation accepts display values: `int`, `float`, `bool`, `string`, and
+nullable string. Use doubled braces for literal braces.
+
+```walk
+out: '{{literal}}'
+```
+
 Strings can be indexed by zero-based byte position. The result is a one-character string.
 
 ```walk

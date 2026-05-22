@@ -40,9 +40,9 @@ out: add(2, 3)
 
 WalkLang currently has three version layers:
 
-- **Stable language contract:** `v1.8`, defined by `docs/SPEC.md`,
+- **Stable language contract:** `v1.9`, defined by `docs/SPEC.md`,
   `docs/COMPATIBILITY.md`, and the v1 compatibility tests.
-- **Current compiler/tooling/docs release:** `v5.4.1`, focused on the C backend,
+- **Current compiler/tooling/docs release:** `v5.5.0`, focused on the C backend,
   release artifacts, generated docs, and the public reference site.
 - **Experimental implemented language surface:** v2 through v2.2 features such
   as structs, methods, and simple generic functions are implemented, but are not
@@ -51,7 +51,7 @@ WalkLang currently has three version layers:
 ## What Works Today
 
 - `.walk` files compile through generated C into native executables.
-- Stable v1.8 syntax, diagnostics, modules, tests, and standard-library helpers
+- Stable v1.9 syntax, diagnostics, modules, tests, and standard-library helpers
   are documented and compatibility-tested.
 - `walk run`, direct `walk file.walk`, `walk build`, `walk check`, `walk test`,
   `walk fmt`, `walk clean`, `walk package`, `walk docs`, `walk debug-map`,

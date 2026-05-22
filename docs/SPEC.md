@@ -1,6 +1,6 @@
 # WalkLang v1 Specification
 
-This document is the stable WalkLang language contract for the v1 line. v1.8 keeps the v1.7 compatibility policy and adds small terminal-game helpers for strings, arrays, and random choice.
+This document is the stable WalkLang language contract for the v1 line. v1.9 keeps the v1.8 compatibility policy and adds string interpolation for display text.
 
 Core rule:
 
@@ -80,6 +80,22 @@ Strings support these escapes:
 \\ backslash
 \n newline
 \t tab
+```
+
+Strings support interpolation with `{expression}`. Interpolation formats `int`,
+`float`, `bool`, `string`, and nullable string values into the surrounding
+string.
+
+```walk
+var: name = 'Walker'
+var: length = string.len(name)
+out: 'name {name} has {length} characters'
+```
+
+Use doubled braces for literal braces:
+
+```walk
+out: '{{name}}'
 ```
 
 Double-quoted strings are not valid WalkLang.

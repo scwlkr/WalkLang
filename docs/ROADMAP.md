@@ -14,6 +14,7 @@ v1.3: grow the standard library carefully
 v1.6: local function type inference
 v1.7: required-line stdin input
 v1.8: terminal game helpers
+v1.9: string interpolation
 v2: data modeling
 v2.1: methods and stronger composition
 v3: ecosystem
@@ -755,6 +756,37 @@ SPEC and STDLIB document the helpers
 pass/fail/compatibility fixtures cover the helpers
 a small Hangman playground program compiles
 the v1 stress script proves the helpers through native output
+```
+
+---
+
+## v1.9 String Interpolation
+
+Add display-friendly string interpolation without changing numeric `+` or making
+`string.concat` accept mixed scalar types.
+
+Stable addition:
+
+```text
+'text {expression}'
+```
+
+Example:
+
+```walk
+imp: string
+
+var: word = 'paddle'
+var: wordLength = string.len(word)
+out: 'the secret word is {wordLength} characters long'
+```
+
+v1.9 done when:
+
+```text
+SPEC and SYNTAX document interpolation
+pass/fail/compatibility fixtures cover interpolation
+the v1 stress script proves interpolation through native output
 ```
 
 ---

@@ -637,6 +637,20 @@ func (c *Checker) checkExpression(expression ast.Expression) (ast.Type, error) {
 		default:
 			return ast.Type{}, errorAt(e.Loc(), "internal error: unknown literal")
 		}
+	case *ast.InterpolatedString:
+		for _, part := range e.Parts {
+			if part.Expression == nil {
+				continue
+			}
+			partType, err := c.checkExpression(part.Expression)
+			if err != nil {
+				return ast.Type{}, err
+			}
+			if !interpolatable(partType) {
+				return ast.Type{}, errorAt(part.Expression.Loc(), "type error: interpolation needs int, float, bool, or string, got %s", partType.String())
+			}
+		}
+		result = ast.Basic(ast.TypeString)
 	case *ast.Name:
 		sym, exists := c.resolve(e.Identifier)
 		if !exists {
@@ -1384,6 +1398,13 @@ func containsKind(types []ast.Type, target ast.TypeKind) bool {
 
 func nativeArrayElement(typeName ast.Type) bool {
 	return !typeName.Nullable && (typeName.Kind == ast.TypeInt || typeName.Kind == ast.TypeFloat || typeName.Kind == ast.TypeBool || typeName.Kind == ast.TypeString)
+}
+
+func interpolatable(typeName ast.Type) bool {
+	if typeName.Nullable {
+		return typeName.Kind == ast.TypeString
+	}
+	return typeName.Kind == ast.TypeInt || typeName.Kind == ast.TypeFloat || typeName.Kind == ast.TypeBool || typeName.Kind == ast.TypeString
 }
 
 func blockReturns(statements []ast.Statement) bool {

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>WalkLang v1.8 Compatibility - WalkLang</title>
+<title>WalkLang v1.9 Compatibility - WalkLang</title>
 <link rel="icon" href="../assets/icon.svg">
 <link rel="stylesheet" href="../assets/site.css">
 </head>
@@ -19,13 +19,13 @@
 <h2>Language</h2>
 <a href="SYNTAX.html">v1 Syntax Guide</a>
 <a href="SPEC.html">v1 Specification</a>
-<a href="STDLIB.html">v1.8 Standard Library</a>
+<a href="STDLIB.html">v1.9 Standard Library</a>
 <a href="ERRORS.html">v1 Diagnostics</a>
-<a href="COMPATIBILITY.html" aria-current="page">v1.8 Compatibility</a>
+<a href="COMPATIBILITY.html" aria-current="page">v1.9 Compatibility</a>
 <a href="MIGRATING.html">Migration Guide</a>
 <a href="DEPRECATION.html">Deprecation Policy</a>
 <h2>Versions</h2>
-<a href="V1.html">v1 / v1.8</a>
+<a href="V1.html">v1 / v1.9</a>
 <a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
 <a href="V3.html">v3 Package Ecosystem</a>
 <h2>Tools</h2>
@@ -49,8 +49,8 @@
 <div class="topbar"><a href="index.html">Docs</a><a href="reference/api.html">Reference</a><a href="https://github.com/scwlkr/WalkLang">GitHub</a></div>
 <div class="page">
 <article class="doc">
-<h1 id="walklang-v1-8-compatibility">WalkLang v1.8 Compatibility</h1>
-<p>WalkLang v1.8 defines the compatibility promise for the v1.x language line. v1.8 keeps the v1.7 release boundary and adds stable terminal-game helpers for strings, arrays, and random choice.</p>
+<h1 id="walklang-v1-9-compatibility">WalkLang v1.9 Compatibility</h1>
+<p>WalkLang v1.9 defines the compatibility promise for the v1.x language line. v1.9 keeps the v1.8 release boundary and adds stable string interpolation for display text.</p>
 <h2 id="compatibility-promise">Compatibility Promise</h2>
 <p>Stable v1 code should continue to compile through the v1.x line unless one of these applies:</p>
 <pre><code class="language-text">the behavior was undocumented
@@ -91,7 +91,7 @@ tests/snapshots/</code></pre>
 <p>If a feature is accepted by the compiler but absent from those files, treat it as experimental.</p>
 <h2 id="compatibility-test-suite">Compatibility Test Suite</h2>
 <p>Run the focused v1 compatibility suite with:</p>
-<pre><code class="language-bash">go test ./cmd/walk -run TestV18CompatibilitySuite</code></pre>
+<pre><code class="language-bash">go test ./cmd/walk -run TestV19CompatibilitySuite</code></pre>
 <p>The full repository test command also runs it:</p>
 <pre><code class="language-bash">go test ./...</code></pre>
 <p>The suite covers representative stable programs, test syntax, user-module exports, stable stdlib APIs, and selected stable diagnostic first lines.</p>
@@ -110,7 +110,7 @@ project config behavior
 LSP/debugger behavior
 any generated C details outside snapshots</code></pre>
 <h2 id="deprecation-policy">Deprecation Policy</h2>
-<p><code>docs/DEPRECATION.md</code> owns the deprecation lifecycle. Current v1.8 deprecated surface: none.</p>
+<p><code>docs/DEPRECATION.md</code> owns the deprecation lifecycle. Current v1.9 deprecated surface: none.</p>
 <h2 id="changing-the-contract">Changing The Contract</h2>
 <p>When changing stable behavior:</p>
 <p>1. Update <code>docs/SPEC.md</code>. 2. Update syntax, stdlib, diagnostics, compatibility, migration, or deprecation docs when relevant. 3. Add or update pass/fail and compatibility fixtures. 4. Update generated C snapshots when backend output intentionally changes. 5. Update release notes when the change affects users. 6. Update <code>docs/STATUS.md</code> with the new project state.</p>

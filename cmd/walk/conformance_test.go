@@ -22,6 +22,7 @@ func TestV13PassFixturesBuildAndRun(t *testing.T) {
 		{"nullable.walk", "missing\nWalker\n"},
 		{"function_values.walk", "5\n"},
 		{"stdlib.walk", "3\n8\n4\na\nl\ntrue\nfalse\nwalklang\n3\n2\ntrue\nfalse\ntrue\n7\nfixed\ntrue\n"},
+		{"interpolation.walk", "the secret word is 6 characters long\nsecret: paddle\nscore 3 ok true\nplural paddles\n{word}\n{\n}\n"},
 		{"modules.walk", "25\n10\n"},
 	}
 
@@ -122,6 +123,7 @@ func TestV13FailFixturesHaveExpectedDiagnostics(t *testing.T) {
 		{"bad_string_at.walk", "tests/fail/bad_string_at.walk:2:23: type error: string.at index must be int, got string"},
 		{"bad_array_push.walk", "tests/fail/bad_array_push.walk:3:25: type error: arg 2 to array.push is int, got string"},
 		{"bad_random_choice.walk", "tests/fail/bad_random_choice.walk:2:20: type error: random.choice needs array arg, got string"},
+		{"bad_interpolation.walk", "tests/fail/bad_interpolation.walk:2:13: type error: interpolation needs int, float, bool, or string, got array[int]"},
 		{"unknown_library.walk", "tests/fail/unknown_library.walk:2:6: name error: unknown library function math.nope"},
 		{"top_break.walk", "tests/fail/top_break.walk:1:1: syntax error: break outside loop"},
 	}

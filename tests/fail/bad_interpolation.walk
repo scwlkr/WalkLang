@@ -1,0 +1,2 @@
+var: nums = [1, 2]
+out: 'nums {nums}'

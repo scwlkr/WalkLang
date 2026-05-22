@@ -183,9 +183,34 @@ func readString(text string, i int, location ast.Location) (string, int, error) 
 	i++
 	var out strings.Builder
 	escaped := false
+	interpolationDepth := 0
+	inInterpolationString := false
+	interpolationEscaped := false
 	for i < len(text) {
 		ch := text[i]
-		if escaped {
+		if interpolationDepth > 0 {
+			out.WriteByte(ch)
+			if inInterpolationString {
+				switch {
+				case interpolationEscaped:
+					interpolationEscaped = false
+				case ch == '\\':
+					interpolationEscaped = true
+				case ch == '\'':
+					inInterpolationString = false
+				}
+				i++
+				continue
+			}
+			switch ch {
+			case '\'':
+				inInterpolationString = true
+			case '{':
+				interpolationDepth++
+			case '}':
+				interpolationDepth--
+			}
+		} else if escaped {
 			switch ch {
 			case 'n':
 				out.WriteByte('\n')
@@ -201,6 +226,13 @@ func readString(text string, i int, location ast.Location) (string, int, error) 
 			escaped = true
 		} else if ch == '\'' {
 			return out.String(), i + 1, nil
+		} else if ch == '{' && i+1 < len(text) && text[i+1] == '{' {
+			out.WriteString("{{")
+			i += 2
+			continue
+		} else if ch == '{' && (i+1 >= len(text) || text[i+1] != '{') {
+			interpolationDepth = 1
+			out.WriteByte(ch)
 		} else {
 			out.WriteByte(ch)
 		}

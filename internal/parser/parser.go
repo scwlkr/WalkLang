@@ -718,7 +718,7 @@ func (c *cursor) parseAtom(stop map[string]bool) (ast.Expression, error) {
 		}
 		return &ast.Literal{ExprBase: ast.ExprBase{Location: token.Location}, Kind: kind, Value: token.Value}, nil
 	case lexer.TokenString:
-		return &ast.Literal{ExprBase: ast.ExprBase{Location: token.Location}, Kind: ast.LiteralString, Value: token.Value}, nil
+		return parseStringExpression(token)
 	case lexer.TokenName:
 		switch token.Value {
 		case "true", "false":
@@ -773,6 +773,139 @@ func (c *cursor) parseAtom(stop map[string]bool) (ast.Expression, error) {
 		}
 	}
 	return nil, errorAt(token.Location, "syntax error: expected expression, got %q", token.Value)
+}
+
+func parseStringExpression(token lexer.Token) (ast.Expression, error) {
+	if !strings.ContainsAny(token.Value, "{}") {
+		return &ast.Literal{ExprBase: ast.ExprBase{Location: token.Location}, Kind: ast.LiteralString, Value: token.Value}, nil
+	}
+	parts, interpolated, err := parseInterpolatedStringParts(token)
+	if err != nil {
+		return nil, err
+	}
+	if !interpolated {
+		return &ast.Literal{ExprBase: ast.ExprBase{Location: token.Location}, Kind: ast.LiteralString, Value: stringFromParts(parts)}, nil
+	}
+	return &ast.InterpolatedString{ExprBase: ast.ExprBase{Location: token.Location}, Parts: parts}, nil
+}
+
+func parseInterpolatedStringParts(token lexer.Token) ([]ast.InterpolatedStringPart, bool, error) {
+	var parts []ast.InterpolatedStringPart
+	var literal strings.Builder
+	interpolated := false
+
+	for i := 0; i < len(token.Value); {
+		switch token.Value[i] {
+		case '{':
+			if i+1 < len(token.Value) && token.Value[i+1] == '{' {
+				literal.WriteByte('{')
+				i += 2
+				continue
+			}
+			if literal.Len() > 0 {
+				parts = append(parts, ast.InterpolatedStringPart{Literal: literal.String()})
+				literal.Reset()
+			}
+			exprStart := i + 1
+			exprEnd := findInterpolationEnd(token.Value, exprStart)
+			if exprEnd < 0 {
+				return nil, false, errorAt(interpolationLocation(token, i), "syntax error: unterminated interpolation")
+			}
+			exprText := token.Value[exprStart:exprEnd]
+			trimmed := strings.TrimLeft(exprText, " \t")
+			exprOffset := exprStart + len(exprText) - len(trimmed)
+			exprText = strings.TrimSpace(exprText)
+			if exprText == "" {
+				return nil, false, errorAt(interpolationLocation(token, exprStart), "syntax error: expected interpolation expression")
+			}
+			expr, err := parseInterpolatedExpression(exprText, interpolationLocation(token, exprOffset))
+			if err != nil {
+				return nil, false, err
+			}
+			parts = append(parts, ast.InterpolatedStringPart{Expression: expr})
+			interpolated = true
+			i = exprEnd + 1
+		case '}':
+			if i+1 < len(token.Value) && token.Value[i+1] == '}' {
+				literal.WriteByte('}')
+				i += 2
+				continue
+			}
+			return nil, false, errorAt(interpolationLocation(token, i), "syntax error: unmatched } in string")
+		default:
+			literal.WriteByte(token.Value[i])
+			i++
+		}
+	}
+	if literal.Len() > 0 {
+		parts = append(parts, ast.InterpolatedStringPart{Literal: literal.String()})
+	}
+	return parts, interpolated, nil
+}
+
+func findInterpolationEnd(value string, start int) int {
+	depth := 1
+	inString := false
+	escaped := false
+	for i := start; i < len(value); i++ {
+		ch := value[i]
+		if inString {
+			switch {
+			case escaped:
+				escaped = false
+			case ch == '\\':
+				escaped = true
+			case ch == '\'':
+				inString = false
+			}
+			continue
+		}
+		switch ch {
+		case '\'':
+			inString = true
+		case '{':
+			depth++
+		case '}':
+			depth--
+			if depth == 0 {
+				return i
+			}
+		}
+	}
+	return -1
+}
+
+func stringFromParts(parts []ast.InterpolatedStringPart) string {
+	var out strings.Builder
+	for _, part := range parts {
+		out.WriteString(part.Literal)
+	}
+	return out.String()
+}
+
+func parseInterpolatedExpression(source string, location ast.Location) (ast.Expression, error) {
+	lines, err := lexer.Lex(source, location.Filename)
+	if err != nil {
+		return nil, errorAt(location, "syntax error: invalid interpolation expression")
+	}
+	if len(lines) != 1 || len(lines[0].Tokens) == 0 {
+		return nil, errorAt(location, "syntax error: expected interpolation expression")
+	}
+	tokens := lines[0].Tokens
+	for i := range tokens {
+		tokens[i].Location.Filename = location.Filename
+		tokens[i].Location.Line = location.Line
+		tokens[i].Location.Column = location.Column + tokens[i].Location.Column - 1
+	}
+	return parseExpressionTokens(tokens, location)
+}
+
+func interpolationLocation(token lexer.Token, valueIndex int) ast.Location {
+	return ast.Location{
+		Filename: token.Location.Filename,
+		Line:     token.Location.Line,
+		Column:   token.Location.Column + 1 + valueIndex,
+	}
 }
 
 func (c *cursor) parseCallArgs() ([]ast.Expression, error) {

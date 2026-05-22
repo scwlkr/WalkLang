@@ -1,6 +1,6 @@
-# WalkLang v1.8 Standard Library
+# WalkLang v1.9 Standard Library
 
-This document lists the stable built-in modules and functions for the v1 line. These APIs are compatibility-protected in v1.8.
+This document lists the stable built-in modules and functions for the v1 line. These APIs are compatibility-protected in v1.9.
 
 Import built-ins with `imp:` and call functions through their module namespace.
 
@@ -22,7 +22,7 @@ random
 testing
 ```
 
-No other built-in module is stable in v1.8.
+No other built-in module is stable in v1.9.
 
 ---
 
@@ -202,7 +202,7 @@ walk test tests.walk
 
 ## Draft APIs
 
-These names are planned draft APIs only. They are documented here so naming can stay consistent, but they are not stable, not importable, and not compatibility-protected in v1.8.
+These names are planned draft APIs only. They are documented here so naming can stay consistent, but they are not stable, not importable, and not compatibility-protected in v1.9.
 
 ```text
 file.read
