@@ -20,10 +20,12 @@ const (
 	TypeNull     TypeKind = "null"
 	TypeArray    TypeKind = "array"
 	TypeFunction TypeKind = "func"
+	TypeStruct   TypeKind = "struct"
 )
 
 type Type struct {
 	Kind     TypeKind
+	Name     string
 	Nullable bool
 	Elem     *Type
 	Params   []Type
@@ -49,6 +51,8 @@ func (t Type) String() string {
 			returnType = t.Return.String()
 		}
 		out = "func(" + strings.Join(parts, ", ") + ") " + returnType
+	case TypeStruct:
+		out = t.Name
 	default:
 		out = string(t.Kind)
 	}
@@ -59,7 +63,7 @@ func (t Type) String() string {
 }
 
 func (t Type) Equal(other Type) bool {
-	if t.Kind != other.Kind || t.Nullable != other.Nullable {
+	if t.Kind != other.Kind || t.Nullable != other.Nullable || t.Name != other.Name {
 		return false
 	}
 	switch t.Kind {
@@ -93,6 +97,10 @@ func ArrayOf(elem Type) Type {
 
 func FuncType(params []Type, ret Type) Type {
 	return Type{Kind: TypeFunction, Params: params, Return: &ret}
+}
+
+func Struct(name string) Type {
+	return Type{Kind: TypeStruct, Name: name}
 }
 
 type Program struct {
@@ -187,6 +195,21 @@ type FuncDecl struct {
 
 func (s *FuncDecl) Loc() Location  { return s.Location }
 func (s *FuncDecl) statementNode() {}
+
+type StructField struct {
+	Location Location
+	Name     string
+	Type     Type
+}
+
+type StructDecl struct {
+	Location Location
+	Name     string
+	Fields   []StructField
+}
+
+func (s *StructDecl) Loc() Location  { return s.Location }
+func (s *StructDecl) statementNode() {}
 
 type Return struct {
 	Location Location
@@ -312,3 +335,11 @@ type Index struct {
 }
 
 func (e *Index) expressionNode() {}
+
+type FieldAccess struct {
+	ExprBase
+	Target Expression
+	Field  string
+}
+
+func (e *FieldAccess) expressionNode() {}

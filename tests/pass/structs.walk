@@ -1,0 +1,26 @@
+struct: User
+    name string
+    age int
+
+func: birthday(user User) User
+    user.age = + user.age 1
+    return: user
+
+var: user = User('Walker', 25)
+out: user.name
+out: user.age
+
+user.age = 26
+out: user.age
+
+var: users = [user, User('Ada', 37)]
+users[1].age = 38
+
+for: item in users
+    out: item.name
+    out: item.age
+
+out: users[0].name
+
+var: older = birthday(user)
+out: older.age

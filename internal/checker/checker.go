@@ -13,6 +13,13 @@ type symbol struct {
 	mutable  bool
 }
 
+type StructDef struct {
+	Location ast.Location
+	Name     string
+	Fields   []ast.StructField
+	FieldMap map[string]ast.StructField
+}
+
 type Module struct {
 	Name    string
 	Program *ast.Program
@@ -21,6 +28,7 @@ type Module struct {
 
 type Options struct {
 	Modules map[string]*Module
+	Structs map[string]StructDef
 }
 
 type Warning struct {
@@ -36,10 +44,12 @@ type Checker struct {
 	scopes        []map[string]symbol
 	imports       map[string]bool
 	modules       map[string]*Module
+	structs       map[string]StructDef
 	warnings      []Warning
 	currentReturn ast.Type
 	inFunction    bool
 	loopDepth     int
+	blockDepth    int
 }
 
 func Check(program *ast.Program) error {
@@ -48,10 +58,19 @@ func Check(program *ast.Program) error {
 }
 
 func CheckWithOptions(program *ast.Program, options Options) ([]Warning, error) {
+	structs := options.Structs
+	if structs == nil {
+		var err error
+		structs, err = StructDefinitions(program)
+		if err != nil {
+			return nil, err
+		}
+	}
 	c := Checker{
 		scopes:  []map[string]symbol{{}},
 		imports: map[string]bool{},
 		modules: options.Modules,
+		structs: structs,
 	}
 	if c.modules == nil {
 		c.modules = map[string]*Module{}
@@ -61,6 +80,9 @@ func CheckWithOptions(program *ast.Program, options Options) ([]Warning, error) 
 }
 
 func (c *Checker) check(program *ast.Program) error {
+	if err := c.checkStructs(); err != nil {
+		return err
+	}
 	for _, statement := range program.Statements {
 		fn, ok := statement.(*ast.FuncDecl)
 		if !ok {
@@ -87,6 +109,96 @@ func functionType(fn *ast.FuncDecl) ast.Type {
 	return ast.FuncType(params, fn.ReturnType)
 }
 
+func StructDefinitions(program *ast.Program) (map[string]StructDef, error) {
+	structs := map[string]StructDef{}
+	for _, statement := range program.Statements {
+		decl, ok := statement.(*ast.StructDecl)
+		if !ok {
+			continue
+		}
+		if _, exists := structs[decl.Name]; exists {
+			return nil, errorAt(decl.Location, "type error: struct %s is already defined", decl.Name)
+		}
+		def := StructDef{
+			Location: decl.Location,
+			Name:     decl.Name,
+			Fields:   decl.Fields,
+			FieldMap: map[string]ast.StructField{},
+		}
+		for _, field := range decl.Fields {
+			if _, exists := def.FieldMap[field.Name]; exists {
+				return nil, errorAt(field.Location, "type error: struct %s already has field %s", decl.Name, field.Name)
+			}
+			def.FieldMap[field.Name] = field
+		}
+		structs[decl.Name] = def
+	}
+	return structs, nil
+}
+
+func (c *Checker) checkStructs() error {
+	for _, def := range c.structs {
+		for _, field := range def.Fields {
+			if err := c.validateType(field.Type, field.Location); err != nil {
+				return err
+			}
+		}
+	}
+	visiting := map[string]bool{}
+	visited := map[string]bool{}
+	var visit func(string) error
+	visit = func(name string) error {
+		if visited[name] {
+			return nil
+		}
+		if visiting[name] {
+			return errorAt(c.structs[name].Location, "type error: struct %s cannot contain itself", name)
+		}
+		visiting[name] = true
+		for _, field := range c.structs[name].Fields {
+			for _, dep := range structTypeDependencies(field.Type) {
+				if _, ok := c.structs[dep]; ok {
+					if err := visit(dep); err != nil {
+						return err
+					}
+				}
+			}
+		}
+		visiting[name] = false
+		visited[name] = true
+		return nil
+	}
+	for name := range c.structs {
+		if err := visit(name); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func structTypeDependencies(typeName ast.Type) []string {
+	switch typeName.Kind {
+	case ast.TypeStruct:
+		return []string{typeName.Name}
+	case ast.TypeArray:
+		if typeName.Elem == nil {
+			return nil
+		}
+		return structTypeDependencies(*typeName.Elem)
+	case ast.TypeFunction:
+		var deps []string
+		for _, param := range typeName.Params {
+			deps = append(deps, structTypeDependencies(param)...)
+		}
+		if typeName.Return != nil {
+			deps = append(deps, structTypeDependencies(*typeName.Return)...)
+		}
+		return deps
+	default:
+		return nil
+	}
+}
+
 func (c *Checker) checkStatement(statement ast.Statement) error {
 	switch s := statement.(type) {
 	case *ast.Import:
@@ -104,6 +216,11 @@ func (c *Checker) checkStatement(statement ast.Statement) error {
 		return nil
 	case *ast.FuncDecl:
 		return c.checkFuncDecl(s)
+	case *ast.StructDecl:
+		if c.blockDepth > 0 {
+			return errorAt(s.Location, "syntax error: struct declarations must be top level")
+		}
+		return nil
 	case *ast.VarDecl:
 		return c.checkVarDecl(s)
 	case *ast.Assignment:
@@ -113,7 +230,7 @@ func (c *Checker) checkStatement(statement ast.Statement) error {
 		if err != nil {
 			return err
 		}
-		if valueType.Kind == ast.TypeArray || valueType.Kind == ast.TypeFunction || valueType.Kind == ast.TypeVoid {
+		if valueType.Kind == ast.TypeArray || valueType.Kind == ast.TypeFunction || valueType.Kind == ast.TypeVoid || valueType.Kind == ast.TypeStruct {
 			return errorAt(s.Location, "type error: cannot output %s", valueType.String())
 		}
 		return nil
@@ -210,16 +327,18 @@ func (c *Checker) checkStatement(statement ast.Statement) error {
 }
 
 func (c *Checker) checkFuncDecl(fn *ast.FuncDecl) error {
-	if err := validateType(fn.ReturnType, fn.Location); err != nil {
+	if err := c.validateType(fn.ReturnType, fn.Location); err != nil {
 		return err
 	}
 	c.pushScope()
 	previousReturn := c.currentReturn
 	previousInFunction := c.inFunction
+	previousBlockDepth := c.blockDepth
 	c.currentReturn = fn.ReturnType
 	c.inFunction = true
+	c.blockDepth++
 	for _, param := range fn.Params {
-		if err := validateType(param.Type, fn.Location); err != nil {
+		if err := c.validateType(param.Type, fn.Location); err != nil {
 			c.popScope()
 			return err
 		}
@@ -231,6 +350,7 @@ func (c *Checker) checkFuncDecl(fn *ast.FuncDecl) error {
 	err := c.checkBlock(fn.Body)
 	c.currentReturn = previousReturn
 	c.inFunction = previousInFunction
+	c.blockDepth = previousBlockDepth
 	c.popScope()
 	if err != nil {
 		return err
@@ -251,7 +371,7 @@ func (c *Checker) checkVarDecl(statement *ast.VarDecl) error {
 	}
 	declaredType := valueType
 	if statement.Annotation.Kind != ast.TypeInvalid {
-		if err := validateType(statement.Annotation, statement.Location); err != nil {
+		if err := c.validateType(statement.Annotation, statement.Location); err != nil {
 			return err
 		}
 		declaredType = statement.Annotation
@@ -275,6 +395,9 @@ func (c *Checker) checkAssignment(statement *ast.Assignment) error {
 	if !assignable(valueType, targetType) {
 		if name, ok := statement.Target.(*ast.Name); ok {
 			return errorAt(statement.Location, "type error: %s is %s, got %s", name.Identifier, targetType.String(), valueType.String())
+		}
+		if field, ok := statement.Target.(*ast.FieldAccess); ok {
+			return errorAt(statement.Location, "type error: field %s is %s, got %s", field.Field, targetType.String(), valueType.String())
 		}
 		return errorAt(statement.Location, "type error: target is %s, got %s", targetType.String(), valueType.String())
 	}
@@ -315,6 +438,22 @@ func (c *Checker) checkAssignableTarget(target ast.Expression) (ast.Type, error)
 		}
 		t.SetExprType(*targetType.Elem)
 		return *targetType.Elem, nil
+	case *ast.FieldAccess:
+		if name, ok := rootName(t.Target); ok {
+			if sym, exists := c.resolve(name); exists && !sym.mutable {
+				return ast.Type{}, errorAt(t.Loc(), "type error: %s is const and cannot be reassigned", name)
+			}
+		}
+		targetType, err := c.checkExpression(t.Target)
+		if err != nil {
+			return ast.Type{}, err
+		}
+		field, err := c.lookupField(targetType, t.Field, t.Loc())
+		if err != nil {
+			return ast.Type{}, err
+		}
+		t.SetExprType(field.Type)
+		return field.Type, nil
 	default:
 		return ast.Type{}, errorAt(target.Loc(), "syntax error: invalid assignment target")
 	}
@@ -378,6 +517,16 @@ func (c *Checker) checkExpression(expression ast.Expression) (ast.Type, error) {
 			return ast.Type{}, errorAt(e.Index.Loc(), "type error: array index must be int, got %s", indexType.String())
 		}
 		result = *targetType.Elem
+	case *ast.FieldAccess:
+		targetType, err := c.checkExpression(e.Target)
+		if err != nil {
+			return ast.Type{}, err
+		}
+		field, err := c.lookupField(targetType, e.Field, e.Loc())
+		if err != nil {
+			return ast.Type{}, err
+		}
+		result = field.Type
 	default:
 		return ast.Type{}, errorAt(expression.Loc(), "internal error: unknown expression")
 	}
@@ -439,6 +588,9 @@ func (c *Checker) checkCall(call *ast.Call) (ast.Type, error) {
 	if strings.Contains(call.Callee, ".") {
 		return c.checkModuleCall(call)
 	}
+	if def, ok := c.structs[call.Callee]; ok {
+		return c.checkStructConstructor(call, def)
+	}
 	sym, ok := c.resolve(call.Callee)
 	if !ok {
 		return ast.Type{}, errorAt(call.Loc(), "name error: %s is not defined", call.Callee)
@@ -459,6 +611,23 @@ func (c *Checker) checkCall(call *ast.Call) (ast.Type, error) {
 		}
 	}
 	return *sym.typeName.Return, nil
+}
+
+func (c *Checker) checkStructConstructor(call *ast.Call, def StructDef) (ast.Type, error) {
+	if len(call.Args) != len(def.Fields) {
+		return ast.Type{}, errorAt(call.Loc(), "type error: %s expects %d field values, got %d", def.Name, len(def.Fields), len(call.Args))
+	}
+	for i, arg := range call.Args {
+		argType, err := c.checkExpression(arg)
+		if err != nil {
+			return ast.Type{}, err
+		}
+		field := def.Fields[i]
+		if !assignable(argType, field.Type) {
+			return ast.Type{}, errorAt(arg.Loc(), "type error: field %s is %s, got %s", field.Name, field.Type.String(), argType.String())
+		}
+	}
+	return ast.Struct(def.Name), nil
 }
 
 func (c *Checker) checkModuleCall(call *ast.Call) (ast.Type, error) {
@@ -602,9 +771,26 @@ func (c *Checker) checkArrayLiteral(array *ast.ArrayLiteral) (ast.Type, error) {
 	return ast.ArrayOf(firstType), nil
 }
 
+func (c *Checker) lookupField(targetType ast.Type, fieldName string, location ast.Location) (ast.StructField, error) {
+	if targetType.Kind != ast.TypeStruct {
+		return ast.StructField{}, errorAt(location, "type error: field access needs struct, got %s", targetType.String())
+	}
+	def, ok := c.structs[targetType.Name]
+	if !ok {
+		return ast.StructField{}, errorAt(location, "type error: unknown type %s", targetType.String())
+	}
+	field, ok := def.FieldMap[fieldName]
+	if !ok {
+		return ast.StructField{}, errorAt(location, "type error: %s has no field %s", targetType.String(), fieldName)
+	}
+	return field, nil
+}
+
 func (c *Checker) checkNestedBlock(statements []ast.Statement) error {
 	c.pushScope()
+	c.blockDepth++
 	err := c.checkBlock(statements)
+	c.blockDepth--
 	c.popScope()
 	return err
 }
@@ -642,6 +828,9 @@ func (c *Checker) define(name string, typeName ast.Type, mutable bool, location 
 	if c.currentScopeHas(name) {
 		return errorAt(location, "name error: %s is already defined", name)
 	}
+	if _, ok := c.structs[name]; ok {
+		return errorAt(location, "name error: %s is already defined as struct", name)
+	}
 	if c.outerScopeHas(name) {
 		c.warnings = append(c.warnings, Warning{Location: location, Message: fmt.Sprintf("%s shadows outer name", name)})
 	}
@@ -667,25 +856,33 @@ func (c *Checker) resolve(name string) (symbol, bool) {
 	return symbol{}, false
 }
 
-func validateType(typeName ast.Type, location ast.Location) error {
+func (c *Checker) validateType(typeName ast.Type, location ast.Location) error {
 	switch typeName.Kind {
 	case ast.TypeVoid, ast.TypeInt, ast.TypeFloat, ast.TypeBool, ast.TypeString:
+		return nil
+	case ast.TypeStruct:
+		if typeName.Nullable {
+			return errorAt(location, "type error: struct type %s cannot be nullable", typeName.Name)
+		}
+		if _, ok := c.structs[typeName.Name]; !ok {
+			return errorAt(location, "type error: unknown type %s", typeName.String())
+		}
 		return nil
 	case ast.TypeArray:
 		if typeName.Elem == nil {
 			return errorAt(location, "type error: array type needs element type")
 		}
-		return validateType(*typeName.Elem, location)
+		return c.validateType(*typeName.Elem, location)
 	case ast.TypeFunction:
 		for _, param := range typeName.Params {
-			if err := validateType(param, location); err != nil {
+			if err := c.validateType(param, location); err != nil {
 				return err
 			}
 		}
 		if typeName.Return == nil {
 			return errorAt(location, "type error: function type needs return type")
 		}
-		return validateType(*typeName.Return, location)
+		return c.validateType(*typeName.Return, location)
 	}
 	return errorAt(location, "type error: unknown type %s", typeName.String())
 }
@@ -711,6 +908,9 @@ func assignable(source ast.Type, target ast.Type) bool {
 }
 
 func comparable(left ast.Type, right ast.Type) bool {
+	if left.Kind == ast.TypeStruct || right.Kind == ast.TypeStruct {
+		return false
+	}
 	if left.Kind == ast.TypeNull {
 		return right.Nullable
 	}
@@ -772,6 +972,8 @@ func rootName(expression ast.Expression) (string, bool) {
 	case *ast.Name:
 		return e.Identifier, true
 	case *ast.Index:
+		return rootName(e.Target)
+	case *ast.FieldAccess:
 		return rootName(e.Target)
 	default:
 		return "", false

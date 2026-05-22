@@ -1,0 +1,6 @@
+struct: User
+    name string
+    age int
+
+const: user = User('Walker', 25)
+user.age = 26

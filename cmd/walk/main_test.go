@@ -96,7 +96,7 @@ func TestV1UserModuleRejectsTopLevelRuntimeStatements(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected module surface error")
 	}
-	if got, want := err.Error(), "bad_module.walk:1:1: module error: modules may contain only imp, func, and exp at top level"; !strings.HasSuffix(got, want) {
+	if got, want := err.Error(), "bad_module.walk:1:1: module error: modules may contain only imp, struct, func, and exp at top level"; !strings.HasSuffix(got, want) {
 		t.Fatalf("want suffix %q, got %q", want, got)
 	}
 }

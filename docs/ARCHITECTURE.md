@@ -125,6 +125,8 @@ Not v1.1:
 class: Person       # error in v1.1
 ```
 
+v2 adds structs for data modeling without classes, inheritance, or methods.
+
 ---
 
 ## 4. Syntax Model
@@ -191,6 +193,7 @@ string
 array
 null
 function
+struct (experimental in v2)
 ```
 
 Example:

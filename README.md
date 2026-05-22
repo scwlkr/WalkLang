@@ -2,14 +2,14 @@
 
 WalkLang is a small compiled language implemented in Go with a C backend.
 
-This repo currently contains the v1.5 compatibility release preparation, v1.4 diagnostics and developer experience, the v1.3 standard library foundation, v1.2 project mode, and the v1 language contract from `docs/ROADMAP.md`.
+This repo currently contains v2 data modeling, the v1.5 compatibility release preparation, v1.4 diagnostics and developer experience, the v1.3 standard library foundation, v1.2 project mode, and the v1 language contract from `docs/ROADMAP.md`.
 It proves the pipeline:
 
 ```text
 .walk source -> Go compiler -> generated C -> native executable
 ```
 
-## Current v1.5 Surface
+## Current Surface
 
 Supported now:
 
@@ -50,9 +50,20 @@ Supported now:
 - GitHub Actions CI for tests, stress, and release artifacts
 - release notes, migration guide, deprecation policy, and official install instructions
 
+Experimental v2 surface:
+
+- `struct:` declarations with fixed typed fields
+- positional struct constructors such as `User('Walker', 25)`
+- dot field reads such as `user.name`
+- field assignment through mutable roots such as `user.age = 26`
+- structs as function parameters and return values
+- arrays of structs, indexed struct fields, and field assignment through mutable array elements
+- module-declared structs returned by exported module functions
+
 Contract docs:
 
 - `docs/SPEC.md`
+- `docs/V2.md`
 - `docs/SYNTAX.md`
 - `docs/STDLIB.md`
 - `docs/ERRORS.md`
@@ -68,14 +79,14 @@ Contract docs:
 Not stable yet:
 
 - file/json/matrix stdlib APIs
-- structs, methods, traits, or package manager behavior
+- methods, traits, or package manager behavior
 
 ## Use
 
 Install the local `walk` command:
 
 ```bash
-scripts/install-local.sh v1.5-local
+scripts/install-local.sh v2-local
 walk version
 ```
 
@@ -125,6 +136,13 @@ walk build examples/v1.walk -o build/v1 --release
 ./build/v1
 ```
 
+Run the v2 struct fixture:
+
+```bash
+walk build tests/pass/structs.walk -o build/structs
+./build/structs
+```
+
 Check warnings:
 
 ```bash
@@ -165,5 +183,5 @@ scripts/stress-v1.sh
 Build cross-platform CLI release artifacts:
 
 ```bash
-scripts/release.sh v1.5.0
+scripts/release.sh v2.0.0
 ```

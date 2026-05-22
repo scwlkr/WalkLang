@@ -156,6 +156,75 @@ func TestV13ExamplesAreTestableFixtures(t *testing.T) {
 	}
 }
 
+func TestV20StructFixturesBuildAndRun(t *testing.T) {
+	requireCC(t)
+	root := repoRoot(t)
+	cases := []struct {
+		file string
+		want string
+	}{
+		{
+			file: "structs.walk",
+			want: strings.Join([]string{
+				"Walker",
+				"25",
+				"26",
+				"Walker",
+				"26",
+				"Ada",
+				"38",
+				"Walker",
+				"27",
+				"",
+			}, "\n"),
+		},
+		{
+			file: "struct_modules.walk",
+			want: "Walker\n25\n",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.file, func(t *testing.T) {
+			cCode, warnings, err := compileFileToCWithOptions(filepath.Join(root, "tests", "pass", tc.file), false)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(warnings) != 0 {
+				t.Fatalf("unexpected warnings: %#v", warnings)
+			}
+			if got := runCProgram(t, cCode); got != tc.want {
+				t.Fatalf("want %q, got %q\nC:\n%s", tc.want, got, cCode)
+			}
+		})
+	}
+}
+
+func TestV20StructFailFixturesHaveExpectedDiagnostics(t *testing.T) {
+	root := repoRoot(t)
+	cases := []struct {
+		file string
+		want string
+	}{
+		{"missing_struct_field.walk", "tests/fail/missing_struct_field.walk:5:13: type error: User expects 2 field values, got 1"},
+		{"unknown_struct_field.walk", "tests/fail/unknown_struct_field.walk:6:10: type error: User has no field height"},
+		{"bad_struct_field_type.walk", "tests/fail/bad_struct_field_type.walk:5:28: type error: field age is int, got string"},
+		{"const_struct_field.walk", "tests/fail/const_struct_field.walk:6:5: type error: user is const and cannot be reassigned"},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.file, func(t *testing.T) {
+			_, err := checkFile(filepath.Join(root, "tests", "fail", tc.file))
+			if err == nil {
+				t.Fatal("expected fixture to fail")
+			}
+			if got := err.Error(); !strings.HasSuffix(got, tc.want) {
+				t.Fatalf("want suffix %q, got %q", tc.want, got)
+			}
+		})
+	}
+}
+
 func repoRoot(t *testing.T) string {
 	t.Helper()
 	wd, err := os.Getwd()

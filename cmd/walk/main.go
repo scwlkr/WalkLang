@@ -574,10 +574,10 @@ func appendSearchDir(existing []string, dirs ...string) []string {
 func validateModuleSurface(program *ast.Program) error {
 	for _, statement := range program.Statements {
 		switch statement.(type) {
-		case *ast.Import, *ast.FuncDecl, *ast.Export:
+		case *ast.Import, *ast.FuncDecl, *ast.StructDecl, *ast.Export:
 			continue
 		default:
-			return errorAt(statement.Loc(), "module error: modules may contain only imp, func, and exp at top level")
+			return errorAt(statement.Loc(), "module error: modules may contain only imp, struct, func, and exp at top level")
 		}
 	}
 	return nil
@@ -595,6 +595,10 @@ func imports(program *ast.Program) []*ast.Import {
 
 func checkPrograms(program *ast.Program, modules map[string]*checker.Module) ([]checker.Warning, error) {
 	var warnings []checker.Warning
+	structs, err := collectStructDefinitions(program, modules)
+	if err != nil {
+		return warnings, err
+	}
 	checked := map[string]bool{}
 	var checkModule func(string) error
 	checkModule = func(name string) error {
@@ -609,7 +613,7 @@ func checkPrograms(program *ast.Program, modules map[string]*checker.Module) ([]
 				}
 			}
 		}
-		moduleWarnings, err := checker.CheckWithOptions(module.Program, checker.Options{Modules: modules})
+		moduleWarnings, err := checker.CheckWithOptions(module.Program, checker.Options{Modules: modules, Structs: structs})
 		warnings = append(warnings, moduleWarnings...)
 		if err != nil {
 			return err
@@ -634,9 +638,40 @@ func checkPrograms(program *ast.Program, modules map[string]*checker.Module) ([]
 		}
 	}
 
-	entryWarnings, err := checker.CheckWithOptions(program, checker.Options{Modules: modules})
+	entryWarnings, err := checker.CheckWithOptions(program, checker.Options{Modules: modules, Structs: structs})
 	warnings = append(warnings, entryWarnings...)
 	return warnings, err
+}
+
+func collectStructDefinitions(program *ast.Program, modules map[string]*checker.Module) (map[string]checker.StructDef, error) {
+	structs := map[string]checker.StructDef{}
+	add := func(program *ast.Program) error {
+		local, err := checker.StructDefinitions(program)
+		if err != nil {
+			return err
+		}
+		for name, def := range local {
+			if _, exists := structs[name]; exists {
+				return errorAt(def.Location, "type error: struct %s is already defined", name)
+			}
+			structs[name] = def
+		}
+		return nil
+	}
+	names := make([]string, 0, len(modules))
+	for name := range modules {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	for _, name := range names {
+		if err := add(modules[name].Program); err != nil {
+			return nil, err
+		}
+	}
+	if err := add(program); err != nil {
+		return nil, err
+	}
+	return structs, nil
 }
 
 func moduleProgramMap(modules map[string]*checker.Module) map[string]*ast.Program {

@@ -51,11 +51,22 @@ if: true
 
 ## Type Errors
 
-Type errors come from incompatible assignments, bad conditions, bad operators, bad calls, invalid output types, or unsupported array use.
+Type errors come from incompatible assignments, bad conditions, bad operators, bad calls, invalid output types, unsupported array use, or invalid struct field use.
 
 ```walk
 var: x = 1
 x = 'one'
+```
+
+v2 struct diagnostics also use `type error`:
+
+```walk
+struct: User
+    name string
+    age int
+
+var: user = User('Walker', 25)
+out: user.height # type error: User has no field height
 ```
 
 ## Name Errors

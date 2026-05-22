@@ -1,0 +1,6 @@
+struct: User
+    name string
+    age int
+
+var: user = User('Walker', 25)
+out: user.height

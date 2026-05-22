@@ -32,7 +32,7 @@ var reservedWords = map[string]bool{
 	"while": true, "for": true, "repeat": true, "break": true, "continue": true,
 	"func": true, "return": true, "imp": true, "exp": true, "true": true,
 	"false": true, "null": true, "and": true, "or": true, "not": true,
-	"in": true, "test": true, "assert": true,
+	"in": true, "test": true, "assert": true, "struct": true,
 }
 
 type lineNode struct {
@@ -138,6 +138,9 @@ func parseStatementAt(nodes []lineNode, index int) (ast.Statement, int, error) {
 			return &ast.Assert{Location: first.Location, Value: value}, index + 1, err
 		case "func":
 			statement, err := parseFuncDecl(payload, node.children, first.Location)
+			return statement, index + 1, err
+		case "struct":
+			statement, err := parseStructDecl(payload, node.children, first.Location)
 			return statement, index + 1, err
 		case "return":
 			value, err := parseCommandExpression(payload, node.children, first.Location)
@@ -338,6 +341,45 @@ func parseFuncDecl(tokens []lexer.Token, children []lineNode, location ast.Locat
 		return nil, err
 	}
 	return &ast.FuncDecl{Location: location, Name: name.Value, Params: params, ReturnType: returnType, Body: body}, nil
+}
+
+func parseStructDecl(tokens []lexer.Token, children []lineNode, location ast.Location) (ast.Statement, error) {
+	name, err := parseBareName(tokens, location)
+	if err != nil {
+		return nil, err
+	}
+	if reservedWords[name] {
+		return nil, errorAt(location, "syntax error: reserved word %q cannot be used as struct name", name)
+	}
+	var fields []ast.StructField
+	for _, child := range children {
+		if isCloseOnly(child.line.Tokens) {
+			continue
+		}
+		if err := rejectUnexpectedChildren(child.children); err != nil {
+			return nil, err
+		}
+		c := cursor{tokens: child.line.Tokens}
+		fieldName, err := c.expectName("field name")
+		if err != nil {
+			return nil, err
+		}
+		if reservedWords[fieldName.Value] {
+			return nil, errorAt(fieldName.Location, "syntax error: reserved word %q cannot be used as field name", fieldName.Value)
+		}
+		fieldType, err := c.parseType()
+		if err != nil {
+			return nil, err
+		}
+		if err := c.expectEnd(); err != nil {
+			return nil, err
+		}
+		fields = append(fields, ast.StructField{Location: fieldName.Location, Name: fieldName.Value, Type: fieldType})
+	}
+	if len(fields) == 0 {
+		return nil, errorAt(location, "type error: struct %s needs at least one field", name)
+	}
+	return &ast.StructDecl{Location: location, Name: name, Fields: fields}, nil
 }
 
 func parseFor(tokens []lexer.Token, children []lineNode, location ast.Location) (ast.Statement, error) {
@@ -589,6 +631,28 @@ func (c *cursor) parsePostfix(stop map[string]bool) (ast.Expression, error) {
 			expr = &ast.Index{ExprBase: ast.ExprBase{Location: open.Location}, Target: expr, Index: index}
 			continue
 		}
+		if c.peek().Value == "." {
+			dot := c.advance()
+			field, err := c.expectName("field name")
+			if err != nil {
+				return nil, err
+			}
+			expr = &ast.FieldAccess{ExprBase: ast.ExprBase{Location: dot.Location}, Target: expr, Field: field.Value}
+			continue
+		}
+		if c.peek().Value == "(" {
+			open := c.advance()
+			callee, ok := expressionCallee(expr)
+			if !ok {
+				return nil, errorAt(open.Location, "syntax error: invalid call target")
+			}
+			args, err := c.parseCallArgs()
+			if err != nil {
+				return nil, err
+			}
+			expr = &ast.Call{ExprBase: ast.ExprBase{Location: calleeLocation(expr)}, Callee: callee, Args: args}
+			continue
+		}
 		break
 	}
 	return expr, nil
@@ -618,19 +682,7 @@ func (c *cursor) parseAtom(stop map[string]bool) (ast.Expression, error) {
 		if reservedWords[token.Value] {
 			return nil, errorAt(token.Location, "syntax error: reserved word %q cannot be used as expression name", token.Value)
 		}
-		callee, err := c.finishQualifiedName(token.Value)
-		if err != nil {
-			return nil, err
-		}
-		if c.peek() != nil && c.peek().Value == "(" {
-			c.advance()
-			args, err := c.parseCallArgs()
-			if err != nil {
-				return nil, err
-			}
-			return &ast.Call{ExprBase: ast.ExprBase{Location: token.Location}, Callee: callee, Args: args}, nil
-		}
-		return &ast.Name{ExprBase: ast.ExprBase{Location: token.Location}, Identifier: callee}, nil
+		return &ast.Name{ExprBase: ast.ExprBase{Location: token.Location}, Identifier: token.Value}, nil
 	case lexer.TokenSymbol:
 		if token.Value == "(" {
 			expr, err := c.parseExpression(map[string]bool{")": true})
@@ -663,19 +715,6 @@ func (c *cursor) parseAtom(stop map[string]bool) (ast.Expression, error) {
 	return nil, errorAt(token.Location, "syntax error: expected expression, got %q", token.Value)
 }
 
-func (c *cursor) finishQualifiedName(first string) (string, error) {
-	parts := []string{first}
-	for c.peek() != nil && c.peek().Value == "." {
-		c.advance()
-		next, err := c.expectName("qualified name")
-		if err != nil {
-			return "", err
-		}
-		parts = append(parts, next.Value)
-	}
-	return strings.Join(parts, "."), nil
-}
-
 func (c *cursor) parseCallArgs() ([]ast.Expression, error) {
 	var args []ast.Expression
 	for c.peek() != nil && c.peek().Value != ")" {
@@ -692,6 +731,30 @@ func (c *cursor) parseCallArgs() ([]ast.Expression, error) {
 		return nil, err
 	}
 	return args, nil
+}
+
+func expressionCallee(expression ast.Expression) (string, bool) {
+	switch e := expression.(type) {
+	case *ast.Name:
+		return e.Identifier, true
+	case *ast.FieldAccess:
+		target, ok := expressionCallee(e.Target)
+		if !ok {
+			return "", false
+		}
+		return target + "." + e.Field, true
+	default:
+		return "", false
+	}
+}
+
+func calleeLocation(expression ast.Expression) ast.Location {
+	switch e := expression.(type) {
+	case *ast.FieldAccess:
+		return calleeLocation(e.Target)
+	default:
+		return expression.Loc()
+	}
 }
 
 func (c *cursor) parseType() (ast.Type, error) {
@@ -741,7 +804,13 @@ func (c *cursor) parseType() (ast.Type, error) {
 		}
 		return ast.FuncType(params, ret), nil
 	}
-	result := ast.Basic(ast.TypeKind(token.Value))
+	var result ast.Type
+	switch token.Value {
+	case string(ast.TypeVoid), string(ast.TypeInt), string(ast.TypeFloat), string(ast.TypeBool), string(ast.TypeString):
+		result = ast.Basic(ast.TypeKind(token.Value))
+	default:
+		result = ast.Struct(token.Value)
+	}
 	if c.peek() != nil && c.peek().Value == "?" {
 		c.advance()
 		result.Nullable = true

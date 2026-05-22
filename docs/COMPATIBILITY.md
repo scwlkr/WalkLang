@@ -81,7 +81,7 @@ The suite covers representative stable programs, test syntax, user-module export
 These are not compatibility-protected in v1:
 
 ```text
-structs
+structs (implemented as experimental in v2)
 methods
 traits
 interfaces

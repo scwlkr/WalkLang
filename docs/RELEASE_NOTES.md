@@ -1,5 +1,61 @@
 # WalkLang Release Notes
 
+## v2.0.0 - Data Modeling
+
+Date: 2026-05-22
+
+v2.0.0 adds experimental struct-based data modeling. The v1 compatibility contract remains documented separately in `docs/SPEC.md` and `docs/COMPATIBILITY.md`.
+
+### Added
+
+- `struct:` declarations with fixed typed fields.
+- Positional struct constructors.
+- Dot field reads and mutable field assignment.
+- Structs as function parameters and return values.
+- Arrays of structs, indexed field access, and mutable array-element fields.
+- Module-declared structs returned by exported module functions.
+- v2 struct pass/fail fixtures and formatter coverage.
+- `docs/V2.md` for the experimental v2 data-modeling surface.
+
+### Changed
+
+- User modules may now contain `struct:` declarations at top level.
+- `struct` is now a reserved word.
+- Generated C includes typedefs for WalkLang structs and arrays of structs.
+
+### Breaking Changes
+
+- `struct` can no longer be used as a variable, function, field, or expression name.
+
+### Removed
+
+None.
+
+### Experimental Or Draft
+
+Structs are implemented but remain experimental in v2.0. The following remain future roadmap items:
+
+```text
+methods
+traits
+interfaces
+generic structs
+named-field constructors
+file/json/matrix APIs
+```
+
+### Upgrade
+
+Run:
+
+```bash
+walk check --warnings=error <your entry file>
+walk test <your tests file>
+walk build <your entry file> -o build/app
+```
+
+Rename any user-defined binding named `struct`.
+
 ## v1.5.0 - Compatibility Release Preparation
 
 Date: 2026-05-22
@@ -60,4 +116,3 @@ walk check --warnings=error
 walk test
 walk build
 ```
-

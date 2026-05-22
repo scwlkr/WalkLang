@@ -33,6 +33,8 @@ type cEmitter struct {
 	currentModule       string
 	modules             map[string]*ast.Program
 	moduleFunctionNames map[string]map[string]bool
+	structs             map[string]*ast.StructDecl
+	structOrder         []string
 }
 
 func newCEmitter(modules map[string]*ast.Program) *cEmitter {
@@ -42,10 +44,13 @@ func newCEmitter(modules map[string]*ast.Program) *cEmitter {
 	return &cEmitter{
 		modules:             modules,
 		moduleFunctionNames: collectModuleFunctionNames(modules),
+		structs:             collectStructDecls(modules),
 	}
 }
 
 func (e *cEmitter) emit(program *ast.Program, testsOnly bool) (string, error) {
+	e.addProgramStructs(program)
+	e.structOrder = e.sortedStructNames()
 	var out strings.Builder
 	out.WriteString("#include <math.h>\n")
 	out.WriteString("#include <stdbool.h>\n")
@@ -58,6 +63,14 @@ func (e *cEmitter) emit(program *ast.Program, testsOnly bool) (string, error) {
 	out.WriteString("typedef struct { double *items; long long len; } WalkArrayFloat;\n")
 	out.WriteString("typedef struct { bool *items; long long len; } WalkArrayBool;\n")
 	out.WriteString("typedef struct { const char **items; long long len; } WalkArrayString;\n\n")
+	for _, name := range e.structOrder {
+		rendered, err := e.emitStructDecl(e.structs[name])
+		if err != nil {
+			return "", err
+		}
+		out.WriteString(rendered)
+		out.WriteString(fmt.Sprintf("typedef struct { %s *items; long long len; } %s;\n\n", cStructName(name), cStructArrayName(name)))
+	}
 	out.WriteString("static long long __walk_random_int(long long min, long long max) {\n")
 	out.WriteString("    if (max < min) { return min; }\n")
 	out.WriteString("    return min + (rand() % (max - min + 1));\n")
@@ -131,7 +144,7 @@ func (e *cEmitter) emit(program *ast.Program, testsOnly bool) (string, error) {
 	}
 	for _, statement := range program.Statements {
 		switch s := statement.(type) {
-		case *ast.FuncDecl, *ast.Import, *ast.Export:
+		case *ast.FuncDecl, *ast.StructDecl, *ast.Import, *ast.Export:
 			continue
 		case *ast.TestDecl:
 			if !testsOnly {
@@ -223,6 +236,100 @@ func collectModuleFunctionNames(modules map[string]*ast.Program) map[string]map[
 		}
 	}
 	return result
+}
+
+func collectStructDecls(modules map[string]*ast.Program) map[string]*ast.StructDecl {
+	result := map[string]*ast.StructDecl{}
+	for _, name := range sortedModuleNames(modules) {
+		for _, statement := range modules[name].Statements {
+			if decl, ok := statement.(*ast.StructDecl); ok {
+				result[decl.Name] = decl
+			}
+		}
+	}
+	return result
+}
+
+func (e *cEmitter) addProgramStructs(program *ast.Program) {
+	for _, statement := range program.Statements {
+		if decl, ok := statement.(*ast.StructDecl); ok {
+			e.structs[decl.Name] = decl
+		}
+	}
+}
+
+func (e *cEmitter) sortedStructNames() []string {
+	names := make([]string, 0, len(e.structs))
+	seen := map[string]bool{}
+	visiting := map[string]bool{}
+	var visit func(string)
+	visit = func(name string) {
+		if seen[name] || visiting[name] {
+			return
+		}
+		visiting[name] = true
+		if decl := e.structs[name]; decl != nil {
+			deps := make([]string, 0)
+			for _, field := range decl.Fields {
+				deps = append(deps, structDependencies(field.Type)...)
+			}
+			sort.Strings(deps)
+			for _, dep := range deps {
+				if _, ok := e.structs[dep]; ok && dep != name {
+					visit(dep)
+				}
+			}
+		}
+		visiting[name] = false
+		seen[name] = true
+		names = append(names, name)
+	}
+	all := make([]string, 0, len(e.structs))
+	for name := range e.structs {
+		all = append(all, name)
+	}
+	sort.Strings(all)
+	for _, name := range all {
+		visit(name)
+	}
+	return names
+}
+
+func structDependencies(typeName ast.Type) []string {
+	switch typeName.Kind {
+	case ast.TypeStruct:
+		return []string{typeName.Name}
+	case ast.TypeArray:
+		if typeName.Elem == nil {
+			return nil
+		}
+		return structDependencies(*typeName.Elem)
+	case ast.TypeFunction:
+		var deps []string
+		for _, param := range typeName.Params {
+			deps = append(deps, structDependencies(param)...)
+		}
+		if typeName.Return != nil {
+			deps = append(deps, structDependencies(*typeName.Return)...)
+		}
+		return deps
+	default:
+		return nil
+	}
+}
+
+func (e *cEmitter) emitStructDecl(decl *ast.StructDecl) (string, error) {
+	var out strings.Builder
+	out.WriteString("typedef struct {\n")
+	for _, field := range decl.Fields {
+		fieldType, err := cValueType(field.Type)
+		if err != nil {
+			return "", err
+		}
+		out.WriteString(fmt.Sprintf("    %s %s;\n", fieldType, field.Name))
+	}
+	out.WriteString(fmt.Sprintf("} %s;\n", cStructName(decl.Name)))
+	return out.String(), nil
 }
 
 func (e *cEmitter) emitFunction(fn *ast.FuncDecl) (string, error) {
@@ -534,6 +641,12 @@ func (e *cEmitter) emitExpression(expression ast.Expression) (string, error) {
 			return "", err
 		}
 		return fmt.Sprintf("%s.items[%s]", target, index), nil
+	case *ast.FieldAccess:
+		target, err := e.emitExpression(ex.Target)
+		if err != nil {
+			return "", err
+		}
+		return fmt.Sprintf("(%s).%s", target, ex.Field), nil
 	case *ast.ArrayLiteral:
 		return "", errorAt(ex.Loc(), "internal error: array literal cannot be emitted inline")
 	default:
@@ -605,6 +718,17 @@ func (e *cEmitter) emitCall(call *ast.Call) (string, error) {
 			return "", err
 		}
 		args = append(args, rendered)
+	}
+	if call.ExprType().Kind == ast.TypeStruct && call.Callee == call.ExprType().Name {
+		def := e.structs[call.Callee]
+		if def == nil {
+			return "", errorAt(call.Loc(), "internal error: unknown struct %s", call.Callee)
+		}
+		fields := make([]string, 0, len(def.Fields))
+		for i, field := range def.Fields {
+			fields = append(fields, fmt.Sprintf(".%s = %s", field.Name, args[i]))
+		}
+		return fmt.Sprintf("(%s){%s}", cStructName(call.Callee), strings.Join(fields, ", ")), nil
 	}
 	switch call.Callee {
 	case "math.sqrt":
@@ -692,6 +816,8 @@ func cValueType(typeName ast.Type) (string, error) {
 		return "bool", nil
 	case ast.TypeString:
 		return "const char *", nil
+	case ast.TypeStruct:
+		return cStructName(typeName.Name), nil
 	case ast.TypeArray:
 		if typeName.Elem == nil {
 			return "", fmt.Errorf("internal error: array type needs element")
@@ -705,6 +831,8 @@ func cValueType(typeName ast.Type) (string, error) {
 			return "WalkArrayBool", nil
 		case ast.TypeString:
 			return "WalkArrayString", nil
+		case ast.TypeStruct:
+			return cStructArrayName(typeName.Elem.Name), nil
 		}
 	}
 	return "", fmt.Errorf("internal error: unsupported C type %s", typeName.String())
@@ -720,9 +848,19 @@ func cArrayItemType(typeName ast.Type) (string, error) {
 		return "bool", nil
 	case ast.TypeString:
 		return "const char *", nil
+	case ast.TypeStruct:
+		return cStructName(typeName.Name), nil
 	default:
 		return "", fmt.Errorf("internal error: unsupported array element type %s", typeName.String())
 	}
+}
+
+func cStructName(name string) string {
+	return name
+}
+
+func cStructArrayName(name string) string {
+	return "WalkArray" + name
 }
 
 func (e *cEmitter) nextTemp(prefix string) string {

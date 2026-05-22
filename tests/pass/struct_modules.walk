@@ -1,0 +1,5 @@
+imp: profile
+
+var: user = profile.make_user('Walker', 25)
+out: user.name
+out: user.age
