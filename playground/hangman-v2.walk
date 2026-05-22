@@ -1,0 +1,9 @@
+imp: random
+
+# secret word selection
+var: word_bank = ['dog', 'cat', 'paddle', 'car', 'bike', 'motor']
+var: secretWord = random.choice(word_bank)
+
+# print secret word to user
+var: secretWordLength = string.len(secretWord)
+out: 'the secret word is (secretWordLength)'
