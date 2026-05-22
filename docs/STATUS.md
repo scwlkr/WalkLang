@@ -6,6 +6,15 @@ Current compiler/tooling/docs release: v5.3.0 stable required-line input.
 
 Experimental implemented language surface: v2.2.
 
+Hangman readiness audit on 2026-05-22: WalkLang is not ready for the clean
+string-first Hangman shape because stable v1.7 has no `contains`, `push`,
+`random.choice`, string indexing, or string concatenation/building. A constrained
+terminal guessing game is possible today using `in:`, `out:`, `if:`, `while:`,
+arrays of one-character strings, array indexing, string equality, `array.len`,
+and `random.int`. Fresh proof: `go test -count=1 ./...` passed; stdlib and array
+compiler checks passed; `playground/hangman.walk` currently fails at standalone
+`in:` syntax because `in:` is an expression, not a statement.
+
 State: v5.3 is complete against the new v1.7 stable `in:` input rule. `in:` is
 a core expression that returns `string`, can be used anywhere an expression is
 valid, reads exactly one required line from stdin, supports an optional string
@@ -55,7 +64,8 @@ Playground example update on 2026-05-22: `playground/route_ranker.walk` now demo
 
 CLI run shortcut update on 2026-05-22: `walk run <source.walk>` now compiles a single file to a temporary native executable, runs it, streams program input and output, and removes the temporary build directory; `walk <source.walk>` is a direct shorthand for the same flow. Verification passed with focused `go test ./cmd/walk -run TestRunCommandRunsSingleFileAndDirectFileAlias -count=1`, `go build -o build/walk ./cmd/walk`, `./build/walk run playground/route_ranker.walk`, `./build/walk playground/route_ranker.walk`, full `go test -count=1 ./...`, `scripts/check-docs-site.sh`, `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh`, `scripts/release.sh v5.1.0 <temp>/release`, a 5-line `SHA256SUMS` check, host release binary `walk version` reporting `v5.1.0`, and `git diff --check`.
 
-Next: implement the next IO Phase 0 decision point in `IO_PLAN.md`, especially
-the `do:` effect-call syntax needed before side-effect standard-library IO
-modules; separately retry HTTPS enforcement after GitHub issues the Pages
-certificate for `walklang.wlkrlabs.com`.
+Next: decide whether the next small language step should be Hangman ergonomics
+(`string.contains`, `string.at` or equivalent indexing, string building, and an
+array append story) or the existing IO Phase 0 `do:` effect-call decision point;
+separately retry HTTPS enforcement after GitHub issues the Pages certificate for
+`walklang.wlkrlabs.com`.
