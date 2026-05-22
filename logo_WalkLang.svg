@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 4167 4167" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <rect x="0" y="0" width="4166.667" height="4166.667" style="fill:white;"/>
+    <g transform="matrix(0.798995,0,0,0.798995,124.39722,172.073976)">
+        <text x="45.717px" y="2118.889px" style="font-family:'Poppins-Bold', 'Poppins';font-weight:700;font-size:1796.514px;fill:rgb(8,8,8);">walk</text>
+        <text x="4461.549px" y="2118.889px" style="font-family:'Poppins-Bold', 'Poppins';font-weight:700;font-size:1601.022px;fill:rgb(0,0,136);">:</text>
+        <g transform="matrix(1796.514214,0,0,1796.514214,4571.222628,3556.10044)">
+        </g>
+        <text x="390.734px" y="3556.1px" style="font-family:'Poppins-Bold', 'Poppins';font-weight:700;font-size:1796.514px;fill:rgb(8,8,8);">lang</text>
+    </g>
+</svg>
