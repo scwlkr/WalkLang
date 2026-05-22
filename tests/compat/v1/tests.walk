@@ -1,0 +1,10 @@
+imp: math_extra
+imp: string
+imp: testing
+
+test: 'stdlib assert stays compatible'
+    assert: testing.assert(== string.len('walk') 4)
+
+test: 'module export stays compatible'
+    assert: == math_extra.cube(3) 27
+

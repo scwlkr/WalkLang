@@ -2,14 +2,14 @@
 
 WalkLang is a small compiled language implemented in Go with a C backend.
 
-This repo currently contains the v1.4 diagnostics and developer experience pass, the v1.3 standard library foundation, v1.2 project mode, and the v1 language contract from `docs/ROADMAP.md`.
+This repo currently contains the v1.5 compatibility release preparation, v1.4 diagnostics and developer experience, the v1.3 standard library foundation, v1.2 project mode, and the v1 language contract from `docs/ROADMAP.md`.
 It proves the pipeline:
 
 ```text
 .walk source -> Go compiler -> generated C -> native executable
 ```
 
-## Current v1.4 Surface
+## Current v1.5 Surface
 
 Supported now:
 
@@ -29,7 +29,7 @@ Supported now:
 - `imp:` for built-in and user modules with exported function validation
 - formatter command
 - test runner with `test:` and `assert:`
-- v1.3 stable stdlib APIs: `math.sqrt`, `math.pow`, `string.len`, `array.len`, `time.now`, `random.int`, and `testing.assert`
+- stable stdlib APIs: `math.sqrt`, `math.pow`, `string.len`, `array.len`, `time.now`, `random.int`, and `testing.assert`
 - basic expression REPL
 - professional diagnostics with line/column, source snippets, caret locations, and focused suggestions
 - `walk check` with `--warnings=off|default|error`
@@ -40,6 +40,7 @@ Supported now:
 - cross-platform CLI release script
 - stable language contract docs
 - pass/fail conformance fixtures
+- v1 compatibility fixtures
 - generated C snapshot tests
 - `walk init` project scaffolding
 - `walk.toml` project config
@@ -47,6 +48,7 @@ Supported now:
 - project tests that can import modules from `src/`
 - examples covered as testable fixtures
 - GitHub Actions CI for tests, stress, and release artifacts
+- release notes, migration guide, deprecation policy, and official install instructions
 
 Contract docs:
 
@@ -56,7 +58,11 @@ Contract docs:
 - `docs/ERRORS.md`
 - `docs/DESIGN_RULES.md`
 - `docs/COMPATIBILITY.md`
+- `docs/DEPRECATION.md`
+- `docs/INSTALL.md`
+- `docs/MIGRATING.md`
 - `docs/PROJECTS.md`
+- `docs/RELEASE_NOTES.md`
 - `docs/STATUS.md`
 
 Not stable yet:
@@ -69,7 +75,7 @@ Not stable yet:
 Install the local `walk` command:
 
 ```bash
-scripts/install-local.sh v1.4-local
+scripts/install-local.sh v1.5-local
 walk version
 ```
 
@@ -144,6 +150,12 @@ Run tests:
 go test ./...
 ```
 
+Run the focused v1 compatibility suite:
+
+```bash
+go test ./cmd/walk -run TestV15CompatibilitySuite
+```
+
 Stress v1:
 
 ```bash
@@ -153,5 +165,5 @@ scripts/stress-v1.sh
 Build cross-platform CLI release artifacts:
 
 ```bash
-scripts/release.sh v1.4.0
+scripts/release.sh v1.5.0
 ```

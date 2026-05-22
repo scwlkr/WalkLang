@@ -1,6 +1,6 @@
 # WalkLang v1 Specification
 
-This document is the stable WalkLang language contract for the v1 line. v1.4 adds professional diagnostics and developer-experience improvements without changing the core syntax.
+This document is the stable WalkLang language contract for the v1 line. v1.5 keeps the v1.4 language surface and adds explicit compatibility-release policy around it.
 
 Core rule:
 

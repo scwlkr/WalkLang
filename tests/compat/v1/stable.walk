@@ -1,0 +1,51 @@
+imp: math_extra
+imp: math
+imp: string
+imp: array
+imp: random
+imp: testing
+
+func: add(a int, b int) int
+    return: + a b
+
+func: inc(x int) int
+    return: + x 1
+
+func: apply(f func(int) int, x int) int
+    return: f(x)
+
+var: nums = [1, 2, 3]
+nums[1] = 9
+
+out: math_extra.cube(3)
+out: add(2, 3)
+out: math.sqrt(9)
+out: math.pow(2, 3)
+out: string.len('walk')
+out: array.len(nums)
+out: random.int(7, 7)
+out: testing.assert(true)
+
+for: n in nums
+    out: n
+
+var: count = 0
+while: < count 3
+    count = + count 1
+    if: == count 2
+        continue:
+    out: count
+
+repeat: 2
+    out: 'r'
+
+var: name string? = null
+if: == name null
+    out: 'missing'
+
+name = 'Walker'
+if: != name null
+    out: name
+
+out: apply(inc, 4)
+

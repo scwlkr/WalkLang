@@ -40,6 +40,7 @@ expect_failure() {
     fi
 }
 
+go test ./cmd/walk -run TestV15CompatibilitySuite
 go test ./...
 
 "$walk_bin" check --warnings=error examples/v1.walk
@@ -140,4 +141,4 @@ project_dir="$work_dir/hello_project"
     test ! -d build
 )
 
-echo "v1.4 stress ok"
+echo "v1.5 stress ok"

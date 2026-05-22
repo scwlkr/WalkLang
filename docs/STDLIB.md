@@ -1,6 +1,6 @@
-# WalkLang v1.3 Standard Library
+# WalkLang v1.5 Standard Library
 
-This document lists the stable built-in modules and functions in v1.3.
+This document lists the stable built-in modules and functions for the v1 line. These APIs became stable in v1.3 and remain compatibility-protected in v1.5.
 
 Import built-ins with `imp:` and call functions through their module namespace.
 
@@ -22,7 +22,7 @@ random
 testing
 ```
 
-No other built-in module is stable in v1.3.
+No other built-in module is stable in v1.5.
 
 ---
 
@@ -92,9 +92,9 @@ out: > time.now() 0
 
 ### random.int(int, int) -> int
 
-Returns an integer in the inclusive range. If `max < min`, v1.3 returns `min`.
+Returns an integer in the inclusive range. If `max < min`, v1 returns `min`.
 
-`random.int` uses the native C runtime's default `rand()` state. v1.3 does not expose seeding.
+`random.int` uses the native C runtime's default `rand()` state. v1 does not expose seeding.
 
 ```walk
 imp: random
@@ -139,7 +139,7 @@ walk test tests.walk
 
 ## Draft APIs
 
-These names are planned draft APIs only. They are documented here so naming can stay consistent, but they are not stable, not importable, and not compatibility-protected in v1.3.
+These names are planned draft APIs only. They are documented here so naming can stay consistent, but they are not stable, not importable, and not compatibility-protected in v1.5.
 
 ```text
 file.read
