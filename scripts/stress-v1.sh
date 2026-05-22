@@ -53,6 +53,15 @@ expect_output "$work_dir/v1" "27
 3
 true"
 
+"$walk_bin" build tests/pass/stdlib.walk -o "$work_dir/stdlib"
+expect_output "$work_dir/stdlib" "3
+8
+4
+3
+true
+7
+true"
+
 "$walk_bin" build examples/v0.walk -o "$work_dir/v0"
 expect_output "$work_dir/v0" "11
 12
@@ -66,6 +75,9 @@ true"
 
 "$walk_bin" test examples/v0_1_tests.walk >"$work_dir/tests.out"
 grep -q "ok 2 tests" "$work_dir/tests.out"
+
+"$walk_bin" test tests/pass/walk_tests.walk >"$work_dir/stdlib-tests.out"
+grep -q "ok 2 tests" "$work_dir/stdlib-tests.out"
 
 cat >"$work_dir/shadow.walk" <<'WALK'
 var: x = 1
@@ -117,4 +129,4 @@ project_dir="$work_dir/hello_project"
     test ! -d build
 )
 
-echo "v1.2 stress ok"
+echo "v1.3 stress ok"

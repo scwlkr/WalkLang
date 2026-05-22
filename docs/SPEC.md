@@ -1,6 +1,6 @@
-# WalkLang v1.1 Specification
+# WalkLang v1 Specification
 
-This document is the stable WalkLang language contract for v1.1.
+This document is the stable WalkLang language contract for the v1 line. v1.3 adds compatible standard library APIs without changing the core syntax.
 
 Core rule:
 
@@ -393,6 +393,7 @@ string
 array
 time
 random
+testing
 ```
 
 User modules are sibling `.walk` files imported by bare module name.
@@ -423,6 +424,15 @@ test: 'add works'
 ```
 
 `assert:` requires a bool expression. Failed assertions make the generated test executable exit non-zero.
+
+`testing.assert(bool)` is a stable v1.3 stdlib helper that returns its bool argument unchanged. It is intended to be paired with `assert:`:
+
+```walk
+imp: testing
+
+test: 'wrapped assertion works'
+    assert: testing.assert(true)
+```
 
 Normal `walk build` ignores `test:` blocks.
 
@@ -471,7 +481,7 @@ Warnings do not fail by default. `--warnings=error` promotes warnings to errors.
 
 ## 21. Non-Goals
 
-These are not stable v1.1 features:
+These are not stable v1 features:
 
 ```text
 classes

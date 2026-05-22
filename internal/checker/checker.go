@@ -546,6 +546,18 @@ func (c *Checker) checkModuleCall(call *ast.Call) (ast.Type, error) {
 			}
 		}
 		return ast.Basic(ast.TypeInt), nil
+	case "testing.assert":
+		if len(call.Args) != 1 {
+			return ast.Type{}, errorAt(call.Loc(), "type error: testing.assert expects 1 arg, got %d", len(call.Args))
+		}
+		argType, err := c.checkExpression(call.Args[0])
+		if err != nil {
+			return ast.Type{}, err
+		}
+		if !argType.Equal(ast.Basic(ast.TypeBool)) {
+			return ast.Type{}, errorAt(call.Args[0].Loc(), "type error: testing.assert needs bool arg, got %s", argType.String())
+		}
+		return ast.Basic(ast.TypeBool), nil
 	}
 	return ast.Type{}, errorAt(call.Loc(), "name error: unknown library function %s", call.Callee)
 }
@@ -744,7 +756,7 @@ func errorAt(location ast.Location, format string, args ...any) error {
 
 func IsBuiltinModule(name string) bool {
 	switch name {
-	case "math", "string", "array", "time", "random":
+	case "math", "string", "array", "time", "random", "testing":
 		return true
 	default:
 		return false

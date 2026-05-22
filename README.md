@@ -2,14 +2,14 @@
 
 WalkLang is a small compiled language implemented in Go with a C backend.
 
-This repo currently contains the v1.2 project mode and the v1.1 language contract from `docs/ROADMAP.md`.
+This repo currently contains the v1.3 standard library foundation, v1.2 project mode, and the v1 language contract from `docs/ROADMAP.md`.
 It proves the pipeline:
 
 ```text
 .walk source -> Go compiler -> generated C -> native executable
 ```
 
-## Current v1.2 Surface
+## Current v1.3 Surface
 
 Supported now:
 
@@ -27,12 +27,11 @@ Supported now:
 - `func:` / `return:`, recursion, and function values
 - arrays, indexing, and array element assignment
 - `imp:` for built-in and user modules with exported function validation
-- `math.sqrt` and `random.int`
 - formatter command
 - test runner with `test:` and `assert:`
+- v1.3 stable stdlib APIs: `math.sqrt`, `math.pow`, `string.len`, `array.len`, `time.now`, `random.int`, and `testing.assert`
 - basic expression REPL
 - line/column diagnostics
-- stdlib polish for `math.pow`, `string.len`, `array.len`, and `time.now`
 - `walk check` with `--warnings=off|default|error`
 - release native builds with `--release`, `--cc`, and `--cflag`
 - user-local `walk` command install
@@ -59,7 +58,7 @@ Contract docs:
 - `docs/PROJECTS.md`
 - `docs/STATUS.md`
 
-Not v1.2 yet:
+Not stable yet:
 
 - file/json/matrix stdlib APIs
 - structs, methods, traits, or package manager behavior
@@ -69,7 +68,7 @@ Not v1.2 yet:
 Install the local `walk` command:
 
 ```bash
-scripts/install-local.sh v1.2-local
+scripts/install-local.sh v1.3-local
 walk version
 ```
 
@@ -153,5 +152,5 @@ scripts/stress-v1.sh
 Build cross-platform CLI release artifacts:
 
 ```bash
-scripts/release.sh v1.2.0
+scripts/release.sh v1.3.0
 ```

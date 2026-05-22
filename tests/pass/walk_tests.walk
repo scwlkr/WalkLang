@@ -1,6 +1,8 @@
 imp: math
 imp: string
 imp: array
+imp: random
+imp: testing
 
 func: add(a int, b int) int
     return: + a b
@@ -10,6 +12,8 @@ test: 'arithmetic works'
 
 test: 'stdlib works'
     var: nums = [1, 2, 3]
+    var: fixed_random = random.int(2, 2)
     assert: == array.len(nums) 3
     assert: == string.len('walk') 4
     assert: == math.pow(2, 3) 8
+    assert: testing.assert(== fixed_random 2)

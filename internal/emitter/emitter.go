@@ -618,6 +618,8 @@ func (e *cEmitter) emitCall(call *ast.Call) (string, error) {
 		return "(long long)time(NULL)", nil
 	case "random.int":
 		return fmt.Sprintf("__walk_random_int(%s)", strings.Join(args, ", ")), nil
+	case "testing.assert":
+		return args[0], nil
 	default:
 		if strings.Contains(call.Callee, ".") {
 			return fmt.Sprintf("%s(%s)", strings.ReplaceAll(call.Callee, ".", "__"), strings.Join(args, ", ")), nil

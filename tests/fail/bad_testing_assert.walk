@@ -1,0 +1,4 @@
+imp: testing
+
+test: 'needs bool'
+    assert: testing.assert(1)

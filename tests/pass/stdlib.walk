@@ -2,11 +2,16 @@ imp: math
 imp: string
 imp: array
 imp: time
+imp: random
+imp: testing
 
 var: nums = [1, 2, 3]
+var: fixed_random = random.int(7, 7)
 
 out: math.sqrt(9)
 out: math.pow(2, 3)
 out: string.len('walk')
 out: array.len(nums)
 out: > time.now() 0
+out: fixed_random
+out: testing.assert(== fixed_random 7)

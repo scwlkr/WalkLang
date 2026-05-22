@@ -281,7 +281,7 @@ calc.square -> generated C symbol calc__square
 
 ## 9. Standard Library
 
-v1.1 stable libraries:
+v1.3 stable libraries:
 
 ```text
 math
@@ -289,6 +289,7 @@ string
 array
 time
 random
+testing
 ```
 
 Example:
@@ -300,6 +301,8 @@ imp: random
 var: x = random.int(1, 10)
 out: math.sqrt(x)
 ```
+
+`testing.assert(bool)` is stable as a namespaced assertion helper for `walk test`.
 
 Draft library areas are not stable until they appear in `docs/STDLIB.md` and pass conformance tests.
 

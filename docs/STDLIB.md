@@ -1,6 +1,6 @@
-# WalkLang v1.1 Standard Library
+# WalkLang v1.3 Standard Library
 
-This document lists the stable built-in modules and functions in v1.1.
+This document lists the stable built-in modules and functions in v1.3.
 
 Import built-ins with `imp:` and call functions through their module namespace.
 
@@ -19,9 +19,10 @@ string
 array
 time
 random
+testing
 ```
 
-No other built-in module is stable in v1.1.
+No other built-in module is stable in v1.3.
 
 ---
 
@@ -64,7 +65,7 @@ out: string.len('walk')
 
 ### array.len(array[T]) -> int
 
-Returns the length stored with a stable v1.1 array.
+Returns the length stored with a stable v1 array.
 
 ```walk
 imp: array
@@ -91,7 +92,9 @@ out: > time.now() 0
 
 ### random.int(int, int) -> int
 
-Returns an integer in the inclusive range. If `max < min`, v1.1 returns `min`.
+Returns an integer in the inclusive range. If `max < min`, v1.3 returns `min`.
+
+`random.int` uses the native C runtime's default `rand()` state. v1.3 does not expose seeding.
 
 ```walk
 imp: random
@@ -100,9 +103,26 @@ out: random.int(1, 10)
 
 ---
 
-## Testing Base
+## testing
 
-The stable testing surface is syntax, not an importable module:
+### testing.assert(bool) -> bool
+
+Returns the bool argument unchanged. Use it with `assert:` when a test wants the assertion helper to be visibly namespaced.
+
+```walk
+imp: testing
+
+test: 'works'
+    assert: testing.assert(true)
+```
+
+`testing.assert` itself does not print or stop a program. The `assert:` statement owns test failure reporting.
+
+---
+
+## Test Syntax
+
+The stable testing surface also includes syntax:
 
 ```walk
 test: 'works'
@@ -117,9 +137,9 @@ walk test tests.walk
 
 ---
 
-## Not Stable In v1.1
+## Draft APIs
 
-These names are planned or draft ideas only:
+These names are planned draft APIs only. They are documented here so naming can stay consistent, but they are not stable, not importable, and not compatibility-protected in v1.3.
 
 ```text
 file.read
@@ -130,5 +150,4 @@ json.stringify
 matrix.rows
 matrix.cols
 matrix.get
-testing.assert as an imported function
 ```

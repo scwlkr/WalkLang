@@ -219,6 +219,7 @@ func replSource(expression string) string {
 		"imp: array",
 		"imp: random",
 		"imp: time",
+		"imp: testing",
 		"out: " + expression,
 		"",
 	}, "\n")

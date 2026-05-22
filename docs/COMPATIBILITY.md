@@ -1,10 +1,10 @@
-# WalkLang v1.1 Compatibility
+# WalkLang v1 Compatibility
 
-WalkLang v1.1 is the first contract-focused checkpoint for the v1 language line.
+WalkLang v1.1 is the first contract-focused checkpoint for the v1 language line. v1.3 adds compatible standard library functions on top of that contract.
 
 ## Stable Surface
 
-Stable v1.1 behavior is defined by:
+Stable v1 behavior is defined by:
 
 ```text
 docs/SPEC.md
@@ -20,7 +20,7 @@ If a feature is accepted by the compiler but absent from those files, treat it a
 
 ## Compatibility Promise
 
-Stable v1.1 programs should continue to compile through the v1.x line unless one of these applies:
+Stable v1 programs should continue to compile through the v1.x line unless one of these applies:
 
 ```text
 the behavior was undocumented
@@ -39,7 +39,7 @@ v2.0.0: breaking language changes allowed
 
 ## Experimental Or Future Features
 
-These are not compatibility-protected in v1.1:
+These are not compatibility-protected in v1:
 
 ```text
 structs

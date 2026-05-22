@@ -1,4 +1,4 @@
-# WalkLang v1.1 Syntax Guide
+# WalkLang v1 Syntax Guide
 
 This guide is the readable syntax companion to `docs/SPEC.md`. `SPEC.md` is the contract when the two disagree.
 
@@ -384,6 +384,15 @@ test: 'add works'
 ```
 
 `assert:` requires a bool expression.
+
+`testing.assert(bool)` can wrap that bool expression when you want a namespaced stdlib assertion helper.
+
+```walk
+imp: testing
+
+test: 'wrapped assertion works'
+    assert: testing.assert(true)
+```
 
 ---
 

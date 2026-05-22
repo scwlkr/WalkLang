@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestV11PassFixturesBuildAndRun(t *testing.T) {
+func TestV13PassFixturesBuildAndRun(t *testing.T) {
 	requireCC(t)
 	root := repoRoot(t)
 	cases := []struct {
@@ -21,7 +21,7 @@ func TestV11PassFixturesBuildAndRun(t *testing.T) {
 		{"control_flow.walk", "1\n3\nr\nr\n2\n6\n"},
 		{"nullable.walk", "missing\nWalker\n"},
 		{"function_values.walk", "5\n"},
-		{"stdlib.walk", "3\n8\n4\n3\ntrue\n"},
+		{"stdlib.walk", "3\n8\n4\n3\ntrue\n7\ntrue\n"},
 		{"modules.walk", "25\n10\n"},
 	}
 
@@ -43,7 +43,7 @@ func TestV11PassFixturesBuildAndRun(t *testing.T) {
 	}
 }
 
-func TestV11TestFixtureRuns(t *testing.T) {
+func TestV13TestFixtureRuns(t *testing.T) {
 	requireCC(t)
 	root := repoRoot(t)
 	sourcePath := filepath.Join(root, "tests", "pass", "walk_tests.walk")
@@ -61,7 +61,7 @@ func TestV11TestFixtureRuns(t *testing.T) {
 	}
 }
 
-func TestV11FailFixturesHaveExpectedDiagnostics(t *testing.T) {
+func TestV13FailFixturesHaveExpectedDiagnostics(t *testing.T) {
 	root := repoRoot(t)
 	cases := []struct {
 		file string
@@ -76,6 +76,7 @@ func TestV11FailFixturesHaveExpectedDiagnostics(t *testing.T) {
 		{"bad_array.walk", "tests/fail/bad_array.walk:1:15: type error: arrays must be homogeneous, got int and string"},
 		{"non_bool_if.walk", "tests/fail/non_bool_if.walk:1:5: type error: if condition must be bool, got int"},
 		{"bad_assert.walk", "tests/fail/bad_assert.walk:2:13: type error: assert needs bool, got int"},
+		{"bad_testing_assert.walk", "tests/fail/bad_testing_assert.walk:4:28: type error: testing.assert needs bool arg, got int"},
 		{"unknown_library.walk", "tests/fail/unknown_library.walk:2:6: name error: unknown library function math.nope"},
 		{"top_break.walk", "tests/fail/top_break.walk:1:1: syntax error: break outside loop"},
 	}
@@ -93,7 +94,7 @@ func TestV11FailFixturesHaveExpectedDiagnostics(t *testing.T) {
 	}
 }
 
-func TestV11GeneratedCSnapshots(t *testing.T) {
+func TestV13GeneratedCSnapshots(t *testing.T) {
 	root := repoRoot(t)
 	for _, name := range []string{"hello", "functions"} {
 		t.Run(name, func(t *testing.T) {
@@ -116,7 +117,7 @@ func TestV11GeneratedCSnapshots(t *testing.T) {
 	}
 }
 
-func TestV12ExamplesAreTestableFixtures(t *testing.T) {
+func TestV13ExamplesAreTestableFixtures(t *testing.T) {
 	requireCC(t)
 	root := repoRoot(t)
 	programs := []struct {

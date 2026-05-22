@@ -1,4 +1,4 @@
-# WalkLang v1.1 Diagnostics
+# WalkLang v1 Diagnostics
 
 WalkLang diagnostics are intended to be deterministic enough for conformance tests.
 
