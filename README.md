@@ -4,14 +4,22 @@
 
 [Getting started] | [Learn] | [Documentation] | [Contributing]
 
-This is the main source code repository for WalkLang. It contains the compiler,
-standard library surface, editor tooling, documentation, examples, tests, and
-release automation.
+This repository contains the WalkLang compiler, language specification,
+examples, tests, documentation, generated reference docs, and release tooling.
 
 WalkLang compiles `.walk` source through generated C into native executables:
 
 ```text
 .walk source -> Go compiler -> generated C -> native executable
+```
+
+A small WalkLang program looks like this:
+
+```walk
+func: add(a int, b int) int
+    return: + a b
+
+out: add(2, 3)
 ```
 
 [Getting started]: docs/INSTALL.md
@@ -27,6 +35,32 @@ WalkLang compiles `.walk` source through generated C into native executables:
   compiler to build native executables.
 - **Tooling:** project mode, tests, formatting, diagnostics, package workflows,
   editor support, API docs generation, and release scripts are part of the repo.
+
+## Version Map
+
+WalkLang currently has three version layers:
+
+- **Stable language contract:** `v1.5`, defined by `docs/SPEC.md`,
+  `docs/COMPATIBILITY.md`, and the v1 compatibility tests.
+- **Current compiler/tooling/docs release:** `v5.1.0`, focused on the C backend,
+  release artifacts, generated docs, and the public reference site.
+- **Experimental implemented language surface:** v2 through v2.2 features such
+  as structs, methods, and simple generic functions are implemented, but are not
+  part of the stable v1 compatibility promise.
+
+## What Works Today
+
+- `.walk` files compile through generated C into native executables.
+- Stable v1.5 syntax, diagnostics, modules, tests, and standard-library helpers
+  are documented and compatibility-tested.
+- `walk run`, direct `walk file.walk`, `walk build`, `walk check`, `walk test`,
+  `walk fmt`, `walk clean`, `walk package`, `walk docs`, `walk debug-map`,
+  `walk lsp`, `walk repl`, and `walk version` are implemented.
+- Project mode supports `walk init`, `walk.toml`, source/test layout, builds,
+  checks, tests, formatting, and cleanup.
+- Static docs and generated API reference output are repo-owned and deployed
+  through GitHub Pages; live custom-domain HTTPS readiness is tracked in
+  [STATUS.md](docs/STATUS.md).
 
 ## Quick Start
 
@@ -55,10 +89,10 @@ If you want to install from this repository, see [INSTALL.md](docs/INSTALL.md).
 
 ## Getting Help
 
-Start with the docs index at [docs/README.md](docs/README.md). The hosted docs
-path is <https://walklang.wlkrlabs.com/docs>, built from `docs/` and `public/`
-in this repository. Until public community channels exist, use this repository's
-issue tracker for bugs and design questions.
+Start with the docs index at [docs/README.md](docs/README.md). The public docs
+site is built from `docs/` and `public/` in this repository and configured for
+`walklang.wlkrlabs.com/docs`. Until public community channels exist, use this
+repository's issue tracker for bugs and design questions.
 
 ## Contributing
 

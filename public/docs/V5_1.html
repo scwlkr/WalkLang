@@ -54,8 +54,8 @@
 <h2 id="site-surface">Site Surface</h2>
 <p>The static site builds into:</p>
 <pre><code class="language-text">public/</code></pre>
-<p>The hosted path is:</p>
-<pre><code class="language-text">https://walklang.wlkrlabs.com/docs</code></pre>
+<p>The hosted path is configured for:</p>
+<pre><code class="language-text">walklang.wlkrlabs.com/docs</code></pre>
 <p>The generated site includes:</p>
 <pre><code class="language-text">public/index.html
 public/docs/index.html
@@ -63,6 +63,7 @@ public/docs/reference/api.html
 public/docs/reference/api.md
 public/docs/reference/api.json</code></pre>
 <p><code>public/CNAME</code> sets the custom domain to <code>walklang.wlkrlabs.com</code> for static hosts that honor CNAME files.</p>
+<p>HTTPS enforcement depends on GitHub Pages issuing a certificate for the custom domain. <code>docs/STATUS.md</code> records the current live HTTPS state.</p>
 <h2 id="reference-generation">Reference Generation</h2>
 <p>The reference source remains real WalkLang code with structured comments:</p>
 <pre><code class="language-text">examples/v1.walk

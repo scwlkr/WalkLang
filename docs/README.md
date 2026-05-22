@@ -1,8 +1,7 @@
 # WalkLang Documentation
 
-WalkLang docs are built into a static site for
-<https://walklang.wlkrlabs.com/docs>. This directory remains the source for the
-hosted documentation path.
+WalkLang docs are built into a static site for `walklang.wlkrlabs.com/docs`.
+This directory remains the source for the hosted documentation path.
 
 Use this page as the docs front door. The root README explains the repository;
 these docs explain how to install, learn, use, verify, and evolve WalkLang.
@@ -30,6 +29,11 @@ these docs explain how to install, learn, use, verify, and evolve WalkLang.
 - [Architecture](ARCHITECTURE.md)
 
 ## Track Versions
+
+WalkLang version names use separate stability layers. The stable language
+contract is `v1.5`. The current compiler, tooling, backend, release, and docs
+milestone is `v5.1.0`. Experimental v2 through v2.2 language features are
+implemented, but they are not part of the stable v1 compatibility promise.
 
 - [v1 / v1.5 stable contract](V1.md)
 - [v2 data modeling, methods, and generics](V2.md)
@@ -62,12 +66,15 @@ Markdown, and `api.json` from the same compiler output.
 
 ## Hosting Contract
 
-The public docs home is:
+The public docs home is configured for:
 
 ```text
-https://walklang.wlkrlabs.com/docs
+walklang.wlkrlabs.com/docs
 ```
 
+The target public scheme is HTTPS once GitHub Pages issues the custom-domain
+certificate. `docs/STATUS.md` records the current live HTTP/HTTPS state.
+
 Use stable, relative links inside this directory so the same Markdown works in
-GitHub and on the hosted site. Run `scripts/check-docs-site.sh` before publishing
-docs changes.
+GitHub and on the hosted site. Run `scripts/check-docs-site.sh` before
+publishing docs changes.

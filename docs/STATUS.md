@@ -1,12 +1,20 @@
 # WalkLang Status
 
-Current version: v5.1 public docs and reference site.
+Stable language contract: v1.5.
+
+Current compiler/tooling/docs release: v5.1.0 public docs and reference site.
+
+Experimental implemented language surface: v2.2.
 
 State: v5.1 is complete against `docs/ROADMAP.md`. The repo now owns a static public docs and reference site: `scripts/build-docs-site.sh` regenerates `docs/reference/api.md`, `docs/reference/api.json`, and the static `public/` tree; `scripts/check-docs-site.sh` rebuilds and checks generated artifacts plus static-site links; `public/CNAME` targets `walklang.wlkrlabs.com`; and `.github/workflows/pages.yml` deploys `public/` through GitHub Pages from `main`. Generated reference docs now use repo-relative source paths instead of local absolute paths. C remains the primary backend, and the v5 runtime/backend contract remains documented in `docs/V5.md` and `docs/ARCHITECTURE.md`.
 
 v5.1 verification on 2026-05-22: focused `go test ./cmd/walk -run 'TestV4DocsAndDebugMapCommands|TestV51DocsUseRelativePublishablePaths' -count=1` passed; `scripts/check-docs-site.sh` passed; full `go test -count=1 ./...` passed; `go build -o build/walk ./cmd/walk` passed; `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh` passed; `scripts/release.sh v5.1.0 <temp>/release` produced 5 platform artifacts plus `SHA256SUMS`; `wc -l <temp>/release/SHA256SUMS` reported 5 checksum lines; the host release binary reported `v5.1.0` from `walk version`; `git diff --check` passed; and a temporary local HTTP server served `/`, `/docs/`, `/docs/reference/api.html`, and `/docs/reference/api.json` with expected v5.1 docs and repo-relative reference paths.
 
 Live docs verification on 2026-05-22: `walklang.wlkrlabs.com` resolves through the DNS-only `walklang -> scwlkr.github.io` CNAME to GitHub Pages addresses; `http://walklang.wlkrlabs.com/docs/` returns `200 OK` from GitHub Pages and includes the v5.1 docs content; `http://walklang.wlkrlabs.com/docs/reference/api.json` returns repo-relative source paths. HTTPS is not enforced yet because GitHub Pages still reports `The certificate does not exist yet` when enabling HTTPS and `https://walklang.wlkrlabs.com/docs/` still fails certificate hostname validation.
+
+Public positioning update on 2026-05-22: README and docs front-door wording now distinguish the stable `v1.5` language contract, the current `v5.1.0` compiler/tooling/docs release, and the experimental v2.2 language surface. README now includes a tiny WalkLang function example, a "What works today" section, and less inflated repository-scope wording. HTTPS remediation checked the live DNS CNAME, CAA records, Pages API state, and Pages HTTP response; DNS points at `scwlkr.github.io`, CAA allows Let's Encrypt, HTTP still returns `200 OK`, but GitHub still rejects HTTPS enforcement with `The certificate does not exist yet`. Next HTTPS action is to retry enforcement after the next Pages deployment/certificate issuance window.
+
+Public positioning verification on 2026-05-22: `scripts/build-docs-site.sh` passed; `scripts/check-docs-site.sh` passed after generated site artifacts were staged; `git diff --check` passed; full `go test -count=1 ./...` passed; `go build -o build/walk ./cmd/walk` passed; `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh` passed; `scripts/release.sh v5.1.0 <temp>/release` produced 5 platform artifacts plus `SHA256SUMS`; `wc -l <temp>/release/SHA256SUMS` reported 5 checksum lines; and the host release binary reported `v5.1.0` from `walk version`.
 
 Docs setup on 2026-05-22: the root README now follows a Rust-style repository landing-page shape, `docs/README.md` is the canonical docs front door and source for the `https://walklang.wlkrlabs.com/docs` hosted path, `CONTRIBUTING.md` documents the local contribution and verification path, and `docs/DOCS_STYLE_GUIDE.md` records the source-grounded docs rules plus generated-reference expectations.
 

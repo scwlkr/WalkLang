@@ -7,12 +7,17 @@
 - `walk run <source.walk>` compiles a single file to a temporary native executable, runs it, streams program input and output, and cleans up the temporary build directory.
 - `walk <source.walk>` is a direct shorthand for `walk run <source.walk>`.
 
+### Changed
+
+- README and docs front-door wording now separate the stable `v1.5` language contract from the current `v5.1.0` compiler/tooling/docs release.
+- README now includes a small WalkLang code example and a concise "What works today" section for public readers.
+
 ## v5.1.0 - Public Docs And Reference Site
 
 Date: 2026-05-22
 
 v5.1.0 turns the docs and generated reference output into a repo-owned static
-site for `https://walklang.wlkrlabs.com/docs`.
+site for `walklang.wlkrlabs.com/docs`.
 
 ### Added
 
