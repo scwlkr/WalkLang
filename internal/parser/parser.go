@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"walklang/internal/ast"
+	"walklang/internal/diagnostic"
 	"walklang/internal/lexer"
 )
 
@@ -244,7 +245,7 @@ func parseVarDecl(tokens []lexer.Token, children []lineNode, location ast.Locati
 	}
 
 	var annotation ast.Type
-	if c.peekKind(lexer.TokenName) && c.peekAheadValue(1) != "=" {
+	if c.peekKind(lexer.TokenName) {
 		annotation, err = c.parseType()
 		if err != nil {
 			return nil, err
@@ -477,14 +478,6 @@ func (c *cursor) peek() *lexer.Token {
 func (c *cursor) peekKind(kind lexer.TokenKind) bool {
 	token := c.peek()
 	return token != nil && token.Kind == kind
-}
-
-func (c *cursor) peekAheadValue(offset int) string {
-	index := c.index + offset
-	if index >= len(c.tokens) {
-		return ""
-	}
-	return c.tokens[index].Value
 }
 
 func (c *cursor) advance() lexer.Token {
@@ -787,5 +780,5 @@ func isCloseOnly(tokens []lexer.Token) bool {
 }
 
 func errorAt(location ast.Location, format string, args ...any) error {
-	return fmt.Errorf("%s:%d:%d: %s", location.Filename, location.Line, location.Column, fmt.Sprintf(format, args...))
+	return diagnostic.Errorf(location, format, args...)
 }

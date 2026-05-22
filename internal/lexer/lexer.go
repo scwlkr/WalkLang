@@ -1,11 +1,11 @@
 package lexer
 
 import (
-	"fmt"
 	"strings"
 	"unicode"
 
 	"walklang/internal/ast"
+	"walklang/internal/diagnostic"
 )
 
 type TokenKind string
@@ -207,5 +207,5 @@ func readString(text string, i int, location ast.Location) (string, int, error) 
 }
 
 func errorAt(location ast.Location, format string, args ...any) error {
-	return fmt.Errorf("%s:%d:%d: %s", location.Filename, location.Line, location.Column, fmt.Sprintf(format, args...))
+	return diagnostic.Errorf(location, format, args...)
 }

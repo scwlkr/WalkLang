@@ -11,6 +11,7 @@ import (
 
 	"walklang/internal/ast"
 	"walklang/internal/checker"
+	"walklang/internal/diagnostic"
 	"walklang/internal/emitter"
 	walkfmt "walklang/internal/format"
 	"walklang/internal/parser"
@@ -20,7 +21,7 @@ var version = "dev"
 
 func main() {
 	if err := run(os.Args[1:]); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintln(os.Stderr, diagnostic.FormatError(err))
 		os.Exit(1)
 	}
 }
@@ -205,7 +206,7 @@ func replCommand(args []string) error {
 		}
 		output, err := runSource(replSource(line), "<repl>")
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			fmt.Fprintln(os.Stderr, diagnostic.FormatError(err))
 			continue
 		}
 		fmt.Print(output)
@@ -390,7 +391,7 @@ func handleWarnings(warnings []checker.Warning, mode warningMode) error {
 		return nil
 	}
 	for _, warning := range warnings {
-		fmt.Fprintln(os.Stderr, warning.String())
+		fmt.Fprintln(os.Stderr, diagnostic.FormatWarning(warning.Location, warning.Message))
 	}
 	if mode == warningError && len(warnings) > 0 {
 		return fmt.Errorf("warnings-as-errors: %d warning(s)", len(warnings))
@@ -682,7 +683,7 @@ func nativeBuildArgs(cPath string, output string, options nativeBuildOptions) []
 }
 
 func errorAt(location ast.Location, format string, args ...any) error {
-	return fmt.Errorf("%s:%d:%d: %s", location.Filename, location.Line, location.Column, fmt.Sprintf(format, args...))
+	return diagnostic.Errorf(location, format, args...)
 }
 
 func runSource(source string, filename string) (string, error) {

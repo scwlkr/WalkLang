@@ -4,7 +4,7 @@ WalkLang diagnostics are intended to be deterministic enough for conformance tes
 
 ## Shape
 
-Compiler diagnostics use:
+Compiler diagnostics keep this stable first line:
 
 ```text
 file.walk:line:column: category: message
@@ -13,7 +13,16 @@ file.walk:line:column: category: message
 Example:
 
 ```text
-main.walk:2:1: type error: x is int, got string
+main.walk:1:16: type error: age is int, got string
+```
+
+The command-line display also includes the source line, a caret, and a focused suggestion when one is obvious:
+
+```text
+main.walk:1:16: type error: age is int, got string
+
+var: age int = 'old'
+               ^ string cannot initialize int
 ```
 
 ## Categories
@@ -76,7 +85,7 @@ if: true
     var: x = 2
 ```
 
-The current stable warning is shadowing an outer name.
+Stable warnings cover shadowing an outer name and unreachable statements after a block-terminating statement such as `return:`, `break`, or `continue`.
 
 ```bash
 walk check --warnings=off main.walk

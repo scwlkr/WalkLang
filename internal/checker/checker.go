@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"walklang/internal/ast"
+	"walklang/internal/diagnostic"
 )
 
 type symbol struct {
@@ -609,9 +610,16 @@ func (c *Checker) checkNestedBlock(statements []ast.Statement) error {
 }
 
 func (c *Checker) checkBlock(statements []ast.Statement) error {
+	unreachable := false
 	for _, statement := range statements {
+		if unreachable {
+			c.warnings = append(c.warnings, Warning{Location: statement.Loc(), Message: "unreachable statement"})
+		}
 		if err := c.checkStatement(statement); err != nil {
 			return err
+		}
+		if statementTerminates(statement) {
+			unreachable = true
 		}
 	}
 	return nil
@@ -739,6 +747,26 @@ func blockReturns(statements []ast.Statement) bool {
 	return false
 }
 
+func statementTerminates(statement ast.Statement) bool {
+	switch s := statement.(type) {
+	case *ast.Return, *ast.Break, *ast.Continue:
+		return true
+	case *ast.If:
+		return len(s.Else) > 0 && blockTerminates(s.Then) && blockTerminates(s.Else)
+	default:
+		return false
+	}
+}
+
+func blockTerminates(statements []ast.Statement) bool {
+	for _, statement := range statements {
+		if statementTerminates(statement) {
+			return true
+		}
+	}
+	return false
+}
+
 func rootName(expression ast.Expression) (string, bool) {
 	switch e := expression.(type) {
 	case *ast.Name:
@@ -751,7 +779,7 @@ func rootName(expression ast.Expression) (string, bool) {
 }
 
 func errorAt(location ast.Location, format string, args ...any) error {
-	return fmt.Errorf("%s:%d:%d: %s", location.Filename, location.Line, location.Column, fmt.Sprintf(format, args...))
+	return diagnostic.Errorf(location, format, args...)
 }
 
 func IsBuiltinModule(name string) bool {

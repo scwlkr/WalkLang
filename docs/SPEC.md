@@ -1,6 +1,6 @@
 # WalkLang v1 Specification
 
-This document is the stable WalkLang language contract for the v1 line. v1.3 adds compatible standard library APIs without changing the core syntax.
+This document is the stable WalkLang language contract for the v1 line. v1.4 adds professional diagnostics and developer-experience improvements without changing the core syntax.
 
 Core rule:
 
@@ -464,6 +464,15 @@ Compiler diagnostics use this shape:
 file.walk:line:column: category: message
 ```
 
+The command-line display may add a source snippet, caret, and focused suggestion under that stable first line:
+
+```text
+main.walk:1:16: type error: age is int, got string
+
+var: age int = 'old'
+               ^ string cannot initialize int
+```
+
 Stable categories:
 
 ```text
@@ -475,7 +484,7 @@ warning
 internal error
 ```
 
-Warnings do not fail by default. `--warnings=error` promotes warnings to errors.
+Warnings do not fail by default. `--warnings=error` promotes warnings to errors. Stable v1.4 warnings cover shadowing an outer name and unreachable statements after `return:`, `break`, or `continue`.
 
 ---
 

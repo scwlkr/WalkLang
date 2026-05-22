@@ -85,7 +85,18 @@ if: true
     var: x = 2
     out: x
 WALK
+"$walk_bin" check "$work_dir/shadow.walk" >"$work_dir/shadow.out" 2>"$work_dir/shadow.err"
+grep -q "warning: x shadows outer name" "$work_dir/shadow.err"
+grep -q "rename this binding or assign to the existing name" "$work_dir/shadow.err"
 expect_failure "$walk_bin check --warnings=error $work_dir/shadow.walk"
+
+cat >"$work_dir/type_error.walk" <<'WALK'
+var: age int = 'old'
+WALK
+expect_failure "$walk_bin check $work_dir/type_error.walk"
+grep -q "type error: age is int, got string" "$work_dir/failure.err"
+grep -q "var: age int = 'old'" "$work_dir/failure.err"
+grep -q "string cannot initialize int" "$work_dir/failure.err"
 
 cat >"$work_dir/math_extra.walk" <<'WALK'
 func: cube(x int) int
@@ -129,4 +140,4 @@ project_dir="$work_dir/hello_project"
     test ! -d build
 )
 
-echo "v1.3 stress ok"
+echo "v1.4 stress ok"

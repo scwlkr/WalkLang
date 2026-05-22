@@ -1,6 +1,6 @@
 # WalkLang v1 Compatibility
 
-WalkLang v1.1 is the first contract-focused checkpoint for the v1 language line. v1.3 adds compatible standard library functions on top of that contract.
+WalkLang v1.1 is the first contract-focused checkpoint for the v1 language line. v1.4 adds compatible diagnostics and developer-experience improvements on top of the v1.3 standard library foundation.
 
 ## Stable Surface
 

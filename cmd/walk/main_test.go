@@ -7,6 +7,8 @@ import (
 	"slices"
 	"strings"
 	"testing"
+
+	"walklang/internal/diagnostic"
 )
 
 func TestV1UserModuleBuildsAndRuns(t *testing.T) {
@@ -131,6 +133,81 @@ func TestV1CheckWarningsCanBeErrors(t *testing.T) {
 		t.Fatal("expected warnings=error to fail")
 	}
 	if got, want := err.Error(), "warnings-as-errors: 1 warning(s)"; got != want {
+		t.Fatalf("want %q, got %q", want, got)
+	}
+}
+
+func TestV14DiagnosticFormattingIncludesSnippetCaretAndSuggestion(t *testing.T) {
+	dir := t.TempDir()
+	sourcePath := filepath.Join(dir, "main.walk")
+	writeFile(t, sourcePath, "var: age int = 'old'\n")
+
+	_, err := checkFile(sourcePath)
+	if err == nil {
+		t.Fatal("expected type error")
+	}
+
+	want := strings.Join([]string{
+		sourcePath + ":1:16: type error: age is int, got string",
+		"",
+		"var: age int = 'old'",
+		"               ^ string cannot initialize int",
+	}, "\n")
+	if got := diagnostic.FormatError(err); got != want {
+		t.Fatalf("want:\n%s\ngot:\n%s", want, got)
+	}
+}
+
+func TestV14WarningFormattingIncludesSnippetCaretAndSuggestion(t *testing.T) {
+	dir := t.TempDir()
+	sourcePath := filepath.Join(dir, "main.walk")
+	writeFile(t, sourcePath, strings.Join([]string{
+		"var: x = 1",
+		"if: true",
+		"    var: x = 2",
+		"    out: x",
+		"",
+	}, "\n"))
+
+	warnings, err := checkFile(sourcePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := len(warnings), 1; got != want {
+		t.Fatalf("want %d warning, got %d: %#v", want, got, warnings)
+	}
+
+	want := strings.Join([]string{
+		sourcePath + ":3:5: warning: x shadows outer name",
+		"",
+		"    var: x = 2",
+		"    ^ rename this binding or assign to the existing name",
+	}, "\n")
+	if got := diagnostic.FormatWarning(warnings[0].Location, warnings[0].Message); got != want {
+		t.Fatalf("want:\n%s\ngot:\n%s", want, got)
+	}
+}
+
+func TestV14UnreachableStatementWarns(t *testing.T) {
+	dir := t.TempDir()
+	sourcePath := filepath.Join(dir, "main.walk")
+	writeFile(t, sourcePath, strings.Join([]string{
+		"func: done() int",
+		"    return: 1",
+		"    out: 2",
+		"",
+		"out: done()",
+		"",
+	}, "\n"))
+
+	warnings, err := checkFile(sourcePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := len(warnings), 1; got != want {
+		t.Fatalf("want %d warning, got %d: %#v", want, got, warnings)
+	}
+	if got, want := warnings[0].String(), sourcePath+":3:5: warning: unreachable statement"; got != want {
 		t.Fatalf("want %q, got %q", want, got)
 	}
 }

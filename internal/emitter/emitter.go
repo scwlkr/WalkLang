@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"walklang/internal/ast"
+	"walklang/internal/diagnostic"
 )
 
 func EmitC(program *ast.Program) (string, error) {
@@ -744,5 +745,5 @@ func escapeCTestName(value string) string {
 }
 
 func errorAt(location ast.Location, format string, args ...any) error {
-	return fmt.Errorf("%s:%d:%d: %s", location.Filename, location.Line, location.Column, fmt.Sprintf(format, args...))
+	return diagnostic.Errorf(location, format, args...)
 }
