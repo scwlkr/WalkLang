@@ -225,6 +225,57 @@ func TestV20StructFailFixturesHaveExpectedDiagnostics(t *testing.T) {
 	}
 }
 
+func TestV21MethodFixturesBuildAndRun(t *testing.T) {
+	requireCC(t)
+	root := repoRoot(t)
+	sourcePath := filepath.Join(root, "tests", "pass", "methods.walk")
+	cCode, warnings, err := compileFileToCWithOptions(sourcePath, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(warnings) != 0 {
+		t.Fatalf("unexpected warnings: %#v", warnings)
+	}
+	got := runCProgram(t, cCode)
+	want := strings.Join([]string{
+		"true",
+		"Ada",
+		"Walker",
+		"true",
+		"false",
+		"adult",
+		"",
+	}, "\n")
+	if got != want {
+		t.Fatalf("want %q, got %q\nC:\n%s", want, got, cCode)
+	}
+}
+
+func TestV21MethodFailFixturesHaveExpectedDiagnostics(t *testing.T) {
+	root := repoRoot(t)
+	cases := []struct {
+		file string
+		want string
+	}{
+		{"unknown_method.walk", "tests/fail/unknown_method.walk:6:14: type error: User has no method is_minor"},
+		{"bad_method_arg.walk", "tests/fail/bad_method_arg.walk:10:24: type error: arg 1 to User.rename is string, got int"},
+		{"non_struct_method_call.walk", "tests/fail/non_struct_method_call.walk:2:14: type error: method call needs struct receiver, got int"},
+		{"bad_method_receiver.walk", "tests/fail/bad_method_receiver.walk:5:1: type error: method User.is_adult receiver param must be User, got int"},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.file, func(t *testing.T) {
+			_, err := checkFile(filepath.Join(root, "tests", "fail", tc.file))
+			if err == nil {
+				t.Fatal("expected fixture to fail")
+			}
+			if got := err.Error(); !strings.HasSuffix(got, tc.want) {
+				t.Fatalf("want suffix %q, got %q", tc.want, got)
+			}
+		})
+	}
+}
+
 func repoRoot(t *testing.T) string {
 	t.Helper()
 	wd, err := os.Getwd()

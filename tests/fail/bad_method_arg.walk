@@ -1,0 +1,10 @@
+struct: User
+    name string
+    age int
+
+func: User.rename(self User, name string) User
+    self.name = name
+    return: self
+
+var: user = User('Walker', 25)
+var: bad = user.rename(10)

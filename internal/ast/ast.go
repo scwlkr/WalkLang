@@ -188,6 +188,7 @@ func (s *Export) statementNode() {}
 type FuncDecl struct {
 	Location   Location
 	Name       string
+	Receiver   string
 	Params     []Param
 	ReturnType Type
 	Body       []Statement
@@ -315,8 +316,10 @@ func (e *Prefix) expressionNode() {}
 
 type Call struct {
 	ExprBase
-	Callee string
-	Args   []Expression
+	Callee   string
+	Receiver Expression
+	Method   string
+	Args     []Expression
 }
 
 func (e *Call) expressionNode() {}

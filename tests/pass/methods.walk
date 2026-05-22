@@ -1,0 +1,32 @@
+struct: User
+    name string
+    age int
+
+struct: Pet
+    name string
+    age int
+
+func: User.is_adult(self User) bool
+    return: >= self.age 18
+
+func: User.rename(self User, name string) User
+    self.name = name
+    return: self
+
+func: Pet.is_adult(self Pet) bool
+    return: >= self.age 2
+
+var: user = User('Walker', 25)
+out: user.is_adult()
+
+var: renamed = user.rename('Ada')
+out: renamed.name
+out: user.name
+
+var: pets = [Pet('Milo', 2)]
+out: pets[0].is_adult()
+
+out: User('Lee', 17).is_adult()
+
+if: user.is_adult()
+    out: 'adult'

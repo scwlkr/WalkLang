@@ -34,3 +34,14 @@ func TestV2FormatterNormalizesStructs(t *testing.T) {
 		t.Fatalf("want %q, got %q", want, formatted)
 	}
 }
+
+func TestV21FormatterKeepsMethodSyntaxTight(t *testing.T) {
+	formatted, err := Format("func:User.is_adult(self User)bool\n  return:>= self.age 18\nout:user.is_adult()\n", "main.walk")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := "func: User.is_adult(self User) bool\n    return: >= self.age 18\nout: user.is_adult()\n"
+	if formatted != want {
+		t.Fatalf("want %q, got %q", want, formatted)
+	}
+}

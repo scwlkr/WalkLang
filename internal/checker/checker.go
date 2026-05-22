@@ -20,6 +20,14 @@ type StructDef struct {
 	FieldMap map[string]ast.StructField
 }
 
+type MethodDef struct {
+	Location ast.Location
+	Receiver string
+	Name     string
+	Type     ast.Type
+	Func     *ast.FuncDecl
+}
+
 type Module struct {
 	Name    string
 	Program *ast.Program
@@ -29,6 +37,7 @@ type Module struct {
 type Options struct {
 	Modules map[string]*Module
 	Structs map[string]StructDef
+	Methods map[string]map[string]MethodDef
 }
 
 type Warning struct {
@@ -45,6 +54,7 @@ type Checker struct {
 	imports       map[string]bool
 	modules       map[string]*Module
 	structs       map[string]StructDef
+	methods       map[string]map[string]MethodDef
 	warnings      []Warning
 	currentReturn ast.Type
 	inFunction    bool
@@ -66,11 +76,20 @@ func CheckWithOptions(program *ast.Program, options Options) ([]Warning, error) 
 			return nil, err
 		}
 	}
+	methods := options.Methods
+	if methods == nil {
+		var err error
+		methods, err = MethodDefinitions(program)
+		if err != nil {
+			return nil, err
+		}
+	}
 	c := Checker{
 		scopes:  []map[string]symbol{{}},
 		imports: map[string]bool{},
 		modules: options.Modules,
 		structs: structs,
+		methods: methods,
 	}
 	if c.modules == nil {
 		c.modules = map[string]*Module{}
@@ -83,9 +102,12 @@ func (c *Checker) check(program *ast.Program) error {
 	if err := c.checkStructs(); err != nil {
 		return err
 	}
+	if err := c.checkMethods(); err != nil {
+		return err
+	}
 	for _, statement := range program.Statements {
 		fn, ok := statement.(*ast.FuncDecl)
-		if !ok {
+		if !ok || fn.Receiver != "" {
 			continue
 		}
 		fnType := functionType(fn)
@@ -99,6 +121,30 @@ func (c *Checker) check(program *ast.Program) error {
 		}
 	}
 	return nil
+}
+
+func MethodDefinitions(program *ast.Program) (map[string]map[string]MethodDef, error) {
+	methods := map[string]map[string]MethodDef{}
+	for _, statement := range program.Statements {
+		fn, ok := statement.(*ast.FuncDecl)
+		if !ok || fn.Receiver == "" {
+			continue
+		}
+		if methods[fn.Receiver] == nil {
+			methods[fn.Receiver] = map[string]MethodDef{}
+		}
+		if _, exists := methods[fn.Receiver][fn.Name]; exists {
+			return nil, errorAt(fn.Location, "type error: method %s is already defined", methodName(fn.Receiver, fn.Name))
+		}
+		methods[fn.Receiver][fn.Name] = MethodDef{
+			Location: fn.Location,
+			Receiver: fn.Receiver,
+			Name:     fn.Name,
+			Type:     functionType(fn),
+			Func:     fn,
+		}
+	}
+	return methods, nil
 }
 
 func functionType(fn *ast.FuncDecl) ast.Type {
@@ -171,6 +217,38 @@ func (c *Checker) checkStructs() error {
 	for name := range c.structs {
 		if err := visit(name); err != nil {
 			return err
+		}
+	}
+	return nil
+}
+
+func (c *Checker) checkMethods() error {
+	for receiver, methods := range c.methods {
+		if _, ok := c.structs[receiver]; !ok {
+			for _, def := range methods {
+				return errorAt(def.Location, "type error: method receiver %s is not a struct", receiver)
+			}
+		}
+		for _, def := range methods {
+			fn := def.Func
+			if fn == nil {
+				continue
+			}
+			if len(fn.Params) == 0 {
+				return errorAt(fn.Location, "type error: method %s needs receiver parameter", methodName(fn.Receiver, fn.Name))
+			}
+			wantReceiver := ast.Struct(fn.Receiver)
+			if !fn.Params[0].Type.Equal(wantReceiver) {
+				return errorAt(fn.Location, "type error: method %s receiver param must be %s, got %s", methodName(fn.Receiver, fn.Name), wantReceiver.String(), fn.Params[0].Type.String())
+			}
+			if err := c.validateType(fn.ReturnType, fn.Location); err != nil {
+				return err
+			}
+			for _, param := range fn.Params {
+				if err := c.validateType(param.Type, fn.Location); err != nil {
+					return err
+				}
+			}
 		}
 	}
 	return nil
@@ -356,7 +434,7 @@ func (c *Checker) checkFuncDecl(fn *ast.FuncDecl) error {
 		return err
 	}
 	if fn.ReturnType.Kind != ast.TypeVoid && !blockReturns(fn.Body) {
-		return errorAt(fn.Location, "type error: function %s may not return on all paths", fn.Name)
+		return errorAt(fn.Location, "type error: function %s may not return on all paths", funcName(fn))
 	}
 	return nil
 }
@@ -585,6 +663,11 @@ func (c *Checker) checkPrefix(expression *ast.Prefix) (ast.Type, error) {
 }
 
 func (c *Checker) checkCall(call *ast.Call) (ast.Type, error) {
+	if call.Receiver != nil {
+		if result, handled, err := c.checkDottedCall(call); handled || err != nil {
+			return result, err
+		}
+	}
 	if strings.Contains(call.Callee, ".") {
 		return c.checkModuleCall(call)
 	}
@@ -611,6 +694,58 @@ func (c *Checker) checkCall(call *ast.Call) (ast.Type, error) {
 		}
 	}
 	return *sym.typeName.Return, nil
+}
+
+func (c *Checker) checkDottedCall(call *ast.Call) (ast.Type, bool, error) {
+	receiverType, err := c.checkExpression(call.Receiver)
+	if err != nil {
+		if c.isImportedModuleCall(call) {
+			result, moduleErr := c.checkModuleCall(call)
+			return result, true, moduleErr
+		}
+		return ast.Type{}, true, err
+	}
+	if receiverType.Kind != ast.TypeStruct {
+		if c.isImportedModuleCall(call) {
+			result, moduleErr := c.checkModuleCall(call)
+			return result, true, moduleErr
+		}
+		return ast.Type{}, true, errorAt(call.Receiver.Loc(), "type error: method call needs struct receiver, got %s", receiverType.String())
+	}
+	methods := c.methods[receiverType.Name]
+	def, ok := methods[call.Method]
+	if !ok {
+		return ast.Type{}, true, errorAt(call.Loc(), "type error: %s has no method %s", receiverType.String(), call.Method)
+	}
+	if len(def.Type.Params) == 0 || def.Type.Return == nil {
+		return ast.Type{}, true, errorAt(call.Loc(), "internal error: method %s has invalid type", methodName(receiverType.Name, call.Method))
+	}
+	if !assignable(receiverType, def.Type.Params[0]) {
+		return ast.Type{}, true, errorAt(call.Receiver.Loc(), "type error: method %s receiver is %s, got %s", methodName(receiverType.Name, call.Method), def.Type.Params[0].String(), receiverType.String())
+	}
+	expectedArgs := len(def.Type.Params) - 1
+	if len(call.Args) != expectedArgs {
+		return ast.Type{}, true, errorAt(call.Loc(), "type error: %s expects %d args, got %d", methodName(receiverType.Name, call.Method), expectedArgs, len(call.Args))
+	}
+	for i, arg := range call.Args {
+		argType, err := c.checkExpression(arg)
+		if err != nil {
+			return ast.Type{}, true, err
+		}
+		paramType := def.Type.Params[i+1]
+		if !assignable(argType, paramType) {
+			return ast.Type{}, true, errorAt(arg.Loc(), "type error: arg %d to %s is %s, got %s", i+1, methodName(receiverType.Name, call.Method), paramType.String(), argType.String())
+		}
+	}
+	return *def.Type.Return, true, nil
+}
+
+func (c *Checker) isImportedModuleCall(call *ast.Call) bool {
+	name, ok := call.Receiver.(*ast.Name)
+	if !ok || call.Method == "" {
+		return false
+	}
+	return c.imports[name.Identifier] && call.Callee == name.Identifier+"."+call.Method
 }
 
 func (c *Checker) checkStructConstructor(call *ast.Call, def StructDef) (ast.Type, error) {
@@ -997,7 +1132,7 @@ func ExportedFunctions(program *ast.Program) (map[string]ast.Type, error) {
 	functions := map[string]ast.Type{}
 	for _, statement := range program.Statements {
 		fn, ok := statement.(*ast.FuncDecl)
-		if !ok {
+		if !ok || fn.Receiver != "" {
 			continue
 		}
 		functions[fn.Name] = functionType(fn)
@@ -1016,4 +1151,15 @@ func ExportedFunctions(program *ast.Program) (map[string]ast.Type, error) {
 		exports[exp.Name] = fnType
 	}
 	return exports, nil
+}
+
+func methodName(receiver string, name string) string {
+	return receiver + "." + name
+}
+
+func funcName(fn *ast.FuncDecl) string {
+	if fn.Receiver != "" {
+		return methodName(fn.Receiver, fn.Name)
+	}
+	return fn.Name
 }

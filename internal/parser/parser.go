@@ -302,6 +302,18 @@ func parseFuncDecl(tokens []lexer.Token, children []lineNode, location ast.Locat
 	if err != nil {
 		return nil, err
 	}
+	receiver := ""
+	if c.peek() != nil && c.peek().Value == "." {
+		if reservedWords[name.Value] {
+			return nil, errorAt(name.Location, "syntax error: reserved word %q cannot be used as receiver type", name.Value)
+		}
+		receiver = name.Value
+		c.advance()
+		name, err = c.expectName("method name")
+		if err != nil {
+			return nil, err
+		}
+	}
 	if reservedWords[name.Value] {
 		return nil, errorAt(name.Location, "syntax error: reserved word %q cannot be used as function name", name.Value)
 	}
@@ -340,7 +352,7 @@ func parseFuncDecl(tokens []lexer.Token, children []lineNode, location ast.Locat
 	if err != nil {
 		return nil, err
 	}
-	return &ast.FuncDecl{Location: location, Name: name.Value, Params: params, ReturnType: returnType, Body: body}, nil
+	return &ast.FuncDecl{Location: location, Name: name.Value, Receiver: receiver, Params: params, ReturnType: returnType, Body: body}, nil
 }
 
 func parseStructDecl(tokens []lexer.Token, children []lineNode, location ast.Location) (ast.Statement, error) {
@@ -463,7 +475,7 @@ func parseExpressionNode(node lineNode) (ast.Expression, error) {
 		}
 	}
 	if len(tokens) > 0 && tokens[len(tokens)-1].Value == "(" {
-		callee, err := parseCallee(tokens[:len(tokens)-1])
+		target, err := parseExpressionTokens(tokens[:len(tokens)-1], node.line.Location)
 		if err != nil {
 			return nil, err
 		}
@@ -471,7 +483,7 @@ func parseExpressionNode(node lineNode) (ast.Expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &ast.Call{ExprBase: ast.ExprBase{Location: tokens[0].Location}, Callee: callee, Args: args}, nil
+		return callFromTarget(target, args)
 	}
 	return parseExpressionTokens(tokens, node.line.Location)
 }
@@ -642,15 +654,15 @@ func (c *cursor) parsePostfix(stop map[string]bool) (ast.Expression, error) {
 		}
 		if c.peek().Value == "(" {
 			open := c.advance()
-			callee, ok := expressionCallee(expr)
-			if !ok {
-				return nil, errorAt(open.Location, "syntax error: invalid call target")
-			}
 			args, err := c.parseCallArgs()
 			if err != nil {
 				return nil, err
 			}
-			expr = &ast.Call{ExprBase: ast.ExprBase{Location: calleeLocation(expr)}, Callee: callee, Args: args}
+			call, err := callFromTarget(expr, args)
+			if err != nil {
+				return nil, errorAt(open.Location, "syntax error: invalid call target")
+			}
+			expr = call
 			continue
 		}
 		break
@@ -731,6 +743,27 @@ func (c *cursor) parseCallArgs() ([]ast.Expression, error) {
 		return nil, err
 	}
 	return args, nil
+}
+
+func callFromTarget(target ast.Expression, args []ast.Expression) (*ast.Call, error) {
+	if field, ok := target.(*ast.FieldAccess); ok {
+		callee, _ := expressionCallee(target)
+		if callee == "" {
+			callee = field.Field
+		}
+		return &ast.Call{
+			ExprBase: ast.ExprBase{Location: calleeLocation(target)},
+			Callee:   callee,
+			Receiver: field.Target,
+			Method:   field.Field,
+			Args:     args,
+		}, nil
+	}
+	callee, ok := expressionCallee(target)
+	if !ok {
+		return nil, errorAt(target.Loc(), "syntax error: invalid call target")
+	}
+	return &ast.Call{ExprBase: ast.ExprBase{Location: calleeLocation(target)}, Callee: callee, Args: args}, nil
 }
 
 func expressionCallee(expression ast.Expression) (string, bool) {

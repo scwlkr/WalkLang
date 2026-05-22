@@ -230,7 +230,7 @@ func collectModuleFunctionNames(modules map[string]*ast.Program) map[string]map[
 	for module, program := range modules {
 		result[module] = map[string]bool{}
 		for _, statement := range program.Statements {
-			if fn, ok := statement.(*ast.FuncDecl); ok {
+			if fn, ok := statement.(*ast.FuncDecl); ok && fn.Receiver == "" {
 				result[module][fn.Name] = true
 			}
 		}
@@ -373,7 +373,7 @@ func (e *cEmitter) emitFunctionSignature(fn *ast.FuncDecl, prototype bool) (stri
 	if len(params) == 0 {
 		params = append(params, "void")
 	}
-	return fmt.Sprintf("%s %s(%s)", ret, e.cFunctionName(fn.Name), strings.Join(params, ", ")), nil
+	return fmt.Sprintf("%s %s(%s)", ret, e.cFunctionDeclName(fn), strings.Join(params, ", ")), nil
 }
 
 func (e *cEmitter) emitBlock(statements []ast.Statement) ([]string, error) {
@@ -730,6 +730,14 @@ func (e *cEmitter) emitCall(call *ast.Call) (string, error) {
 		}
 		return fmt.Sprintf("(%s){%s}", cStructName(call.Callee), strings.Join(fields, ", ")), nil
 	}
+	if call.Receiver != nil && call.Method != "" && call.Receiver.ExprType().Kind == ast.TypeStruct {
+		receiver, err := e.emitExpression(call.Receiver)
+		if err != nil {
+			return "", err
+		}
+		args = append([]string{receiver}, args...)
+		return fmt.Sprintf("%s(%s)", cMethodName(call.Receiver.ExprType().Name, call.Method), strings.Join(args, ", ")), nil
+	}
 	switch call.Callee {
 	case "math.sqrt":
 		return fmt.Sprintf("sqrt(%s)", strings.Join(args, ", ")), nil
@@ -756,6 +764,13 @@ func (e *cEmitter) emitCall(call *ast.Call) (string, error) {
 	}
 }
 
+func (e *cEmitter) cFunctionDeclName(fn *ast.FuncDecl) string {
+	if fn.Receiver != "" {
+		return cMethodName(fn.Receiver, fn.Name)
+	}
+	return e.cFunctionName(fn.Name)
+}
+
 func (e *cEmitter) cFunctionName(name string) string {
 	if e.currentModule == "" {
 		return name
@@ -765,6 +780,10 @@ func (e *cEmitter) cFunctionName(name string) string {
 
 func mangleModuleName(module string, name string) string {
 	return strings.ReplaceAll(module, ".", "__") + "__" + name
+}
+
+func cMethodName(receiver string, name string) string {
+	return receiver + "__" + name
 }
 
 func cReturnType(typeName ast.Type) (string, error) {

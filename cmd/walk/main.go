@@ -599,6 +599,10 @@ func checkPrograms(program *ast.Program, modules map[string]*checker.Module) ([]
 	if err != nil {
 		return warnings, err
 	}
+	methods, err := collectMethodDefinitions(program, modules)
+	if err != nil {
+		return warnings, err
+	}
 	checked := map[string]bool{}
 	var checkModule func(string) error
 	checkModule = func(name string) error {
@@ -613,7 +617,7 @@ func checkPrograms(program *ast.Program, modules map[string]*checker.Module) ([]
 				}
 			}
 		}
-		moduleWarnings, err := checker.CheckWithOptions(module.Program, checker.Options{Modules: modules, Structs: structs})
+		moduleWarnings, err := checker.CheckWithOptions(module.Program, checker.Options{Modules: modules, Structs: structs, Methods: methods})
 		warnings = append(warnings, moduleWarnings...)
 		if err != nil {
 			return err
@@ -638,7 +642,7 @@ func checkPrograms(program *ast.Program, modules map[string]*checker.Module) ([]
 		}
 	}
 
-	entryWarnings, err := checker.CheckWithOptions(program, checker.Options{Modules: modules, Structs: structs})
+	entryWarnings, err := checker.CheckWithOptions(program, checker.Options{Modules: modules, Structs: structs, Methods: methods})
 	warnings = append(warnings, entryWarnings...)
 	return warnings, err
 }
@@ -672,6 +676,42 @@ func collectStructDefinitions(program *ast.Program, modules map[string]*checker.
 		return nil, err
 	}
 	return structs, nil
+}
+
+func collectMethodDefinitions(program *ast.Program, modules map[string]*checker.Module) (map[string]map[string]checker.MethodDef, error) {
+	methods := map[string]map[string]checker.MethodDef{}
+	add := func(program *ast.Program) error {
+		local, err := checker.MethodDefinitions(program)
+		if err != nil {
+			return err
+		}
+		for receiver, defs := range local {
+			if methods[receiver] == nil {
+				methods[receiver] = map[string]checker.MethodDef{}
+			}
+			for name, def := range defs {
+				if _, exists := methods[receiver][name]; exists {
+					return errorAt(def.Location, "type error: method %s.%s is already defined", receiver, name)
+				}
+				methods[receiver][name] = def
+			}
+		}
+		return nil
+	}
+	names := make([]string, 0, len(modules))
+	for name := range modules {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	for _, name := range names {
+		if err := add(modules[name].Program); err != nil {
+			return nil, err
+		}
+	}
+	if err := add(program); err != nil {
+		return nil, err
+	}
+	return methods, nil
 }
 
 func moduleProgramMap(modules map[string]*checker.Module) map[string]*ast.Program {

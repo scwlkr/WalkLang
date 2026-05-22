@@ -1,5 +1,55 @@
 # WalkLang Release Notes
 
+## v2.1.0 - Methods
+
+Date: 2026-05-22
+
+v2.1.0 adds experimental methods on top of the v2 struct surface. Methods are receiver functions, not class-based OOP.
+
+### Added
+
+- Method declarations with receiver syntax, such as `func: User.is_adult(self User) bool`.
+- Method calls on struct values, such as `user.is_adult()`.
+- Receiver-type namespacing so different structs may use the same method name.
+- Type checking for method receivers and ordinary method arguments.
+- Generated C lowering that keeps method calls explainable as receiver functions, such as `User__is_adult(user)`.
+- v2.1 method pass/fail fixtures and formatter coverage.
+- `docs/V2.md` method documentation.
+
+### Changed
+
+- Dotted calls now preserve receiver expressions so struct method calls can be distinguished from imported module calls.
+
+### Breaking Changes
+
+None.
+
+### Removed
+
+None.
+
+### Experimental Or Draft
+
+Structs and methods remain experimental in v2.1. The following remain future roadmap items:
+
+```text
+traits
+interfaces
+generic structs
+named-field constructors
+file/json/matrix APIs
+```
+
+### Upgrade
+
+Run:
+
+```bash
+walk check --warnings=error <your entry file>
+walk test <your tests file>
+walk build <your entry file> -o build/app
+```
+
 ## v2.0.0 - Data Modeling
 
 Date: 2026-05-22
