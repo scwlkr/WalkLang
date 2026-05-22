@@ -1,0 +1,22 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go test ./...
+      - run: go build -o build/walk ./cmd/walk
+      - run: WALK_BIN="$PWD/build/walk" scripts/stress-v1.sh
+      - run: scripts/release.sh v1.2.0 dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: walk-v1.2.0
+          path: dist/

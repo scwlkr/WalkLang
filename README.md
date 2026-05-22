@@ -2,14 +2,14 @@
 
 WalkLang is a small compiled language implemented in Go with a C backend.
 
-This repo currently contains the v1.1 language contract and compiler path from `docs/ROADMAP.md`.
+This repo currently contains the v1.2 project mode and the v1.1 language contract from `docs/ROADMAP.md`.
 It proves the pipeline:
 
 ```text
 .walk source -> Go compiler -> generated C -> native executable
 ```
 
-## Current v1.1 Surface
+## Current v1.2 Surface
 
 Supported now:
 
@@ -41,6 +41,12 @@ Supported now:
 - stable language contract docs
 - pass/fail conformance fixtures
 - generated C snapshot tests
+- `walk init` project scaffolding
+- `walk.toml` project config
+- project-mode `walk build`, `walk check`, `walk test`, `walk fmt`, and `walk clean`
+- project tests that can import modules from `src/`
+- examples covered as testable fixtures
+- GitHub Actions CI for tests, stress, and release artifacts
 
 Contract docs:
 
@@ -50,12 +56,11 @@ Contract docs:
 - `docs/ERRORS.md`
 - `docs/DESIGN_RULES.md`
 - `docs/COMPATIBILITY.md`
+- `docs/PROJECTS.md`
 - `docs/STATUS.md`
 
-Not v1.1 yet:
+Not v1.2 yet:
 
-- project mode with `walk.toml`
-- `walk init` / `walk clean`
 - file/json/matrix stdlib APIs
 - structs, methods, traits, or package manager behavior
 
@@ -64,8 +69,21 @@ Not v1.1 yet:
 Install the local `walk` command:
 
 ```bash
-scripts/install-local.sh v1.1-local
+scripts/install-local.sh v1.2-local
 walk version
+```
+
+Create and build a project:
+
+```bash
+walk init hello
+cd hello
+walk check
+walk build
+./build/hello
+walk test
+walk fmt
+walk clean
 ```
 
 Emit C:
@@ -135,5 +153,5 @@ scripts/stress-v1.sh
 Build cross-platform CLI release artifacts:
 
 ```bash
-scripts/release.sh v1.1.0
+scripts/release.sh v1.2.0
 ```

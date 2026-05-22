@@ -27,9 +27,11 @@ func main() {
 
 func run(args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("usage: walk build <source.walk> -o <output>")
+		return fmt.Errorf("usage: walk <init|build|check|test|fmt|clean|emit-c|repl|version>")
 	}
 	switch args[0] {
+	case "init":
+		return initCommand(args[1:])
 	case "build":
 		return build(args[1:])
 	case "emit-c":
@@ -42,6 +44,8 @@ func run(args []string) error {
 		return testCommand(args[1:])
 	case "repl":
 		return replCommand(args[1:])
+	case "clean":
+		return cleanCommand(args[1:])
 	case "version":
 		fmt.Println(version)
 		return nil
@@ -51,6 +55,9 @@ func run(args []string) error {
 }
 
 func build(args []string) error {
+	if useProjectBuild(args) {
+		return projectBuildCommand(args)
+	}
 	config, err := parseBuildArgs(args)
 	if err != nil {
 		return err
@@ -109,7 +116,7 @@ func fmtCommand(args []string) error {
 		sourcePath = arg
 	}
 	if sourcePath == "" {
-		return fmt.Errorf("usage: walk fmt [-w] <source.walk>")
+		return projectFmtCommand(write)
 	}
 	source, err := os.ReadFile(sourcePath)
 	if err != nil {
@@ -127,6 +134,9 @@ func fmtCommand(args []string) error {
 }
 
 func testCommand(args []string) error {
+	if useProjectCheckLike(args) {
+		return projectTestCommand(args)
+	}
 	config, err := parseCheckLikeArgs(args, "test")
 	if err != nil {
 		return err
@@ -158,6 +168,9 @@ func testCommand(args []string) error {
 }
 
 func checkCommand(args []string) error {
+	if useProjectCheckLike(args) {
+		return projectCheckCommand(args)
+	}
 	config, err := parseCheckLikeArgs(args, "check")
 	if err != nil {
 		return err
@@ -395,7 +408,11 @@ func compileFileToC(sourcePath string, testsOnly bool) (string, error) {
 }
 
 func compileFileToCWithOptions(sourcePath string, testsOnly bool) (string, []checker.Warning, error) {
-	program, modules, err := loadProgram(sourcePath)
+	return compileFileToCWithSearchDirs(sourcePath, nil, testsOnly)
+}
+
+func compileFileToCWithSearchDirs(sourcePath string, searchDirs []string, testsOnly bool) (string, []checker.Warning, error) {
+	program, modules, err := loadProgramWithSearchDirs(sourcePath, searchDirs)
 	if err != nil {
 		return "", nil, err
 	}
@@ -413,7 +430,15 @@ func compileFileToCWithOptions(sourcePath string, testsOnly bool) (string, []che
 }
 
 func checkFile(sourcePath string) ([]checker.Warning, error) {
-	program, modules, err := loadProgram(sourcePath)
+	program, modules, err := loadProgramWithSearchDirs(sourcePath, nil)
+	if err != nil {
+		return nil, err
+	}
+	return checkPrograms(program, modules)
+}
+
+func checkFileWithSearchDirs(sourcePath string, searchDirs []string) ([]checker.Warning, error) {
+	program, modules, err := loadProgramWithSearchDirs(sourcePath, searchDirs)
 	if err != nil {
 		return nil, err
 	}
@@ -439,6 +464,10 @@ func compileSourceToC(source string, filename string, testsOnly bool) (string, e
 }
 
 func loadProgram(sourcePath string) (*ast.Program, map[string]*checker.Module, error) {
+	return loadProgramWithSearchDirs(sourcePath, nil)
+}
+
+func loadProgramWithSearchDirs(sourcePath string, searchDirs []string) (*ast.Program, map[string]*checker.Module, error) {
 	source, err := os.ReadFile(sourcePath)
 	if err != nil {
 		return nil, nil, fmt.Errorf("source read failed: %w", err)
@@ -448,8 +477,9 @@ func loadProgram(sourcePath string) (*ast.Program, map[string]*checker.Module, e
 		return nil, nil, err
 	}
 	loader := moduleLoader{
-		modules: map[string]*checker.Module{},
-		loading: map[string]bool{},
+		modules:    map[string]*checker.Module{},
+		loading:    map[string]bool{},
+		searchDirs: cleanSearchDirs(searchDirs),
 	}
 	if err := loader.loadImports(program, filepath.Dir(sourcePath)); err != nil {
 		return nil, nil, err
@@ -458,8 +488,9 @@ func loadProgram(sourcePath string) (*ast.Program, map[string]*checker.Module, e
 }
 
 type moduleLoader struct {
-	modules map[string]*checker.Module
-	loading map[string]bool
+	modules    map[string]*checker.Module
+	loading    map[string]bool
+	searchDirs []string
 }
 
 func (l *moduleLoader) loadImports(program *ast.Program, baseDir string) error {
@@ -473,10 +504,16 @@ func (l *moduleLoader) loadImports(program *ast.Program, baseDir string) error {
 		if _, ok := l.modules[imp.Module]; ok {
 			continue
 		}
-		modulePath := filepath.Join(baseDir, imp.Module+".walk")
+		modulePath, ok := l.findModulePath(imp.Module, baseDir)
+		if !ok {
+			if len(l.searchDirs) == 0 {
+				return errorAt(imp.Location, "module error: module %s not found at %s", imp.Module, filepath.Join(baseDir, imp.Module+".walk"))
+			}
+			return errorAt(imp.Location, "module error: module %s not found in project search paths", imp.Module)
+		}
 		source, err := os.ReadFile(modulePath)
 		if err != nil {
-			return errorAt(imp.Location, "module error: module %s not found at %s", imp.Module, modulePath)
+			return errorAt(imp.Location, "module error: module %s could not be read at %s", imp.Module, modulePath)
 		}
 		moduleProgram, err := parser.ParseSource(string(source), modulePath)
 		if err != nil {
@@ -493,6 +530,43 @@ func (l *moduleLoader) loadImports(program *ast.Program, baseDir string) error {
 		delete(l.loading, imp.Module)
 	}
 	return nil
+}
+
+func (l *moduleLoader) findModulePath(module string, baseDir string) (string, bool) {
+	for _, dir := range appendSearchDir([]string{baseDir}, l.searchDirs...) {
+		path := filepath.Join(dir, module+".walk")
+		if info, err := os.Stat(path); err == nil && !info.IsDir() {
+			return path, true
+		}
+	}
+	return "", false
+}
+
+func cleanSearchDirs(dirs []string) []string {
+	return appendSearchDir(nil, dirs...)
+}
+
+func appendSearchDir(existing []string, dirs ...string) []string {
+	result := make([]string, 0, len(existing)+len(dirs))
+	seen := map[string]bool{}
+	add := func(dir string) {
+		if dir == "" {
+			return
+		}
+		clean := filepath.Clean(dir)
+		if seen[clean] {
+			return
+		}
+		seen[clean] = true
+		result = append(result, clean)
+	}
+	for _, dir := range existing {
+		add(dir)
+	}
+	for _, dir := range dirs {
+		add(dir)
+	}
+	return result
 }
 
 func validateModuleSurface(program *ast.Program) error {

@@ -100,5 +100,21 @@ out: > time.now() 0
 WALK
 cmp "$work_dir/expected-formatted.walk" "$work_dir/formatted.walk"
 
-echo "v1 stress ok"
+project_dir="$work_dir/hello_project"
+"$walk_bin" init "$project_dir" >/dev/null
+(
+    cd "$project_dir"
+    "$walk_bin" check --warnings=error >/dev/null
+    "$walk_bin" build >/dev/null
+    expect_output "$project_dir/build/hello_project" "27"
+    "$walk_bin" test >"$work_dir/project-tests.out"
+    grep -q "ok 1 tests" "$work_dir/project-tests.out"
+    printf 'out:+ 1 2\n' >src/messy.walk
+    "$walk_bin" fmt >/dev/null
+    printf 'out: + 1 2\n' >"$work_dir/project-formatted.walk"
+    cmp "$work_dir/project-formatted.walk" src/messy.walk
+    "$walk_bin" clean >/dev/null
+    test ! -d build
+)
 
+echo "v1.2 stress ok"

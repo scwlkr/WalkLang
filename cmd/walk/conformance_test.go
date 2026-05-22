@@ -116,6 +116,45 @@ func TestV11GeneratedCSnapshots(t *testing.T) {
 	}
 }
 
+func TestV12ExamplesAreTestableFixtures(t *testing.T) {
+	requireCC(t)
+	root := repoRoot(t)
+	programs := []struct {
+		file string
+		want string
+	}{
+		{"hello.walk", "3\nhello from WalkLang\ntrue\n"},
+		{"v0.walk", "11\n12\n13\ndistance is 5\n"},
+		{"v1.walk", "27\n8\n4\n3\ntrue\n"},
+	}
+	for _, tc := range programs {
+		t.Run(tc.file, func(t *testing.T) {
+			cCode, warnings, err := compileFileToCWithOptions(filepath.Join(root, "examples", tc.file), false)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(warnings) != 0 {
+				t.Fatalf("unexpected warnings: %#v", warnings)
+			}
+			if got := runCProgram(t, cCode); got != tc.want {
+				t.Fatalf("want %q, got %q", tc.want, got)
+			}
+		})
+	}
+
+	cCode, warnings, err := compileFileToCWithOptions(filepath.Join(root, "examples", "v0_1_tests.walk"), true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(warnings) != 0 {
+		t.Fatalf("unexpected warnings: %#v", warnings)
+	}
+	want := "test: add works\ntest: stdlib polish works\nok 2 tests\n"
+	if got := runCProgram(t, cCode); got != want {
+		t.Fatalf("want %q, got %q", want, got)
+	}
+}
+
 func repoRoot(t *testing.T) string {
 	t.Helper()
 	wd, err := os.Getwd()
