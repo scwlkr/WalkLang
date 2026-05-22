@@ -116,7 +116,7 @@ func parseStatementAt(nodes []lineNode, index int) (ast.Statement, int, error) {
 			if err := rejectUnexpectedChildren(node.children); err != nil {
 				return nil, index, err
 			}
-			name, err := parseBareName(payload, first.Location)
+			name, err := parseImportName(payload, first.Location)
 			return &ast.Import{Location: first.Location, Module: name}, index + 1, err
 		case "exp":
 			if err := rejectUnexpectedChildren(node.children); err != nil {
@@ -235,6 +235,32 @@ func parseBareName(tokens []lexer.Token, location ast.Location) (string, error) 
 		return "", errorAt(location, "syntax error: expected name")
 	}
 	return tokens[0].Value, nil
+}
+
+func parseImportName(tokens []lexer.Token, location ast.Location) (string, error) {
+	if len(tokens) == 0 {
+		return "", errorAt(location, "syntax error: expected import name")
+	}
+	var parts []string
+	expectName := true
+	for _, token := range tokens {
+		if expectName {
+			if token.Kind != lexer.TokenName {
+				return "", errorAt(location, "syntax error: expected import name")
+			}
+			parts = append(parts, token.Value)
+			expectName = false
+			continue
+		}
+		if token.Kind != lexer.TokenSymbol || token.Value != "." {
+			return "", errorAt(location, "syntax error: expected import name")
+		}
+		expectName = true
+	}
+	if expectName {
+		return "", errorAt(location, "syntax error: expected import name")
+	}
+	return strings.Join(parts, "."), nil
 }
 
 func parseVarDecl(tokens []lexer.Token, children []lineNode, location ast.Location, mutable bool) (ast.Statement, error) {

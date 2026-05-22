@@ -280,6 +280,24 @@ main.walk imp: calc -> calc.walk
 calc.square -> generated C symbol calc__square
 ```
 
+v3 package imports are still module imports, but the module name is dotted and resolved through the package cache:
+
+```walk
+imp: geometry.core
+
+out: geometry.core.double(3)
+```
+
+Resolution shape:
+
+```text
+walk.toml [dependencies] geometry = "0.1.0"
+walk package resolve <registry>
+walk.lock verifies geometry@0.1.0
+.walk/packages/geometry/0.1.0/src/geometry/core.walk
+geometry.core.double -> generated C symbol geometry__core__double
+```
+
 ---
 
 ## 9. Standard Library
@@ -395,7 +413,6 @@ Later:
 
 ```text
 language server
-package manager
 debugger
 ```
 

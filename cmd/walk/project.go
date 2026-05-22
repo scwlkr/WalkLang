@@ -18,11 +18,12 @@ import (
 const projectConfigName = "walk.toml"
 
 type projectConfig struct {
-	root    string
-	name    string
-	version string
-	entry   string
-	build   projectBuildConfig
+	root         string
+	name         string
+	version      string
+	entry        string
+	build        projectBuildConfig
+	dependencies []projectDependency
 }
 
 type projectBuildConfig struct {
@@ -118,7 +119,11 @@ func projectBuildCommand(args []string) error {
 		return err
 	}
 	parsed.native.release = config.build.release || parsed.native.release
-	cCode, warnings, err := compileFileToCWithSearchDirs(entryPath, projectSearchDirs(config, entryPath), false)
+	searchDirs, err := projectSearchDirs(config, entryPath)
+	if err != nil {
+		return err
+	}
+	cCode, warnings, err := compileFileToCWithSearchDirs(entryPath, searchDirs, false)
 	if err != nil {
 		return err
 	}
@@ -145,7 +150,11 @@ func projectCheckCommand(args []string) error {
 	if err != nil {
 		return err
 	}
-	warnings, err := checkFileWithSearchDirs(entryPath, projectSearchDirs(config, entryPath))
+	searchDirs, err := projectSearchDirs(config, entryPath)
+	if err != nil {
+		return err
+	}
+	warnings, err := checkFileWithSearchDirs(entryPath, searchDirs)
 	if err != nil {
 		return err
 	}
@@ -153,7 +162,11 @@ func projectCheckCommand(args []string) error {
 		return err
 	}
 	for _, testPath := range projectTestFiles(config) {
-		warnings, err := checkFileWithSearchDirs(testPath, projectSearchDirs(config, testPath))
+		searchDirs, err := projectSearchDirs(config, testPath)
+		if err != nil {
+			return err
+		}
+		warnings, err := checkFileWithSearchDirs(testPath, searchDirs)
 		if err != nil {
 			return err
 		}
@@ -209,7 +222,11 @@ func projectTestCommand(args []string) error {
 }
 
 func runProjectTestFile(config projectConfig, testPath string, mode warningMode) error {
-	cCode, warnings, err := compileFileToCWithSearchDirs(testPath, projectSearchDirs(config, testPath), true)
+	searchDirs, err := projectSearchDirs(config, testPath)
+	if err != nil {
+		return err
+	}
+	cCode, warnings, err := compileFileToCWithSearchDirs(testPath, searchDirs, true)
 	if err != nil {
 		return err
 	}
@@ -390,7 +407,7 @@ func parseProjectConfig(contents string, filename string) (projectConfig, error)
 		}
 		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
 			section = strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(line, "["), "]"))
-			if section != "build" {
+			if section != "build" && section != "dependencies" {
 				return projectConfig{}, fmt.Errorf("%s:%d: unknown section [%s]", filename, lineNumber, section)
 			}
 			continue
@@ -414,6 +431,9 @@ func parseProjectConfig(contents string, filename string) (projectConfig, error)
 	if config.build.output == "" {
 		config.build.output = filepath.ToSlash(filepath.Join("build", config.name))
 	}
+	sort.Slice(config.dependencies, func(i, j int) bool {
+		return config.dependencies[i].name < config.dependencies[j].name
+	})
 	return config, nil
 }
 
@@ -462,6 +482,23 @@ func assignProjectConfigValue(config *projectConfig, section string, key string,
 		default:
 			return fmt.Errorf("%s:%d: unknown build key %q", filename, line, key)
 		}
+	case "dependencies":
+		if !validPackageName(key) {
+			return fmt.Errorf("%s:%d: dependency name %q may contain only letters, numbers, and underscore", filename, line, key)
+		}
+		for _, dependency := range config.dependencies {
+			if dependency.name == key {
+				return fmt.Errorf("%s:%d: dependency %q is already defined", filename, line, key)
+			}
+		}
+		parsed, err := parseTomlString(value, filename, line)
+		if err != nil {
+			return err
+		}
+		if !validSemver(parsed) {
+			return fmt.Errorf("%s:%d: dependency %q version must be MAJOR.MINOR.PATCH", filename, line, key)
+		}
+		config.dependencies = append(config.dependencies, projectDependency{name: key, version: parsed})
 	}
 	return nil
 }
@@ -519,12 +556,17 @@ func projectPath(config projectConfig, rel string) (string, error) {
 	return filepath.Join(config.root, clean), nil
 }
 
-func projectSearchDirs(config projectConfig, sourcePath string) []string {
+func projectSearchDirs(config projectConfig, sourcePath string) ([]string, error) {
 	entryPath, err := projectPath(config, config.entry)
 	if err != nil {
-		return []string{filepath.Dir(sourcePath)}
+		return []string{filepath.Dir(sourcePath)}, nil
 	}
-	return appendSearchDir([]string{filepath.Dir(sourcePath)}, filepath.Dir(entryPath))
+	dirs := appendSearchDir([]string{filepath.Dir(sourcePath)}, filepath.Dir(entryPath))
+	packageDirs, err := packageSearchDirs(config)
+	if err != nil {
+		return nil, err
+	}
+	return appendSearchDir(dirs, packageDirs...), nil
 }
 
 func projectTestFiles(config projectConfig) []string {

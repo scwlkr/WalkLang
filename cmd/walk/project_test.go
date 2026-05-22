@@ -80,6 +80,124 @@ func TestV12ProjectConfigValidation(t *testing.T) {
 	}
 }
 
+func TestV3PackageLifecycle(t *testing.T) {
+	requireCC(t)
+
+	dir := t.TempDir()
+	registry := filepath.Join(dir, "registry")
+	packageDir := filepath.Join(dir, "geometry")
+	if err := run([]string{"package", "init", packageDir}); err != nil {
+		t.Fatal(err)
+	}
+	for _, rel := range []string{"README.md", "walk.toml", filepath.Join("src", "geometry", "core.walk"), "tests/main_test.walk"} {
+		if _, err := os.Stat(filepath.Join(packageDir, rel)); err != nil {
+			t.Fatalf("expected package file %s: %v", rel, err)
+		}
+	}
+	if err := withWorkingDir(packageDir, func() error {
+		return run([]string{"package", "publish", registry})
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	appDir := filepath.Join(dir, "shape_app")
+	if err := run([]string{"init", appDir}); err != nil {
+		t.Fatal(err)
+	}
+	writeFile(t, filepath.Join(appDir, "walk.toml"), strings.Join([]string{
+		"name = \"shape_app\"",
+		"version = \"0.1.0\"",
+		"entry = \"src/main.walk\"",
+		"",
+		"[build]",
+		"output = \"build/shape_app\"",
+		"release = false",
+		"",
+		"[dependencies]",
+		"geometry = \"0.1.0\"",
+		"",
+	}, "\n"))
+	writeFile(t, filepath.Join(appDir, "src", "main.walk"), strings.Join([]string{
+		"imp: geometry.core",
+		"",
+		"out: geometry.core.double(4)",
+		"",
+	}, "\n"))
+	writeFile(t, filepath.Join(appDir, "tests", "main_test.walk"), strings.Join([]string{
+		"imp: geometry.core",
+		"",
+		"test: 'package import works'",
+		"    assert: == geometry.core.double(4) 8",
+		"",
+	}, "\n"))
+
+	if err := withWorkingDir(appDir, func() error {
+		err := run([]string{"check", "--warnings=error"})
+		if err == nil {
+			return fmt.Errorf("expected unlocked dependency to fail")
+		}
+		if !strings.Contains(err.Error(), "dependencies are not locked") {
+			return fmt.Errorf("expected lock error, got %v", err)
+		}
+		if err := run([]string{"package", "resolve", registry}); err != nil {
+			return err
+		}
+		lock, err := os.ReadFile(filepath.Join(appDir, "walk.lock"))
+		if err != nil {
+			return err
+		}
+		if !strings.Contains(string(lock), "name = \"geometry\"") || !strings.Contains(string(lock), "version = \"0.1.0\"") || !strings.Contains(string(lock), "checksum = \"sha256:") {
+			return fmt.Errorf("walk.lock did not record geometry pin:\n%s", string(lock))
+		}
+		if err := run([]string{"check", "--warnings=error"}); err != nil {
+			return err
+		}
+		if err := run([]string{"test", "--warnings=error"}); err != nil {
+			return err
+		}
+		if err := run([]string{"build"}); err != nil {
+			return err
+		}
+		output, err := exec.Command(filepath.Join(appDir, "build", "shape_app")).CombinedOutput()
+		if err != nil {
+			return err
+		}
+		if got, want := string(output), "8\n"; got != want {
+			return fmt.Errorf("package app output: want %q, got %q", want, got)
+		}
+		cachedModule := filepath.Join(appDir, ".walk", "packages", "geometry", "0.1.0", "src", "geometry", "core.walk")
+		if err := os.WriteFile(cachedModule, []byte("func: double(x int) int\n    return: + x 100\n\nexp: double\n"), 0o644); err != nil {
+			return err
+		}
+		err = run([]string{"check", "--warnings=error"})
+		if err == nil {
+			return fmt.Errorf("expected package cache checksum mismatch")
+		}
+		if !strings.Contains(err.Error(), "cache does not match walk.lock") {
+			return fmt.Errorf("expected checksum error, got %v", err)
+		}
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestV3PackageDependencyConfigValidation(t *testing.T) {
+	_, err := parseProjectConfig(strings.Join([]string{
+		"name = \"shape_app\"",
+		"",
+		"[dependencies]",
+		"geometry = \"latest\"",
+		"",
+	}, "\n"), "walk.toml")
+	if err == nil {
+		t.Fatal("expected invalid dependency version")
+	}
+	if got, want := err.Error(), "walk.toml:4: dependency \"geometry\" version must be MAJOR.MINOR.PATCH"; got != want {
+		t.Fatalf("want %q, got %q", want, got)
+	}
+}
+
 func withWorkingDir(dir string, fn func() error) error {
 	previous, err := os.Getwd()
 	if err != nil {

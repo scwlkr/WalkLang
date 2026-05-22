@@ -344,7 +344,7 @@ if: != email null
 
 ## Imports And Exports
 
-Use `imp:` to import built-in modules or sibling user modules.
+Use `imp:` to import built-in modules, sibling user modules, or v3 package modules.
 
 ```walk
 imp: math
@@ -368,6 +368,13 @@ out: calc.square(5)
 ```
 
 Only names listed with `exp:` are public through the namespace.
+
+Package module example:
+
+```walk
+imp: geometry.core
+out: geometry.core.double(3)
+```
 
 ---
 

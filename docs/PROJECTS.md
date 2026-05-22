@@ -43,6 +43,14 @@ Rules:
 - `entry` defaults to `src/main.walk`.
 - `build.output` defaults to `build/<name>`.
 - project paths must be relative and stay inside the project root.
+- `[dependencies]` pins package dependencies by exact `MAJOR.MINOR.PATCH` version.
+
+Package dependency example:
+
+```toml
+[dependencies]
+geometry = "0.1.0"
+```
 
 ## Commands
 
@@ -84,3 +92,48 @@ test: 'cube works'
 ```
 
 The importing file's directory is searched first. The project entry directory is searched next.
+
+Package dependencies add locked package `src/` directories after local project search paths. Package imports use dotted module names:
+
+```walk
+imp: geometry.core
+
+out: geometry.core.double(3)
+```
+
+This import resolves from:
+
+```text
+.walk/packages/geometry/0.1.0/src/geometry/core.walk
+```
+
+## Packages
+
+Create a package project:
+
+```bash
+walk package init geometry
+```
+
+Publish a documented package to a local registry:
+
+```bash
+cd geometry
+walk package publish ../registry
+```
+
+Resolve an app's pinned dependencies from that registry:
+
+```bash
+cd ../shape_app
+walk package resolve ../registry
+```
+
+Package behavior:
+
+- `walk package publish` requires non-empty `README.md`.
+- Publish runs `walk check --warnings=error` and `walk test --warnings=error`.
+- Published packages are copied to `<registry>/<name>/<version>/`.
+- `walk package resolve` copies packages into `.walk/packages/` and writes `walk.lock`.
+- `walk check`, `walk test`, and `walk build` verify package cache checksums before using dependencies.
+- Build commands do not download packages automatically.

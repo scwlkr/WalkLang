@@ -816,11 +816,11 @@ func (c *Checker) checkDottedCall(call *ast.Call) (ast.Type, bool, error) {
 }
 
 func (c *Checker) isImportedModuleCall(call *ast.Call) bool {
-	name, ok := call.Receiver.(*ast.Name)
-	if !ok || call.Method == "" {
+	module, _, ok := splitQualifiedCall(call.Callee)
+	if !ok {
 		return false
 	}
-	return c.imports[name.Identifier] && call.Callee == name.Identifier+"."+call.Method
+	return c.imports[module]
 }
 
 func (c *Checker) checkStructConstructor(call *ast.Call, def StructDef) (ast.Type, error) {
@@ -841,11 +841,10 @@ func (c *Checker) checkStructConstructor(call *ast.Call, def StructDef) (ast.Typ
 }
 
 func (c *Checker) checkModuleCall(call *ast.Call) (ast.Type, error) {
-	parts := strings.Split(call.Callee, ".")
-	if len(parts) != 2 {
+	module, name, ok := splitQualifiedCall(call.Callee)
+	if !ok {
 		return ast.Type{}, errorAt(call.Loc(), "name error: unsupported qualified call %s", call.Callee)
 	}
-	module, name := parts[0], parts[1]
 	if !c.imports[module] {
 		return ast.Type{}, errorAt(call.Loc(), "name error: module %s is not imported", module)
 	}
@@ -945,6 +944,14 @@ func (c *Checker) checkModuleCall(call *ast.Call) (ast.Type, error) {
 		return ast.Basic(ast.TypeBool), nil
 	}
 	return ast.Type{}, errorAt(call.Loc(), "name error: unknown library function %s", call.Callee)
+}
+
+func splitQualifiedCall(callee string) (string, string, bool) {
+	index := strings.LastIndex(callee, ".")
+	if index <= 0 || index == len(callee)-1 {
+		return "", "", false
+	}
+	return callee[:index], callee[index+1:], true
 }
 
 func (c *Checker) checkFunctionCall(call *ast.Call, fnType ast.Type) (ast.Type, error) {

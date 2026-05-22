@@ -28,11 +28,13 @@ func main() {
 
 func run(args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("usage: walk <init|build|check|test|fmt|clean|emit-c|repl|version>")
+		return fmt.Errorf("usage: walk <init|package|build|check|test|fmt|clean|emit-c|repl|version>")
 	}
 	switch args[0] {
 	case "init":
 		return initCommand(args[1:])
+	case "package":
+		return packageCommand(args[1:])
 	case "build":
 		return build(args[1:])
 	case "emit-c":
@@ -536,12 +538,23 @@ func (l *moduleLoader) loadImports(program *ast.Program, baseDir string) error {
 
 func (l *moduleLoader) findModulePath(module string, baseDir string) (string, bool) {
 	for _, dir := range appendSearchDir([]string{baseDir}, l.searchDirs...) {
-		path := filepath.Join(dir, module+".walk")
-		if info, err := os.Stat(path); err == nil && !info.IsDir() {
-			return path, true
+		for _, rel := range moduleFileCandidates(module) {
+			path := filepath.Join(dir, rel)
+			if info, err := os.Stat(path); err == nil && !info.IsDir() {
+				return path, true
+			}
 		}
 	}
 	return "", false
+}
+
+func moduleFileCandidates(module string) []string {
+	nested := filepath.FromSlash(strings.ReplaceAll(module, ".", "/") + ".walk")
+	literal := module + ".walk"
+	if nested == literal {
+		return []string{nested}
+	}
+	return []string{nested, literal}
 }
 
 func cleanSearchDirs(dirs []string) []string {

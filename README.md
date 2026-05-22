@@ -2,7 +2,7 @@
 
 WalkLang is a small compiled language implemented in Go with a C backend.
 
-This repo currently contains v2.2 data modeling, methods, and simple generics, the v1.5 compatibility release preparation, v1.4 diagnostics and developer experience, the v1.3 standard library foundation, v1.2 project mode, and the v1 language contract from `docs/ROADMAP.md`.
+This repo currently contains the v3 package ecosystem, v2.2 data modeling, methods, and simple generics, the v1.5 compatibility release preparation, v1.4 diagnostics and developer experience, the v1.3 standard library foundation, v1.2 project mode, and the v1 language contract from `docs/ROADMAP.md`.
 It proves the pipeline:
 
 ```text
@@ -46,6 +46,11 @@ Supported now:
 - `walk.toml` project config
 - project-mode `walk build`, `walk check`, `walk test`, `walk fmt`, and `walk clean`
 - project tests that can import modules from `src/`
+- local package projects through `walk package init`
+- pinned package dependencies in `walk.toml`
+- locked package checksums in `walk.lock`
+- local registry publish and resolve through `walk package publish` and `walk package resolve`
+- dotted package imports such as `imp: geometry.core`
 - examples covered as testable fixtures
 - GitHub Actions CI for tests, stress, and release artifacts
 - release notes, migration guide, deprecation policy, and official install instructions
@@ -69,6 +74,7 @@ Experimental v2 surface:
 Contract docs:
 
 - `docs/SPEC.md`
+- `docs/V3.md`
 - `docs/V2.md`
 - `docs/SYNTAX.md`
 - `docs/STDLIB.md`
@@ -85,14 +91,15 @@ Contract docs:
 Not stable yet:
 
 - file/json/matrix stdlib APIs
-- traits or package manager behavior
+- traits
+- remote public package registry behavior
 
 ## Use
 
 Install the local `walk` command:
 
 ```bash
-scripts/install-local.sh v2-local
+scripts/install-local.sh v3-local
 walk version
 ```
 
@@ -107,6 +114,22 @@ walk build
 walk test
 walk fmt
 walk clean
+```
+
+Create, publish, and consume a local package:
+
+```bash
+walk package init geometry
+cd geometry
+walk package publish ../registry
+
+cd ..
+walk init shape_app
+cd shape_app
+# add [dependencies] geometry = "0.1.0" to walk.toml
+walk package resolve ../registry
+walk check
+walk build
 ```
 
 Emit C:
@@ -203,5 +226,5 @@ scripts/stress-v1.sh
 Build cross-platform CLI release artifacts:
 
 ```bash
-scripts/release.sh v2.2.0
+scripts/release.sh v3.0.0
 ```

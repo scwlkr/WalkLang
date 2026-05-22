@@ -1,5 +1,60 @@
 # WalkLang Release Notes
 
+## v3.0.0 - Package Ecosystem
+
+Date: 2026-05-22
+
+v3.0.0 adds a local, file-backed package ecosystem on top of project mode.
+
+### Added
+
+- `walk package init <name>` for package project scaffolding.
+- `[dependencies]` in `walk.toml` with exact `MAJOR.MINOR.PATCH` pins.
+- `walk package resolve <registry-dir>` for copying pinned dependencies into `.walk/packages/`.
+- `walk.lock` with package names, versions, and checksums.
+- Package cache verification before project `walk check`, `walk test`, and `walk build`.
+- Dotted package imports such as `imp: geometry.core`.
+- `walk package publish <registry-dir>` for local registry publishing.
+- Publish-time `README.md`, check, and test gates.
+- v3 package documentation in `docs/V3.md` and `docs/PROJECTS.md`.
+- End-to-end v3 package lifecycle tests.
+
+### Changed
+
+- Module loading can resolve dotted module paths such as `geometry/core.walk`.
+- Qualified call checking now treats the final dotted segment as the exported function and the preceding path as the imported module.
+
+### Breaking Changes
+
+None.
+
+### Removed
+
+None.
+
+### Experimental Or Draft
+
+The v3 package ecosystem is local-registry based. The following remain future roadmap items:
+
+```text
+remote public package registry
+registry authentication
+version range solving
+multiple package versions in one build
+automatic package download during build
+```
+
+### Upgrade
+
+For project dependencies, pin exact versions and resolve before checking or building:
+
+```bash
+walk package resolve <registry-dir>
+walk check --warnings=error
+walk test --warnings=error
+walk build
+```
+
 ## v2.2.0 - Simple Generic Composition
 
 Date: 2026-05-22
