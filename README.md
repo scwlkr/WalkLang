@@ -2,14 +2,14 @@
 
 WalkLang is a small compiled language implemented in Go with a C backend.
 
-This repo currently contains the v1 compiler path from `docs/ROADMAP.md`.
+This repo currently contains the v1.1 language contract and compiler path from `docs/ROADMAP.md`.
 It proves the pipeline:
 
 ```text
 .walk source -> Go compiler -> generated C -> native executable
 ```
 
-## Current v1 Surface
+## Current v1.1 Surface
 
 Supported now:
 
@@ -38,13 +38,33 @@ Supported now:
 - user-local `walk` command install
 - v1 stress script
 - cross-platform CLI release script
+- stable language contract docs
+- pass/fail conformance fixtures
+- generated C snapshot tests
+
+Contract docs:
+
+- `docs/SPEC.md`
+- `docs/SYNTAX.md`
+- `docs/STDLIB.md`
+- `docs/ERRORS.md`
+- `docs/DESIGN_RULES.md`
+- `docs/COMPATIBILITY.md`
+- `docs/STATUS.md`
+
+Not v1.1 yet:
+
+- project mode with `walk.toml`
+- `walk init` / `walk clean`
+- file/json/matrix stdlib APIs
+- structs, methods, traits, or package manager behavior
 
 ## Use
 
 Install the local `walk` command:
 
 ```bash
-scripts/install-local.sh v1-local
+scripts/install-local.sh v1.1-local
 walk version
 ```
 
@@ -115,5 +135,5 @@ scripts/stress-v1.sh
 Build cross-platform CLI release artifacts:
 
 ```bash
-scripts/release.sh v1
+scripts/release.sh v1.1.0
 ```

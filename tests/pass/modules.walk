@@ -1,0 +1,4 @@
+imp: calc
+
+out: calc.square(5)
+out: calc.bump(9)

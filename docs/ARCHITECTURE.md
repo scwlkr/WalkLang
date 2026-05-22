@@ -40,7 +40,7 @@ Kind: compiled
 Target: C
 Output: native executable
 VM: no
-GC: no in v0
+GC: no public v1.1 promise
 ```
 
 Purpose:
@@ -100,7 +100,7 @@ WalkLang chooses visible structure over clever syntax.
 
 ## 3. Language Shape
 
-WalkLang v0 is:
+WalkLang v1.1 is:
 
 ```text
 procedural first
@@ -119,10 +119,10 @@ func: add(a int, b int) int
 out: add(2, 3)
 ```
 
-Not v0:
+Not v1.1:
 
 ```walk
-class: Person       # error in v0
+class: Person       # error in v1.1
 ```
 
 ---
@@ -160,7 +160,7 @@ if: > score 90 { out: 'A'; }   # error
 
 ## 5. Type Model
 
-WalkLang v0 is statically typed.
+WalkLang v1.1 is statically typed.
 
 Types are inferred unless written.
 
@@ -220,7 +220,7 @@ var: nickname = null    # error: unknown nullable type
 
 ## 7. Memory Model
 
-v0 has no public memory syntax.
+v1.1 has no public memory syntax.
 
 ```text
 No malloc.
@@ -279,18 +279,14 @@ calc.square -> generated C symbol calc__square
 
 ---
 
-## 9. Standard Library Targets
+## 9. Standard Library
 
-v0 target libraries:
+v1.1 stable libraries:
 
 ```text
 math
 string
 array
-matrix
-file
-json
-testing
 time
 random
 ```
@@ -305,26 +301,19 @@ var: x = random.int(1, 10)
 out: math.sqrt(x)
 ```
 
-Matrix is library-supported, not a separate core type.
-
-```walk
-var: grid = [
-    [1, 3],
-    [2, 4]
-]
-```
-
-Type:
+Draft library areas are not stable until they appear in `docs/STDLIB.md` and pass conformance tests.
 
 ```text
-array[array[int]]
+file
+json
+matrix
 ```
 
 ---
 
 ## 10. Error Model
 
-v0 has compiler errors, warnings, and runtime stops.
+v1.1 has compiler errors, warnings, and native runtime stops.
 
 Compile error:
 
@@ -336,7 +325,7 @@ age = 'old'
 Diagnostic:
 
 ```text
-main.walk:2
+main.walk:2:1
 type error: age is int, got string
 ```
 
@@ -352,10 +341,10 @@ Diagnostic:
 runtime error: divide by zero
 ```
 
-No v0 recovery:
+No v1.1 recovery:
 
 ```walk
-try:          # error in v0
+try:          # error in v1.1
 catch:
 ```
 
@@ -385,6 +374,15 @@ module loader
 warning levels
 release build flags
 cross-platform CLI release script
+```
+
+v1.1:
+
+```text
+stable contract docs
+pass/fail conformance fixtures
+generated C snapshots
+current status doc
 ```
 
 Later:

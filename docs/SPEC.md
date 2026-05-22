@@ -1,23 +1,29 @@
-# SPEC.md
+# WalkLang v1.1 Specification
 
-## WalkLang v0 Spec
+This document is the stable WalkLang language contract for v1.1.
 
-This document defines valid v0 behavior.
+Core rule:
+
+```text
+If it is not in SPEC.md, it is not stable WalkLang.
+If the compiler disagrees with SPEC.md, either the compiler or the spec must change.
+```
 
 ---
 
-## 1. Source File
+## 1. Source Files
 
-A source file is UTF-8 text ending in `.walk`.
+WalkLang source files are UTF-8 text files ending in `.walk`.
 
 ```text
 main.walk
 ```
 
-A file contains zero or more statements.
+A source file contains zero or more statements. Blank lines are ignored. `#` starts a comment outside strings.
 
 ```walk
-var: x = 1
+# comment
+var: x = 1 # inline comment
 out: x
 ```
 
@@ -25,233 +31,49 @@ out: x
 
 ## 2. Compilation Contract
 
-Compiler pipeline:
+The stable compiler pipeline is:
 
 ```text
-source -> tokens -> AST -> typed IR -> C -> executable
+.walk source -> lexer -> parser -> AST -> type checker -> C emitter -> native executable
 ```
 
-Example:
-
-```walk
-out: + 1 2
-```
-
-Compiles through C into a native executable that prints:
-
-```text
-3
-```
+The `walk build` command writes generated C next to the executable path unless `--emit-c` chooses another path. Native builds use `cc` by default and link with `-lm`.
 
 ---
 
-## 3. Grammar Sketch
+## 3. Blocks And Indentation
 
-```text
-file        := stmt*
-stmt        := command | assign | expr
-command     := keyword ':' payload? block?
-assign      := target '=' expr
-block       := INDENT stmt+ DEDENT
-expr        := literal | name | call | index | prefix | grouped | block_expr
-call        := name '(' args? ')'
-args        := expr (',' expr)*
-prefix      := op expr+
-grouped     := '(' expr ')'
-array       := '[' args? ']'
-index       := expr '[' expr ']'
-```
-
-Example command:
-
-```walk
-out: 'hello'
-```
-
-Example expression:
-
-```walk
-* (+ a b) (- c d)
-```
-
----
-
-## 4. Keywords
-
-Keywords cannot be names.
-
-```text
-var const out if else while for repeat break continue
-func return imp exp true false null and or not in
-```
-
-Invalid:
-
-```walk
-var: return = 1 # error
-```
-
----
-
-## 5. Indentation
-
-Indentation defines block ownership.
+Indentation owns blocks.
 
 ```walk
 if: true
-    out: 'owned by if'
-out: 'top-level'
-```
-
-A dedent closes the block.
-
-Tabs are invalid in v0.
-
----
-
-## 6. Type System
-
-WalkLang is statically typed.
-
-```text
-Every expression has a type.
-Every name has one type.
-Assignments must match that type.
-```
-
-Example:
-
-```walk
-var: x = 1
-x = 2      # ok
-x = 'two'  # error
-```
-
----
-
-## 7. Type Inference
-
-The compiler infers types from values.
-
-```walk
-var: x = 1      # int
-var: y = 1.5    # float
-var: s = 'hi'   # string
-```
-
-Explicit type annotations are allowed.
-
-```walk
-var: x int = 1
-var: y float = 1
-```
-
-If no single type can be proven, compile error.
-
-```walk
-var: x = null # error
-```
-
-Use:
-
-```walk
-var: x string? = null
-```
-
----
-
-## 8. Type Lock
-
-A variable cannot change type.
-
-```walk
-var: value = 10
-value = 20      # ok
-value = false   # error
-```
-
-A function return type is also locked.
-
-```walk
-func: bad(x bool) int
-    if: x
-        return: 1
-    return: 'no' # error
-```
-
----
-
-## 9. Numeric Rules
-
-Types:
-
-```text
-int
-float
+    out: 'inside'
+out: 'outside'
 ```
 
 Rules:
 
-```text
-int + int -> int
-int with float -> float
-/ always -> float
-```
-
-Example:
-
-```walk
-var: a = + 1 2     # int
-var: b = + 1 2.5   # float
-var: c = / 5 2     # float, 2.5
-```
-
-Integer division must be explicit later; v0 `/` is not integer division.
+- spaces define indentation
+- tabs are invalid
+- a greater indentation level starts a child block
+- a lower indentation level closes blocks
+- formatter output uses 4 spaces per block level
 
 ---
 
-## 10. Boolean Rules
+## 4. Lexical Rules
 
-Conditions must be bool.
-
-```walk
-if: > age 18
-    out: 'adult'
-```
-
-Invalid:
-
-```walk
-if: age
-    out: 'bad' # error
-```
-
-Boolean operators:
+Stable tokens:
 
 ```text
-and: 2+ bool args -> bool
-or:  2+ bool args -> bool
-not: 1 bool arg -> bool
+names       letters, digits, and _
+numbers     int and float literals
+strings     single-quoted strings
+symbols     ( ) [ ] , : = + - * / ^ > < ? .
+comments    # outside strings
 ```
 
-Example:
-
-```walk
-if: and (> age 18) (< age 65)
-    out: 'working age'
-```
-
----
-
-## 11. String Rules
-
-Strings use single quotes.
-
-```walk
-var: s = 'hello'
-```
-
-Escapes:
+Strings support these escapes:
 
 ```text
 \' single quote
@@ -260,484 +82,419 @@ Escapes:
 \t tab
 ```
 
-Example:
+Double-quoted strings are not valid WalkLang.
 
-```walk
-var: s = 'don\'t\nstop'
+---
+
+## 5. Statements
+
+Stable statements:
+
+```text
+imp:
+exp:
+var:
+const:
+assignment
+out:
+test:
+assert:
+func:
+return:
+if:
+else:
+while:
+repeat:
+for:
+break:
+continue:
 ```
 
-No implicit string conversion.
+One statement appears on each physical line. Semicolons are not part of v1.1 syntax.
 
-```walk
-var: s = + 'age: ' 5 # error
-```
+---
 
-Use explicit conversion later:
+## 6. Reserved Words
 
-```walk
-var: s = string.from_int(5)
+These words cannot be user-defined names:
+
+```text
+var const out if else while for repeat break continue
+func return imp exp true false null and or not in test assert
 ```
 
 ---
 
-## 12. Null Rules
+## 7. Types
 
-`null` is valid only for nullable types.
+Stable value types:
+
+```text
+int
+float
+bool
+string
+array[T]
+func(T...) R
+```
+
+`void` is used internally for functions with no return type. It is not a value type.
+
+`null` is stable for nullable strings in native v1.1 programs:
 
 ```walk
 var: name string? = null
 ```
 
-Nullable values must be checked before non-null use.
-
-```walk
-if: != name null
-    out: name
-```
-
-Invalid:
-
-```walk
-var: name string = null # error
-```
+Other nullable scalar forms are not part of the v1.1 stable native contract.
 
 ---
 
-## 13. Array Rules
+## 8. Type Inference And Type Lock
 
-Array type is `array[T]`.
-
-```walk
-var: nums = [1, 2, 3] # array[int]
-```
-
-Arrays are homogeneous.
+`var:` and `const:` infer a type from their initializer unless an explicit type annotation is present.
 
 ```walk
-var: bad = [1, true] # error
+var: x = 1
+var: y float = 1
+const: name = 'Walker'
 ```
 
-Mutable arrays allow element assignment.
+Once a name is declared, its type is locked.
 
 ```walk
-nums[0] = 9
+var: x = 1
+x = 2      # ok
+x = 'two'  # type error
 ```
 
-Type remains locked.
-
-```walk
-nums[0] = 'x' # error
-```
+`int` values may initialize or assign to `float` values. Other implicit conversions are not stable.
 
 ---
 
-## 14. Matrix Rules
+## 9. Variables And Constants
 
-Matrix is `array[array[T]]`.
-
-```walk
-var: m = [
-    [1, 2],
-    [3, 4]
-]
-```
-
-All rows must share element type.
+`var:` creates a mutable binding.
 
 ```walk
-var: bad = [
-    [1, 2],
-    ['x', 'y']
-] # error
+var: count = 0
+count = + count 1
 ```
-
-Rectangular shape is recommended; matrix library functions may require it.
-
-```walk
-matrix.rows(m)
-```
-
----
-
-## 15. Constants
 
 `const:` creates an immutable binding.
 
 ```walk
-const: pi = 3.14
-pi = 3 # error
+const: limit = 10
 ```
 
-Const array access is read-only through that name.
-
-```walk
-const: xs = [1, 2]
-xs[0] = 9 # error
-```
+Reassigning a `const:` name is a type error. Assigning through an indexed target rooted at a `const:` array is also a type error.
 
 ---
 
-## 16. Scope
+## 10. Output
 
-Scopes:
+`out:` writes one value and a trailing newline.
+
+```walk
+out: 'hello'
+out: + 1 2
+```
+
+Stable output types:
 
 ```text
-global
-function
-block
+int
+float
+bool
+string
+nullable string
 ```
 
-Example:
-
-```walk
-var: x = 1
-
-if: true
-    var: x = 2
-    out: x # 2
-
-out: x # 1
-```
-
-Inner shadowing is allowed but may warn.
-
-```walk
-var: x = 1
-if: true
-    var: x = 2 # warning: shadows outer x
-```
+Arrays, functions, and void values cannot be output.
 
 ---
 
-## 17. Assignment
+## 11. Expressions
 
-Assignment updates existing names or indexed targets.
-
-```walk
-x = 2
-items[0] = 9
-```
-
-Invalid assignment target:
-
-```walk
-+ a b = 3 # error
-```
-
----
-
-## 18. Prefix Operators
-
-Math:
+Stable expressions:
 
 ```text
-+ - * / ^
+literals
+names
+prefix operators
+grouped expressions
+function calls
+qualified module calls
+array literals
+index expressions
+block expressions under commands
 ```
 
-Comparison:
+Grouping uses parentheses:
+
+```walk
+var: x = * (+ 1 2) (- 9 4)
+```
+
+---
+
+## 12. Operators
+
+Numeric operators:
+
+```text
++  2 or more args
+*  2 or more args
+-  exactly 2 args
+/  exactly 2 args, returns float
+^  exactly 2 args
+```
+
+Comparison operators:
 
 ```text
 > < >= <= == !=
 ```
 
-Boolean:
+Boolean operators:
 
 ```text
-and or not
+and  2 or more bool args
+or   2 or more bool args
+not  exactly 1 bool arg
 ```
 
-Example:
+Negative numeric literals are supported:
 
 ```walk
-if: and (> x 0) (< x 10)
-    out: x
+var: x = -4
+```
+
+Unary negation of variables is not v1.1 syntax. Use subtraction from zero:
+
+```walk
+var: y = - 0 x
 ```
 
 ---
 
-## 19. Function Declarations
+## 13. Arrays
 
-Function form:
+Array literals are homogeneous and non-empty.
 
 ```walk
-func: name(params) return_type
-    body
+var: nums = [1, 2, 3]
+var: words = ['a', 'b']
 ```
 
-Example:
+Stable native array element types:
+
+```text
+int
+float
+bool
+string
+```
+
+Indexing is zero-based.
+
+```walk
+out: nums[0]
+nums[1] = 9
+```
+
+Empty arrays and nested array emission are not stable v1.1 native features.
+
+---
+
+## 14. Functions
+
+Function declarations use typed parameters.
 
 ```walk
 func: add(a int, b int) int
     return: + a b
 ```
 
-Parameter and return types may be omitted only if inferred.
+If a return type is omitted, the function returns `void` and should end normally.
 
 ```walk
-func: add(a, b)
-    return: + a b
+func: say(message string)
+    out: message
 ```
 
-If inference is ambiguous, compile error.
+`return:` requires a value and is valid only inside a function with a compatible return type.
+
+Non-void functions must return on all paths.
 
 ---
 
-## 20. Function Calls
+## 15. Function Values
 
-Call form:
-
-```walk
-name(arg1, arg2)
-```
-
-Example:
-
-```walk
-var: x = add(1, 2)
-```
-
-Wrong arity is compile error.
-
-```walk
-add(1) # error
-```
-
----
-
-## 21. Return Rules
-
-`return:` exits the current function.
-
-```walk
-func: id(x int) int
-    return: x
-```
-
-A function with return type must return on all paths.
-
-```walk
-func: sign(x int) int
-    if: > x 0
-        return: 1
-    else:
-        return: -1
-```
-
----
-
-## 22. Recursion
-
-Functions may call themselves.
-
-```walk
-func: countdown(n int) int
-    if: <= n 0
-        return: 0
-    return: countdown(- n 1)
-```
-
----
-
-## 23. Function Values
-
-Named functions may be values.
+Named functions may be passed as values.
 
 ```walk
 func: inc(x int) int
     return: + x 1
 
-func: run(f func(int) int, x int) int
+func: apply(f func(int) int, x int) int
     return: f(x)
+
+out: apply(inc, 4)
 ```
 
-No anonymous functions:
-
-```walk
-run((x) => + x 1, 3) # error
-```
-
-No closures:
-
-```walk
-func: outer()
-    var: x = 1
-    func: inner() int
-        return: x # error in v0
-```
+Anonymous functions and closures are not v1.1 syntax.
 
 ---
 
-## 24. Control Flow
+## 16. Control Flow
 
-`if`:
+`if:` conditions must be `bool`.
 
 ```walk
-if: condition
-    block
+if: > age 18
+    out: 'adult'
 else:
-    block
+    out: 'minor'
 ```
 
-`while`:
+`while:` conditions must be `bool`.
 
 ```walk
-while: condition
-    block
+while: < count 3
+    count = + count 1
 ```
 
-`repeat`:
+`repeat:` counts must be `int`.
 
 ```walk
-repeat: count
-    block
+repeat: 3
+    out: 'again'
 ```
 
-`for`:
-
-```walk
-for: item in array
-    block
-```
-
-Example:
-
-```walk
-for: n in [1, 2, 3]
-    out: n
-```
-
----
-
-## 25. Loop Control
-
-`break:` exits nearest loop.
-
-```walk
-while: true
-    break:
-```
-
-`continue:` skips to next iteration.
+`for:` iterates arrays.
 
 ```walk
 for: n in nums
-    if: == n 0
-        continue:
     out: n
 ```
 
-Outside loops, both are errors.
+`break:` and `continue:` are valid only inside loops.
 
 ---
 
-## 26. Modules
+## 17. Modules
 
-`imp:` imports a module namespace.
+Built-in modules:
 
-```walk
-imp: math
-out: math.sqrt(4)
+```text
+math
+string
+array
+time
+random
 ```
 
-`exp:` exports a name.
-
-```walk
-func: add(a int, b int) int
-    return: + a b
-
-exp: add
-```
-
-Unexported names remain private to the file.
-
-In v1, user modules are sibling files. `imp: calc` loads `calc.walk`.
-
-Only exported functions are available through the namespace.
+User modules are sibling `.walk` files imported by bare module name.
 
 ```walk
 imp: calc
-
-out: calc.add(1, 2)
+out: calc.square(5)
 ```
+
+`calc` resolves to `calc.walk` in the importing file's directory.
+
+User module rules:
+
+- imported calls stay namespaced
+- only functions listed with `exp:` are callable from another file
+- module files may contain only `imp:`, `func:`, and `exp:` at top level
+- import cycles are errors
 
 ---
 
-## 27. Errors
+## 18. Tests
 
-Compiler errors stop compilation.
+`test:` defines a test block for `walk test`.
 
 ```walk
-var: x = 1
-x = 'one'
+test: 'add works'
+    assert: == add(2, 3) 5
 ```
 
-Error:
+`assert:` requires a bool expression. Failed assertions make the generated test executable exit non-zero.
+
+Normal `walk build` ignores `test:` blocks.
+
+---
+
+## 19. Formatter
+
+`walk fmt` emits stable spacing and indentation:
+
+```walk
+var:x=+ 1 2
+```
+
+becomes:
+
+```walk
+var: x = + 1 2
+```
+
+Formatter output uses 4 spaces for indentation.
+
+---
+
+## 20. Diagnostics
+
+Compiler diagnostics use this shape:
 
 ```text
+file.walk:line:column: category: message
+```
+
+Stable categories:
+
+```text
+syntax error
 type error
+name error
+module error
+warning
+internal error
 ```
 
-Runtime errors stop the program.
-
-```walk
-out: / 1 0
-```
-
-Error:
-
-```text
-divide by zero
-```
-
-Warnings do not stop by default.
-
-```walk
-var: x = 1
-if: true
-    var: x = 2 # warning: shadows outer name
-```
-
-Tooling may promote warnings to errors.
+Warnings do not fail by default. `--warnings=error` promotes warnings to errors.
 
 ---
 
-## 28. v0 Exclusions
+## 21. Non-Goals
 
-These are not valid v0:
+These are not stable v1.1 features:
 
 ```text
 classes
 structs
 methods
+inheritance
 interfaces
 traits
-inheritance
 anonymous functions
 closures
 try/catch
 networking
 package manager
-manual memory syntax
-```
-
-Example invalid OOP:
-
-```walk
-class: User # error
-```
-
-Example invalid exception syntax:
-
-```walk
-try:
-    out: 'x'
-catch:
-    out: 'bad'
+debugger
+full LSP
+file/json/matrix stdlib APIs
+empty arrays
+nested arrays in native output
 ```
 
 ---
 
-## 29. Minimal Valid Program
+## 22. Minimal Valid Program
 
 ```walk
 out: 'hello'
@@ -745,24 +502,31 @@ out: 'hello'
 
 ---
 
-## 30. Representative Program
+## 23. Representative v1.1 Program
 
 ```walk
 imp: math
 
-func: hyp(a float, b float) float
-    return: math.sqrt(+ (^ a 2) (^ b 2))
+func: add(a int, b int) int
+    return: + a b
 
-var: h = hyp(3, 4)
+func: distance(x1 float, y1 float, x2 float, y2 float) float
+    return:
+        math.sqrt(
+            +:
+                ^ (- x2 x1) 2
+                ^ (- y2 y1) 2
+        )
 
-if: == h 5
-    out: 'ok'
+var: nums = [1, 2, 3]
+
+for: n in nums
+    out: add(n, 10)
+
+var: d = distance(0, 0, 3, 4)
+
+if: == d 5
+    out: 'distance is 5'
 else:
-    out: 'bad'
-```
-
-Expected output:
-
-```text
-ok
+    out: 'distance is not 5'
 ```

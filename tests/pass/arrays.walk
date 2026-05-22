@@ -1,0 +1,11 @@
+imp: array
+
+var: nums = [1, 2, 3]
+nums[1] = 9
+
+out: nums[0]
+out: nums[1]
+out: array.len(nums)
+
+var: names = ['a', 'b']
+out: names[1]

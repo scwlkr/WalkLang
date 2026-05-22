@@ -112,9 +112,15 @@ func parseStatementAt(nodes []lineNode, index int) (ast.Statement, int, error) {
 		payload := tokens[2:]
 		switch keyword {
 		case "imp":
+			if err := rejectUnexpectedChildren(node.children); err != nil {
+				return nil, index, err
+			}
 			name, err := parseBareName(payload, first.Location)
 			return &ast.Import{Location: first.Location, Module: name}, index + 1, err
 		case "exp":
+			if err := rejectUnexpectedChildren(node.children); err != nil {
+				return nil, index, err
+			}
 			name, err := parseBareName(payload, first.Location)
 			return &ast.Export{Location: first.Location, Name: name}, index + 1, err
 		case "var", "const":
@@ -178,10 +184,16 @@ func parseStatementAt(nodes []lineNode, index int) (ast.Statement, int, error) {
 			if len(payload) != 0 {
 				return nil, index, errorAt(first.Location, "syntax error: break takes no value")
 			}
+			if err := rejectUnexpectedChildren(node.children); err != nil {
+				return nil, index, err
+			}
 			return &ast.Break{Location: first.Location}, index + 1, nil
 		case "continue":
 			if len(payload) != 0 {
 				return nil, index, errorAt(first.Location, "syntax error: continue takes no value")
+			}
+			if err := rejectUnexpectedChildren(node.children); err != nil {
+				return nil, index, err
 			}
 			return &ast.Continue{Location: first.Location}, index + 1, nil
 		}
@@ -246,6 +258,9 @@ func parseVarDecl(tokens []lexer.Token, children []lineNode, location ast.Locati
 	if c.peek() == nil {
 		value, err = parseExpressionBlock(children, location)
 	} else {
+		if err := rejectUnexpectedChildren(children); err != nil {
+			return nil, err
+		}
 		value, err = c.parseExpression(nil)
 		if err == nil {
 			err = c.expectEnd()
@@ -349,9 +364,22 @@ func parseFor(tokens []lexer.Token, children []lineNode, location ast.Location) 
 
 func parseCommandExpression(tokens []lexer.Token, children []lineNode, location ast.Location) (ast.Expression, error) {
 	if len(tokens) > 0 {
+		if err := rejectUnexpectedChildren(children); err != nil {
+			return nil, err
+		}
 		return parseExpressionTokens(tokens, location)
 	}
 	return parseExpressionBlock(children, location)
+}
+
+func rejectUnexpectedChildren(children []lineNode) error {
+	for _, child := range children {
+		if isCloseOnly(child.line.Tokens) {
+			continue
+		}
+		return errorAt(child.line.Location, "syntax error: unexpected indented block")
+	}
+	return nil
 }
 
 func parseExpressionBlock(children []lineNode, location ast.Location) (ast.Expression, error) {

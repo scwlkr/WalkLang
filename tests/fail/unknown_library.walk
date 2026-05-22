@@ -1,0 +1,2 @@
+imp: math
+out: math.nope(1)

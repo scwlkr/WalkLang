@@ -1,0 +1,2 @@
+func: hidden(x int) int
+    return: + x 1

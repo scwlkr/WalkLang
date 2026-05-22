@@ -34,7 +34,7 @@ func Lex(source string, filename string) ([]Line, error) {
 	for lineNumber, raw := range strings.Split(source, "\n") {
 		line := lineNumber + 1
 		if tab := strings.IndexRune(raw, '\t'); tab >= 0 {
-			return nil, errorAt(ast.Location{Filename: filename, Line: line, Column: tab + 1}, "syntax error: tabs are invalid in v0 indentation")
+			return nil, errorAt(ast.Location{Filename: filename, Line: line, Column: tab + 1}, "syntax error: tabs are invalid in indentation")
 		}
 
 		body := stripComment(raw)

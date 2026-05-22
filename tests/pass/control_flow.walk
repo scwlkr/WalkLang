@@ -1,0 +1,19 @@
+var: count = 0
+
+while: < count 4
+    count = + count 1
+    if: == count 2
+        continue:
+    out: count
+    if: == count 3
+        break:
+
+repeat: 2
+    out: 'r'
+
+var: nums = [2, 4, 6]
+
+for: n in nums
+    if: == n 4
+        continue:
+    out: n

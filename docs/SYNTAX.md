@@ -1,26 +1,20 @@
-# SYNTAX.md
+# WalkLang v1.1 Syntax Guide
 
-## WalkLang Syntax
-
-Draft: v0
+This guide is the readable syntax companion to `docs/SPEC.md`. `SPEC.md` is the contract when the two disagree.
 
 ---
 
-## 1. Files
+## Files
 
 WalkLang files use `.walk`.
 
 ```text
 main.walk
-math.walk
+calc.walk
 tests.walk
 ```
 
----
-
-## 2. Comments
-
-Use `#`.
+Comments use `#` outside strings.
 
 ```walk
 # full-line comment
@@ -29,9 +23,9 @@ var: x = 5 # inline comment
 
 ---
 
-## 3. Blocks
+## Blocks
 
-Blocks use indentation.
+Blocks are indentation-based.
 
 ```walk
 if: true
@@ -39,77 +33,51 @@ if: true
 out: 'outside'
 ```
 
-Formatter emits 4 spaces.
-
-Tabs are invalid in v0.
-
-```walk
-if: true
-	out: 'bad' # error: tab indentation
-```
+Tabs are invalid. `walk fmt` emits 4 spaces for each block level.
 
 ---
 
-## 4. Statements
-
-One statement per line.
-
-```walk
-var: x = 1
-out: x
-```
-
-No semicolons.
-
-```walk
-var: x = 1; out: x # error
-```
-
----
-
-## 5. Commands
+## Commands
 
 Command statements use `keyword:`.
 
 ```walk
 var: x = 1
-const: pi = 3.14
+const: limit = 10
 out: x
-func: add(a int, b int) int
-    return: + a b
 ```
 
-Command keywords are visually distinct.
+Long expressions can use a block after a command.
 
-```text
-var:
-func:
-if:
-while:
+```walk
+out:
+    +:
+        1
+        2
+        3
 ```
 
 ---
 
-## 6. Names
+## Names
 
-Names use letters, digits, and `_`.
+Names use letters, digits, and `_`, and cannot be reserved words.
 
 ```walk
-var: userName = 'scwlkr'
+var: user_name = 'Walker'
 var: score2 = 100
-var: user_name = 'scwlkr'
 ```
 
 Invalid:
 
 ```walk
-var: 2score = 100 # error
-var: if = 1       # error: reserved word
+var: if = 1
+var: 2score = 100
 ```
 
 ---
 
-## 7. Literals
+## Literals
 
 ```walk
 var: i = 10
@@ -117,102 +85,57 @@ var: f = 3.14
 var: yes = true
 var: no = false
 var: name = 'Walker'
-var: none string? = null
+var: optional_name string? = null
 ```
 
-Strings use single quotes.
+Strings are single-quoted.
 
 ```walk
 var: msg = 'don\'t stop'
 ```
 
-Double quotes are invalid in v0.
-
-```walk
-var: msg = "hello" # error
-```
-
 ---
 
-## 8. Variables
+## Variables And Constants
 
-Create:
-
-```walk
-var: name = value
-```
-
-Example:
+`var:` creates a mutable binding.
 
 ```walk
 var: count = 0
 count = + count 1
 ```
 
-With explicit type:
+`const:` creates an immutable binding.
+
+```walk
+const: max = 10
+```
+
+Type annotations go between the name and `=`.
 
 ```walk
 var: count int = 0
-var: price float = 9.99
-```
-
-Type cannot change:
-
-```walk
-var: count = 0
-count = 'zero' # error
+var: price float = 9
+var: name string? = null
 ```
 
 ---
 
-## 9. Constants
+## Output
 
-Constants use `const:`.
-
-```walk
-const: max = 10
-const: app_name = 'WalkLang'
-```
-
-Cannot reassign:
-
-```walk
-const: max = 10
-max = 20 # error
-```
-
-Const arrays are read-only through that name:
-
-```walk
-const: nums = [1, 2, 3]
-nums[0] = 9 # error
-```
-
----
-
-## 10. Output
-
-Use `out:`.
+Use `out:` to print a scalar value.
 
 ```walk
 out: 'hello'
-out: count
-out: + a b
+out: + 1 2
+out: true
 ```
 
-Block form supports long expressions.
-
-```walk
-out:
-    +:
-        subtotal
-        tax
-        fee
-```
+Arrays and function values cannot be printed directly.
 
 ---
 
-## 11. Prefix Math
+## Prefix Math
 
 Math is prefix only.
 
@@ -224,119 +147,62 @@ Math is prefix only.
 ^ a b
 ```
 
-Examples:
+`+` and `*` accept 2 or more operands.
 
 ```walk
-var: sum = + a b
-var: diff = - a b
-var: product = * a b
-var: q = / 5 2
-var: sq = ^ x 2
-```
-
-Invalid infix:
-
-```walk
-var: x = a + b # error
-```
-
----
-
-## 12. Operator Arity
-
-```text
-+   2+ args
-*   2+ args
--   2 args
-/   2 args
-^   2 args
-```
-
-Valid:
-
-```walk
-var: total = + a b c d
+var: total = + a b c
 var: product = * a b c
-var: diff = - a b
 ```
 
-Invalid:
+`-`, `/`, and `^` accept exactly 2 operands.
 
 ```walk
-var: x = - a b c # error
+var: diff = - a b
+var: ratio = / 5 2
+var: square = ^ x 2
+```
+
+Negative numeric literals are valid.
+
+```walk
+var: x = -4
+```
+
+Use subtraction from zero to negate a name.
+
+```walk
+var: y = - 0 x
 ```
 
 ---
 
-## 13. Grouping
+## Grouping
 
-Use `()`.
+Use parentheses when an expression must be one operand.
 
 ```walk
 var: x = * (+ a b) (- c d)
 ```
 
-Means:
-
-```text
-(a + b) * (c - d)
-```
-
-No precedence guessing.
+There is no infix precedence.
 
 ---
 
-## 14. Operator Blocks
+## Operator Blocks
 
 Long prefix expressions may use `operator:` blocks.
 
 ```walk
-var: result = /:
-    * (+ a b) (^ (- c d) 2)
-    - e a
-```
-
-Means:
-
-```text
-((a + b) * ((c - d) ^ 2)) / (e - a)
+var: total =
+    +:
+        subtotal
+        tax
+        fee
 ```
 
 ---
 
-## 15. Negative Values
-
-No space means negation.
-
-```walk
-var: a = -4
-var: b = -a
-var: c = -(+ a b)
-```
-
-Space means subtraction.
-
-```walk
-var: d = - a b
-```
-
-Invalid:
-
-```walk
-var: x = - (+ a b) # error
-```
-
-Use:
-
-```walk
-var: x = -(+ a b)
-```
-
----
-
-## 16. Comparisons
-
-Comparisons are prefix.
+## Comparisons And Boolean Logic
 
 ```walk
 > a b
@@ -345,20 +211,6 @@ Comparisons are prefix.
 <= a b
 == a b
 != a b
-```
-
-Example:
-
-```walk
-if: > score 90
-    out: 'passed'
-```
-
----
-
-## 17. Boolean Logic
-
-```walk
 and a b
 or a b
 not a
@@ -368,12 +220,12 @@ Example:
 
 ```walk
 if: and (> age 18) (< age 65)
-    out: 'valid'
+    out: 'working age'
 ```
 
 ---
 
-## 18. If / Else
+## If / Else
 
 ```walk
 if: condition
@@ -382,25 +234,13 @@ else:
     statement
 ```
 
-Example:
-
-```walk
-if: == name 'Walker'
-    out: 'hello'
-else:
-    out: 'unknown'
-```
-
-Condition must be bool.
-
-```walk
-if: 1
-    out: 'bad' # error
-```
+The condition must be bool.
 
 ---
 
-## 19. While
+## Loops
+
+`while:` loops while a bool condition is true.
 
 ```walk
 var: count = 0
@@ -410,27 +250,14 @@ while: < count 3
     count = + count 1
 ```
 
----
-
-## 20. Repeat
+`repeat:` loops an int count.
 
 ```walk
 repeat: 3
     out: 'again'
 ```
 
-Count must be `int >= 0`.
-
-```walk
-repeat: -1
-    out: 'bad' # error
-```
-
----
-
-## 21. For
-
-For iterates arrays.
+`for:` iterates arrays.
 
 ```walk
 var: nums = [1, 2, 3]
@@ -439,105 +266,33 @@ for: n in nums
     out: n
 ```
 
----
-
-## 22. Break / Continue
-
-```walk
-while: true
-    break:
-```
-
-```walk
-for: n in nums
-    if: == n 0
-        continue:
-    out: n
-```
-
-Only valid inside loops.
-
-```walk
-break: # error at top level
-```
+`break:` and `continue:` are valid only inside loops.
 
 ---
 
-## 23. Functions
+## Functions
 
-Define:
-
-```walk
-func: name(param type, param type) return_type
-    return: value
-```
-
-Example:
+Parameters must have types.
 
 ```walk
 func: add(a int, b int) int
     return: + a b
 ```
 
-Call:
+Omitting the return type makes the function `void`.
 
 ```walk
-var: result = add(5, 10)
+func: say(message string)
+    out: message
 ```
 
-Types may be omitted only when inference is unambiguous.
-
-```walk
-func: double(x)
-    return: * x 2
-
-out: double(4)
-```
-
-Ambiguous inference is an error.
+Non-void functions must return on all paths.
 
 ---
 
-## 24. Return
+## Function Values
 
-```walk
-return: value
-```
-
-Example:
-
-```walk
-func: square(x int) int
-    return: * x x
-```
-
-All paths must return for non-null return types.
-
-```walk
-func: bad(x int) int
-    if: > x 0
-        return: x
-    # error: missing return
-```
-
----
-
-## 25. Recursion
-
-Allowed.
-
-```walk
-func: fact(n int) int
-    if: <= n 1
-        return: 1
-    return: * n fact(- n 1)
-```
-
----
-
-## 26. Function Values
-
-Named functions can be passed.
+Named functions can be passed to typed function parameters.
 
 ```walk
 func: inc(x int) int
@@ -549,176 +304,101 @@ func: apply(f func(int) int, x int) int
 out: apply(inc, 4)
 ```
 
-No anonymous functions in v0.
-
-```walk
-apply(func(x) return + x 1, 4) # error
-```
-
-No closures in v0.
+Anonymous functions and closures are not v1.1 syntax.
 
 ---
 
-## 27. Arrays
+## Arrays
 
-Arrays use `[]` and commas.
+Arrays use brackets and commas.
 
 ```walk
 var: nums = [1, 2, 3]
 var: names = ['a', 'b', 'c']
 ```
 
-Arrays are homogeneous.
+Arrays must be homogeneous and non-empty.
 
 ```walk
-var: bad = [1, 'a'] # error
-```
-
----
-
-## 28. Indexing
-
-Indexes are zero-based.
-
-```walk
-var: nums = [10, 20, 30]
-
-out: nums[0]
 nums[1] = 99
+out: nums[0]
 ```
 
-Element type is locked.
-
-```walk
-nums[0] = 'x' # error
-```
+Stable native element types are `int`, `float`, `bool`, and `string`.
 
 ---
 
-## 29. Matrices
+## Null
 
-A matrix is an array of arrays.
-
-```walk
-var: grid = [
-    [1, 3],
-    [2, 4]
-]
-```
-
-Index twice:
-
-```walk
-out: grid[0][1] # 3
-```
-
----
-
-## 30. Null
-
-`null` requires a nullable type.
+Use nullable string annotations when assigning `null`.
 
 ```walk
 var: email string? = null
 email = 'a@b.com'
-```
 
-Non-null types reject null.
-
-```walk
-var: name string = null # error
+if: != email null
+    out: email
 ```
 
 ---
 
-## 31. Imports
+## Imports And Exports
 
-Use `imp:`.
+Use `imp:` to import built-in modules or sibling user modules.
 
 ```walk
 imp: math
-
 out: math.sqrt(9)
 ```
 
-Imports are namespaced.
+User module example:
 
 ```walk
-sqrt(9)      # error unless locally defined
-math.sqrt(9) # ok
-```
-
----
-
-## 32. Exports
-
-Use `exp:`.
-
-```walk
+# calc.walk
 func: square(x int) int
     return: * x x
 
 exp: square
 ```
 
-Then:
-
 ```walk
+# main.walk
 imp: calc
-
 out: calc.square(5)
 ```
 
-In v1, `calc` resolves to a sibling `calc.walk` file. Only names listed with `exp:` are public through the namespace.
+Only names listed with `exp:` are public through the namespace.
 
 ---
 
-## 33. Tests
+## Tests
 
-Testing syntax is v0.1 target.
+Use `test:` and `assert:` with `walk test`.
 
 ```walk
+func: add(a int, b int) int
+    return: + a b
+
 test: 'add works'
     assert: == add(2, 3) 5
 ```
 
+`assert:` requires a bool expression.
+
 ---
 
-## 34. Reserved Words
+## Reserved Words
 
 ```text
-var
-const
-out
-if
-else
-while
-for
-repeat
-break
-continue
-func
-return
-imp
-exp
-true
-false
-null
-and
-or
-not
-in
-test
-assert
+var const out if else while for repeat break continue
+func return imp exp true false null and or not in test assert
 ```
 
 ---
 
-## 35. Complete Example
+## Complete Example
 
 ```walk
-# main.walk
-
 imp: math
 
 func: distance(x1 float, y1 float, x2 float, y2 float) float

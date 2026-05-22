@@ -1,0 +1,9 @@
+var: name string? = null
+
+if: == name null
+    out: 'missing'
+
+name = 'Walker'
+
+if: != name null
+    out: name
