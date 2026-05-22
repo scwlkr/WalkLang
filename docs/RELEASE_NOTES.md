@@ -1,5 +1,56 @@
 # WalkLang Release Notes
 
+## v4.0.0 - Professional Tooling
+
+Date: 2026-05-22
+
+v4.0.0 adds first-party editor and project tooling on top of the stable project/package workflow.
+
+### Added
+
+- `walk lsp` stdio language server.
+- LSP document diagnostics, formatter integration, hover, go-to-definition, find references, completion, and rename.
+- VS Code extension scaffold in `editors/vscode/` with syntax highlighting and LSP startup.
+- Neovim filetype, syntax, formatter, and LSP setup files in `editors/neovim/`.
+- `walk docs` Markdown API documentation generator.
+- `walk debug-map` JSON source symbol map as debugger-adapter groundwork.
+- v4 tooling documentation in `docs/V4.md`.
+- Focused v4 tests for diagnostics, formatting, completion, navigation, rename, docs, and debug maps.
+
+### Changed
+
+- Module metadata now records resolved source paths so editor navigation can jump from imports and calls to module files.
+- README current-surface docs now include the v4 professional tooling commands.
+
+### Breaking Changes
+
+None.
+
+### Removed
+
+None.
+
+### Experimental Or Draft
+
+The v4 editor layer is intentionally local-first. The following remain future roadmap items:
+
+```text
+JetBrains plugin implementation
+step-through debugger adapter
+generated C source maps
+remote package registry integration
+```
+
+### Upgrade
+
+Install or build the v4 `walk` binary, then point editor integrations at it:
+
+```bash
+walk lsp
+walk docs -o docs/api.md
+walk debug-map -o build/debug-map.json
+```
+
 ## v3.0.0 - Package Ecosystem
 
 Date: 2026-05-22

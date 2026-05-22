@@ -28,7 +28,7 @@ func main() {
 
 func run(args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("usage: walk <init|package|build|check|test|fmt|clean|emit-c|repl|version>")
+		return fmt.Errorf("usage: walk <init|package|build|check|test|fmt|clean|emit-c|docs|debug-map|lsp|repl|version>")
 	}
 	switch args[0] {
 	case "init":
@@ -43,6 +43,12 @@ func run(args []string) error {
 		return checkCommand(args[1:])
 	case "fmt":
 		return fmtCommand(args[1:])
+	case "docs":
+		return docsCommand(args[1:])
+	case "debug-map":
+		return debugMapCommand(args[1:])
+	case "lsp":
+		return lspCommand(args[1:])
 	case "test":
 		return testCommand(args[1:])
 	case "repl":
@@ -526,7 +532,7 @@ func (l *moduleLoader) loadImports(program *ast.Program, baseDir string) error {
 		if err := validateModuleSurface(moduleProgram); err != nil {
 			return err
 		}
-		l.modules[imp.Module] = &checker.Module{Name: imp.Module, Program: moduleProgram}
+		l.modules[imp.Module] = &checker.Module{Name: imp.Module, Path: modulePath, Program: moduleProgram}
 		l.loading[imp.Module] = true
 		if err := l.loadImports(moduleProgram, filepath.Dir(modulePath)); err != nil {
 			return err

@@ -952,12 +952,9 @@ generated C remains understandable enough to inspect
 Later tools:
 
 ```text
-language server
-package manager
 debugger
 networking
 project templates
-docs generator
 playground
 online package index
 formatter service

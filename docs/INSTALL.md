@@ -1,6 +1,6 @@
 # WalkLang Official Install Instructions
 
-WalkLang v2.2 supports two install paths:
+WalkLang v4.0.0 supports two install paths:
 
 ```text
 release artifact install
@@ -14,11 +14,11 @@ Use `walk version` after either path. The reported version should match the rele
 Release artifacts are produced by `scripts/release.sh` and named:
 
 ```text
-walk-v2.2.0-darwin-arm64
-walk-v2.2.0-darwin-amd64
-walk-v2.2.0-linux-amd64
-walk-v2.2.0-linux-arm64
-walk-v2.2.0-windows-amd64.exe
+walk-v4.0.0-darwin-arm64
+walk-v4.0.0-darwin-amd64
+walk-v4.0.0-linux-amd64
+walk-v4.0.0-linux-arm64
+walk-v4.0.0-windows-amd64.exe
 SHA256SUMS
 ```
 
@@ -26,12 +26,12 @@ Install on macOS or Linux:
 
 ```bash
 mkdir -p ~/.local/bin
-cp walk-v2.2.0-<os>-<arch> ~/.local/bin/walk
+cp walk-v4.0.0-<os>-<arch> ~/.local/bin/walk
 chmod +x ~/.local/bin/walk
 walk version
 ```
 
-Install on Windows by placing `walk-v2.2.0-windows-amd64.exe` somewhere on `PATH` as `walk.exe`, then run:
+Install on Windows by placing `walk-v4.0.0-windows-amd64.exe` somewhere on `PATH` as `walk.exe`, then run:
 
 ```powershell
 walk version
@@ -54,14 +54,14 @@ sha256sum -c SHA256SUMS
 Source installs require Go and a native C compiler available as `cc`.
 
 ```bash
-scripts/install-local.sh v2-local
+scripts/install-local.sh v4-local
 walk version
 ```
 
 By default the script writes to `~/.local/bin/walk`. Override the install directory with:
 
 ```bash
-WALK_INSTALL_DIR=/path/to/bin scripts/install-local.sh v2-local
+WALK_INSTALL_DIR=/path/to/bin scripts/install-local.sh v4-local
 ```
 
 ## Smoke Test
@@ -91,7 +91,7 @@ true
 Maintainers can produce the release artifact set with:
 
 ```bash
-scripts/release.sh v2.2.0 dist
+scripts/release.sh v4.0.0 dist
 ```
 
 The command writes the platform binaries and `dist/SHA256SUMS`.

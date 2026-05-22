@@ -16,8 +16,8 @@ jobs:
       - run: go test ./...
       - run: go build -o build/walk ./cmd/walk
       - run: WALK_BIN="$PWD/build/walk" scripts/stress-v1.sh
-      - run: scripts/release.sh v2.1.0 dist
+      - run: scripts/release.sh v4.0.0 dist
       - uses: actions/upload-artifact@v7
         with:
-          name: walk-v2.1.0
+          name: walk-v4.0.0
           path: dist/

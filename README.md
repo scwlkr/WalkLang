@@ -2,7 +2,7 @@
 
 WalkLang is a small compiled language implemented in Go with a C backend.
 
-This repo currently contains the v3 package ecosystem, v2.2 data modeling, methods, and simple generics, the v1.5 compatibility release preparation, v1.4 diagnostics and developer experience, the v1.3 standard library foundation, v1.2 project mode, and the v1 language contract from `docs/ROADMAP.md`.
+This repo currently contains the v4 professional tooling surface, v3 package ecosystem, v2.2 data modeling, methods, and simple generics, the v1.5 compatibility release preparation, v1.4 diagnostics and developer experience, the v1.3 standard library foundation, v1.2 project mode, and the v1 language contract from `docs/ROADMAP.md`.
 It proves the pipeline:
 
 ```text
@@ -51,6 +51,11 @@ Supported now:
 - locked package checksums in `walk.lock`
 - local registry publish and resolve through `walk package publish` and `walk package resolve`
 - dotted package imports such as `imp: geometry.core`
+- `walk lsp` language server for editor diagnostics, formatting, hover, definition, references, completion, and rename
+- VS Code extension scaffold with syntax highlighting and LSP startup
+- Neovim filetype, syntax, formatter, and LSP setup files
+- `walk docs` Markdown API documentation generator
+- `walk debug-map` source symbol map for debugger-adapter groundwork
 - examples covered as testable fixtures
 - GitHub Actions CI for tests, stress, and release artifacts
 - release notes, migration guide, deprecation policy, and official install instructions
@@ -74,6 +79,7 @@ Experimental v2 surface:
 Contract docs:
 
 - `docs/SPEC.md`
+- `docs/V4.md`
 - `docs/V3.md`
 - `docs/V2.md`
 - `docs/SYNTAX.md`
@@ -99,7 +105,7 @@ Not stable yet:
 Install the local `walk` command:
 
 ```bash
-scripts/install-local.sh v3-local
+scripts/install-local.sh v4-local
 walk version
 ```
 
@@ -130,6 +136,19 @@ cd shape_app
 walk package resolve ../registry
 walk check
 walk build
+```
+
+Start editor tooling:
+
+```bash
+walk lsp
+```
+
+Generate API docs and a debugger foundation map:
+
+```bash
+walk docs -o docs/api.md src/main.walk
+walk debug-map -o build/debug-map.json src/main.walk
 ```
 
 Emit C:
@@ -226,5 +245,5 @@ scripts/stress-v1.sh
 Build cross-platform CLI release artifacts:
 
 ```bash
-scripts/release.sh v3.0.0
+scripts/release.sh v4.0.0
 ```

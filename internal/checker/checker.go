@@ -30,6 +30,7 @@ type MethodDef struct {
 
 type Module struct {
 	Name           string
+	Path           string
 	Program        *ast.Program
 	Exports        map[string]ast.Type
 	GenericExports map[string]*ast.FuncDecl

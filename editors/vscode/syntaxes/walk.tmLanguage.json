@@ -1,0 +1,96 @@
+{
+  "scopeName": "source.walk",
+  "name": "WalkLang",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#commands"
+    },
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#types"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#operators"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.number-sign.walk",
+          "match": "#.*$"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.single.walk",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.walk",
+              "match": "\\\\[nrt'\\\\]"
+            }
+          ]
+        }
+      ]
+    },
+    "commands": {
+      "patterns": [
+        {
+          "name": "keyword.control.command.walk",
+          "match": "\\b(imp|exp|var|const|out|if|else|while|for|repeat|break|continue|func|return|test|assert|struct):"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.operator.word.walk",
+          "match": "\\b(and|or|not|in)\\b"
+        },
+        {
+          "name": "constant.language.walk",
+          "match": "\\b(true|false|null)\\b"
+        }
+      ]
+    },
+    "types": {
+      "patterns": [
+        {
+          "name": "storage.type.walk",
+          "match": "\\b(int|float|bool|string|null|array|func|void)\\??\\b"
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.walk",
+          "match": "\\b-?\\d+(\\.\\d+)?\\b"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.walk",
+          "match": "(==|!=|>=|<=|[+\\-*/^><:=.,?])"
+        }
+      ]
+    }
+  }
+}

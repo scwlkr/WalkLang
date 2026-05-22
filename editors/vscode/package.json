@@ -1,0 +1,53 @@
+{
+  "name": "walklang",
+  "displayName": "WalkLang",
+  "description": "WalkLang syntax highlighting, formatting, diagnostics, and navigation.",
+  "version": "0.1.0",
+  "publisher": "wlkrlabs",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "activationEvents": [
+    "onLanguage:walk"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "walk",
+        "aliases": [
+          "WalkLang",
+          "walk"
+        ],
+        "extensions": [
+          ".walk"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "walk",
+        "scopeName": "source.walk",
+        "path": "./syntaxes/walk.tmLanguage.json"
+      }
+    ],
+    "configuration": {
+      "title": "WalkLang",
+      "properties": {
+        "walklang.serverPath": {
+          "type": "string",
+          "default": "walk",
+          "description": "Path to the walk binary used to start walk lsp."
+        }
+      }
+    }
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  }
+}
