@@ -301,6 +301,17 @@ imp: math_extra
 out: math_extra.cube(3)
 ```
 
+v1 done in this repo means:
+
+```text
+examples/v1.walk builds and runs through a sibling module
+walk check supports warning levels
+formatter rules normalize spacing and indentation
+release builds accept native compiler flags
+scripts/release.sh creates cross-platform CLI artifacts
+docs describe the stable v1 surface
+```
+
 ---
 
 ## v1 Data Modeling

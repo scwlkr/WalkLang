@@ -650,6 +650,16 @@ exp: add
 
 Unexported names remain private to the file.
 
+In v1, user modules are sibling files. `imp: calc` loads `calc.walk`.
+
+Only exported functions are available through the namespace.
+
+```walk
+imp: calc
+
+out: calc.add(1, 2)
+```
+
 ---
 
 ## 27. Errors
@@ -682,8 +692,12 @@ divide by zero
 Warnings do not stop by default.
 
 ```walk
-var: unused = 1 # warning
+var: x = 1
+if: true
+    var: x = 2 # warning: shadows outer name
 ```
+
+Tooling may promote warnings to errors.
 
 ---
 

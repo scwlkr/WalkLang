@@ -270,6 +270,13 @@ imp: calc
 out: calc.square(4)
 ```
 
+v1 module loading is file-local:
+
+```text
+main.walk imp: calc -> calc.walk
+calc.square -> generated C symbol calc__square
+```
+
 ---
 
 ## 9. Standard Library Targets
@@ -369,6 +376,15 @@ v0.1:
 ```text
 test runner
 basic REPL
+```
+
+v1:
+
+```text
+module loader
+warning levels
+release build flags
+cross-platform CLI release script
 ```
 
 Later:

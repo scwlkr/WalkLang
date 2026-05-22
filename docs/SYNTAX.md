@@ -669,6 +669,8 @@ imp: calc
 out: calc.square(5)
 ```
 
+In v1, `calc` resolves to a sibling `calc.walk` file. Only names listed with `exp:` are public through the namespace.
+
 ---
 
 ## 33. Tests

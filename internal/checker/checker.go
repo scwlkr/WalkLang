@@ -12,20 +12,51 @@ type symbol struct {
 	mutable  bool
 }
 
+type Module struct {
+	Name    string
+	Program *ast.Program
+	Exports map[string]ast.Type
+}
+
+type Options struct {
+	Modules map[string]*Module
+}
+
+type Warning struct {
+	Location ast.Location
+	Message  string
+}
+
+func (w Warning) String() string {
+	return fmt.Sprintf("%s:%d:%d: warning: %s", w.Location.Filename, w.Location.Line, w.Location.Column, w.Message)
+}
+
 type Checker struct {
 	scopes        []map[string]symbol
 	imports       map[string]bool
+	modules       map[string]*Module
+	warnings      []Warning
 	currentReturn ast.Type
 	inFunction    bool
 	loopDepth     int
 }
 
 func Check(program *ast.Program) error {
+	_, err := CheckWithOptions(program, Options{})
+	return err
+}
+
+func CheckWithOptions(program *ast.Program, options Options) ([]Warning, error) {
 	c := Checker{
 		scopes:  []map[string]symbol{{}},
 		imports: map[string]bool{},
+		modules: options.Modules,
 	}
-	return c.check(program)
+	if c.modules == nil {
+		c.modules = map[string]*Module{}
+	}
+	err := c.check(program)
+	return c.warnings, err
 }
 
 func (c *Checker) check(program *ast.Program) error {
@@ -58,6 +89,11 @@ func functionType(fn *ast.FuncDecl) ast.Type {
 func (c *Checker) checkStatement(statement ast.Statement) error {
 	switch s := statement.(type) {
 	case *ast.Import:
+		if !IsBuiltinModule(s.Module) {
+			if _, ok := c.modules[s.Module]; !ok {
+				return errorAt(s.Location, "module error: module %s is not available", s.Module)
+			}
+		}
 		c.imports[s.Module] = true
 		return nil
 	case *ast.Export:
@@ -433,6 +469,13 @@ func (c *Checker) checkModuleCall(call *ast.Call) (ast.Type, error) {
 	if !c.imports[module] {
 		return ast.Type{}, errorAt(call.Loc(), "name error: module %s is not imported", module)
 	}
+	if userModule, ok := c.modules[module]; ok {
+		fnType, ok := userModule.Exports[name]
+		if !ok {
+			return ast.Type{}, errorAt(call.Loc(), "name error: module %s does not export %s", module, name)
+		}
+		return c.checkFunctionCall(call, fnType)
+	}
 	switch module + "." + name {
 	case "math.sqrt":
 		if len(call.Args) != 1 {
@@ -507,6 +550,25 @@ func (c *Checker) checkModuleCall(call *ast.Call) (ast.Type, error) {
 	return ast.Type{}, errorAt(call.Loc(), "name error: unknown library function %s", call.Callee)
 }
 
+func (c *Checker) checkFunctionCall(call *ast.Call, fnType ast.Type) (ast.Type, error) {
+	if fnType.Kind != ast.TypeFunction || fnType.Return == nil {
+		return ast.Type{}, errorAt(call.Loc(), "type error: %s is not callable", call.Callee)
+	}
+	if len(call.Args) != len(fnType.Params) {
+		return ast.Type{}, errorAt(call.Loc(), "type error: %s expects %d args, got %d", call.Callee, len(fnType.Params), len(call.Args))
+	}
+	for i, arg := range call.Args {
+		argType, err := c.checkExpression(arg)
+		if err != nil {
+			return ast.Type{}, err
+		}
+		if !assignable(argType, fnType.Params[i]) {
+			return ast.Type{}, errorAt(arg.Loc(), "type error: arg %d to %s is %s, got %s", i+1, call.Callee, fnType.Params[i].String(), argType.String())
+		}
+	}
+	return *fnType.Return, nil
+}
+
 func (c *Checker) checkArrayLiteral(array *ast.ArrayLiteral) (ast.Type, error) {
 	if len(array.Elements) == 0 {
 		return ast.Type{}, errorAt(array.Loc(), "type error: empty arrays need an explicit type")
@@ -560,8 +622,20 @@ func (c *Checker) define(name string, typeName ast.Type, mutable bool, location 
 	if c.currentScopeHas(name) {
 		return errorAt(location, "name error: %s is already defined", name)
 	}
+	if c.outerScopeHas(name) {
+		c.warnings = append(c.warnings, Warning{Location: location, Message: fmt.Sprintf("%s shadows outer name", name)})
+	}
 	c.scopes[len(c.scopes)-1][name] = symbol{typeName: typeName, mutable: mutable}
 	return nil
+}
+
+func (c *Checker) outerScopeHas(name string) bool {
+	for i := len(c.scopes) - 2; i >= 0; i-- {
+		if _, ok := c.scopes[i][name]; ok {
+			return true
+		}
+	}
+	return false
 }
 
 func (c *Checker) resolve(name string) (symbol, bool) {
@@ -666,4 +740,38 @@ func rootName(expression ast.Expression) (string, bool) {
 
 func errorAt(location ast.Location, format string, args ...any) error {
 	return fmt.Errorf("%s:%d:%d: %s", location.Filename, location.Line, location.Column, fmt.Sprintf(format, args...))
+}
+
+func IsBuiltinModule(name string) bool {
+	switch name {
+	case "math", "string", "array", "time", "random":
+		return true
+	default:
+		return false
+	}
+}
+
+func ExportedFunctions(program *ast.Program) (map[string]ast.Type, error) {
+	functions := map[string]ast.Type{}
+	for _, statement := range program.Statements {
+		fn, ok := statement.(*ast.FuncDecl)
+		if !ok {
+			continue
+		}
+		functions[fn.Name] = functionType(fn)
+	}
+
+	exports := map[string]ast.Type{}
+	for _, statement := range program.Statements {
+		exp, ok := statement.(*ast.Export)
+		if !ok {
+			continue
+		}
+		fnType, ok := functions[exp.Name]
+		if !ok {
+			return nil, errorAt(exp.Location, "module error: %s is not an exported function", exp.Name)
+		}
+		exports[exp.Name] = fnType
+	}
+	return exports, nil
 }

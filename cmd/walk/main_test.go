@@ -1,0 +1,143 @@
+package main
+
+import (
+	"os"
+	"os/exec"
+	"path/filepath"
+	"slices"
+	"strings"
+	"testing"
+)
+
+func TestV1UserModuleBuildsAndRuns(t *testing.T) {
+	if _, err := exec.LookPath("cc"); err != nil {
+		t.Skip("cc is not available")
+	}
+
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "math_extra.walk"), strings.Join([]string{
+		"func: cube(x int) int",
+		"    return: * x x x",
+		"",
+		"func: hidden(x int) int",
+		"    return: + x 1",
+		"",
+		"exp: cube",
+		"",
+	}, "\n"))
+	mainPath := filepath.Join(dir, "main.walk")
+	writeFile(t, mainPath, strings.Join([]string{
+		"imp: math_extra",
+		"out: math_extra.cube(3)",
+		"",
+	}, "\n"))
+
+	cCode, warnings, err := compileFileToCWithOptions(mainPath, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(warnings) != 0 {
+		t.Fatalf("unexpected warnings: %#v", warnings)
+	}
+
+	cPath := filepath.Join(dir, "main.c")
+	exePath := filepath.Join(dir, "main")
+	if err := os.WriteFile(cPath, []byte(cCode), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if output, err := exec.Command("cc", cPath, "-o", exePath, "-lm").CombinedOutput(); err != nil {
+		t.Fatalf("cc failed: %v\n%s\n%s", err, string(output), cCode)
+	}
+	output, err := exec.Command(exePath).CombinedOutput()
+	if err != nil {
+		t.Fatalf("program failed: %v\n%s", err, string(output))
+	}
+	if got, want := string(output), "27\n"; got != want {
+		t.Fatalf("want %q, got %q\nC:\n%s", want, got, cCode)
+	}
+	if !strings.Contains(cCode, "math_extra__cube") {
+		t.Fatalf("module function was not namespaced in generated C:\n%s", cCode)
+	}
+}
+
+func TestV1UserModuleExportsAreEnforced(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "math_extra.walk"), strings.Join([]string{
+		"func: cube(x int) int",
+		"    return: * x x x",
+		"",
+		"exp: cube",
+		"",
+	}, "\n"))
+	mainPath := filepath.Join(dir, "main.walk")
+	writeFile(t, mainPath, "imp: math_extra\nout: math_extra.hidden(3)\n")
+
+	_, _, err := compileFileToCWithOptions(mainPath, false)
+	if err == nil {
+		t.Fatal("expected missing export error")
+	}
+	if got, want := err.Error(), "main.walk:2:6: name error: module math_extra does not export hidden"; !strings.HasSuffix(got, want) {
+		t.Fatalf("want suffix %q, got %q", want, got)
+	}
+}
+
+func TestV1UserModuleRejectsTopLevelRuntimeStatements(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "bad_module.walk"), strings.Join([]string{
+		"var: x = 1",
+		"",
+	}, "\n"))
+	mainPath := filepath.Join(dir, "main.walk")
+	writeFile(t, mainPath, "imp: bad_module\n")
+
+	_, _, err := compileFileToCWithOptions(mainPath, false)
+	if err == nil {
+		t.Fatal("expected module surface error")
+	}
+	if got, want := err.Error(), "bad_module.walk:1:1: module error: modules may contain only imp, func, and exp at top level"; !strings.HasSuffix(got, want) {
+		t.Fatalf("want suffix %q, got %q", want, got)
+	}
+}
+
+func TestV1ReleaseBuildArgs(t *testing.T) {
+	args := nativeBuildArgs("main.c", "main", nativeBuildOptions{
+		release: true,
+		cFlags:  []string{"-DWALK_TEST"},
+	})
+
+	for _, want := range []string{"main.c", "-o", "main", "-O2", "-DNDEBUG", "-DWALK_TEST", "-lm"} {
+		if !slices.Contains(args, want) {
+			t.Fatalf("build args missing %q: %#v", want, args)
+		}
+	}
+}
+
+func TestV1CheckWarningsCanBeErrors(t *testing.T) {
+	dir := t.TempDir()
+	sourcePath := filepath.Join(dir, "main.walk")
+	writeFile(t, sourcePath, strings.Join([]string{
+		"var: x = 1",
+		"if: true",
+		"    var: x = 2",
+		"    out: x",
+		"",
+	}, "\n"))
+
+	if err := checkCommand([]string{"--warnings=off", sourcePath}); err != nil {
+		t.Fatalf("warnings=off should pass: %v", err)
+	}
+	err := checkCommand([]string{"--warnings=error", sourcePath})
+	if err == nil {
+		t.Fatal("expected warnings=error to fail")
+	}
+	if got, want := err.Error(), "warnings-as-errors: 1 warning(s)"; got != want {
+		t.Fatalf("want %q, got %q", want, got)
+	}
+}
+
+func writeFile(t *testing.T, path string, contents string) {
+	t.Helper()
+	if err := os.WriteFile(path, []byte(contents), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}

@@ -2,24 +2,46 @@ package emitter
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"walklang/internal/ast"
 )
 
 func EmitC(program *ast.Program) (string, error) {
-	e := &cEmitter{}
-	return e.emit(program, false)
+	return EmitCWithModules(program, nil)
 }
 
 func EmitTestC(program *ast.Program) (string, error) {
-	e := &cEmitter{}
+	return EmitTestCWithModules(program, nil)
+}
+
+func EmitCWithModules(program *ast.Program, modules map[string]*ast.Program) (string, error) {
+	e := newCEmitter(modules)
+	return e.emit(program, false)
+}
+
+func EmitTestCWithModules(program *ast.Program, modules map[string]*ast.Program) (string, error) {
+	e := newCEmitter(modules)
 	return e.emit(program, true)
 }
 
 type cEmitter struct {
-	tempID int
-	indent int
+	tempID              int
+	indent              int
+	currentModule       string
+	modules             map[string]*ast.Program
+	moduleFunctionNames map[string]map[string]bool
+}
+
+func newCEmitter(modules map[string]*ast.Program) *cEmitter {
+	if modules == nil {
+		modules = map[string]*ast.Program{}
+	}
+	return &cEmitter{
+		modules:             modules,
+		moduleFunctionNames: collectModuleFunctionNames(modules),
+	}
 }
 
 func (e *cEmitter) emit(program *ast.Program, testsOnly bool) (string, error) {
@@ -40,6 +62,22 @@ func (e *cEmitter) emit(program *ast.Program, testsOnly bool) (string, error) {
 	out.WriteString("    return min + (rand() % (max - min + 1));\n")
 	out.WriteString("}\n\n")
 
+	for _, name := range sortedModuleNames(e.modules) {
+		e.currentModule = name
+		for _, statement := range e.modules[name].Statements {
+			fn, ok := statement.(*ast.FuncDecl)
+			if !ok {
+				continue
+			}
+			prototype, err := e.emitFunctionSignature(fn, true)
+			if err != nil {
+				return "", err
+			}
+			out.WriteString(prototype)
+			out.WriteString(";\n")
+		}
+	}
+	e.currentModule = ""
 	for _, statement := range program.Statements {
 		fn, ok := statement.(*ast.FuncDecl)
 		if !ok {
@@ -52,9 +90,25 @@ func (e *cEmitter) emit(program *ast.Program, testsOnly bool) (string, error) {
 		out.WriteString(prototype)
 		out.WriteString(";\n")
 	}
-	if hasFunctions(program) {
+	if hasFunctions(program) || hasModuleFunctions(e.modules) {
 		out.WriteString("\n")
 	}
+	for _, name := range sortedModuleNames(e.modules) {
+		e.currentModule = name
+		for _, statement := range e.modules[name].Statements {
+			fn, ok := statement.(*ast.FuncDecl)
+			if !ok {
+				continue
+			}
+			rendered, err := e.emitFunction(fn)
+			if err != nil {
+				return "", err
+			}
+			out.WriteString(rendered)
+			out.WriteString("\n")
+		}
+	}
+	e.currentModule = ""
 	for _, statement := range program.Statements {
 		fn, ok := statement.(*ast.FuncDecl)
 		if !ok {
@@ -139,6 +193,37 @@ func hasFunctions(program *ast.Program) bool {
 	return false
 }
 
+func hasModuleFunctions(modules map[string]*ast.Program) bool {
+	for _, program := range modules {
+		if hasFunctions(program) {
+			return true
+		}
+	}
+	return false
+}
+
+func sortedModuleNames(modules map[string]*ast.Program) []string {
+	names := make([]string, 0, len(modules))
+	for name := range modules {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	return names
+}
+
+func collectModuleFunctionNames(modules map[string]*ast.Program) map[string]map[string]bool {
+	result := map[string]map[string]bool{}
+	for module, program := range modules {
+		result[module] = map[string]bool{}
+		for _, statement := range program.Statements {
+			if fn, ok := statement.(*ast.FuncDecl); ok {
+				result[module][fn.Name] = true
+			}
+		}
+	}
+	return result
+}
+
 func (e *cEmitter) emitFunction(fn *ast.FuncDecl) (string, error) {
 	signature, err := e.emitFunctionSignature(fn, false)
 	if err != nil {
@@ -180,7 +265,7 @@ func (e *cEmitter) emitFunctionSignature(fn *ast.FuncDecl, prototype bool) (stri
 	if len(params) == 0 {
 		params = append(params, "void")
 	}
-	return fmt.Sprintf("%s %s(%s)", ret, fn.Name, strings.Join(params, ", ")), nil
+	return fmt.Sprintf("%s %s(%s)", ret, e.cFunctionName(fn.Name), strings.Join(params, ", ")), nil
 }
 
 func (e *cEmitter) emitBlock(statements []ast.Statement) ([]string, error) {
@@ -430,6 +515,9 @@ func (e *cEmitter) emitExpression(expression ast.Expression) (string, error) {
 	case *ast.Literal:
 		return emitLiteral(ex)
 	case *ast.Name:
+		if e.currentModule != "" && e.moduleFunctionNames[e.currentModule][ex.Identifier] {
+			return mangleModuleName(e.currentModule, ex.Identifier), nil
+		}
 		return ex.Identifier, nil
 	case *ast.Prefix:
 		return e.emitPrefix(ex)
@@ -531,8 +619,25 @@ func (e *cEmitter) emitCall(call *ast.Call) (string, error) {
 	case "random.int":
 		return fmt.Sprintf("__walk_random_int(%s)", strings.Join(args, ", ")), nil
 	default:
+		if strings.Contains(call.Callee, ".") {
+			return fmt.Sprintf("%s(%s)", strings.ReplaceAll(call.Callee, ".", "__"), strings.Join(args, ", ")), nil
+		}
+		if e.currentModule != "" && e.moduleFunctionNames[e.currentModule][call.Callee] {
+			return fmt.Sprintf("%s(%s)", mangleModuleName(e.currentModule, call.Callee), strings.Join(args, ", ")), nil
+		}
 		return fmt.Sprintf("%s(%s)", call.Callee, strings.Join(args, ", ")), nil
 	}
+}
+
+func (e *cEmitter) cFunctionName(name string) string {
+	if e.currentModule == "" {
+		return name
+	}
+	return mangleModuleName(e.currentModule, name)
+}
+
+func mangleModuleName(module string, name string) string {
+	return strings.ReplaceAll(module, ".", "__") + "__" + name
 }
 
 func cReturnType(typeName ast.Type) (string, error) {

@@ -12,8 +12,16 @@ func Format(source string, filename string) (string, error) {
 		return "", err
 	}
 	var out strings.Builder
+	indentStack := []int{0}
 	for _, line := range lines {
-		out.WriteString(strings.Repeat(" ", line.Indent))
+		for len(indentStack) > 1 && line.Indent < indentStack[len(indentStack)-1] {
+			indentStack = indentStack[:len(indentStack)-1]
+		}
+		if line.Indent > indentStack[len(indentStack)-1] {
+			indentStack = append(indentStack, line.Indent)
+		}
+		depth := len(indentStack) - 1
+		out.WriteString(strings.Repeat(" ", depth*4))
 		out.WriteString(formatTokens(line.Tokens))
 		out.WriteByte('\n')
 	}
@@ -44,6 +52,9 @@ func escapeString(value string) string {
 
 func needsSpace(prev string, current string) bool {
 	if current == ")" || current == "]" || current == "," || current == ":" || current == "." {
+		return false
+	}
+	if current == "(" {
 		return false
 	}
 	if prev == "(" || prev == "[" || prev == "." {

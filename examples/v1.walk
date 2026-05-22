@@ -1,0 +1,14 @@
+imp: math_extra
+imp: math
+imp: string
+imp: array
+imp: time
+
+var: nums = [1, 2, 3]
+
+out: math_extra.cube(3)
+out: math.pow(2, 3)
+out: string.len('walk')
+out: array.len(nums)
+out: > time.now() 0
+
