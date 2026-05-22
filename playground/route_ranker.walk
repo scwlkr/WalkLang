@@ -1,3 +1,5 @@
+# example project - route ranker
+
 struct: Route
     name string
     distance int
@@ -12,7 +14,7 @@ func: route_score(route Route) int
     var: comfort = + 25 shade_points coffee_points
     var: penalty = + distance_penalty difficulty_penalty
     return: - comfort penalty
-var: routes = [Route('River Loop', 4, 9, 2, 3), Route('Market Mile', 2, 3, 5, 4), Route('Hilltop Cut', 3, 6, 1, 8), Route('Library Lane', 1, 7, 3, 2)]
+var: routes = [Route('River Loop', 4, 9, 2, 3), Route('Market Mile', 2, 3, 5, 4), Route('Hilltop Cut', 3, 6, 1, 8), Route('Library Lane', 1, 7, 3, 10)]
 var: best = routes[0]
 var: best_score = route_score(best)
 for: route in routes
@@ -24,3 +26,4 @@ out: 'Best route:'
 out: best.name
 out: 'Score:'
 out: best_score
+
