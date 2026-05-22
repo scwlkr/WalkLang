@@ -100,6 +100,65 @@ func (e *cEmitter) emit(program *ast.Program, testsOnly bool) (string, error) {
 	out.WriteString("static WALK_UNUSED WalkInt __walk_string_len(WalkString value) {\n")
 	out.WriteString("    return value == NULL ? 0 : (WalkInt)strlen(value);\n")
 	out.WriteString("}\n\n")
+	out.WriteString("static WALK_UNUSED WalkString __walk_input(WalkString prompt) {\n")
+	out.WriteString("    if (prompt != NULL) {\n")
+	out.WriteString("        fputs(prompt, stdout);\n")
+	out.WriteString("        fflush(stdout);\n")
+	out.WriteString("    }\n")
+	out.WriteString("    size_t cap = 64;\n")
+	out.WriteString("    size_t len = 0;\n")
+	out.WriteString("    char *buffer = (char *)malloc(cap);\n")
+	out.WriteString("    if (buffer == NULL) {\n")
+	out.WriteString("        fprintf(stderr, \"walk runtime error: out of memory\\n\");\n")
+	out.WriteString("        exit(1);\n")
+	out.WriteString("    }\n")
+	out.WriteString("    for (;;) {\n")
+	out.WriteString("        int ch = fgetc(stdin);\n")
+	out.WriteString("        if (ch == EOF) {\n")
+	out.WriteString("            if (ferror(stdin)) {\n")
+	out.WriteString("                free(buffer);\n")
+	out.WriteString("                fprintf(stderr, \"walk runtime error: stdin read failed\\n\");\n")
+	out.WriteString("                exit(1);\n")
+	out.WriteString("            }\n")
+	out.WriteString("            if (len == 0) {\n")
+	out.WriteString("                free(buffer);\n")
+	out.WriteString("                fprintf(stderr, \"walk runtime error: input reached EOF\\n\");\n")
+	out.WriteString("                exit(1);\n")
+	out.WriteString("            }\n")
+	out.WriteString("            break;\n")
+	out.WriteString("        }\n")
+	out.WriteString("        if (ch == '\\n') { break; }\n")
+	out.WriteString("        if (ch == '\\r') {\n")
+	out.WriteString("            int next = fgetc(stdin);\n")
+	out.WriteString("            if (next == '\\n') { break; }\n")
+	out.WriteString("            if (next == EOF && ferror(stdin)) {\n")
+	out.WriteString("                free(buffer);\n")
+	out.WriteString("                fprintf(stderr, \"walk runtime error: stdin read failed\\n\");\n")
+	out.WriteString("                exit(1);\n")
+	out.WriteString("            }\n")
+	out.WriteString("            if (next != EOF) { ungetc(next, stdin); }\n")
+	out.WriteString("        }\n")
+	out.WriteString("        if (len + 1 >= cap) {\n")
+	out.WriteString("            if (cap > ((size_t)-1) / 2) {\n")
+	out.WriteString("                free(buffer);\n")
+	out.WriteString("                fprintf(stderr, \"walk runtime error: out of memory\\n\");\n")
+	out.WriteString("                exit(1);\n")
+	out.WriteString("            }\n")
+	out.WriteString("            size_t next_cap = cap * 2;\n")
+	out.WriteString("            char *next_buffer = (char *)realloc(buffer, next_cap);\n")
+	out.WriteString("            if (next_buffer == NULL) {\n")
+	out.WriteString("                free(buffer);\n")
+	out.WriteString("                fprintf(stderr, \"walk runtime error: out of memory\\n\");\n")
+	out.WriteString("                exit(1);\n")
+	out.WriteString("            }\n")
+	out.WriteString("            buffer = next_buffer;\n")
+	out.WriteString("            cap = next_cap;\n")
+	out.WriteString("        }\n")
+	out.WriteString("        buffer[len++] = (char)ch;\n")
+	out.WriteString("    }\n")
+	out.WriteString("    buffer[len] = '\\0';\n")
+	out.WriteString("    return buffer;\n")
+	out.WriteString("}\n\n")
 	out.WriteString("static WALK_UNUSED void __walk_print_int(WalkInt value) { printf(\"%lld\\n\", (long long)value); }\n")
 	out.WriteString("static WALK_UNUSED void __walk_print_float(WalkFloat value) { printf(\"%g\\n\", (double)value); }\n")
 	out.WriteString("static WALK_UNUSED void __walk_print_bool(WalkBool value) { printf(\"%s\\n\", value ? \"true\" : \"false\"); }\n")
@@ -534,6 +593,10 @@ func collectGenericCalls(statements []ast.Statement, skipGenericFunctions bool) 
 			for _, arg := range e.Args {
 				visitExpression(arg)
 			}
+		case *ast.Input:
+			if e.Prompt != nil {
+				visitExpression(e.Prompt)
+			}
 		case *ast.ArrayLiteral:
 			for _, element := range e.Elements {
 				visitExpression(element)
@@ -668,6 +731,12 @@ func cloneExpression(expression ast.Expression, bindings map[string]ast.Type) as
 			receiver = cloneExpression(e.Receiver, bindings)
 		}
 		return &ast.Call{ExprBase: base, Callee: e.Callee, Receiver: receiver, Method: e.Method, Args: args, TypeArgs: typeArgs}
+	case *ast.Input:
+		var prompt ast.Expression
+		if e.Prompt != nil {
+			prompt = cloneExpression(e.Prompt, bindings)
+		}
+		return &ast.Input{ExprBase: base, Prompt: prompt}
 	case *ast.ArrayLiteral:
 		elements := make([]ast.Expression, 0, len(e.Elements))
 		for _, element := range e.Elements {
@@ -1130,6 +1199,16 @@ func (e *cEmitter) emitExpression(expression ast.Expression) (string, error) {
 		return e.emitPrefix(ex)
 	case *ast.Call:
 		return e.emitCall(ex)
+	case *ast.Input:
+		prompt := "NULL"
+		if ex.Prompt != nil {
+			rendered, err := e.emitExpression(ex.Prompt)
+			if err != nil {
+				return "", err
+			}
+			prompt = rendered
+		}
+		return fmt.Sprintf("__walk_input(%s)", prompt), nil
 	case *ast.Index:
 		target, err := e.emitExpression(ex.Target)
 		if err != nil {

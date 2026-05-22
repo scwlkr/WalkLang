@@ -12,6 +12,7 @@ v1.1: stabilize the language contract
 v1.2: make projects and releases real
 v1.3: grow the standard library carefully
 v1.6: local function type inference
+v1.7: required-line stdin input
 v2: data modeling
 v2.1: methods and stronger composition
 v3: ecosystem
@@ -678,6 +679,42 @@ compatibility tests continue to pass
 
 ---
 
+## v1.7 Required-Line Input
+
+Make basic stdin input a small, stable language primitive that pairs cleanly with `out:`.
+
+Add:
+
+```text
+core in: expression
+optional string prompt expression
+stdin-only required-line behavior
+stdout prompt flush before reading
+empty line returns ''
+CRLF and LF line ending stripping
+final unterminated input returns as a line
+immediate EOF and stdin errors runtime-stop clearly
+```
+
+Example:
+
+```walk
+var: name = in: 'Name? '
+out: name
+```
+
+v1.7 done when:
+
+```text
+in: parses anywhere expressions are valid
+prompt expressions type-check as string
+generated C reads stdin without a fixed line limit
+compatibility tests cover prompt, pipes, empty lines, CRLF, EOF, and final unterminated input
+SPEC, SYNTAX, migration, release notes, and status docs describe the rule
+```
+
+---
+
 ## v2 Data Modeling
 
 Add structs after the v1 language contract is solid.
@@ -1257,6 +1294,9 @@ v1.5
 
 v1.6
   local function type inference
+
+v1.7
+  required-line stdin input
 
 v2
   structs + data modeling

@@ -19,13 +19,13 @@
 <h2>Language</h2>
 <a href="SYNTAX.html">v1 Syntax Guide</a>
 <a href="SPEC.html">v1 Specification</a>
-<a href="STDLIB.html">v1.6 Standard Library</a>
+<a href="STDLIB.html">v1.7 Standard Library</a>
 <a href="ERRORS.html">v1 Diagnostics</a>
-<a href="COMPATIBILITY.html">v1.6 Compatibility</a>
+<a href="COMPATIBILITY.html">v1.7 Compatibility</a>
 <a href="MIGRATING.html">Migration Guide</a>
 <a href="DEPRECATION.html">Deprecation Policy</a>
 <h2>Versions</h2>
-<a href="V1.html">v1 / v1.6</a>
+<a href="V1.html">v1 / v1.7</a>
 <a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
 <a href="V3.html">v3 Package Ecosystem</a>
 <h2>Tools</h2>
@@ -52,6 +52,28 @@
 <h1 id="walklang-release-notes">WalkLang Release Notes</h1>
 <h2 id="unreleased">Unreleased</h2>
 <p>No unreleased changes.</p>
+<h2 id="v5-3-0-stable-required-line-input">v5.3.0 - Stable Required-Line Input</h2>
+<p>Date: 2026-05-22</p>
+<p>v5.3.0 adds the v1.7 stable <code>in:</code> expression for required-line stdin input.</p>
+<h3 id="added">Added</h3>
+<ul>
+<li><code>in:</code> as a core expression that reads one required line from stdin and returns <code>string</code>.</li>
+<li>Optional <code>in:</code> prompts, such as <code>var: name = in: &#39;Name? &#39;</code>, written to stdout without a newline and flushed before reading.</li>
+<li>Runtime input handling for empty lines, CRLF line endings, final unterminated lines, immediate EOF, stdin read failure, and allocation failure.</li>
+<li>Compatibility coverage for the stable v1 input surface.</li>
+</ul>
+<h3 id="changed">Changed</h3>
+<ul>
+<li>README and docs front-door wording now separate the stable <code>v1.7</code> language contract from the current <code>v5.3.0</code> compiler/tooling/docs release.</li>
+<li>The stable syntax/spec docs now describe <code>in:</code> as a compatible v1.x improvement.</li>
+</ul>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<p>None.</p>
+<h3 id="upgrade">Upgrade</h3>
+<p>Regenerate docs and release artifacts with:</p>
+<pre><code class="language-bash">scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.3.0 dist</code></pre>
 <h2 id="v5-2-0-local-function-type-inference">v5.2.0 - Local Function Type Inference</h2>
 <p>Date: 2026-05-22</p>
 <p>v5.2.0 adds the v1.6 local function type inference rule: obvious helper functions can omit parameter and return types, while ambiguous functions ask for annotations instead of guessing from call sites.</p>

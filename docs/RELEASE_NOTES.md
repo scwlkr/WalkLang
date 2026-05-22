@@ -4,6 +4,38 @@
 
 No unreleased changes.
 
+## v5.3.0 - Stable Required-Line Input
+
+Date: 2026-05-22
+
+v5.3.0 adds the v1.7 stable `in:` expression for required-line stdin input.
+
+### Added
+
+- `in:` as a core expression that reads one required line from stdin and returns `string`.
+- Optional `in:` prompts, such as `var: name = in: 'Name? '`, written to stdout without a newline and flushed before reading.
+- Runtime input handling for empty lines, CRLF line endings, final unterminated lines, immediate EOF, stdin read failure, and allocation failure.
+- Compatibility coverage for the stable v1 input surface.
+
+### Changed
+
+- README and docs front-door wording now separate the stable `v1.7` language contract from the current `v5.3.0` compiler/tooling/docs release.
+- The stable syntax/spec docs now describe `in:` as a compatible v1.x improvement.
+
+### Breaking Changes
+
+None.
+
+### Upgrade
+
+Regenerate docs and release artifacts with:
+
+```bash
+scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.3.0 dist
+```
+
 ## v5.2.0 - Local Function Type Inference
 
 Date: 2026-05-22

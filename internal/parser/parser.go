@@ -725,6 +725,19 @@ func (c *cursor) parseAtom(stop map[string]bool) (ast.Expression, error) {
 			return &ast.Literal{ExprBase: ast.ExprBase{Location: token.Location}, Kind: ast.LiteralBool, Value: token.Value}, nil
 		case "null":
 			return &ast.Literal{ExprBase: ast.ExprBase{Location: token.Location}, Kind: ast.LiteralNull, Value: "null"}, nil
+		case "in":
+			if err := c.expectSymbol(":"); err != nil {
+				return nil, err
+			}
+			var prompt ast.Expression
+			if c.peek() != nil && (stop == nil || !stop[c.peek().Value]) {
+				var err error
+				prompt, err = c.parseExpression(stop)
+				if err != nil {
+					return nil, err
+				}
+			}
+			return &ast.Input{ExprBase: ast.ExprBase{Location: token.Location}, Prompt: prompt}, nil
 		}
 		if reservedWords[token.Value] {
 			return nil, errorAt(token.Location, "syntax error: reserved word %q cannot be used as expression name", token.Value)

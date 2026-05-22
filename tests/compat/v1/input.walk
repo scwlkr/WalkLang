@@ -1,0 +1,8 @@
+var: prompt = 'Name? '
+var: name = in: prompt
+var: blank = in:
+var: crlf = in:
+out: name
+out: blank
+out: crlf
+out: in:

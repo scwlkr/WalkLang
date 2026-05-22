@@ -1,6 +1,6 @@
 # WalkLang v1 Specification
 
-This document is the stable WalkLang language contract for the v1 line. v1.6 keeps the v1.5 compatibility policy and adds local function type inference for obvious function bodies.
+This document is the stable WalkLang language contract for the v1 line. v1.7 keeps the v1.6 compatibility policy and adds required-line stdin input through the core `in:` expression.
 
 Core rule:
 
@@ -216,13 +216,61 @@ Arrays, functions, and void values cannot be output.
 
 ---
 
-## 11. Expressions
+## 11. Input
+
+`in:` reads one required line from stdin and returns a `string`.
+
+```walk
+var: name = in:
+```
+
+`in:` may take an optional prompt expression. The prompt must be `string`.
+
+```walk
+var: prompt = 'Name? '
+var: name = in: prompt
+```
+
+Prompt behavior:
+
+```text
+write prompt to stdout
+add no newline
+flush stdout before reading
+```
+
+Input behavior:
+
+```text
+reads from stdin only
+consumes exactly one line
+strips the final \n or \r\n line ending
+preserves all other whitespace
+returns '' for an empty line
+has no language-level line length limit
+returns final unterminated input as a line
+runtime-stops if EOF happens before any text is read
+runtime-stops on stdin read failure or allocation failure
+```
+
+`in:` is an expression and may appear anywhere an expression is valid.
+
+```walk
+out: in: 'Say something: '
+```
+
+Typed input is not part of `in:`. Read text first, then parse it explicitly when a parse API exists.
+
+---
+
+## 12. Expressions
 
 Stable expressions:
 
 ```text
 literals
 names
+in:
 prefix operators
 grouped expressions
 function calls
@@ -240,7 +288,7 @@ var: x = * (+ 1 2) (- 9 4)
 
 ---
 
-## 12. Operators
+## 13. Operators
 
 Numeric operators:
 
@@ -280,7 +328,7 @@ var: y = - 0 x
 
 ---
 
-## 13. Arrays
+## 14. Arrays
 
 Array literals are homogeneous and non-empty.
 
@@ -309,7 +357,7 @@ Empty arrays and nested array emission are not stable v1.1 native features.
 
 ---
 
-## 14. Functions
+## 15. Functions
 
 Function declarations may use typed parameters.
 
@@ -345,7 +393,7 @@ Non-void functions must return on all paths.
 
 ---
 
-## 15. Function Values
+## 16. Function Values
 
 Named functions may be passed as values.
 
@@ -363,7 +411,7 @@ Anonymous functions and closures are not v1.1 syntax.
 
 ---
 
-## 16. Control Flow
+## 17. Control Flow
 
 `if:` conditions must be `bool`.
 
@@ -399,7 +447,7 @@ for: n in nums
 
 ---
 
-## 17. Modules
+## 18. Modules
 
 Built-in modules:
 
@@ -430,7 +478,7 @@ User module rules:
 
 ---
 
-## 18. Tests
+## 19. Tests
 
 `test:` defines a test block for `walk test`.
 
@@ -454,7 +502,7 @@ Normal `walk build` ignores `test:` blocks.
 
 ---
 
-## 19. Formatter
+## 20. Formatter
 
 `walk fmt` emits stable spacing and indentation:
 
@@ -472,7 +520,7 @@ Formatter output uses 4 spaces for indentation.
 
 ---
 
-## 20. Diagnostics
+## 21. Diagnostics
 
 Compiler diagnostics use this shape:
 
@@ -504,7 +552,7 @@ Warnings do not fail by default. `--warnings=error` promotes warnings to errors.
 
 ---
 
-## 21. Non-Goals
+## 22. Non-Goals
 
 These are not stable v1 features:
 
@@ -530,7 +578,7 @@ nested arrays in native output
 
 ---
 
-## 22. Minimal Valid Program
+## 23. Minimal Valid Program
 
 ```walk
 out: 'hello'
@@ -538,7 +586,7 @@ out: 'hello'
 
 ---
 
-## 23. Representative v1.1 Program
+## 24. Representative v1.1 Program
 
 ```walk
 imp: math

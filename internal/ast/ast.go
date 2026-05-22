@@ -334,6 +334,13 @@ type Call struct {
 
 func (e *Call) expressionNode() {}
 
+type Input struct {
+	ExprBase
+	Prompt Expression
+}
+
+func (e *Input) expressionNode() {}
+
 type ArrayLiteral struct {
 	ExprBase
 	Elements []Expression

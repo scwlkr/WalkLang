@@ -19,13 +19,13 @@
 <h2>Language</h2>
 <a href="SYNTAX.html" aria-current="page">v1 Syntax Guide</a>
 <a href="SPEC.html">v1 Specification</a>
-<a href="STDLIB.html">v1.6 Standard Library</a>
+<a href="STDLIB.html">v1.7 Standard Library</a>
 <a href="ERRORS.html">v1 Diagnostics</a>
-<a href="COMPATIBILITY.html">v1.6 Compatibility</a>
+<a href="COMPATIBILITY.html">v1.7 Compatibility</a>
 <a href="MIGRATING.html">Migration Guide</a>
 <a href="DEPRECATION.html">Deprecation Policy</a>
 <h2>Versions</h2>
-<a href="V1.html">v1 / v1.6</a>
+<a href="V1.html">v1 / v1.7</a>
 <a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
 <a href="V3.html">v3 Package Ecosystem</a>
 <h2>Tools</h2>
@@ -115,6 +115,17 @@ var: name string? = null</code></pre>
 out: + 1 2
 out: true</code></pre>
 <p>Arrays and function values cannot be printed directly.</p>
+<p>---</p>
+<h2 id="input">Input</h2>
+<p>Use <code>in:</code> to read one required line from stdin.</p>
+<pre><code class="language-walk">var: name = in:</code></pre>
+<p><code>in:</code> may include a prompt. The prompt is a <code>string</code> expression written to stdout without a newline, then stdout is flushed before reading.</p>
+<pre><code class="language-walk">var: prompt = &#39;Name? &#39;
+var: name = in: prompt</code></pre>
+<p><code>in:</code> strips the final line ending, preserves all other whitespace, returns <code>&#39;&#39;</code> for an empty line, accepts final input without a trailing newline, and runtime-stops if stdin reaches EOF before any text is read.</p>
+<p><code>in:</code> is an expression, so this is valid:</p>
+<pre><code class="language-walk">out: in: &#39;Say something: &#39;</code></pre>
+<p>Typed input is separate from <code>in:</code>. Read text first, then parse explicitly when parsing helpers exist.</p>
 <p>---</p>
 <h2 id="prefix-math">Prefix Math</h2>
 <p>Math is prefix only.</p>

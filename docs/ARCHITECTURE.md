@@ -68,6 +68,15 @@ create b
 print a + b
 ```
 
+Core text IO stays small:
+
+```walk
+var: name = in: 'Name? '
+out: name
+```
+
+`in:` reads one required stdin line. Larger IO surfaces belong in explicit modules.
+
 ---
 
 ## 2. Design Priorities

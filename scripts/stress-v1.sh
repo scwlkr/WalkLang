@@ -40,7 +40,7 @@ expect_failure() {
     fi
 }
 
-go test ./cmd/walk -run TestV15CompatibilitySuite
+go test ./cmd/walk -run TestV17CompatibilitySuite
 go test ./...
 
 "$walk_bin" check --warnings=error examples/v1.walk
@@ -73,6 +73,29 @@ distance is 5"
 expect_output "$work_dir/hello" "3
 hello from WalkLang
 true"
+
+cat >"$work_dir/input.walk" <<'WALK'
+var: prompt = 'Name? '
+var: name = in: prompt
+var: blank = in:
+var: crlf = in:
+out: name
+out: blank
+out: crlf
+out: in:
+WALK
+"$walk_bin" build "$work_dir/input.walk" -o "$work_dir/input"
+printf '  Walker \n\nLine\r\nFinal' | "$work_dir/input" >"$work_dir/input.out"
+printf 'Name?   Walker \n\nLine\nFinal\n' >"$work_dir/input.expected"
+cmp "$work_dir/input.expected" "$work_dir/input.out"
+
+cat >"$work_dir/input_eof.walk" <<'WALK'
+var: name = in:
+out: name
+WALK
+"$walk_bin" build "$work_dir/input_eof.walk" -o "$work_dir/input-eof"
+expect_failure "$work_dir/input-eof"
+grep -q "walk runtime error: input reached EOF" "$work_dir/failure.err"
 
 "$walk_bin" test examples/v0_1_tests.walk >"$work_dir/tests.out"
 grep -q "ok 2 tests" "$work_dir/tests.out"
@@ -141,4 +164,4 @@ project_dir="$work_dir/hello_project"
     test ! -d build
 )
 
-echo "v1.6 stress ok"
+echo "v1.7 stress ok"

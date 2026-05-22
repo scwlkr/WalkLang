@@ -1,5 +1,23 @@
 # WalkLang Migration Guide
 
+## v1.6 to v1.7
+
+v1.7 adds the stable `in:` expression for required-line stdin input. Existing v1.6 source should not need changes.
+
+New code can read one line from stdin:
+
+```walk
+var: name = in:
+```
+
+Use an optional string prompt when interactive programs need one:
+
+```walk
+var: name = in: 'Name? '
+```
+
+`in:` returns `string`, strips the final line ending, preserves other whitespace, and runtime-stops if stdin reaches EOF before any text is read. It does not add typed input helpers such as `in-int:`.
+
 ## v1.5 to v1.6
 
 v1.6 adds local function type inference. Existing v1.5 source should not need changes.

@@ -650,6 +650,17 @@ func (c *Checker) checkExpression(expression ast.Expression) (ast.Type, error) {
 		if err != nil {
 			return ast.Type{}, err
 		}
+	case *ast.Input:
+		if e.Prompt != nil {
+			promptType, err := c.checkExpression(e.Prompt)
+			if err != nil {
+				return ast.Type{}, err
+			}
+			if !promptType.Equal(ast.Basic(ast.TypeString)) {
+				return ast.Type{}, errorAt(e.Loc(), "type error: in prompt must be string, got %s", promptType.String())
+			}
+		}
+		result = ast.Basic(ast.TypeString)
 	case *ast.ArrayLiteral:
 		var err error
 		result, err = c.checkArrayLiteral(e)

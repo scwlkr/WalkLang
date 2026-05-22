@@ -19,13 +19,13 @@
 <h2>Language</h2>
 <a href="SYNTAX.html">v1 Syntax Guide</a>
 <a href="SPEC.html">v1 Specification</a>
-<a href="STDLIB.html">v1.6 Standard Library</a>
+<a href="STDLIB.html">v1.7 Standard Library</a>
 <a href="ERRORS.html" aria-current="page">v1 Diagnostics</a>
-<a href="COMPATIBILITY.html">v1.6 Compatibility</a>
+<a href="COMPATIBILITY.html">v1.7 Compatibility</a>
 <a href="MIGRATING.html">Migration Guide</a>
 <a href="DEPRECATION.html">Deprecation Policy</a>
 <h2>Versions</h2>
-<a href="V1.html">v1 / v1.6</a>
+<a href="V1.html">v1 / v1.7</a>
 <a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
 <a href="V3.html">v3 Package Ecosystem</a>
 <h2>Tools</h2>
@@ -111,7 +111,11 @@ walk check --warnings=default main.walk
 walk check --warnings=error main.walk</code></pre>
 <h2 id="runtime-failures">Runtime Failures</h2>
 <p><code>walk test</code> builds and runs a native executable. Failed assertions print failure lines and make the executable exit non-zero.</p>
-<p>Native C runtime failures are outside the stable diagnostic contract unless a WalkLang conformance test explicitly covers them.</p>
+<p>Stable v1.7 <code>in:</code> runtime failures include:</p>
+<pre><code class="language-text">walk runtime error: input reached EOF
+walk runtime error: stdin read failed
+walk runtime error: out of memory</code></pre>
+<p>Other native C runtime failures are outside the stable diagnostic contract unless a WalkLang conformance test explicitly covers them.</p>
 </article>
 <footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
 </div>

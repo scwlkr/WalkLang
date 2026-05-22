@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestV15CompatibilitySuitePassPrograms(t *testing.T) {
+func TestV17CompatibilitySuitePassPrograms(t *testing.T) {
 	requireCC(t)
 	root := repoRoot(t)
 	cases := []struct {
@@ -65,7 +65,7 @@ func TestV15CompatibilitySuitePassPrograms(t *testing.T) {
 	}
 }
 
-func TestV15CompatibilitySuiteStableFailures(t *testing.T) {
+func TestV17CompatibilitySuiteStableFailures(t *testing.T) {
 	root := repoRoot(t)
 	cases := []struct {
 		file string
@@ -89,7 +89,7 @@ func TestV15CompatibilitySuiteStableFailures(t *testing.T) {
 	}
 }
 
-func TestV15ReleasePrepDocsArePresent(t *testing.T) {
+func TestV17ReleaseDocsArePresent(t *testing.T) {
 	root := repoRoot(t)
 	cases := []struct {
 		file string
@@ -98,8 +98,8 @@ func TestV15ReleasePrepDocsArePresent(t *testing.T) {
 		{"docs/COMPATIBILITY.md", "Stable v1 code should continue to compile through the v1.x line"},
 		{"docs/INSTALL.md", "Official Install Instructions"},
 		{"docs/RELEASE_NOTES.md", "v1.5.0"},
-		{"docs/MIGRATING.md", "v1.5 to v1.6"},
-		{"docs/DEPRECATION.md", "Current v1.6 Deprecated Surface"},
+		{"docs/MIGRATING.md", "v1.6 to v1.7"},
+		{"docs/DEPRECATION.md", "Current v1.7 Deprecated Surface"},
 	}
 
 	for _, tc := range cases {

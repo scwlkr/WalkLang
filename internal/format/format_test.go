@@ -35,6 +35,17 @@ func TestV2FormatterNormalizesStructs(t *testing.T) {
 	}
 }
 
+func TestV17FormatterNormalizesInputExpression(t *testing.T) {
+	formatted, err := Format("var:name=in:'Name? '\nout:in:\n", "main.walk")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := "var: name = in: 'Name? '\nout: in:\n"
+	if formatted != want {
+		t.Fatalf("want %q, got %q", want, formatted)
+	}
+}
+
 func TestV21FormatterKeepsMethodSyntaxTight(t *testing.T) {
 	formatted, err := Format("func:User.is_adult(self User)bool\n  return:>= self.age 18\nout:user.is_adult()\n", "main.walk")
 	if err != nil {

@@ -19,13 +19,13 @@
 <h2>Language</h2>
 <a href="SYNTAX.html">v1 Syntax Guide</a>
 <a href="SPEC.html" aria-current="page">v1 Specification</a>
-<a href="STDLIB.html">v1.6 Standard Library</a>
+<a href="STDLIB.html">v1.7 Standard Library</a>
 <a href="ERRORS.html">v1 Diagnostics</a>
-<a href="COMPATIBILITY.html">v1.6 Compatibility</a>
+<a href="COMPATIBILITY.html">v1.7 Compatibility</a>
 <a href="MIGRATING.html">Migration Guide</a>
 <a href="DEPRECATION.html">Deprecation Policy</a>
 <h2>Versions</h2>
-<a href="V1.html">v1 / v1.6</a>
+<a href="V1.html">v1 / v1.7</a>
 <a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
 <a href="V3.html">v3 Package Ecosystem</a>
 <h2>Tools</h2>
@@ -50,7 +50,7 @@
 <div class="page">
 <article class="doc">
 <h1 id="walklang-v1-specification">WalkLang v1 Specification</h1>
-<p>This document is the stable WalkLang language contract for the v1 line. v1.6 keeps the v1.5 compatibility policy and adds local function type inference for obvious function bodies.</p>
+<p>This document is the stable WalkLang language contract for the v1 line. v1.7 keeps the v1.6 compatibility policy and adds required-line stdin input through the core <code>in:</code> expression.</p>
 <p>Core rule:</p>
 <pre><code class="language-text">If it is not in SPEC.md, it is not stable WalkLang.
 If the compiler disagrees with SPEC.md, either the compiler or the spec must change.</code></pre>
@@ -167,10 +167,35 @@ string
 nullable string</code></pre>
 <p>Arrays, functions, and void values cannot be output.</p>
 <p>---</p>
-<h2 id="11-expressions">11. Expressions</h2>
+<h2 id="11-input">11. Input</h2>
+<p><code>in:</code> reads one required line from stdin and returns a <code>string</code>.</p>
+<pre><code class="language-walk">var: name = in:</code></pre>
+<p><code>in:</code> may take an optional prompt expression. The prompt must be <code>string</code>.</p>
+<pre><code class="language-walk">var: prompt = &#39;Name? &#39;
+var: name = in: prompt</code></pre>
+<p>Prompt behavior:</p>
+<pre><code class="language-text">write prompt to stdout
+add no newline
+flush stdout before reading</code></pre>
+<p>Input behavior:</p>
+<pre><code class="language-text">reads from stdin only
+consumes exactly one line
+strips the final \n or \r\n line ending
+preserves all other whitespace
+returns &#39;&#39; for an empty line
+has no language-level line length limit
+returns final unterminated input as a line
+runtime-stops if EOF happens before any text is read
+runtime-stops on stdin read failure or allocation failure</code></pre>
+<p><code>in:</code> is an expression and may appear anywhere an expression is valid.</p>
+<pre><code class="language-walk">out: in: &#39;Say something: &#39;</code></pre>
+<p>Typed input is not part of <code>in:</code>. Read text first, then parse it explicitly when a parse API exists.</p>
+<p>---</p>
+<h2 id="12-expressions">12. Expressions</h2>
 <p>Stable expressions:</p>
 <pre><code class="language-text">literals
 names
+in:
 prefix operators
 grouped expressions
 function calls
@@ -181,7 +206,7 @@ block expressions under commands</code></pre>
 <p>Grouping uses parentheses:</p>
 <pre><code class="language-walk">var: x = * (+ 1 2) (- 9 4)</code></pre>
 <p>---</p>
-<h2 id="12-operators">12. Operators</h2>
+<h2 id="13-operators">13. Operators</h2>
 <p>Numeric operators:</p>
 <pre><code class="language-text">+  2 or more args
 *  2 or more args
@@ -199,7 +224,7 @@ not  exactly 1 bool arg</code></pre>
 <p>Unary negation of variables is not v1.1 syntax. Use subtraction from zero:</p>
 <pre><code class="language-walk">var: y = - 0 x</code></pre>
 <p>---</p>
-<h2 id="13-arrays">13. Arrays</h2>
+<h2 id="14-arrays">14. Arrays</h2>
 <p>Array literals are homogeneous and non-empty.</p>
 <pre><code class="language-walk">var: nums = [1, 2, 3]
 var: words = [&#39;a&#39;, &#39;b&#39;]</code></pre>
@@ -213,7 +238,7 @@ string</code></pre>
 nums[1] = 9</code></pre>
 <p>Empty arrays and nested array emission are not stable v1.1 native features.</p>
 <p>---</p>
-<h2 id="14-functions">14. Functions</h2>
+<h2 id="15-functions">15. Functions</h2>
 <p>Function declarations may use typed parameters.</p>
 <pre><code class="language-walk">func: add(a int, b int) int
     return: + a b</code></pre>
@@ -229,7 +254,7 @@ nums[1] = 9</code></pre>
 <p><code>return:</code> requires a value and is valid only inside a function with a compatible return type.</p>
 <p>Non-void functions must return on all paths.</p>
 <p>---</p>
-<h2 id="15-function-values">15. Function Values</h2>
+<h2 id="16-function-values">16. Function Values</h2>
 <p>Named functions may be passed as values.</p>
 <pre><code class="language-walk">func: inc(x int) int
     return: + x 1
@@ -240,7 +265,7 @@ func: apply(f func(int) int, x int) int
 out: apply(inc, 4)</code></pre>
 <p>Anonymous functions and closures are not v1.1 syntax.</p>
 <p>---</p>
-<h2 id="16-control-flow">16. Control Flow</h2>
+<h2 id="17-control-flow">17. Control Flow</h2>
 <p><code>if:</code> conditions must be <code>bool</code>.</p>
 <pre><code class="language-walk">if: &gt; age 18
     out: &#39;adult&#39;
@@ -257,7 +282,7 @@ else:
     out: n</code></pre>
 <p><code>break:</code> and <code>continue:</code> are valid only inside loops.</p>
 <p>---</p>
-<h2 id="17-modules">17. Modules</h2>
+<h2 id="18-modules">18. Modules</h2>
 <p>Built-in modules:</p>
 <pre><code class="language-text">math
 string
@@ -277,7 +302,7 @@ out: calc.square(5)</code></pre>
 <li>import cycles are errors</li>
 </ul>
 <p>---</p>
-<h2 id="18-tests">18. Tests</h2>
+<h2 id="19-tests">19. Tests</h2>
 <p><code>test:</code> defines a test block for <code>walk test</code>.</p>
 <pre><code class="language-walk">test: &#39;add works&#39;
     assert: == add(2, 3) 5</code></pre>
@@ -289,14 +314,14 @@ test: &#39;wrapped assertion works&#39;
     assert: testing.assert(true)</code></pre>
 <p>Normal <code>walk build</code> ignores <code>test:</code> blocks.</p>
 <p>---</p>
-<h2 id="19-formatter">19. Formatter</h2>
+<h2 id="20-formatter">20. Formatter</h2>
 <p><code>walk fmt</code> emits stable spacing and indentation:</p>
 <pre><code class="language-walk">var:x=+ 1 2</code></pre>
 <p>becomes:</p>
 <pre><code class="language-walk">var: x = + 1 2</code></pre>
 <p>Formatter output uses 4 spaces for indentation.</p>
 <p>---</p>
-<h2 id="20-diagnostics">20. Diagnostics</h2>
+<h2 id="21-diagnostics">21. Diagnostics</h2>
 <p>Compiler diagnostics use this shape:</p>
 <pre><code class="language-text">file.walk:line:column: category: message</code></pre>
 <p>The command-line display may add a source snippet, caret, and focused suggestion under that stable first line:</p>
@@ -313,7 +338,7 @@ warning
 internal error</code></pre>
 <p>Warnings do not fail by default. <code>--warnings=error</code> promotes warnings to errors. Stable v1.4 warnings cover shadowing an outer name and unreachable statements after <code>return:</code>, <code>break</code>, or <code>continue</code>.</p>
 <p>---</p>
-<h2 id="21-non-goals">21. Non-Goals</h2>
+<h2 id="22-non-goals">22. Non-Goals</h2>
 <p>These are not stable v1 features:</p>
 <pre><code class="language-text">classes
 structs
@@ -333,10 +358,10 @@ file/json/matrix stdlib APIs
 empty arrays
 nested arrays in native output</code></pre>
 <p>---</p>
-<h2 id="22-minimal-valid-program">22. Minimal Valid Program</h2>
+<h2 id="23-minimal-valid-program">23. Minimal Valid Program</h2>
 <pre><code class="language-walk">out: &#39;hello&#39;</code></pre>
 <p>---</p>
-<h2 id="23-representative-v1-1-program">23. Representative v1.1 Program</h2>
+<h2 id="24-representative-v1-1-program">24. Representative v1.1 Program</h2>
 <pre><code class="language-walk">imp: math
 
 func: add(a int, b int) int

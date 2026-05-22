@@ -135,6 +135,33 @@ Arrays and function values cannot be printed directly.
 
 ---
 
+## Input
+
+Use `in:` to read one required line from stdin.
+
+```walk
+var: name = in:
+```
+
+`in:` may include a prompt. The prompt is a `string` expression written to stdout without a newline, then stdout is flushed before reading.
+
+```walk
+var: prompt = 'Name? '
+var: name = in: prompt
+```
+
+`in:` strips the final line ending, preserves all other whitespace, returns `''` for an empty line, accepts final input without a trailing newline, and runtime-stops if stdin reaches EOF before any text is read.
+
+`in:` is an expression, so this is valid:
+
+```walk
+out: in: 'Say something: '
+```
+
+Typed input is separate from `in:`. Read text first, then parse explicitly when parsing helpers exist.
+
+---
+
 ## Prefix Math
 
 Math is prefix only.

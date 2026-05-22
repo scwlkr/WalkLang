@@ -1,6 +1,6 @@
-# WalkLang v1.6 Compatibility
+# WalkLang v1.7 Compatibility
 
-WalkLang v1.6 defines the compatibility promise for the v1.x language line. v1.6 keeps the v1.5 release boundary and adds local function type inference as a compatible syntax improvement.
+WalkLang v1.7 defines the compatibility promise for the v1.x language line. v1.7 keeps the v1.6 release boundary and adds `in:` as a stable required-line stdin input expression.
 
 ## Compatibility Promise
 
@@ -65,7 +65,7 @@ If a feature is accepted by the compiler but absent from those files, treat it a
 Run the focused v1 compatibility suite with:
 
 ```bash
-go test ./cmd/walk -run TestV15CompatibilitySuite
+go test ./cmd/walk -run TestV17CompatibilitySuite
 ```
 
 The full repository test command also runs it:
@@ -97,7 +97,7 @@ any generated C details outside snapshots
 
 ## Deprecation Policy
 
-`docs/DEPRECATION.md` owns the deprecation lifecycle. Current v1.6 deprecated surface: none.
+`docs/DEPRECATION.md` owns the deprecation lifecycle. Current v1.7 deprecated surface: none.
 
 ## Changing The Contract
 

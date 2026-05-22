@@ -46,6 +46,66 @@ static WALK_UNUSED WalkInt __walk_string_len(WalkString value) {
     return value == NULL ? 0 : (WalkInt)strlen(value);
 }
 
+static WALK_UNUSED WalkString __walk_input(WalkString prompt) {
+    if (prompt != NULL) {
+        fputs(prompt, stdout);
+        fflush(stdout);
+    }
+    size_t cap = 64;
+    size_t len = 0;
+    char *buffer = (char *)malloc(cap);
+    if (buffer == NULL) {
+        fprintf(stderr, "walk runtime error: out of memory\n");
+        exit(1);
+    }
+    for (;;) {
+        int ch = fgetc(stdin);
+        if (ch == EOF) {
+            if (ferror(stdin)) {
+                free(buffer);
+                fprintf(stderr, "walk runtime error: stdin read failed\n");
+                exit(1);
+            }
+            if (len == 0) {
+                free(buffer);
+                fprintf(stderr, "walk runtime error: input reached EOF\n");
+                exit(1);
+            }
+            break;
+        }
+        if (ch == '\n') { break; }
+        if (ch == '\r') {
+            int next = fgetc(stdin);
+            if (next == '\n') { break; }
+            if (next == EOF && ferror(stdin)) {
+                free(buffer);
+                fprintf(stderr, "walk runtime error: stdin read failed\n");
+                exit(1);
+            }
+            if (next != EOF) { ungetc(next, stdin); }
+        }
+        if (len + 1 >= cap) {
+            if (cap > ((size_t)-1) / 2) {
+                free(buffer);
+                fprintf(stderr, "walk runtime error: out of memory\n");
+                exit(1);
+            }
+            size_t next_cap = cap * 2;
+            char *next_buffer = (char *)realloc(buffer, next_cap);
+            if (next_buffer == NULL) {
+                free(buffer);
+                fprintf(stderr, "walk runtime error: out of memory\n");
+                exit(1);
+            }
+            buffer = next_buffer;
+            cap = next_cap;
+        }
+        buffer[len++] = (char)ch;
+    }
+    buffer[len] = '\0';
+    return buffer;
+}
+
 static WALK_UNUSED void __walk_print_int(WalkInt value) { printf("%lld\n", (long long)value); }
 static WALK_UNUSED void __walk_print_float(WalkFloat value) { printf("%g\n", (double)value); }
 static WALK_UNUSED void __walk_print_bool(WalkBool value) { printf("%s\n", value ? "true" : "false"); }

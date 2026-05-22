@@ -235,6 +235,13 @@ func (i *functionInferencer) inferExpression(expression ast.Expression, expected
 		return i.inferPrefix(e, expected)
 	case *ast.Call:
 		return i.inferCall(e, expected)
+	case *ast.Input:
+		if e.Prompt != nil {
+			if _, err := i.inferExpression(e.Prompt, ast.Basic(ast.TypeString)); err != nil {
+				return ast.Type{}, err
+			}
+		}
+		return ast.Basic(ast.TypeString), nil
 	case *ast.ArrayLiteral:
 		return i.inferArrayLiteral(e, expected)
 	case *ast.Index:

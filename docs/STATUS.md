@@ -1,16 +1,27 @@
 # WalkLang Status
 
-Stable language contract: v1.6.
+Stable language contract: v1.7.
 
-Current compiler/tooling/docs release: v5.2.0 local function type inference.
+Current compiler/tooling/docs release: v5.3.0 stable required-line input.
 
 Experimental implemented language surface: v2.2.
 
-IO planning update on 2026-05-22: `IO_PLAN.md` now defines the proposed
-module-first IO direction, the recommended `do:` effect-call decision point,
-runtime-owned string and recoverable-error prerequisites, feature-by-feature
-implementation costs, and a phased order that starts with console/process IO
-before stdin, files, directories, JSON, networking, web, or graphics.
+State: v5.3 is complete against the new v1.7 stable `in:` input rule. `in:` is
+a core expression that returns `string`, can be used anywhere an expression is
+valid, reads exactly one required line from stdin, supports an optional string
+prompt expression written to stdout without a newline, flushes stdout before
+reading, strips only the final line ending, preserves all other characters,
+returns `''` for an empty line, accepts a final unterminated line, and
+runtime-stops on immediate EOF, stdin read failure, or allocation failure.
+
+v5.3 verification on 2026-05-22: focused `go test ./cmd/walk ./internal/format -run 'TestInExpression|TestInPrompt|TestV17Formatter' -count=1` passed; full `go test -count=1 ./...` passed; `go build -o build/walk ./cmd/walk` passed; `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh` passed and reported `v1.7 stress ok`; `scripts/check-docs-site.sh` passed after generated site artifacts were staged; `scripts/release.sh v5.3.0 <temp>/release` produced 5 platform artifacts plus `SHA256SUMS`; `wc -l <temp>/release/SHA256SUMS` reported 5 checksum lines; the host release binary reported `v5.3.0` from `walk version`; and `git diff --check` passed.
+
+IO planning update on 2026-05-22: `IO_PLAN.md` now records stable `out:` and
+`in:` as the current baseline, the proposed module-first IO direction for most
+future IO, the recommended `do:` effect-call decision point, runtime-owned
+string and recoverable-error prerequisites, feature-by-feature implementation
+costs, and a phased order for files, directories, JSON, networking, web, and
+graphics.
 
 IO planning verification on 2026-05-22: `scripts/build-docs-site.sh` passed;
 full `go test -count=1 ./...` passed; `go build -o build/walk ./cmd/walk`
@@ -38,13 +49,13 @@ v5 verification on 2026-05-22: baseline `go test -count=1 ./...` passed before i
 
 Previous v4.1 verification on 2026-05-22: focused `go test ./cmd/walk -run 'TestV4DocsAndDebugMapCommands|TestV4LSPDiagnosticsFormattingAndCompletion' -count=1`, lexer/parser `go test ./internal/lexer ./internal/parser -count=1`, focused `go test ./cmd/walk -run TestV4 -count=1`, full `go test -count=1 ./...`, `go build -o build/walk ./cmd/walk`, `./build/walk docs --strict -o build/v4.1-api.md examples/v1.walk`, `./build/walk docs --strict --format json -o build/v4.1-api.json examples/v1.walk`, `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh`, `scripts/release.sh v4.1.0 <temp>/release`, `SHA256SUMS` line count check, and `git diff --check` all passed.
 
-Release CI maintenance on 2026-05-22: GitHub Actions workflow uses Node 24 first-party actions, disables unnecessary Go dependency caching for this no-`go.sum` module, runs `scripts/check-docs-site.sh`, and now publishes v5.2.0-labeled release artifacts.
+Release CI maintenance on 2026-05-22: GitHub Actions workflow uses Node 24 first-party actions, disables unnecessary Go dependency caching for this no-`go.sum` module, runs `scripts/check-docs-site.sh`, and now publishes v5.3.0-labeled release artifacts.
 
 Playground example update on 2026-05-22: `playground/route_ranker.walk` now demonstrates a compact route-ranking program with structs, arrays, loops, typed helper functions, prefix math, and scalar output. Verification passed with `./build/walk check --warnings=error playground/route_ranker.walk`, `./build/walk build playground/route_ranker.walk -o build/route_ranker`, and `./build/route_ranker`, which printed `Library Lane` with score `46`; broader verification passed with `go test -count=1 ./...`, `scripts/check-docs-site.sh`, `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh`, `scripts/release.sh v5.1.0 <temp>/release`, a 5-line `SHA256SUMS` check, host release binary `walk version` reporting `v5.1.0`, and `git diff --check`.
 
 CLI run shortcut update on 2026-05-22: `walk run <source.walk>` now compiles a single file to a temporary native executable, runs it, streams program input and output, and removes the temporary build directory; `walk <source.walk>` is a direct shorthand for the same flow. Verification passed with focused `go test ./cmd/walk -run TestRunCommandRunsSingleFileAndDirectFileAlias -count=1`, `go build -o build/walk ./cmd/walk`, `./build/walk run playground/route_ranker.walk`, `./build/walk playground/route_ranker.walk`, full `go test -count=1 ./...`, `scripts/check-docs-site.sh`, `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh`, `scripts/release.sh v5.1.0 <temp>/release`, a 5-line `SHA256SUMS` check, host release binary `walk version` reporting `v5.1.0`, and `git diff --check`.
 
-Next: review the IO Phase 0 decision points in `IO_PLAN.md`, especially `do:`,
-runtime-created string ownership, and recoverable IO errors; separately retry
-HTTPS enforcement after GitHub issues the Pages certificate for
-`walklang.wlkrlabs.com`.
+Next: implement the next IO Phase 0 decision point in `IO_PLAN.md`, especially
+the `do:` effect-call syntax needed before side-effect standard-library IO
+modules; separately retry HTTPS enforcement after GitHub issues the Pages
+certificate for `walklang.wlkrlabs.com`.

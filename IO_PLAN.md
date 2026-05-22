@@ -26,13 +26,21 @@ Already stable:
 out: 'hello'
 out: + 1 2
 out: true
+var: name = in:
+var: name = in: 'Name? '
 ```
 
 `out:` prints one scalar value with a newline. Stable output types are `int`,
 `float`, `bool`, `string`, and nullable string. Arrays, functions, structs, and
 void values cannot be printed directly.
 
-Stable v1.6 built-in modules:
+`in:` reads one required line from stdin and returns `string`. Its optional
+prompt writes to stdout without a newline and flushes before reading. `in:`
+strips the final line ending, preserves other whitespace, returns `''` for an
+empty line, accepts final unterminated input, and runtime-stops on immediate EOF
+stdin failure, or allocation failure.
+
+Stable v1.7 built-in modules:
 
 ```text
 math
@@ -332,26 +340,25 @@ wait for enter
 Recommended direction:
 
 ```walk
-imp: io
-
-do: io.write('Name? ')
-var: name = io.read_line()
+var: name = in: 'Name? '
 out: name
 ```
 
-Do not start with prompt-specific commands like `in-int:`. Keep reading and
+`in:` is now the stable core required-line input expression. Do not add
+prompt-specific typed commands like `in-int:`. Keep reading and
 parsing separate:
 
 ```walk
-imp: io
 imp: parse
 
-do: io.write('Age? ')
-var: age = parse.int(io.read_line())
+var: text = in: 'Age? '
+var: age = parse.int(text)
 ```
 
-The exact `parse` API is a separate design decision. It depends on the error
-model because invalid input is normal, not exceptional.
+Lower-level stream APIs such as `io.read_line()` remain future work for code
+that needs EOF/error as data. The exact `parse` API is a separate design
+decision. It depends on the error model because invalid input is normal, not
+exceptional.
 
 Defer:
 
@@ -361,15 +368,16 @@ Defer:
 
 What it takes:
 
-- runtime-owned strings
-- stdin runtime helpers
-- EOF behavior
-- line length and allocation behavior
-- clear invalid-conversion behavior
+- stable `in:` parser, checker, formatter, emitter, docs, and tests
+- future runtime-owned strings for lower-level stream APIs
+- future EOF/result behavior for `io.read_line()`
+- future line length and allocation behavior for long-running stream APIs
+- clear invalid-conversion behavior for parse helpers
 - tests that feed stdin to native executables
 - cross-platform newline handling
 
-Order: after console output and runtime string ownership.
+Order: stable `in:` is the first input slice. Lower-level stream APIs come
+after recoverable errors.
 
 ### 3. Files
 
@@ -1197,7 +1205,17 @@ Done when:
 
 Do not start with files, HTTP, terminal raw mode, or JSON.
 
-Start with the smallest slice that proves the IO architecture:
+The first stable slice is now `in:`:
+
+```text
+1. Add core `in:` expression.
+2. Support optional string prompts.
+3. Read stdin without a fixed language-level line limit.
+4. Runtime-stop on immediate EOF, stdin failure, or allocation failure.
+5. Add compatibility tests, formatter support, docs, and generated C coverage.
+```
+
+The next side-effect slice should prove the `do:` architecture:
 
 ```text
 1. Add the `do:` effect statement.
@@ -1231,14 +1249,13 @@ process.cwd
 Third slice:
 
 ```text
-runtime-owned strings
-io.read_line
-io.read_all
+recoverable stream result shape
+io.read_line()
+io.read_all()
 parse helpers
 ```
 
-Only after those should `file.read` and `file.write` move from draft to real
-implementation.
+Only after those should `file.read` and `file.write` move from draft to real implementation.
 
 ## Stable API Gate
 

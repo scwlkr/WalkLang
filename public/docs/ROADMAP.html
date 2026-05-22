@@ -19,13 +19,13 @@
 <h2>Language</h2>
 <a href="SYNTAX.html">v1 Syntax Guide</a>
 <a href="SPEC.html">v1 Specification</a>
-<a href="STDLIB.html">v1.6 Standard Library</a>
+<a href="STDLIB.html">v1.7 Standard Library</a>
 <a href="ERRORS.html">v1 Diagnostics</a>
-<a href="COMPATIBILITY.html">v1.6 Compatibility</a>
+<a href="COMPATIBILITY.html">v1.7 Compatibility</a>
 <a href="MIGRATING.html">Migration Guide</a>
 <a href="DEPRECATION.html">Deprecation Policy</a>
 <h2>Versions</h2>
-<a href="V1.html">v1 / v1.6</a>
+<a href="V1.html">v1 / v1.7</a>
 <a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
 <a href="V3.html">v3 Package Ecosystem</a>
 <h2>Tools</h2>
@@ -59,6 +59,7 @@ v1.1: stabilize the language contract
 v1.2: make projects and releases real
 v1.3: grow the standard library carefully
 v1.6: local function type inference
+v1.7: required-line stdin input
 v2: data modeling
 v2.1: methods and stronger composition
 v3: ecosystem
@@ -470,6 +471,27 @@ ambiguous helpers ask for annotations
 SPEC, SYNTAX, migration, release notes, and status docs describe the rule
 compatibility tests continue to pass</code></pre>
 <p>---</p>
+<h2 id="v1-7-required-line-input">v1.7 Required-Line Input</h2>
+<p>Make basic stdin input a small, stable language primitive that pairs cleanly with <code>out:</code>.</p>
+<p>Add:</p>
+<pre><code class="language-text">core in: expression
+optional string prompt expression
+stdin-only required-line behavior
+stdout prompt flush before reading
+empty line returns &#39;&#39;
+CRLF and LF line ending stripping
+final unterminated input returns as a line
+immediate EOF and stdin errors runtime-stop clearly</code></pre>
+<p>Example:</p>
+<pre><code class="language-walk">var: name = in: &#39;Name? &#39;
+out: name</code></pre>
+<p>v1.7 done when:</p>
+<pre><code class="language-text">in: parses anywhere expressions are valid
+prompt expressions type-check as string
+generated C reads stdin without a fixed line limit
+compatibility tests cover prompt, pipes, empty lines, CRLF, EOF, and final unterminated input
+SPEC, SYNTAX, migration, release notes, and status docs describe the rule</code></pre>
+<p>---</p>
 <h2 id="v2-data-modeling">v2 Data Modeling</h2>
 <p>Add structs after the v1 language contract is solid.</p>
 <p>Target syntax:</p>
@@ -820,6 +842,9 @@ v1.5
 
 v1.6
   local function type inference
+
+v1.7
+  required-line stdin input
 
 v2
   structs + data modeling
