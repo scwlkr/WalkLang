@@ -52,6 +52,21 @@
 <h1 id="walklang-release-notes">WalkLang Release Notes</h1>
 <h2 id="unreleased">Unreleased</h2>
 <p>No unreleased changes.</p>
+<h2 id="v5-4-1-random-seed-fix">v5.4.1 - Random Seed Fix</h2>
+<p>Date: 2026-05-22</p>
+<p>v5.4.1 fixes the v1.8 random runtime so fresh native process launches do not start from the same default C <code>rand()</code> state.</p>
+<h3 id="fixed">Fixed</h3>
+<ul>
+<li><code>random.choice(items)</code> now uses the same runtime-owned seeded PRNG as <code>random.int</code>, preventing the first choice from repeating across fresh command invocations just because the process was restarted.</li>
+<li>Added a regression test that compiles one <code>random.choice</code> program and executes the native binary repeatedly as fresh processes.</li>
+</ul>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<p>None.</p>
+<h3 id="upgrade">Upgrade</h3>
+<p>Regenerate docs and release artifacts with:</p>
+<pre><code class="language-bash">scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.4.1 dist</code></pre>
 <h2 id="v5-4-0-terminal-game-helpers">v5.4.0 - Terminal Game Helpers</h2>
 <p>Date: 2026-05-22</p>
 <p>v5.4.0 adds the v1.8 stable helpers needed for simple terminal games such as Hangman while keeping the existing expression, module, and C-backend model.</p>

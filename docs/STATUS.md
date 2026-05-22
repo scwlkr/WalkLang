@@ -2,9 +2,26 @@
 
 Stable language contract: v1.8.
 
-Current compiler/tooling/docs release: v5.4.0 terminal game helpers.
+Current compiler/tooling/docs release: v5.4.1 random seed fix.
 
 Experimental implemented language surface: v2.2.
+
+State: v5.4.1 fixes `random.choice` and `random.int` to use a runtime-owned
+PRNG seeded once per native process instead of the C runtime's unseeded default
+`rand()` state.
+
+v5.4.1 verification on 2026-05-22: added `TestRandomChoiceSeedsFreshProcesses`
+and confirmed it failed before the runtime fix because fresh native processes
+all produced the same first `random.choice` value; after the fix, full `go test
+-count=1 ./...` passed; `go build -trimpath -ldflags "-X main.version=v5.4.1"
+-o build/walk ./cmd/walk` passed and `./build/walk version` reported
+`v5.4.1`; `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh` passed and reported
+`v1.8 stress ok`; `scripts/release.sh v5.4.1 <temp>/release` produced 5
+platform artifacts plus `SHA256SUMS`; `wc -l <temp>/release/SHA256SUMS`
+reported 5 checksum lines; the host release binary reported `v5.4.1` from
+`walk version`; `scripts/install-local.sh v5.4.1` installed
+`/Users/shanewalker/.local/bin/walk`; and twelve fresh installed
+`walk hangman-v2.walk` runs from `playground/` produced multiple choices.
 
 State: v5.4 is complete against the new v1.8 terminal-game helper surface.
 Stable v1.8 adds `string.at`, string indexing with `word[0]`,
@@ -72,7 +89,7 @@ v5 verification on 2026-05-22: baseline `go test -count=1 ./...` passed before i
 
 Previous v4.1 verification on 2026-05-22: focused `go test ./cmd/walk -run 'TestV4DocsAndDebugMapCommands|TestV4LSPDiagnosticsFormattingAndCompletion' -count=1`, lexer/parser `go test ./internal/lexer ./internal/parser -count=1`, focused `go test ./cmd/walk -run TestV4 -count=1`, full `go test -count=1 ./...`, `go build -o build/walk ./cmd/walk`, `./build/walk docs --strict -o build/v4.1-api.md examples/v1.walk`, `./build/walk docs --strict --format json -o build/v4.1-api.json examples/v1.walk`, `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh`, `scripts/release.sh v4.1.0 <temp>/release`, `SHA256SUMS` line count check, and `git diff --check` all passed.
 
-Release CI maintenance on 2026-05-22: GitHub Actions workflow uses Node 24 first-party actions, disables unnecessary Go dependency caching for this no-`go.sum` module, runs `scripts/check-docs-site.sh`, and now publishes v5.4.0-labeled release artifacts.
+Release CI maintenance on 2026-05-22: GitHub Actions workflow uses Node 24 first-party actions, disables unnecessary Go dependency caching for this no-`go.sum` module, runs `scripts/check-docs-site.sh`, and now publishes v5.4.1-labeled release artifacts.
 
 Playground example update on 2026-05-22: `playground/route_ranker.walk` now demonstrates a compact route-ranking program with structs, arrays, loops, typed helper functions, prefix math, and scalar output. Verification passed with `./build/walk check --warnings=error playground/route_ranker.walk`, `./build/walk build playground/route_ranker.walk -o build/route_ranker`, and `./build/route_ranker`, which printed `Library Lane` with score `46`; broader verification passed with `go test -count=1 ./...`, `scripts/check-docs-site.sh`, `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh`, `scripts/release.sh v5.1.0 <temp>/release`, a 5-line `SHA256SUMS` check, host release binary `walk version` reporting `v5.1.0`, and `git diff --check`.
 

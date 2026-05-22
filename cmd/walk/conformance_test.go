@@ -61,6 +61,47 @@ func TestV13TestFixtureRuns(t *testing.T) {
 	}
 }
 
+func TestRandomChoiceSeedsFreshProcesses(t *testing.T) {
+	requireCC(t)
+	dir := t.TempDir()
+	sourcePath := filepath.Join(dir, "random_choice.walk")
+	source := strings.Join([]string{
+		"imp: random",
+		"",
+		"var: words = ['a0', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8', 'a9', 'b0', 'b1', 'b2', 'b3', 'b4', 'b5']",
+		"out: random.choice(words)",
+		"",
+	}, "\n")
+	if err := os.WriteFile(sourcePath, []byte(source), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cCode, warnings, err := compileFileToCWithOptions(sourcePath, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(warnings) != 0 {
+		t.Fatalf("unexpected warnings: %#v", warnings)
+	}
+	exePath := filepath.Join(dir, "random_choice")
+	if err := buildC(cCode, filepath.Join(dir, "random_choice.c"), exePath, nativeBuildOptions{}); err != nil {
+		t.Fatal(err)
+	}
+	seen := map[string]bool{}
+	for i := 0; i < 12; i++ {
+		output, err := exec.Command(exePath).CombinedOutput()
+		if err != nil {
+			t.Fatalf("program failed: %v\n%s", err, string(output))
+		}
+		seen[string(output)] = true
+		if len(seen) > 1 {
+			return
+		}
+	}
+	for output := range seen {
+		t.Fatalf("random.choice returned the same first value across fresh processes: %q", output)
+	}
+}
+
 func TestV13FailFixturesHaveExpectedDiagnostics(t *testing.T) {
 	root := repoRoot(t)
 	cases := []struct {

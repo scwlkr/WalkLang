@@ -4,6 +4,31 @@
 
 No unreleased changes.
 
+## v5.4.1 - Random Seed Fix
+
+Date: 2026-05-22
+
+v5.4.1 fixes the v1.8 random runtime so fresh native process launches do not start from the same default C `rand()` state.
+
+### Fixed
+
+- `random.choice(items)` now uses the same runtime-owned seeded PRNG as `random.int`, preventing the first choice from repeating across fresh command invocations just because the process was restarted.
+- Added a regression test that compiles one `random.choice` program and executes the native binary repeatedly as fresh processes.
+
+### Breaking Changes
+
+None.
+
+### Upgrade
+
+Regenerate docs and release artifacts with:
+
+```bash
+scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.4.1 dist
+```
+
 ## v5.4.0 - Terminal Game Helpers
 
 Date: 2026-05-22

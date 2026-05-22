@@ -102,7 +102,7 @@ Score:
 Maintainers can produce the release artifact set with:
 
 ```bash
-scripts/release.sh v5.4.0 dist
+scripts/release.sh v5.4.1 dist
 ```
 
 The command writes the platform binaries and `dist/SHA256SUMS`.

@@ -3,11 +3,19 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include <time.h>
+
+#if defined(_WIN32)
+#include <process.h>
+#else
+#include <sys/time.h>
+#include <unistd.h>
+#endif
 
 /* walk runtime: no user pointers; array storage is runtime-owned for the process lifetime. */
 typedef long long WalkInt;
@@ -42,14 +50,43 @@ static WALK_UNUSED void __walk_runtime_error(const char *message) {
     exit(1);
 }
 
+static unsigned long long __walk_random_state = 0;
+
+static WALK_UNUSED unsigned long long __walk_random_seed(void) {
+    unsigned long long seed = (unsigned long long)time(NULL);
+    seed ^= ((unsigned long long)clock() << 32);
+    seed ^= (unsigned long long)(uintptr_t)&seed;
+#if defined(_WIN32)
+    seed ^= ((unsigned long long)_getpid() << 16);
+#else
+    struct timeval tv;
+    if (gettimeofday(&tv, NULL) == 0) {
+        seed ^= ((unsigned long long)tv.tv_sec << 32) ^ (unsigned long long)tv.tv_usec;
+    }
+    seed ^= ((unsigned long long)getpid() << 16);
+#endif
+    if (seed == 0) { seed = 0x9e3779b97f4a7c15ULL; }
+    return seed;
+}
+
+static WALK_UNUSED unsigned long long __walk_random_next(void) {
+    if (__walk_random_state == 0) { __walk_random_state = __walk_random_seed(); }
+    unsigned long long x = __walk_random_state;
+    x ^= x >> 12;
+    x ^= x << 25;
+    x ^= x >> 27;
+    __walk_random_state = x;
+    return x * 2685821657736338717ULL;
+}
+
 static WALK_UNUSED WalkInt __walk_random_int(WalkInt min, WalkInt max) {
     if (max < min) { return min; }
-    return min + (rand() % (max - min + 1));
+    return min + (WalkInt)(__walk_random_next() % (unsigned long long)(max - min + 1));
 }
 
 static WALK_UNUSED WalkSize __walk_random_index(WalkSize len) {
     if (len <= 0) { __walk_runtime_error("random.choice on empty array"); }
-    return (WalkSize)(rand() % len);
+    return (WalkSize)(__walk_random_next() % (unsigned long long)len);
 }
 
 static WALK_UNUSED WalkInt __walk_string_len(WalkString value) {

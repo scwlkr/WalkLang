@@ -32,7 +32,7 @@ these docs explain how to install, learn, use, verify, and evolve WalkLang.
 
 WalkLang version names use separate stability layers. The stable language
 contract is `v1.8`. The current compiler, tooling, backend, release, and docs
-milestone is `v5.4.0`. Experimental v2 through v2.2 language features are
+milestone is `v5.4.1`. Experimental v2 through v2.2 language features are
 implemented, but they are not part of the stable v1 compatibility promise.
 
 - [v1 / v1.8 stable contract](V1.md)

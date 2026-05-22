@@ -42,7 +42,7 @@ WalkLang currently has three version layers:
 
 - **Stable language contract:** `v1.8`, defined by `docs/SPEC.md`,
   `docs/COMPATIBILITY.md`, and the v1 compatibility tests.
-- **Current compiler/tooling/docs release:** `v5.4.0`, focused on the C backend,
+- **Current compiler/tooling/docs release:** `v5.4.1`, focused on the C backend,
   release artifacts, generated docs, and the public reference site.
 - **Experimental implemented language surface:** v2 through v2.2 features such
   as structs, methods, and simple generic functions are implemented, but are not

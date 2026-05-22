@@ -147,7 +147,7 @@ out: > time.now() 0
 
 Returns an integer in the inclusive range. If `max < min`, v1 returns `min`.
 
-`random.int` uses the native C runtime's default `rand()` state. v1 does not expose seeding.
+`random.int` and `random.choice` use a runtime-owned PRNG seeded once per native process. v1 does not expose manual seeding.
 
 ```walk
 imp: random
