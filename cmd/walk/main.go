@@ -774,7 +774,7 @@ func buildC(cCode string, cPath string, output string, options nativeBuildOption
 func nativeBuildArgs(cPath string, output string, options nativeBuildOptions) []string {
 	args := []string{cPath, "-o", output}
 	if options.release {
-		args = append(args, "-O2", "-DNDEBUG")
+		args = append(args, "-O3", "-DNDEBUG")
 	}
 	args = append(args, options.cFlags...)
 	args = append(args, "-lm")

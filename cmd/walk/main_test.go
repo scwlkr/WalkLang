@@ -101,13 +101,13 @@ func TestV1UserModuleRejectsTopLevelRuntimeStatements(t *testing.T) {
 	}
 }
 
-func TestV1ReleaseBuildArgs(t *testing.T) {
+func TestV5ReleaseBuildArgs(t *testing.T) {
 	args := nativeBuildArgs("main.c", "main", nativeBuildOptions{
 		release: true,
 		cFlags:  []string{"-DWALK_TEST"},
 	})
 
-	for _, want := range []string{"main.c", "-o", "main", "-O2", "-DNDEBUG", "-DWALK_TEST", "-lm"} {
+	for _, want := range []string{"main.c", "-o", "main", "-O3", "-DNDEBUG", "-DWALK_TEST", "-lm"} {
 		if !slices.Contains(args, want) {
 			t.Fatalf("build args missing %q: %#v", want, args)
 		}

@@ -38,10 +38,12 @@ func TestEmitCForVariablesAndOutput(t *testing.T) {
 	}, "\n"))
 
 	for _, want := range []string{
-		"long long x = (1 + 2);",
-		"const bool ok = true;",
-		"printf(\"%lld\\n\", (long long)(x));",
-		"printf(\"%s\\n\", (ok) ? \"true\" : \"false\");",
+		"typedef long long WalkInt;",
+		"/* source: main.walk:1:1 */",
+		"WalkInt x = (1 + 2);",
+		"const WalkBool ok = true;",
+		"__walk_print_int((WalkInt)(x));",
+		"__walk_print_bool((WalkBool)(ok));",
 	} {
 		if !strings.Contains(cCode, want) {
 			t.Fatalf("generated C missing %q:\n%s", want, cCode)

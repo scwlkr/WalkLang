@@ -2,7 +2,7 @@
 
 WalkLang is a small compiled language implemented in Go with a C backend.
 
-This repo currently contains the v4 professional tooling surface, v3 package ecosystem, v2.2 data modeling, methods, and simple generics, the v1.5 compatibility release preparation, v1.4 diagnostics and developer experience, the v1.3 standard library foundation, v1.2 project mode, and the v1 language contract from `docs/ROADMAP.md`.
+This repo currently contains the v5 runtime/backend maturity surface, v4 professional tooling, v3 package ecosystem, v2.2 data modeling, methods, and simple generics, the v1.5 compatibility release preparation, v1.4 diagnostics and developer experience, the v1.3 standard library foundation, v1.2 project mode, and the v1 language contract from `docs/ROADMAP.md`.
 It proves the pipeline:
 
 ```text
@@ -35,6 +35,7 @@ Supported now:
 - `walk check` with `--warnings=off|default|error`
 - shadowed-name and unreachable-statement warnings
 - release native builds with `--release`, `--cc`, and `--cflag`
+- generated C with a small runtime layer, process-lifetime array storage, and source comments
 - user-local `walk` command install
 - v1 stress script
 - cross-platform CLI release script
@@ -79,6 +80,7 @@ Experimental v2 surface:
 Contract docs:
 
 - `docs/SPEC.md`
+- `docs/V5.md`
 - `docs/V4.md`
 - `docs/V3.md`
 - `docs/V2.md`
@@ -105,7 +107,7 @@ Not stable yet:
 Install the local `walk` command:
 
 ```bash
-scripts/install-local.sh v4-local
+scripts/install-local.sh v5-local
 walk version
 ```
 
@@ -246,5 +248,5 @@ scripts/stress-v1.sh
 Build cross-platform CLI release artifacts:
 
 ```bash
-scripts/release.sh v4.0.0
+scripts/release.sh v5.0.0
 ```

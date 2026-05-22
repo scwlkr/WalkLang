@@ -1,5 +1,42 @@
 # WalkLang Release Notes
 
+## v5.0.0 - Runtime and Backend Maturity
+
+Date: 2026-05-22
+
+v5.0.0 keeps C as the primary backend and makes generated output easier to inspect, optimize, and reason about at runtime.
+
+### Added
+
+- `docs/V5.md` runtime/backend contract documentation.
+- A small generated C runtime section with WalkLang scalar aliases, array structs, print helpers, string length helper, random helper, and array allocation helper.
+- Source-location comments in emitted C statements, such as `/* source: main.walk:6:1 */`.
+- Focused v5 conformance coverage for generated-C runtime helpers, source comments, and array returns.
+
+### Changed
+
+- `walk build --release` now uses `-O3 -DNDEBUG` for native C builds.
+- Array literals now allocate item storage through the generated runtime helper instead of pointing array structs at stack-local item buffers.
+- Generated C snapshots now cover the v5 runtime section and source comments.
+- Official install and CI release artifact labels now target `v5.0.0`.
+
+### Runtime And Memory
+
+WalkLang source still has no `malloc`, `free`, pointer syntax, or public garbage collector promise. Array literal item storage is owned by the generated program for the process lifetime, which makes returned arrays predictable without adding source-level ownership syntax.
+
+### Breaking Changes
+
+None.
+
+### Upgrade
+
+Regenerate emitted C and release binaries with the v5 compiler:
+
+```bash
+walk build main.walk -o build/main --release
+scripts/release.sh v5.0.0 dist
+```
+
 ## v4.1.0 - Documentation Generator Hardening
 
 Date: 2026-05-22

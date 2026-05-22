@@ -223,7 +223,7 @@ var: nickname = null    # error: unknown nullable type
 
 ## 7. Memory Model
 
-v1.1 has no public memory syntax.
+WalkLang has no public memory syntax.
 
 ```text
 No malloc.
@@ -242,6 +242,16 @@ out: names[0]
 ```
 
 The user writes array logic, not allocation logic.
+
+v5 makes array storage explicit inside generated C:
+
+```text
+array literals allocate item storage through the generated walk runtime helper
+array item storage is owned for the process lifetime
+arrays can be returned from functions without pointing at expired stack storage
+```
+
+This is still not source-level memory management. WalkLang programs do not call `malloc`, `free`, or pointer APIs.
 
 ---
 
@@ -409,11 +419,32 @@ generated C snapshots
 current status doc
 ```
 
-Later:
+v4:
 
 ```text
 language server
+editor integration
+docs generator
+debug map
+```
+
+v5:
+
+```text
+small generated C runtime layer
+process-lifetime array storage
+source comments in generated C
+optimized native release builds
+runtime/backend contract docs
+```
+
+Later:
+
+```text
 debugger
+reference site
+playground
+advanced backends
 ```
 
 Formatter example:

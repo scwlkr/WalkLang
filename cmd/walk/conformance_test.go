@@ -339,6 +339,51 @@ func TestV22GenericFailFixturesHaveExpectedDiagnostics(t *testing.T) {
 	}
 }
 
+func TestV5RuntimeGeneratedCIsInspectableAndArrayStorageIsOwned(t *testing.T) {
+	requireCC(t)
+	dir := t.TempDir()
+	sourcePath := filepath.Join(dir, "main.walk")
+	writeFile(t, sourcePath, strings.Join([]string{
+		"func: make_numbers() array[int]",
+		"    var: nums = [4, 5, 6]",
+		"    return: nums",
+		"",
+		"var: got = make_numbers()",
+		"out: got[0]",
+		"out: got[2]",
+		"",
+	}, "\n"))
+
+	cCode, warnings, err := compileFileToCWithOptions(sourcePath, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(warnings) != 0 {
+		t.Fatalf("unexpected warnings: %#v", warnings)
+	}
+	for _, want := range []string{
+		"walk runtime: no user pointers",
+		"static WALK_UNUSED void *__walk_alloc_array",
+		"WalkArrayInt make_numbers(void)",
+		"/* source: main.walk:2:5 */",
+		"__walk_print_int",
+	} {
+		if !strings.Contains(cCode, want) {
+			t.Fatalf("generated C missing %q:\n%s", want, cCode)
+		}
+	}
+	if got, want := runCProgram(t, cCode), "4\n6\n"; got != want {
+		t.Fatalf("want %q, got %q\nC:\n%s", want, got, cCode)
+	}
+	strictExe := filepath.Join(dir, "strict")
+	if err := buildC(cCode, filepath.Join(dir, "strict.c"), strictExe, nativeBuildOptions{cFlags: []string{"-Wall", "-Werror"}}); err != nil {
+		t.Fatalf("strict native build failed: %v\nC:\n%s", err, cCode)
+	}
+	if output, err := exec.Command(strictExe).CombinedOutput(); err != nil || string(output) != "4\n6\n" {
+		t.Fatalf("strict program failed: %v\n%s\nC:\n%s", err, string(output), cCode)
+	}
+}
+
 func repoRoot(t *testing.T) string {
 	t.Helper()
 	wd, err := os.Getwd()
