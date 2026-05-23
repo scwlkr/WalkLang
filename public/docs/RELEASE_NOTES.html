@@ -52,6 +52,32 @@
 <h1 id="walklang-release-notes">WalkLang Release Notes</h1>
 <h2 id="unreleased">Unreleased</h2>
 <p>No unreleased changes.</p>
+<h2 id="v5-9-0-draft-local-filesystem-io-completion">v5.9.0 - Draft Local Filesystem IO Completion</h2>
+<p>Date: 2026-05-23</p>
+<p>v5.9.0 completes <code>IO_PLAN.md</code> Roadmap Phase 2 as draft compiler APIs while keeping the stable language contract at v1.9.</p>
+<h3 id="added">Added</h3>
+<ul>
+<li>Draft <code>file.append</code>, <code>file.try_read</code>, <code>file.try_write</code>, and <code>file.try_append</code> helpers.</li>
+<li>Draft <code>FileReadResult</code> and <code>FileActionResult</code> structs for recoverable file operations.</li>
+<li>Draft <code>dir.list</code>, <code>dir.make</code>, and <code>dir.delete</code> helpers.</li>
+<li>Draft <code>path.join</code>, <code>path.base</code>, and <code>path.ext</code> helpers.</li>
+<li>Draft <code>process.chdir</code> effect helper.</li>
+<li>Native temp-directory tests covering append, directory creation/list/delete, path building, cwd mutation isolation, recoverable file results, and invalid-use diagnostics.</li>
+</ul>
+<h3 id="notes">Notes</h3>
+<ul>
+<li>The stable language contract remains v1.9.</li>
+<li>Fail-stop file, directory, and cwd helpers still use clear <code>walk runtime error</code> messages for unrecoverable draft behavior.</li>
+<li>Recoverable <code>file.try_*</code> helpers report ordinary file/path/write/read failures as result structs; allocation failure still runtime-stops.</li>
+<li>JSON, process spawning, terminal raw mode, HTTP, and browser targets remain gated by later <code>IO_PLAN.md</code> roadmap phases.</li>
+</ul>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<p>None.</p>
+<h3 id="upgrade">Upgrade</h3>
+<p>Regenerate docs and release artifacts with:</p>
+<pre><code class="language-bash">scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.9.0 dist</code></pre>
 <h2 id="v5-8-0-draft-local-file-text-io">v5.8.0 - Draft Local File Text IO</h2>
 <p>Date: 2026-05-23</p>
 <p>v5.8.0 starts the local filesystem roadmap phase with draft UTF-8 text file helpers.</p>

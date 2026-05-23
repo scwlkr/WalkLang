@@ -132,6 +132,10 @@ func TestV13FailFixturesHaveExpectedDiagnostics(t *testing.T) {
 		{"bad_io_read_line_arg.walk", "tests/fail/bad_io_read_line_arg.walk:3:13: type error: io.read_line expects 0 args, got 1"},
 		{"bad_parse_int_arg.walk", "tests/fail/bad_parse_int_arg.walk:3:24: type error: arg 1 to parse.int is string, got int"},
 		{"bad_process_exit_arg.walk", "tests/fail/bad_process_exit_arg.walk:3:18: type error: arg 1 to process.exit is int, got string"},
+		{"bad_file_append_arg.walk", "tests/fail/bad_file_append_arg.walk:3:29: type error: arg 2 to file.append is string, got int"},
+		{"bad_dir_make_as_expression.walk", "tests/fail/bad_dir_make_as_expression.walk:3:6: type error: dir.make is an effect; use do: dir.make(...)"},
+		{"bad_path_join_arg.walk", "tests/fail/bad_path_join_arg.walk:3:24: type error: arg 2 to path.join is string, got int"},
+		{"bad_process_chdir_arg.walk", "tests/fail/bad_process_chdir_arg.walk:3:19: type error: arg 1 to process.chdir is string, got int"},
 		{"unknown_library.walk", "tests/fail/unknown_library.walk:2:6: name error: unknown library function math.nope"},
 		{"top_break.walk", "tests/fail/top_break.walk:1:1: syntax error: break outside loop"},
 	}

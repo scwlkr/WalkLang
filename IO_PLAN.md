@@ -1,8 +1,8 @@
 # WalkLang IO Plan
 
-Status: design draft with the CLI text IO roadmap phase implemented and the
-first local filesystem text-file slice implemented as draft compiler APIs. This
-is not stable language syntax yet.
+Status: design draft with the CLI text IO and local filesystem IO roadmap
+phases implemented as draft compiler APIs. This is not stable language syntax
+yet.
 
 Purpose: turn the current input/output brainstorm into a durable implementation
 plan for WalkLang's console, file, process, terminal, data, network, and future
@@ -72,13 +72,23 @@ parse.float
 parse.bool
 file.read
 file.write
+file.append
 file.exists
+file.try_read
+file.try_write
+file.try_append
+dir.list
+dir.make
+dir.delete
+path.join
+path.base
+path.ext
+process.chdir
 ```
 
 Draft-only stdlib names already called out in `docs/STDLIB.md`:
 
 ```text
-file.append
 json.parse
 json.stringify
 matrix.rows
@@ -948,8 +958,7 @@ The stable language contract remains v1.9.
 
 ### Roadmap Phase 2: Local Filesystem IO
 
-Status: in progress. The first draft text-file slice is implemented in
-`v5.8.0` with `file.read`, `file.write`, and `file.exists`.
+Status: done as draft compiler APIs in `v5.9.0`.
 
 Scope:
 
@@ -973,22 +982,23 @@ into one local-filesystem milestone. It should make file-backed CLI programs
 possible without starting process spawning, JSON, HTTP, terminal raw mode, or
 browser/runtime work.
 
-First-slice decisions:
+Phase decisions:
 
 - Path policy: pass native relative and absolute paths to the host OS without
   normalization or `~` expansion. Relative paths resolve against the native
   process current working directory.
 - UTF-8 file policy: `file.read` and `file.write` are text-only. Reads reject
   invalid UTF-8 and embedded null bytes. Writes accept WalkLang strings and do
-  not expose binary output.
-- Error policy: `file.read` and `file.write` are draft fail-stop APIs for now.
-  Missing files, permission errors, invalid paths, invalid UTF-8, embedded null
-  bytes on read, and write failures stop the native program with a clear
-  `walk runtime error`.
+  not expose binary output. `file.append` follows the same text policy.
+- Error policy: fail-stop `file.read`, `file.write`, `file.append`, directory
+  helpers, and `process.chdir` stop the native program with a clear
+  `walk runtime error`. Recoverable `file.try_read`, `file.try_write`, and
+  `file.try_append` return draft result structs for ordinary file/path/read and
+  write failures; allocation failure remains fail-stop.
 - Tests: file APIs are proven with native executable tests that run inside Go
   `t.TempDir()` directories.
-- Cwd mutation policy: `process.chdir` is not part of the first slice. Add it
-  only with isolated cwd tests and explicit directory/path docs.
+- Cwd mutation policy: `process.chdir` is draft-only, explicit through `do:`,
+  and covered by isolated cwd tests that restore the original directory.
 
 Done when:
 
@@ -1495,10 +1505,9 @@ io.read_all()
 parse helpers
 ```
 
-That sequence is complete as draft compiler APIs. The current local filesystem
-slice starts with UTF-8 text `file.read`, `file.write`, and `file.exists`.
-Keep `file.append`, directory/path helpers, `process.chdir`, and recoverable
-file results as the next Phase 2 work.
+That sequence is complete as draft compiler APIs. The local filesystem slice is
+also complete as draft compiler APIs with UTF-8 text file helpers, recoverable
+`file.try_*` results, directory/path helpers, and `process.chdir`.
 
 ## Stable API Gate
 

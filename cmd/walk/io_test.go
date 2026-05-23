@@ -275,6 +275,158 @@ func TestDraftFileTextIOReadsWritesAndChecksExistence(t *testing.T) {
 	}
 }
 
+func TestDraftLocalFilesystemPhase2CompletesFileDirPathAndCwd(t *testing.T) {
+	requireCC(t)
+
+	dir := t.TempDir()
+	sourcePath := filepath.Join(dir, "main.walk")
+	writeFile(t, sourcePath, strings.Join([]string{
+		"imp: array",
+		"imp: dir",
+		"imp: file",
+		"imp: path",
+		"imp: process",
+		"",
+		"var: data_dir = 'data'",
+		"var: note_path = path.join(data_dir, 'note.txt')",
+		"out: path.base(note_path)",
+		"out: path.ext(note_path)",
+		"out: file.exists(data_dir)",
+		"do: dir.make(data_dir)",
+		"out: file.exists(data_dir)",
+		"do: file.write(note_path, 'alpha')",
+		"do: file.append(note_path, '\\nbeta')",
+		"out: file.read(note_path)",
+		"var: files = dir.list(data_dir)",
+		"out: array.len(files)",
+		"out: array.contains(files, 'note.txt')",
+		"do: dir.make(path.join(data_dir, 'empty'))",
+		"out: file.exists(path.join(data_dir, 'empty'))",
+		"do: dir.delete(path.join(data_dir, 'empty'))",
+		"out: file.exists(path.join(data_dir, 'empty'))",
+		"var: original = process.cwd()",
+		"do: process.chdir(data_dir)",
+		"out: path.base(process.cwd())",
+		"out: file.read('note.txt')",
+		"do: process.chdir(original)",
+		"out: path.base(process.cwd())",
+		"",
+	}, "\n"))
+
+	cCode, warnings, err := compileFileToCWithOptions(sourcePath, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(warnings) != 0 {
+		t.Fatalf("unexpected warnings: %#v", warnings)
+	}
+
+	exePath := filepath.Join(dir, "program")
+	if err := buildC(cCode, filepath.Join(dir, "program.c"), exePath, nativeBuildOptions{}); err != nil {
+		t.Fatal(err)
+	}
+
+	command := exec.Command(exePath)
+	command.Dir = dir
+	output, err := command.CombinedOutput()
+	if err != nil {
+		t.Fatalf("program failed: %v\noutput:\n%s\nC:\n%s", err, string(output), cCode)
+	}
+	want := strings.Join([]string{
+		"note.txt",
+		".txt",
+		"false",
+		"true",
+		"alpha",
+		"beta",
+		"1",
+		"true",
+		"true",
+		"false",
+		"data",
+		"alpha",
+		"beta",
+		filepath.Base(dir),
+		"",
+	}, "\n")
+	if got := string(output); got != want {
+		t.Fatalf("stdout mismatch:\nwant %q\ngot  %q\nC:\n%s", want, got, cCode)
+	}
+}
+
+func TestDraftRecoverableFileResults(t *testing.T) {
+	requireCC(t)
+
+	dir := t.TempDir()
+	sourcePath := filepath.Join(dir, "main.walk")
+	writeFile(t, sourcePath, strings.Join([]string{
+		"imp: file",
+		"",
+		"var: missing = file.try_read('missing.txt')",
+		"out: missing.ok",
+		"out: missing.value",
+		"out: missing.error",
+		"var: wrote = file.try_write('note.txt', 'hello')",
+		"out: wrote.ok",
+		"out: wrote.value",
+		"out: wrote.error",
+		"var: appended = file.try_append('note.txt', ' world')",
+		"out: appended.ok",
+		"out: appended.value",
+		"out: appended.error",
+		"var: read = file.try_read('note.txt')",
+		"out: read.ok",
+		"out: read.value",
+		"out: read.error",
+		"var: bad_write = file.try_write('', 'nope')",
+		"out: bad_write.ok",
+		"out: bad_write.value",
+		"out: bad_write.error",
+		"",
+	}, "\n"))
+
+	cCode, warnings, err := compileFileToCWithOptions(sourcePath, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(warnings) != 0 {
+		t.Fatalf("unexpected warnings: %#v", warnings)
+	}
+
+	exePath := filepath.Join(dir, "program")
+	if err := buildC(cCode, filepath.Join(dir, "program.c"), exePath, nativeBuildOptions{}); err != nil {
+		t.Fatal(err)
+	}
+
+	command := exec.Command(exePath)
+	command.Dir = dir
+	output, err := command.CombinedOutput()
+	if err != nil {
+		t.Fatalf("program failed: %v\noutput:\n%s\nC:\n%s", err, string(output), cCode)
+	}
+	want := strings.Join([]string{
+		"false",
+		"",
+		"file read failed",
+		"true",
+		"true",
+		"",
+		"true",
+		"true",
+		"",
+		"true",
+		"hello world",
+		"",
+		"false",
+		"false",
+		"file path empty",
+		"",
+	}, "\n")
+	if got := string(output); got != want {
+		t.Fatalf("stdout mismatch:\nwant %q\ngot  %q\nC:\n%s", want, got, cCode)
+	}
+}
+
 func TestDraftFileReadMissingFileFailsClearly(t *testing.T) {
 	requireCC(t)
 

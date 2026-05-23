@@ -15,7 +15,9 @@
 #if defined(_WIN32)
 #include <direct.h>
 #include <process.h>
+#include <windows.h>
 #else
+#include <dirent.h>
 #include <sys/time.h>
 #include <unistd.h>
 #endif
@@ -40,6 +42,20 @@ static char **__walk_host_argv = NULL;
 #else
 #define WALK_UNUSED
 #endif
+
+typedef struct {
+    WalkBool ok;
+    WalkBool value;
+    WalkString error;
+} FileActionResult;
+typedef struct { FileActionResult *items; WalkSize len; } WalkArrayFileActionResult;
+
+typedef struct {
+    WalkBool ok;
+    WalkString value;
+    WalkString error;
+} FileReadResult;
+typedef struct { FileReadResult *items; WalkSize len; } WalkArrayFileReadResult;
 
 typedef struct {
     WalkBool ok;
@@ -183,6 +199,15 @@ static WALK_UNUSED WalkString __walk_format_bool(WalkBool value) {
 
 static WALK_UNUSED WalkString __walk_format_string(WalkString value) {
     return value == NULL ? "null" : value;
+}
+
+static WALK_UNUSED WalkString __walk_copy_string(const char *value) {
+    if (value == NULL) { value = ""; }
+    size_t len = strlen(value);
+    char *out = (char *)malloc(len + 1);
+    if (out == NULL) { __walk_runtime_error("out of memory"); }
+    memcpy(out, value, len + 1);
+    return out;
 }
 
 static WALK_UNUSED WalkArrayInt __walk_array_push_int(WalkArrayInt array, WalkInt item) {
@@ -460,25 +485,11 @@ static WALK_UNUSED WalkBool __walk_is_valid_utf8(WalkString text) {
     return true;
 }
 
-static WALK_UNUSED void __walk_file_require_path(WalkString path) {
-    if (path == NULL || path[0] == '\0') { __walk_runtime_error("file path empty"); }
-}
-
-static WALK_UNUSED WalkBool __walk_file_exists(WalkString path) {
-    if (path == NULL || path[0] == '\0') { return false; }
-#if defined(_WIN32)
-    struct _stat info;
-    return _stat(path, &info) == 0;
-#else
-    struct stat info;
-    return stat(path, &info) == 0;
-#endif
-}
-
-static WALK_UNUSED WalkString __walk_file_read(WalkString path) {
-    __walk_file_require_path(path);
+static WALK_UNUSED WalkString __walk_file_read_try_value(WalkString path, WalkString *error) {
+    *error = "";
+    if (path == NULL || path[0] == '\0') { *error = "file path empty"; return ""; }
     FILE *file = fopen(path, "rb");
-    if (file == NULL) { __walk_runtime_error("file read failed"); }
+    if (file == NULL) { *error = "file read failed"; return ""; }
     size_t cap = 64;
     size_t len = 0;
     char *buffer = (char *)malloc(cap);
@@ -492,14 +503,16 @@ static WALK_UNUSED WalkString __walk_file_read(WalkString path) {
             if (ferror(file)) {
                 fclose(file);
                 free(buffer);
-                __walk_runtime_error("file read failed");
+                *error = "file read failed";
+                return "";
             }
             break;
         }
         if (ch == '\0') {
             fclose(file);
             free(buffer);
-            __walk_runtime_error("file contains null byte");
+            *error = "file contains null byte";
+            return "";
         }
         if (len + 1 >= cap) {
             if (cap > ((size_t)-1) / 2) {
@@ -521,27 +534,199 @@ static WALK_UNUSED WalkString __walk_file_read(WalkString path) {
     }
     if (fclose(file) != 0) {
         free(buffer);
-        __walk_runtime_error("file read failed");
+        *error = "file read failed";
+        return "";
     }
     buffer[len] = '\0';
     if (!__walk_is_valid_utf8(buffer)) {
         free(buffer);
-        __walk_runtime_error("file invalid utf-8");
+        *error = "file invalid utf-8";
+        return "";
     }
     return buffer;
 }
 
-static WALK_UNUSED void __walk_file_write(WalkString path, WalkString text) {
-    __walk_file_require_path(path);
-    if (text == NULL || !__walk_is_valid_utf8(text)) { __walk_runtime_error("file invalid utf-8"); }
-    FILE *file = fopen(path, "wb");
-    if (file == NULL) { __walk_runtime_error("file write failed"); }
+static WALK_UNUSED WalkString __walk_file_read(WalkString path) {
+    WalkString error = "";
+    WalkString value = __walk_file_read_try_value(path, &error);
+    if (error[0] != '\0') { __walk_runtime_error(error); }
+    return value;
+}
+
+static WALK_UNUSED FileReadResult __walk_file_try_read(WalkString path) {
+    WalkString error = "";
+    WalkString value = __walk_file_read_try_value(path, &error);
+    if (error[0] != '\0') { return (FileReadResult){.ok = false, .value = "", .error = error}; }
+    return (FileReadResult){.ok = true, .value = value, .error = ""};
+}
+
+static WALK_UNUSED WalkString __walk_file_write_try_error(WalkString path, WalkString text, const char *mode, const char *failure) {
+    if (path == NULL || path[0] == '\0') { return "file path empty"; }
+    if (text == NULL || !__walk_is_valid_utf8(text)) { return "file invalid utf-8"; }
+    FILE *file = fopen(path, mode);
+    if (file == NULL) { return failure; }
     size_t len = strlen(text);
     if (len > 0 && fwrite(text, 1, len, file) != len) {
         fclose(file);
-        __walk_runtime_error("file write failed");
+        return failure;
     }
-    if (fclose(file) != 0) { __walk_runtime_error("file write failed"); }
+    if (fclose(file) != 0) { return failure; }
+    return "";
+}
+
+static WALK_UNUSED void __walk_file_write(WalkString path, WalkString text) {
+    WalkString error = __walk_file_write_try_error(path, text, "wb", "file write failed");
+    if (error[0] != '\0') { __walk_runtime_error(error); }
+}
+
+static WALK_UNUSED FileActionResult __walk_file_try_write(WalkString path, WalkString text) {
+    WalkString error = __walk_file_write_try_error(path, text, "wb", "file write failed");
+    WalkBool ok = error[0] == '\0';
+    return (FileActionResult){.ok = ok, .value = ok, .error = error};
+}
+
+static WALK_UNUSED void __walk_file_append(WalkString path, WalkString text) {
+    WalkString error = __walk_file_write_try_error(path, text, "ab", "file append failed");
+    if (error[0] != '\0') { __walk_runtime_error(error); }
+}
+
+static WALK_UNUSED FileActionResult __walk_file_try_append(WalkString path, WalkString text) {
+    WalkString error = __walk_file_write_try_error(path, text, "ab", "file append failed");
+    WalkBool ok = error[0] == '\0';
+    return (FileActionResult){.ok = ok, .value = ok, .error = error};
+}
+
+static WALK_UNUSED WalkBool __walk_file_exists(WalkString path) {
+    if (path == NULL || path[0] == '\0') { return false; }
+#if defined(_WIN32)
+    struct _stat info;
+    return _stat(path, &info) == 0;
+#else
+    struct stat info;
+    return stat(path, &info) == 0;
+#endif
+}
+
+static WALK_UNUSED void __walk_array_string_push_owned(WalkString **items, WalkSize *len, WalkSize *cap, WalkString item) {
+    if (*len >= *cap) {
+        WalkSize next_cap = *cap == 0 ? 4 : *cap * 2;
+        if (next_cap <= *cap || (size_t)next_cap > ((size_t)-1) / sizeof(WalkString)) { __walk_runtime_error("out of memory"); }
+        WalkString *next_items = (WalkString *)realloc(*items, (size_t)next_cap * sizeof(WalkString));
+        if (next_items == NULL) { __walk_runtime_error("out of memory"); }
+        *items = next_items;
+        *cap = next_cap;
+    }
+    (*items)[*len] = item;
+    *len += 1;
+}
+
+static WALK_UNUSED int __walk_string_pointer_compare(const void *left, const void *right) {
+    const WalkString *a = (const WalkString *)left;
+    const WalkString *b = (const WalkString *)right;
+    return strcmp(*a, *b);
+}
+
+static WALK_UNUSED WalkArrayString __walk_dir_list(WalkString path) {
+    if (path == NULL || path[0] == '\0') { __walk_runtime_error("dir path empty"); }
+    WalkString *items = NULL;
+    WalkSize len = 0;
+    WalkSize cap = 0;
+#if defined(_WIN32)
+    size_t path_len = strlen(path);
+    WalkBool needs_sep = path_len > 0 && path[path_len - 1] != '/' && path[path_len - 1] != '\\';
+    size_t pattern_len = path_len + (needs_sep ? 2 : 1) + 1;
+    char *pattern = (char *)malloc(pattern_len);
+    if (pattern == NULL) { __walk_runtime_error("out of memory"); }
+    if (needs_sep) { snprintf(pattern, pattern_len, "%s\\*", path); } else { snprintf(pattern, pattern_len, "%s*", path); }
+    WIN32_FIND_DATAA data;
+    HANDLE handle = FindFirstFileA(pattern, &data);
+    free(pattern);
+    if (handle == INVALID_HANDLE_VALUE) { __walk_runtime_error("dir list failed"); }
+    do {
+        if (strcmp(data.cFileName, ".") != 0 && strcmp(data.cFileName, "..") != 0) { __walk_array_string_push_owned(&items, &len, &cap, __walk_copy_string(data.cFileName)); }
+    } while (FindNextFileA(handle, &data) != 0);
+    DWORD find_error = GetLastError();
+    FindClose(handle);
+    if (find_error != ERROR_NO_MORE_FILES) { __walk_runtime_error("dir list failed"); }
+#else
+    DIR *dir = opendir(path);
+    if (dir == NULL) { __walk_runtime_error("dir list failed"); }
+    for (;;) {
+        errno = 0;
+        struct dirent *entry = readdir(dir);
+        if (entry == NULL) {
+            if (errno != 0) { closedir(dir); __walk_runtime_error("dir list failed"); }
+            break;
+        }
+        if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) { __walk_array_string_push_owned(&items, &len, &cap, __walk_copy_string(entry->d_name)); }
+    }
+    if (closedir(dir) != 0) { __walk_runtime_error("dir list failed"); }
+#endif
+    if (len > 1) { qsort(items, (size_t)len, sizeof(WalkString), __walk_string_pointer_compare); }
+    return (WalkArrayString){items, len};
+}
+
+static WALK_UNUSED void __walk_dir_make(WalkString path) {
+    if (path == NULL || path[0] == '\0') { __walk_runtime_error("dir path empty"); }
+#if defined(_WIN32)
+    if (_mkdir(path) != 0) { __walk_runtime_error("dir make failed"); }
+#else
+    if (mkdir(path, 0777) != 0) { __walk_runtime_error("dir make failed"); }
+#endif
+}
+
+static WALK_UNUSED void __walk_dir_delete(WalkString path) {
+    if (path == NULL || path[0] == '\0') { __walk_runtime_error("dir path empty"); }
+#if defined(_WIN32)
+    if (_rmdir(path) != 0) { __walk_runtime_error("dir delete failed"); }
+#else
+    if (rmdir(path) != 0) { __walk_runtime_error("dir delete failed"); }
+#endif
+}
+
+static WALK_UNUSED WalkBool __walk_is_path_separator(char ch) {
+    return ch == '/' || ch == '\\';
+}
+
+static WALK_UNUSED WalkString __walk_path_join(WalkString left, WalkString right) {
+    if (left == NULL) { left = ""; }
+    if (right == NULL) { right = ""; }
+    size_t left_len = strlen(left);
+    size_t right_len = strlen(right);
+    if (left_len == 0) { return __walk_copy_string(right); }
+    if (right_len == 0) { return __walk_copy_string(left); }
+    WalkBool add_sep = !__walk_is_path_separator(left[left_len - 1]) && !__walk_is_path_separator(right[0]);
+#if defined(_WIN32)
+    const char sep = '\\';
+#else
+    const char sep = '/';
+#endif
+    size_t extra = add_sep ? 1 : 0;
+    if (left_len > ((size_t)-1) - right_len - extra - 1) { __walk_runtime_error("out of memory"); }
+    char *out = (char *)malloc(left_len + right_len + extra + 1);
+    if (out == NULL) { __walk_runtime_error("out of memory"); }
+    memcpy(out, left, left_len);
+    size_t offset = left_len;
+    if (add_sep) { out[offset++] = sep; }
+    memcpy(out + offset, right, right_len + 1);
+    return out;
+}
+
+static WALK_UNUSED WalkString __walk_path_base(WalkString path) {
+    if (path == NULL) { return __walk_copy_string(""); }
+    const char *base = path;
+    for (const char *p = path; *p != '\0'; p++) { if (__walk_is_path_separator(*p)) { base = p + 1; } }
+    return __walk_copy_string(base);
+}
+
+static WALK_UNUSED WalkString __walk_path_ext(WalkString path) {
+    if (path == NULL) { return __walk_copy_string(""); }
+    const char *dot = NULL;
+    for (const char *p = path; *p != '\0'; p++) {
+        if (__walk_is_path_separator(*p)) { dot = NULL; continue; }
+        if (*p == '.') { dot = p; }
+    }
+    return __walk_copy_string(dot == NULL ? "" : dot);
 }
 
 static WALK_UNUSED WalkInt __walk_process_arg_count(void) {
@@ -583,6 +768,15 @@ static WALK_UNUSED WalkString __walk_process_cwd(void) {
         if (cap > ((size_t)-1) / 2) { __walk_runtime_error("cwd path too long"); }
         cap *= 2;
     }
+}
+
+static WALK_UNUSED void __walk_process_chdir(WalkString path) {
+    if (path == NULL || path[0] == '\0') { __walk_runtime_error("chdir path empty"); }
+#if defined(_WIN32)
+    if (_chdir(path) != 0) { __walk_runtime_error("chdir failed"); }
+#else
+    if (chdir(path) != 0) { __walk_runtime_error("chdir failed"); }
+#endif
 }
 
 static WALK_UNUSED void __walk_process_exit(WalkInt code) {

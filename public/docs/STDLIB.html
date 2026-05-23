@@ -194,24 +194,70 @@ struct: ParseBoolResult
 <p>Parses exactly <code>true</code> or <code>false</code>. Other text returns <code>error &#39;invalid bool&#39;</code>.</p>
 <p>---</p>
 <h2 id="draft-file">Draft file</h2>
-<p>Draft <code>file</code> APIs are UTF-8 text helpers. They use native process paths: relative paths resolve against the current working directory, absolute paths are passed to the host OS, and this draft slice does not normalize paths or expand <code>~</code>. Empty paths runtime-stop for reads and writes.</p>
-<p><code>file.read</code> and <code>file.write</code> are fail-stop in this draft slice. Missing files, permission errors, invalid UTF-8, embedded null bytes on read, and write failures stop the native program with a <code>walk runtime error</code>.</p>
+<p>Draft <code>file</code> APIs are UTF-8 text helpers. They use native process paths: relative paths resolve against the current working directory, absolute paths are passed to the host OS, and this draft slice does not normalize paths or expand <code>~</code>. Empty paths runtime-stop for fail-stop file effects and reads.</p>
+<p><code>file.read</code>, <code>file.write</code>, and <code>file.append</code> are fail-stop helpers. Missing files, permission errors, invalid UTF-8, embedded null bytes on read, and write failures stop the native program with a <code>walk runtime error</code>.</p>
+<p>Recoverable file helpers return draft result structs:</p>
+<pre><code class="language-walk">struct: FileReadResult
+    ok bool
+    value string
+    error string
+
+struct: FileActionResult
+    ok bool
+    value bool
+    error string</code></pre>
+<p><code>error</code> is <code>&#39;&#39;</code> on success. <code>FileActionResult.value</code> is <code>true</code> on success and <code>false</code> on failure.</p>
 <h3 id="file-read-string-string">file.read(string) -&gt; string</h3>
 <p>Reads the whole UTF-8 text file into a runtime-owned string.</p>
+<h3 id="file-try-read-string-filereadresult">file.try_read(string) -&gt; FileReadResult</h3>
+<p>Reads a UTF-8 text file without runtime-stopping for ordinary file failures. Missing files return <code>ok false</code>, <code>value &#39;&#39;</code>, and <code>error &#39;file read failed&#39;</code>. Invalid UTF-8 and embedded null bytes are reported as file errors. Allocation failure still runtime-stops.</p>
 <h3 id="file-write-string-string-effect">file.write(string, string) -&gt; effect</h3>
 <p>Overwrites the target path with UTF-8 text. Create parent directories first; this helper does not create them.</p>
+<h3 id="file-try-write-string-string-fileactionresult">file.try_write(string, string) -&gt; FileActionResult</h3>
+<p>Attempts the same overwrite behavior as <code>file.write</code> and returns failures as data instead of runtime-stopping for ordinary file/path/write errors.</p>
+<h3 id="file-append-string-string-effect">file.append(string, string) -&gt; effect</h3>
+<p>Appends UTF-8 text to the target file, creating the file if needed. Create parent directories first; this helper does not create them.</p>
+<h3 id="file-try-append-string-string-fileactionresult">file.try_append(string, string) -&gt; FileActionResult</h3>
+<p>Attempts the same append behavior as <code>file.append</code> and returns failures as data instead of runtime-stopping for ordinary file/path/write errors.</p>
 <pre><code class="language-walk">imp: file
 
 do: file.write(&#39;note.txt&#39;, &#39;hello&#39;)
+do: file.append(&#39;note.txt&#39;, &#39; world&#39;)
 out: file.read(&#39;note.txt&#39;)</code></pre>
 <h3 id="file-exists-string-bool">file.exists(string) -&gt; bool</h3>
 <p>Returns <code>true</code> when the path currently exists according to the host OS and <code>false</code> when it does not. Empty paths return <code>false</code>.</p>
+<p>---</p>
+<h2 id="draft-dir">Draft dir</h2>
+<p>Draft <code>dir</code> APIs operate on native process paths. They do not normalize paths, expand <code>~</code>, or create missing parents. Directory failures are fail-stop in this draft slice.</p>
+<h3 id="dir-list-string-array-string">dir.list(string) -&gt; array[string]</h3>
+<p>Lists names directly inside a directory, excluding <code>.</code> and <code>..</code>. Results are sorted by bytewise string order for deterministic output. Returned names are not joined to the input path.</p>
+<h3 id="dir-make-string-effect">dir.make(string) -&gt; effect</h3>
+<p>Creates one directory. It fails if the parent directory is missing or the path already exists.</p>
+<h3 id="dir-delete-string-effect">dir.delete(string) -&gt; effect</h3>
+<p>Deletes one empty directory. It fails for non-empty directories.</p>
+<pre><code class="language-walk">imp: dir
+imp: path
+
+do: dir.make(&#39;data&#39;)
+do: dir.make(path.join(&#39;data&#39;, &#39;empty&#39;))
+var: files = dir.list(&#39;data&#39;)
+do: dir.delete(path.join(&#39;data&#39;, &#39;empty&#39;))</code></pre>
+<p>---</p>
+<h2 id="draft-path">Draft path</h2>
+<p>Draft <code>path</code> APIs are small host-path string helpers. They do not normalize paths, resolve <code>..</code>, check whether a path exists, or expand <code>~</code>.</p>
+<h3 id="path-join-string-string-string">path.join(string, string) -&gt; string</h3>
+<p>Joins two path segments with the host separator when neither side already has a separator at the join point.</p>
+<h3 id="path-base-string-string">path.base(string) -&gt; string</h3>
+<p>Returns the substring after the final <code>/</code> or <code>\</code> path separator. A path ending with a separator returns <code>&#39;&#39;</code>.</p>
+<h3 id="path-ext-string-string">path.ext(string) -&gt; string</h3>
+<p>Returns the final extension in the last path segment, including the dot. Paths with no dot in the final segment return <code>&#39;&#39;</code>.</p>
 <p>---</p>
 <h2 id="draft-process">Draft process</h2>
 <pre><code class="language-walk">imp: process
 
 out: process.arg_count()
 out: process.cwd()
+do: process.chdir(&#39;data&#39;)
 do: process.exit(0)</code></pre>
 <h3 id="process-args-array-string">process.args() -&gt; array[string]</h3>
 <p>Returns command-line arguments passed after the executable path.</p>
@@ -221,6 +267,8 @@ do: process.exit(0)</code></pre>
 <p>Returns an environment variable value, or <code>null</code> when the variable is not set.</p>
 <h3 id="process-cwd-string">process.cwd() -&gt; string</h3>
 <p>Returns the current working directory as a runtime-owned string.</p>
+<h3 id="process-chdir-string-effect">process.chdir(string) -&gt; effect</h3>
+<p>Changes the native process current working directory. This is process-global state; tests and programs that use it should change back when needed. Empty paths and failed changes runtime-stop.</p>
 <h3 id="process-exit-int-effect">process.exit(int) -&gt; effect</h3>
 <p>Exits the native process with the given status code.</p>
 <p>---</p>
@@ -233,8 +281,7 @@ do: process.exit(0)</code></pre>
 <p>---</p>
 <h2 id="draft-apis">Draft APIs</h2>
 <p>These names are planned draft APIs only. They are documented here so naming can stay consistent, but they are not stable, not importable, and not compatibility-protected in v1.9.</p>
-<pre><code class="language-text">file.append
-json.parse
+<pre><code class="language-text">json.parse
 json.stringify
 matrix.rows
 matrix.cols

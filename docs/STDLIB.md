@@ -296,25 +296,65 @@ Parses exactly `true` or `false`. Other text returns `error 'invalid bool'`.
 Draft `file` APIs are UTF-8 text helpers. They use native process paths:
 relative paths resolve against the current working directory, absolute paths
 are passed to the host OS, and this draft slice does not normalize paths or
-expand `~`. Empty paths runtime-stop for reads and writes.
+expand `~`. Empty paths runtime-stop for fail-stop file effects and reads.
 
-`file.read` and `file.write` are fail-stop in this draft slice. Missing files,
-permission errors, invalid UTF-8, embedded null bytes on read, and write
-failures stop the native program with a `walk runtime error`.
+`file.read`, `file.write`, and `file.append` are fail-stop helpers. Missing
+files, permission errors, invalid UTF-8, embedded null bytes on read, and
+write failures stop the native program with a `walk runtime error`.
+
+Recoverable file helpers return draft result structs:
+
+```walk
+struct: FileReadResult
+    ok bool
+    value string
+    error string
+
+struct: FileActionResult
+    ok bool
+    value bool
+    error string
+```
+
+`error` is `''` on success. `FileActionResult.value` is `true` on success and
+`false` on failure.
 
 ### file.read(string) -> string
 
 Reads the whole UTF-8 text file into a runtime-owned string.
+
+### file.try_read(string) -> FileReadResult
+
+Reads a UTF-8 text file without runtime-stopping for ordinary file failures.
+Missing files return `ok false`, `value ''`, and `error 'file read failed'`.
+Invalid UTF-8 and embedded null bytes are reported as file errors. Allocation
+failure still runtime-stops.
 
 ### file.write(string, string) -> effect
 
 Overwrites the target path with UTF-8 text. Create parent directories first;
 this helper does not create them.
 
+### file.try_write(string, string) -> FileActionResult
+
+Attempts the same overwrite behavior as `file.write` and returns failures as
+data instead of runtime-stopping for ordinary file/path/write errors.
+
+### file.append(string, string) -> effect
+
+Appends UTF-8 text to the target file, creating the file if needed. Create
+parent directories first; this helper does not create them.
+
+### file.try_append(string, string) -> FileActionResult
+
+Attempts the same append behavior as `file.append` and returns failures as data
+instead of runtime-stopping for ordinary file/path/write errors.
+
 ```walk
 imp: file
 
 do: file.write('note.txt', 'hello')
+do: file.append('note.txt', ' world')
 out: file.read('note.txt')
 ```
 
@@ -325,6 +365,61 @@ Returns `true` when the path currently exists according to the host OS and
 
 ---
 
+## Draft dir
+
+Draft `dir` APIs operate on native process paths. They do not normalize paths,
+expand `~`, or create missing parents. Directory failures are fail-stop in this
+draft slice.
+
+### dir.list(string) -> array[string]
+
+Lists names directly inside a directory, excluding `.` and `..`. Results are
+sorted by bytewise string order for deterministic output. Returned names are
+not joined to the input path.
+
+### dir.make(string) -> effect
+
+Creates one directory. It fails if the parent directory is missing or the path
+already exists.
+
+### dir.delete(string) -> effect
+
+Deletes one empty directory. It fails for non-empty directories.
+
+```walk
+imp: dir
+imp: path
+
+do: dir.make('data')
+do: dir.make(path.join('data', 'empty'))
+var: files = dir.list('data')
+do: dir.delete(path.join('data', 'empty'))
+```
+
+---
+
+## Draft path
+
+Draft `path` APIs are small host-path string helpers. They do not normalize
+paths, resolve `..`, check whether a path exists, or expand `~`.
+
+### path.join(string, string) -> string
+
+Joins two path segments with the host separator when neither side already has a
+separator at the join point.
+
+### path.base(string) -> string
+
+Returns the substring after the final `/` or `\` path separator. A path ending
+with a separator returns `''`.
+
+### path.ext(string) -> string
+
+Returns the final extension in the last path segment, including the dot. Paths
+with no dot in the final segment return `''`.
+
+---
+
 ## Draft process
 
 ```walk
@@ -332,6 +427,7 @@ imp: process
 
 out: process.arg_count()
 out: process.cwd()
+do: process.chdir('data')
 do: process.exit(0)
 ```
 
@@ -350,6 +446,12 @@ Returns an environment variable value, or `null` when the variable is not set.
 ### process.cwd() -> string
 
 Returns the current working directory as a runtime-owned string.
+
+### process.chdir(string) -> effect
+
+Changes the native process current working directory. This is process-global
+state; tests and programs that use it should change back when needed. Empty
+paths and failed changes runtime-stop.
 
 ### process.exit(int) -> effect
 
@@ -381,7 +483,6 @@ stay consistent, but they are not stable, not importable, and not
 compatibility-protected in v1.9.
 
 ```text
-file.append
 json.parse
 json.stringify
 matrix.rows

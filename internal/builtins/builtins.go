@@ -63,6 +63,24 @@ func init() {
 		},
 		Draft: true,
 	})
+	registerStruct(Struct{
+		Name: "FileReadResult",
+		Fields: []ast.StructField{
+			field("ok", ast.Basic(ast.TypeBool)),
+			field("value", ast.Basic(ast.TypeString)),
+			field("error", ast.Basic(ast.TypeString)),
+		},
+		Draft: true,
+	})
+	registerStruct(Struct{
+		Name: "FileActionResult",
+		Fields: []ast.StructField{
+			field("ok", ast.Basic(ast.TypeBool)),
+			field("value", ast.Basic(ast.TypeBool)),
+			field("error", ast.Basic(ast.TypeString)),
+		},
+		Draft: true,
+	})
 	register(Function{
 		Module: "io",
 		Name:   "write",
@@ -114,6 +132,14 @@ func init() {
 	})
 	register(Function{
 		Module: "file",
+		Name:   "try_read",
+		Params: []ast.Type{ast.Basic(ast.TypeString)},
+		Return: ast.Struct("FileReadResult"),
+		Draft:  true,
+		CName:  "__walk_file_try_read",
+	})
+	register(Function{
+		Module: "file",
 		Name:   "write",
 		Params: []ast.Type{ast.Basic(ast.TypeString), ast.Basic(ast.TypeString)},
 		Return: ast.Basic(ast.TypeVoid),
@@ -123,11 +149,86 @@ func init() {
 	})
 	register(Function{
 		Module: "file",
+		Name:   "try_write",
+		Params: []ast.Type{ast.Basic(ast.TypeString), ast.Basic(ast.TypeString)},
+		Return: ast.Struct("FileActionResult"),
+		Draft:  true,
+		CName:  "__walk_file_try_write",
+	})
+	register(Function{
+		Module: "file",
+		Name:   "append",
+		Params: []ast.Type{ast.Basic(ast.TypeString), ast.Basic(ast.TypeString)},
+		Return: ast.Basic(ast.TypeVoid),
+		Effect: true,
+		Draft:  true,
+		CName:  "__walk_file_append",
+	})
+	register(Function{
+		Module: "file",
+		Name:   "try_append",
+		Params: []ast.Type{ast.Basic(ast.TypeString), ast.Basic(ast.TypeString)},
+		Return: ast.Struct("FileActionResult"),
+		Draft:  true,
+		CName:  "__walk_file_try_append",
+	})
+	register(Function{
+		Module: "file",
 		Name:   "exists",
 		Params: []ast.Type{ast.Basic(ast.TypeString)},
 		Return: ast.Basic(ast.TypeBool),
 		Draft:  true,
 		CName:  "__walk_file_exists",
+	})
+	register(Function{
+		Module: "dir",
+		Name:   "list",
+		Params: []ast.Type{ast.Basic(ast.TypeString)},
+		Return: ast.ArrayOf(ast.Basic(ast.TypeString)),
+		Draft:  true,
+		CName:  "__walk_dir_list",
+	})
+	register(Function{
+		Module: "dir",
+		Name:   "make",
+		Params: []ast.Type{ast.Basic(ast.TypeString)},
+		Return: ast.Basic(ast.TypeVoid),
+		Effect: true,
+		Draft:  true,
+		CName:  "__walk_dir_make",
+	})
+	register(Function{
+		Module: "dir",
+		Name:   "delete",
+		Params: []ast.Type{ast.Basic(ast.TypeString)},
+		Return: ast.Basic(ast.TypeVoid),
+		Effect: true,
+		Draft:  true,
+		CName:  "__walk_dir_delete",
+	})
+	register(Function{
+		Module: "path",
+		Name:   "join",
+		Params: []ast.Type{ast.Basic(ast.TypeString), ast.Basic(ast.TypeString)},
+		Return: ast.Basic(ast.TypeString),
+		Draft:  true,
+		CName:  "__walk_path_join",
+	})
+	register(Function{
+		Module: "path",
+		Name:   "base",
+		Params: []ast.Type{ast.Basic(ast.TypeString)},
+		Return: ast.Basic(ast.TypeString),
+		Draft:  true,
+		CName:  "__walk_path_base",
+	})
+	register(Function{
+		Module: "path",
+		Name:   "ext",
+		Params: []ast.Type{ast.Basic(ast.TypeString)},
+		Return: ast.Basic(ast.TypeString),
+		Draft:  true,
+		CName:  "__walk_path_ext",
 	})
 	register(Function{
 		Module: "process",
@@ -157,6 +258,15 @@ func init() {
 		Return: ast.Basic(ast.TypeString),
 		Draft:  true,
 		CName:  "__walk_process_cwd",
+	})
+	register(Function{
+		Module: "process",
+		Name:   "chdir",
+		Params: []ast.Type{ast.Basic(ast.TypeString)},
+		Return: ast.Basic(ast.TypeVoid),
+		Effect: true,
+		Draft:  true,
+		CName:  "__walk_process_chdir",
 	})
 	register(Function{
 		Module: "process",

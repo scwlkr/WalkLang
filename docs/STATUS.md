@@ -2,9 +2,43 @@
 
 Stable language contract: v1.9.
 
-Current compiler/tooling/docs release: v5.8.0 draft local file text IO.
+Current compiler/tooling/docs release: v5.9.0 draft local filesystem IO completion.
 
 Experimental implemented language surface: v2.2.
+
+State: v5.9.0 completes `IO_PLAN.md` Roadmap Phase 2, Local Filesystem IO, as
+draft compiler APIs. Draft text file helpers now cover fail-stop
+`file.read`, `file.write`, `file.append`, and `file.exists`, plus recoverable
+`file.try_read`, `file.try_write`, and `file.try_append` results through
+`FileReadResult` and `FileActionResult`. Draft directory/path helpers now cover
+`dir.list`, `dir.make`, `dir.delete`, `path.join`, `path.base`, and `path.ext`.
+Draft `process.chdir` is available as an explicit `do:` effect and is covered
+by isolated cwd tests. Relative and absolute paths remain native host paths
+without normalization or `~` expansion; directory listings return direct child
+names sorted for deterministic output; directory creation/deletion is
+single-directory only; and fail-stop file/directory/cwd helpers report clear
+runtime errors. Stable language contract remains v1.9. JSON, process spawning,
+terminal raw mode, HTTP, and browser targets remain gated by later
+`IO_PLAN.md` phases.
+
+v5.9.0 verification on 2026-05-23: focused Phase 2 tests first failed because
+`dir`, `path`, `file.append`, `file.try_*`, and `process.chdir` were not
+implemented, then
+`go test ./cmd/walk -run
+'TestDraftLocalFilesystemPhase2CompletesFileDirPathAndCwd|TestDraftRecoverableFileResults|TestDraftFileTextIOReadsWritesAndChecksExistence|TestDraftFileReadMissingFileFailsClearly|TestDraftFileReadInvalidUTF8FailsClearly|TestV13FailFixturesHaveExpectedDiagnostics'
+-count=1` passed after implementation; generated C snapshots were refreshed
+and `go test ./cmd/walk -run
+'TestDraftLocalFilesystemPhase2CompletesFileDirPathAndCwd|TestDraftRecoverableFileResults|TestV13GeneratedCSnapshots|TestV13FailFixturesHaveExpectedDiagnostics|TestV19ReleaseDocsArePresent'
+-count=1` passed; full `go test -count=1 ./...` passed; `go build -trimpath
+-ldflags "-X main.version=v5.9.0" -o build/walk ./cmd/walk` passed;
+`./build/walk version` reported `v5.9.0`; `./build/walk check
+--warnings=error tests/pass/do_effects.walk` passed; `WALK_BIN=$PWD/build/walk
+scripts/stress-v1.sh` passed and reported `v1.9 stress ok`;
+`scripts/build-docs-site.sh` passed; `scripts/check-docs-site.sh` passed after
+staging generated docs; `scripts/release.sh v5.9.0 <temp>/release` produced 5
+platform artifacts plus `SHA256SUMS`; `wc -l <temp>/release/SHA256SUMS`
+reported 5 checksum lines; and the host release binary reported `v5.9.0` from
+`walk version`.
 
 State: v5.8.0 starts `IO_PLAN.md` Roadmap Phase 2, Local Filesystem IO, with a
 draft UTF-8 text-file slice. Draft `file.read`, `file.write`, and
@@ -241,6 +275,6 @@ Playground example update on 2026-05-22: `playground/route_ranker.walk` now demo
 
 CLI run shortcut update on 2026-05-22: `walk run <source.walk>` now compiles a single file to a temporary native executable, runs it, streams program input and output, and removes the temporary build directory; `walk <source.walk>` is a direct shorthand for the same flow. Verification passed with focused `go test ./cmd/walk -run TestRunCommandRunsSingleFileAndDirectFileAlias -count=1`, `go build -o build/walk ./cmd/walk`, `./build/walk run playground/route_ranker.walk`, `./build/walk playground/route_ranker.walk`, full `go test -count=1 ./...`, `scripts/check-docs-site.sh`, `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh`, `scripts/release.sh v5.1.0 <temp>/release`, a 5-line `SHA256SUMS` check, host release binary `walk version` reporting `v5.1.0`, and `git diff --check`.
 
-Next: continue the remaining `IO_PLAN.md` Roadmap Phase 2 work with
-`file.append`, directory/path helpers, `process.chdir`, and recoverable file
-result structs before moving to Phase 3 process/data interop.
+Next: continue `IO_PLAN.md` Roadmap Phase 3 process/data interop only after
+the accepted filesystem result shape, command result type, deterministic
+process tests, and JSON data-model decisions are ready.

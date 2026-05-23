@@ -4,6 +4,43 @@
 
 No unreleased changes.
 
+## v5.9.0 - Draft Local Filesystem IO Completion
+
+Date: 2026-05-23
+
+v5.9.0 completes `IO_PLAN.md` Roadmap Phase 2 as draft compiler APIs while
+keeping the stable language contract at v1.9.
+
+### Added
+
+- Draft `file.append`, `file.try_read`, `file.try_write`, and `file.try_append` helpers.
+- Draft `FileReadResult` and `FileActionResult` structs for recoverable file operations.
+- Draft `dir.list`, `dir.make`, and `dir.delete` helpers.
+- Draft `path.join`, `path.base`, and `path.ext` helpers.
+- Draft `process.chdir` effect helper.
+- Native temp-directory tests covering append, directory creation/list/delete, path building, cwd mutation isolation, recoverable file results, and invalid-use diagnostics.
+
+### Notes
+
+- The stable language contract remains v1.9.
+- Fail-stop file, directory, and cwd helpers still use clear `walk runtime error` messages for unrecoverable draft behavior.
+- Recoverable `file.try_*` helpers report ordinary file/path/write/read failures as result structs; allocation failure still runtime-stops.
+- JSON, process spawning, terminal raw mode, HTTP, and browser targets remain gated by later `IO_PLAN.md` roadmap phases.
+
+### Breaking Changes
+
+None.
+
+### Upgrade
+
+Regenerate docs and release artifacts with:
+
+```bash
+scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.9.0 dist
+```
+
 ## v5.8.0 - Draft Local File Text IO
 
 Date: 2026-05-23
