@@ -25,8 +25,8 @@ testing
 No other built-in module is stable in v1.9.
 
 The current compiler also includes draft `io`, `parse`, `process`, `file`,
-`dir`, `path`, and `json` modules. They are importable and tested, but they are not
-compatibility-protected in v1.9.
+`dir`, `path`, `json`, `term`, `http`, and `html` modules. They are importable
+and tested, but they are not compatibility-protected in v1.9.
 
 Draft APIs may expose draft result structs. They are documented here so current
 compiler behavior is visible, but they are not part of the stable v1.9
@@ -631,6 +631,89 @@ positive integer, then `24`.
 
 Reads one key from an interactive stdin terminal. On POSIX hosts this enters raw
 mode for a single key read and restores the terminal before returning.
+
+---
+
+## Draft http
+
+Draft `http` APIs are recoverable value-returning helpers. They do not
+runtime-stop for ordinary network, DNS, TLS, timeout, missing-backend, or HTTP
+status failures.
+
+```walk
+imp: http
+
+var: response = http.get('http://127.0.0.1:8080/health')
+out: response.ok
+out: response.status
+out: response.body
+out: response.error
+```
+
+Recoverable HTTP helpers return:
+
+```walk
+struct: HttpResult
+    ok bool
+    status int
+    body string
+    error string
+```
+
+`ok` is true for status codes `200` through `399`. Other status codes return
+`ok false`, preserve `body`, and set `error 'http status'`. Runtime backend
+failures such as missing `curl`, DNS failure, TLS failure, connection failure,
+timeout, response-size failure, or invalid output return `ok false` with
+`status` from the backend when available, otherwise `-1`.
+
+Draft HTTP uses the system `curl` executable through argv-style process
+execution. It does not invoke a shell. Redirects are followed, the timeout is
+10 seconds, response bodies are capped at 1 MiB, and response bodies are UTF-8
+text only. See [Draft networking](NETWORKING.md) for the security and backend
+policy.
+
+### http.get(string) -> HttpResult
+
+Sends a `GET` request to the URL.
+
+### http.post(string, string) -> HttpResult
+
+Sends a `POST` request with the string body.
+
+### http.request(string, string, string) -> HttpResult
+
+Sends a request with `method`, `url`, and `body`. Empty method or URL returns a
+recoverable error before any runtime backend is started.
+
+---
+
+## Draft html
+
+Draft `html` helpers generate escaped HTML strings only. They do not write
+files, start a web server, run a browser, attach assets, or create a DOM.
+
+```walk
+imp: html
+
+out: html.h1('Walk <Lang>')
+out: html.p('copy & text')
+```
+
+### html.escape(string) -> string
+
+Escapes `&`, `<`, `>`, `"`, and `'` for HTML text contexts.
+
+### html.h1(string) -> string
+
+Returns an escaped `<h1>...</h1>` string.
+
+### html.p(string) -> string
+
+Returns an escaped `<p>...</p>` string.
+
+### html.button(string) -> string
+
+Returns an escaped `<button>...</button>` string.
 
 ---
 

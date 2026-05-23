@@ -4,6 +4,53 @@
 
 No unreleased changes.
 
+## v5.12.0 - Draft Network And Rich Runtime IO
+
+Date: 2026-05-23
+
+v5.12.0 completes `IO_PLAN.md` Roadmap Phase 5 as draft compiler APIs and
+design docs while keeping the stable language contract at v1.9.
+
+### Added
+
+- Draft `http.get`, `http.post`, and `http.request` helpers.
+- Draft `HttpResult` for recoverable HTTP status, body, and error data.
+- Draft `html.escape`, `html.h1`, `html.p`, and `html.button` text helpers.
+- Networking security, timeout, response-size, TLS/backend, and no-public-network
+  test policy in `docs/NETWORKING.md`.
+- Rich runtime design boundaries for HTML helpers, web servers, native graphics,
+  WASM/browser backend, and compiler explorer/playground integration in
+  `docs/RICH_RUNTIMES.md`.
+- Native local-loopback HTTP tests and HTML escaping tests for the draft Phase 5
+  surface.
+
+### Notes
+
+- The stable language contract remains v1.9.
+- Draft HTTP delegates to the system `curl` executable at runtime instead of
+  linking a C TLS library into generated output.
+- Draft HTTP does not invoke a shell, follows redirects, uses a 10 second
+  timeout, caps response bodies at 1 MiB, and treats response bodies as UTF-8
+  text.
+- HTTP status codes `200` through `399` set `ok true`; other status codes
+  preserve the body and return `ok false` with `error 'http status'`.
+- `html` helpers generate escaped strings only; they do not start a web server,
+  run a browser, attach assets, or own a DOM.
+
+### Breaking Changes
+
+None.
+
+### Upgrade
+
+Regenerate docs and release artifacts with:
+
+```bash
+scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.12.0 dist
+```
+
 ## v5.11.0 - Draft Terminal UX IO
 
 Date: 2026-05-23

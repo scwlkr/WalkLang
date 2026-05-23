@@ -19,6 +19,7 @@
 <h2>Language</h2>
 <a href="SYNTAX.html">v1 Syntax Guide</a>
 <a href="SPEC.html">v1 Specification</a>
+<a href="LANGUAGE_CONCEPTS.html">Language Concepts And Documentation Standard</a>
 <a href="STDLIB.html">v1.9 Standard Library</a>
 <a href="ERRORS.html">v1 Diagnostics</a>
 <a href="COMPATIBILITY.html">v1.9 Compatibility</a>
@@ -32,6 +33,8 @@
 <a href="V4.html">v4 Professional Tooling</a>
 <a href="V5.html">v5 Runtime and Backend Maturity</a>
 <a href="V5_1.html">v5.1 Public Docs And Reference Site</a>
+<a href="NETWORKING.html">Draft Networking</a>
+<a href="RICH_RUNTIMES.html">Rich Runtime Tracks</a>
 <h2>Reference</h2>
 <a href="reference/api.html">API Reference</a>
 <a href="reference/index.html">Reference index</a>
@@ -755,17 +758,17 @@ online package index
 formatter service
 compiler explorer</code></pre>
 <p>Package example target:</p>
-<pre><code class="language-walk">imp: http # later only</code></pre>
+<pre><code class="language-walk">imp: http # draft only</code></pre>
 <p>Networking target:</p>
 <pre><code class="language-walk">imp: http
 
-var: body = http.get(&#39;https://example.com&#39;)
-out: body</code></pre>
-<p>Only add networking when:</p>
-<pre><code class="language-text">error handling is mature
-stdlib design is stable
-package/project model exists
-security rules are documented</code></pre>
+var: response = http.get(&#39;https://example.com&#39;)
+out: response.body</code></pre>
+<p>Draft HTTP client helpers are implemented in v5.12.0. Broader networking and server/runtime work still requires:</p>
+<pre><code class="language-text">custom header/body design
+server package design
+async/event-loop decisions
+package/runtime boundary decisions</code></pre>
 <p>---</p>
 <h2 id="advanced-future-ideas">Advanced Future Ideas</h2>
 <p>These are not promises.</p>

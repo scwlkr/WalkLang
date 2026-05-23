@@ -19,6 +19,7 @@
 <h2>Language</h2>
 <a href="SYNTAX.html">v1 Syntax Guide</a>
 <a href="SPEC.html">v1 Specification</a>
+<a href="LANGUAGE_CONCEPTS.html">Language Concepts And Documentation Standard</a>
 <a href="STDLIB.html">v1.9 Standard Library</a>
 <a href="ERRORS.html">v1 Diagnostics</a>
 <a href="COMPATIBILITY.html">v1.9 Compatibility</a>
@@ -32,6 +33,8 @@
 <a href="V4.html">v4 Professional Tooling</a>
 <a href="V5.html">v5 Runtime and Backend Maturity</a>
 <a href="V5_1.html">v5.1 Public Docs And Reference Site</a>
+<a href="NETWORKING.html">Draft Networking</a>
+<a href="RICH_RUNTIMES.html">Rich Runtime Tracks</a>
 <h2>Reference</h2>
 <a href="reference/api.html">API Reference</a>
 <a href="reference/index.html">Reference index</a>
@@ -52,6 +55,40 @@
 <h1 id="walklang-release-notes">WalkLang Release Notes</h1>
 <h2 id="unreleased">Unreleased</h2>
 <p>No unreleased changes.</p>
+<h2 id="v5-12-0-draft-network-and-rich-runtime-io">v5.12.0 - Draft Network And Rich Runtime IO</h2>
+<p>Date: 2026-05-23</p>
+<p>v5.12.0 completes <code>IO_PLAN.md</code> Roadmap Phase 5 as draft compiler APIs and design docs while keeping the stable language contract at v1.9.</p>
+<h3 id="added">Added</h3>
+<ul>
+<li>Draft <code>http.get</code>, <code>http.post</code>, and <code>http.request</code> helpers.</li>
+<li>Draft <code>HttpResult</code> for recoverable HTTP status, body, and error data.</li>
+<li>Draft <code>html.escape</code>, <code>html.h1</code>, <code>html.p</code>, and <code>html.button</code> text helpers.</li>
+<li>Networking security, timeout, response-size, TLS/backend, and no-public-network</li>
+<p>test policy in <code>docs/NETWORKING.md</code>.</p>
+<li>Rich runtime design boundaries for HTML helpers, web servers, native graphics,</li>
+<p>WASM/browser backend, and compiler explorer/playground integration in <code>docs/RICH_RUNTIMES.md</code>.</p>
+<li>Native local-loopback HTTP tests and HTML escaping tests for the draft Phase 5</li>
+<p>surface.</p>
+</ul>
+<h3 id="notes">Notes</h3>
+<ul>
+<li>The stable language contract remains v1.9.</li>
+<li>Draft HTTP delegates to the system <code>curl</code> executable at runtime instead of</li>
+<p>linking a C TLS library into generated output.</p>
+<li>Draft HTTP does not invoke a shell, follows redirects, uses a 10 second</li>
+<p>timeout, caps response bodies at 1 MiB, and treats response bodies as UTF-8 text.</p>
+<li>HTTP status codes <code>200</code> through <code>399</code> set <code>ok true</code>; other status codes</li>
+<p>preserve the body and return <code>ok false</code> with <code>error &#39;http status&#39;</code>.</p>
+<li><code>html</code> helpers generate escaped strings only; they do not start a web server,</li>
+<p>run a browser, attach assets, or own a DOM.</p>
+</ul>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<p>None.</p>
+<h3 id="upgrade">Upgrade</h3>
+<p>Regenerate docs and release artifacts with:</p>
+<pre><code class="language-bash">scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.12.0 dist</code></pre>
 <h2 id="v5-11-0-draft-terminal-ux-io">v5.11.0 - Draft Terminal UX IO</h2>
 <p>Date: 2026-05-23</p>
 <p>v5.11.0 completes <code>IO_PLAN.md</code> Roadmap Phase 4 as draft compiler APIs while keeping the stable language contract at v1.9.</p>

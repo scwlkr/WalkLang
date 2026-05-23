@@ -111,6 +111,16 @@ func init() {
 		},
 		Draft: true,
 	})
+	registerStruct(Struct{
+		Name: "HttpResult",
+		Fields: []ast.StructField{
+			field("ok", ast.Basic(ast.TypeBool)),
+			field("status", ast.Basic(ast.TypeInt)),
+			field("body", ast.Basic(ast.TypeString)),
+			field("error", ast.Basic(ast.TypeString)),
+		},
+		Draft: true,
+	})
 	register(Function{
 		Module: "io",
 		Name:   "write",
@@ -467,6 +477,62 @@ func init() {
 		Return: ast.Struct("IOReadResult"),
 		Draft:  true,
 		CName:  "__walk_term_read_key",
+	})
+	register(Function{
+		Module: "http",
+		Name:   "get",
+		Params: []ast.Type{ast.Basic(ast.TypeString)},
+		Return: ast.Struct("HttpResult"),
+		Draft:  true,
+		CName:  "__walk_http_get",
+	})
+	register(Function{
+		Module: "http",
+		Name:   "post",
+		Params: []ast.Type{ast.Basic(ast.TypeString), ast.Basic(ast.TypeString)},
+		Return: ast.Struct("HttpResult"),
+		Draft:  true,
+		CName:  "__walk_http_post",
+	})
+	register(Function{
+		Module: "http",
+		Name:   "request",
+		Params: []ast.Type{ast.Basic(ast.TypeString), ast.Basic(ast.TypeString), ast.Basic(ast.TypeString)},
+		Return: ast.Struct("HttpResult"),
+		Draft:  true,
+		CName:  "__walk_http_request",
+	})
+	register(Function{
+		Module: "html",
+		Name:   "escape",
+		Params: []ast.Type{ast.Basic(ast.TypeString)},
+		Return: ast.Basic(ast.TypeString),
+		Draft:  true,
+		CName:  "__walk_html_escape",
+	})
+	register(Function{
+		Module: "html",
+		Name:   "h1",
+		Params: []ast.Type{ast.Basic(ast.TypeString)},
+		Return: ast.Basic(ast.TypeString),
+		Draft:  true,
+		CName:  "__walk_html_h1",
+	})
+	register(Function{
+		Module: "html",
+		Name:   "p",
+		Params: []ast.Type{ast.Basic(ast.TypeString)},
+		Return: ast.Basic(ast.TypeString),
+		Draft:  true,
+		CName:  "__walk_html_p",
+	})
+	register(Function{
+		Module: "html",
+		Name:   "button",
+		Params: []ast.Type{ast.Basic(ast.TypeString)},
+		Return: ast.Basic(ast.TypeString),
+		Draft:  true,
+		CName:  "__walk_html_button",
 	})
 }
 

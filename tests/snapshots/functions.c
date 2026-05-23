@@ -69,6 +69,14 @@ typedef struct { FileReadResult *items; WalkSize len; } WalkArrayFileReadResult;
 
 typedef struct {
     WalkBool ok;
+    WalkInt status;
+    WalkString body;
+    WalkString error;
+} HttpResult;
+typedef struct { HttpResult *items; WalkSize len; } WalkArrayHttpResult;
+
+typedef struct {
+    WalkBool ok;
     WalkString value;
     WalkString error;
 } IOReadResult;
@@ -1111,6 +1119,134 @@ static WALK_UNUSED ProcessResult __walk_process_run_shell(WalkString command) {
 
 static WALK_UNUSED void __walk_process_exit(WalkInt code) {
     exit((int)code);
+}
+
+static WALK_UNUSED HttpResult __walk_http_result(WalkBool ok, WalkInt status, WalkString body, WalkString error) {
+    return (HttpResult){.ok = ok, .status = status, .body = body == NULL ? "" : body, .error = error == NULL ? "" : error};
+}
+
+static WALK_UNUSED HttpResult __walk_http_parse(ProcessResult result) {
+    if (!result.ok) { return __walk_http_result(false, result.status, result.stdout, result.error[0] != '\0' ? result.error : result.stderr); }
+    const char *marker = "\n__WALK_HTTP_STATUS:";
+    const char *last = NULL;
+    const char *scan = result.stdout;
+    while ((scan = strstr(scan, marker)) != NULL) { last = scan; scan += 1; }
+    if (last == NULL) { return __walk_http_result(false, -1, result.stdout, "http status missing"); }
+    const char *status_text = last + strlen(marker);
+    errno = 0;
+    char *end = NULL;
+    long long status = strtoll(status_text, &end, 10);
+    if (end == status_text || *end != '\0' || errno == ERANGE) { return __walk_http_result(false, -1, result.stdout, "http status invalid"); }
+    size_t body_len = (size_t)(last - result.stdout);
+    char *body = (char *)malloc(body_len + 1);
+    if (body == NULL) { __walk_runtime_error("out of memory"); }
+    memcpy(body, result.stdout, body_len);
+    body[body_len] = '\0';
+    WalkBool ok = status >= 200 && status < 400;
+    return __walk_http_result(ok, (WalkInt)status, body, ok ? "" : "http status");
+}
+
+static WALK_UNUSED HttpResult __walk_http_request(WalkString method, WalkString url, WalkString body) {
+    if (method == NULL || method[0] == '\0') { return __walk_http_result(false, -1, "", "http method empty"); }
+    if (url == NULL || url[0] == '\0') { return __walk_http_result(false, -1, "", "http url empty"); }
+    if (body == NULL) { body = ""; }
+    WalkString items[14];
+    WalkSize len = 0;
+    items[len++] = "--silent";
+    items[len++] = "--show-error";
+    items[len++] = "--location";
+    items[len++] = "--max-time";
+    items[len++] = "10";
+    items[len++] = "--max-filesize";
+    items[len++] = "1048576";
+    items[len++] = "--write-out";
+    items[len++] = "\n__WALK_HTTP_STATUS:%{http_code}";
+    items[len++] = "-X";
+    items[len++] = method;
+    if (body[0] != '\0') {
+        items[len++] = "--data-binary";
+        items[len++] = body;
+    }
+    items[len++] = url;
+    return __walk_http_parse(__walk_process_run("curl", (WalkArrayString){items, len}));
+}
+
+static WALK_UNUSED HttpResult __walk_http_get(WalkString url) {
+    return __walk_http_request("GET", url, "");
+}
+
+static WALK_UNUSED HttpResult __walk_http_post(WalkString url, WalkString body) {
+    return __walk_http_request("POST", url, body);
+}
+
+static WALK_UNUSED size_t __walk_html_escape_len(WalkString text) {
+    if (text == NULL) { return 0; }
+    size_t len = 0;
+    for (const char *p = text; *p != '\0'; p++) {
+        switch (*p) {
+        case '&': len += 5; break;
+        case '<': len += 4; break;
+        case '>': len += 4; break;
+        case '"': len += 6; break;
+        case '\'': len += 5; break;
+        default: len += 1; break;
+        }
+    }
+    return len;
+}
+
+static WALK_UNUSED void __walk_html_append_escape(char **out, char ch) {
+    const char *replacement = NULL;
+    switch (ch) {
+    case '&': replacement = "&amp;"; break;
+    case '<': replacement = "&lt;"; break;
+    case '>': replacement = "&gt;"; break;
+    case '"': replacement = "&quot;"; break;
+    case '\'': replacement = "&#39;"; break;
+    }
+    if (replacement != NULL) {
+        size_t len = strlen(replacement);
+        memcpy(*out, replacement, len);
+        *out += len;
+        return;
+    }
+    **out = ch;
+    *out += 1;
+}
+
+static WALK_UNUSED WalkString __walk_html_escape(WalkString text) {
+    size_t len = __walk_html_escape_len(text);
+    char *out = (char *)malloc(len + 1);
+    if (out == NULL) { __walk_runtime_error("out of memory"); }
+    char *cursor = out;
+    if (text != NULL) {
+        for (const char *p = text; *p != '\0'; p++) { __walk_html_append_escape(&cursor, *p); }
+    }
+    *cursor = '\0';
+    return out;
+}
+
+static WALK_UNUSED WalkString __walk_html_wrap(const char *tag, WalkString text) {
+    WalkString escaped = __walk_html_escape(text);
+    size_t tag_len = strlen(tag);
+    size_t text_len = strlen(escaped);
+    size_t total = tag_len + 2 + text_len + tag_len + 3;
+    char *out = (char *)malloc(total + 1);
+    if (out == NULL) { __walk_runtime_error("out of memory"); }
+    snprintf(out, total + 1, "<%s>%s</%s>", tag, escaped, tag);
+    return out;
+}
+
+static WALK_UNUSED WalkString __walk_html_h1(WalkString text) {
+    return __walk_html_wrap("h1", text);
+}
+
+static WALK_UNUSED WalkString __walk_html_p(WalkString text) {
+    return __walk_html_wrap("p", text);
+}
+
+static WALK_UNUSED WalkString __walk_html_button(WalkString text) {
+    return __walk_html_wrap("button", text);
 }
 
 static WALK_UNUSED WalkBool __walk_parse_starts_with_space(WalkString text) {

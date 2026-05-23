@@ -19,6 +19,7 @@
 <h2>Language</h2>
 <a href="SYNTAX.html">v1 Syntax Guide</a>
 <a href="SPEC.html">v1 Specification</a>
+<a href="LANGUAGE_CONCEPTS.html">Language Concepts And Documentation Standard</a>
 <a href="STDLIB.html">v1.9 Standard Library</a>
 <a href="ERRORS.html">v1 Diagnostics</a>
 <a href="COMPATIBILITY.html">v1.9 Compatibility</a>
@@ -32,6 +33,8 @@
 <a href="V4.html">v4 Professional Tooling</a>
 <a href="V5.html">v5 Runtime and Backend Maturity</a>
 <a href="V5_1.html">v5.1 Public Docs And Reference Site</a>
+<a href="NETWORKING.html">Draft Networking</a>
+<a href="RICH_RUNTIMES.html">Rich Runtime Tracks</a>
 <h2>Reference</h2>
 <a href="reference/api.html">API Reference</a>
 <a href="reference/index.html">Reference index</a>
@@ -51,6 +54,7 @@
 <article class="doc">
 <h1 id="walklang-docs-style-guide">WalkLang Docs Style Guide</h1>
 <p>Build docs in narrow, source-grounded slices. The style target is Rust-like: short front doors, clear version boundaries, practical examples, and generated reference pages that come from documented public symbols instead of handwritten API lists.</p>
+<p>Use <code>LANGUAGE_CONCEPTS.md</code> as the terminology and documentation-governance standard before writing or reshaping language docs. If a language concept is not defined there, define it there first or avoid using it as a formal term.</p>
 <p>The hosted docs entry point is:</p>
 <pre><code class="language-text">https://walklang.wlkrlabs.com/docs</code></pre>
 <h2 id="page-roles">Page Roles</h2>
@@ -68,6 +72,7 @@
 <h2 id="writing-rules">Writing Rules</h2>
 <ul>
 <li>Lead with what the page is for.</li>
+<li>Use the exact concept vocabulary from <code>LANGUAGE_CONCEPTS.md</code>.</li>
 <li>Use present tense and active voice.</li>
 <li>Prefer short sections with one concept each.</li>
 <li>Keep examples small enough to run or inspect.</li>
@@ -75,6 +80,8 @@
 <li>Link to adjacent docs instead of duplicating long explanations.</li>
 <li>Do not claim a command, website route, package workflow, or language feature</li>
 <p>exists unless the repo proves it.</p>
+<li>Keep language behavior docs synchronous with tests, fixtures, snapshots, or</li>
+<p>native execution proof. Unproven behavior must be labeled planned, draft, or experimental.</p>
 <li>Keep root README prose short. Put detailed usage in <code>docs/</code>.</li>
 </ul>
 <h2 id="generated-reference-pipeline">Generated Reference Pipeline</h2>

@@ -141,6 +141,8 @@ func TestV13FailFixturesHaveExpectedDiagnostics(t *testing.T) {
 		{"bad_json_write_as_expression.walk", "tests/fail/bad_json_write_as_expression.walk:3:6: type error: json.write is an effect; use do: json.write(...)"},
 		{"bad_term_move_arg.walk", "tests/fail/bad_term_move_arg.walk:3:15: type error: arg 1 to term.move is int, got string"},
 		{"bad_term_clear_as_expression.walk", "tests/fail/bad_term_clear_as_expression.walk:3:6: type error: term.clear is an effect; use do: term.clear(...)"},
+		{"bad_http_post_arg.walk", "tests/fail/bad_http_post_arg.walk:3:48: type error: arg 2 to http.post is string, got int"},
+		{"bad_html_h1_arg.walk", "tests/fail/bad_html_h1_arg.walk:3:14: type error: arg 1 to html.h1 is string, got int"},
 		{"unknown_library.walk", "tests/fail/unknown_library.walk:2:6: name error: unknown library function math.nope"},
 		{"top_break.walk", "tests/fail/top_break.walk:1:1: syntax error: break outside loop"},
 	}

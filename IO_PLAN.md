@@ -1,8 +1,8 @@
 # WalkLang IO Plan
 
-Status: design draft with the CLI text IO, local filesystem IO, and process/data
-interop roadmap phases implemented as draft compiler APIs. This is not stable
-language syntax yet.
+Status: design draft with the CLI text IO, local filesystem IO, process/data
+interop, terminal UX, and network/rich runtime roadmap phases implemented as
+draft compiler APIs. This is not stable language syntax yet.
 
 Purpose: turn the current input/output brainstorm into a durable implementation
 plan for WalkLang's console, file, process, terminal, data, network, and future
@@ -91,6 +91,23 @@ json.parse
 json.stringify
 json.read
 json.write
+term.is_tty
+term.color
+term.background
+term.style
+term.reset
+term.clear
+term.move
+term.width
+term.height
+term.read_key
+http.get
+http.post
+http.request
+html.escape
+html.h1
+html.p
+html.button
 ```
 
 Planned draft-only stdlib names already called out in `docs/STDLIB.md`:
@@ -1125,7 +1142,7 @@ Done when:
 
 ### Roadmap Phase 5: Network And Rich Runtimes
 
-Status: future.
+Status: done as draft compiler APIs and design docs in `v5.12.0`.
 
 Scope:
 
@@ -1148,11 +1165,13 @@ Entry gates:
 
 - mature error handling
 - package/project model
-- networking security docs
-- timeout and response-size policy
-- TLS/backend dependency decision
-- runtime/backend architecture decision for web, graphics, and browser targets
-- event loop and asset policies
+- networking security docs: documented in `docs/NETWORKING.md`
+- timeout and response-size policy: 10 seconds and 1 MiB for draft HTTP
+- TLS/backend dependency decision: system `curl` runtime backend, no linked C
+  TLS dependency yet
+- runtime/backend architecture decision for web, graphics, and browser targets:
+  tracked in `docs/RICH_RUNTIMES.md`
+- event loop and asset policies: deferred to rich runtime package/backend tracks
 
 Done when:
 
@@ -1445,6 +1464,8 @@ Done when:
 
 Goal: add network client IO after the language has the safety rails to own it.
 
+Status: done as draft compiler APIs in `v5.12.0`.
+
 Candidate APIs:
 
 ```text
@@ -1457,9 +1478,9 @@ Prerequisites:
 
 - mature error handling
 - package/project model
-- security docs
-- timeout and response-size policy
-- TLS/backend dependency decision
+- security docs: `docs/NETWORKING.md`
+- timeout and response-size policy: 10 seconds and 1 MiB for draft HTTP
+- TLS/backend dependency decision: system `curl` runtime backend
 
 Done when:
 
@@ -1470,6 +1491,10 @@ Done when:
 ### Phase 10: Web, Graphics, Browser Targets
 
 Goal: explore richer runtimes without bloating core IO.
+
+Status: draft HTML text helpers implemented in `v5.12.0`; web server, native
+graphics, WASM/browser, and playground/compiler explorer tracks documented as
+future runtime/backend work.
 
 Tracks:
 
@@ -1484,9 +1509,9 @@ compiler explorer/playground integration
 Prerequisites:
 
 - package ecosystem
-- runtime/backend architecture decision
-- event loop design
-- asset policy
+- runtime/backend architecture decision: `docs/RICH_RUNTIMES.md`
+- event loop design: deferred to each future track
+- asset policy: deferred to each future track
 
 Done when:
 

@@ -15,6 +15,7 @@ these docs explain how to install, learn, use, verify, and evolve WalkLang.
 
 ## Use The Language
 
+- [Language concepts and docs standard](LANGUAGE_CONCEPTS.md)
 - [Standard library](STDLIB.md)
 - [Diagnostics and warnings](ERRORS.md)
 - [Compatibility promise](COMPATIBILITY.md)
@@ -26,16 +27,19 @@ these docs explain how to install, learn, use, verify, and evolve WalkLang.
 - [Project mode and packages](PROJECTS.md)
 - [Editor tooling, LSP, docs generation, and debug maps](V4.md)
 - [Runtime and backend model](V5.md)
+- [Draft networking](NETWORKING.md)
+- [Rich runtime tracks](RICH_RUNTIMES.md)
 - [Architecture](ARCHITECTURE.md)
 
 ## Track Versions
 
 WalkLang version names use separate stability layers. The stable language
 contract is `v1.9`. The current compiler, tooling, backend, release, and docs
-milestone is `v5.7.0`. Experimental v2 through v2.2 language features are
+milestone is `v5.12.0`. Experimental v2 through v2.2 language features are
 implemented, but they are not part of the stable v1 compatibility promise.
-Draft `do:`, `io`, `parse`, and `process` helpers are implemented for current
-compiler experiments and are not part of the stable v1.9 contract yet.
+Draft `do:`, `io`, `parse`, `process`, `file`, `dir`, `path`, `json`, `term`,
+`http`, and `html` helpers are implemented for current compiler experiments and
+are not part of the stable v1.9 contract yet.
 
 - [v1 / v1.9 stable contract](V1.md)
 - [v2 data modeling, methods, and generics](V2.md)

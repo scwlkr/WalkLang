@@ -19,6 +19,7 @@
 <h2>Language</h2>
 <a href="SYNTAX.html">v1 Syntax Guide</a>
 <a href="SPEC.html">v1 Specification</a>
+<a href="LANGUAGE_CONCEPTS.html">Language Concepts And Documentation Standard</a>
 <a href="STDLIB.html">v1.9 Standard Library</a>
 <a href="ERRORS.html">v1 Diagnostics</a>
 <a href="COMPATIBILITY.html">v1.9 Compatibility</a>
@@ -32,6 +33,8 @@
 <a href="V4.html">v4 Professional Tooling</a>
 <a href="V5.html" aria-current="page">v5 Runtime and Backend Maturity</a>
 <a href="V5_1.html">v5.1 Public Docs And Reference Site</a>
+<a href="NETWORKING.html">Draft Networking</a>
+<a href="RICH_RUNTIMES.html">Rich Runtime Tracks</a>
 <h2>Reference</h2>
 <a href="reference/api.html">API Reference</a>
 <a href="reference/index.html">Reference index</a>
@@ -100,6 +103,23 @@ out: got[0]</code></pre>
 <p>Generated C starts with a short backend comment and runtime section. Emitted source statements include comments like:</p>
 <pre><code class="language-c">/* source: main.walk:6:1 */</code></pre>
 <p>These comments do not change runtime behavior. They make emitted functions and <code>main</code> easier to inspect while preserving predictable C output and snapshot coverage.</p>
+<h2 id="draft-runtime-backends">Draft Runtime Backends</h2>
+<p>Draft IO helpers grow the generated runtime without changing the stable v1.9 language contract.</p>
+<p>Current draft runtime families include:</p>
+<pre><code class="language-text">console and stdin helpers
+local files, directories, and paths
+process execution
+JSON text validation
+terminal UX helpers
+HTTP client helpers
+HTML text helpers</code></pre>
+<p>Draft HTTP deliberately delegates to the system <code>curl</code> executable at runtime instead of linking a C TLS library into generated output. This keeps release cross-builds portable while the API remains draft. Programs that use <code>http</code> need <code>curl</code> available on <code>PATH</code>; missing backend, DNS, TLS, timeout, HTTP status, and size-limit failures are returned through <code>HttpResult</code> values.</p>
+<p>Rich runtimes stay outside the core runtime layer:</p>
+<pre><code class="language-text">web server runtime
+native graphics
+WASM/browser backend
+compiler explorer/playground integration</code></pre>
+<p>Those tracks require separate package or backend designs before implementation. See <a href="NETWORKING.html">Draft networking</a> and <a href="RICH_RUNTIMES.html">Rich runtime tracks</a>.</p>
 <h2 id="non-goals">Non-Goals</h2>
 <p>v5 does not add:</p>
 <pre><code class="language-text">LLVM backend

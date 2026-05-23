@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Draft Networking - WalkLang</title>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+<a class="brand" href="../index.html"><img src="../assets/icon.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>
+<nav class="nav" aria-label="Documentation">
+<h2>Start</h2>
+<a href="index.html">Documentation</a>
+<a href="INSTALL.html">Install Instructions</a>
+<a href="PROJECTS.html">Project Mode</a>
+<h2>Language</h2>
+<a href="SYNTAX.html">v1 Syntax Guide</a>
+<a href="SPEC.html">v1 Specification</a>
+<a href="LANGUAGE_CONCEPTS.html">Language Concepts And Documentation Standard</a>
+<a href="STDLIB.html">v1.9 Standard Library</a>
+<a href="ERRORS.html">v1 Diagnostics</a>
+<a href="COMPATIBILITY.html">v1.9 Compatibility</a>
+<a href="MIGRATING.html">Migration Guide</a>
+<a href="DEPRECATION.html">Deprecation Policy</a>
+<h2>Versions</h2>
+<a href="V1.html">v1 / v1.9</a>
+<a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
+<a href="V3.html">v3 Package Ecosystem</a>
+<h2>Tools</h2>
+<a href="V4.html">v4 Professional Tooling</a>
+<a href="V5.html">v5 Runtime and Backend Maturity</a>
+<a href="V5_1.html">v5.1 Public Docs And Reference Site</a>
+<a href="NETWORKING.html" aria-current="page">Draft Networking</a>
+<a href="RICH_RUNTIMES.html">Rich Runtime Tracks</a>
+<h2>Reference</h2>
+<a href="reference/api.html">API Reference</a>
+<a href="reference/index.html">Reference index</a>
+<h2>Project</h2>
+<a href="ARCHITECTURE.html">ARCHITECTURE.md</a>
+<a href="DESIGN_RULES.html">v1 Design Rules</a>
+<a href="DOCS_STYLE_GUIDE.html">Docs Style Guide</a>
+<a href="PURPOSE.html">Purpose</a>
+<a href="RELEASE_NOTES.html">Release Notes</a>
+<a href="ROADMAP.html">ROADMAP.md</a>
+<a href="STATUS.html">Status</a>
+</nav>
+</aside>
+<main class="content">
+<div class="topbar"><a href="index.html">Docs</a><a href="reference/api.html">Reference</a><a href="https://github.com/scwlkr/WalkLang">GitHub</a></div>
+<div class="page">
+<article class="doc">
+<h1 id="draft-networking">Draft Networking</h1>
+<p>WalkLang networking is draft-only. It is implemented for native CLI experiments, not for the stable v1.9 language contract.</p>
+<h2 id="scope">Scope</h2>
+<p>The current draft <code>http</code> module includes:</p>
+<pre><code class="language-walk">imp: http
+
+var: response = http.get(&#39;http://127.0.0.1:8080/health&#39;)
+out: response.ok
+out: response.status
+out: response.body
+out: response.error</code></pre>
+<pre><code class="language-text">http.get(url) -&gt; HttpResult
+http.post(url, body) -&gt; HttpResult
+http.request(method, url, body) -&gt; HttpResult</code></pre>
+<p><code>HttpResult</code> is:</p>
+<pre><code class="language-walk">struct: HttpResult
+    ok bool
+    status int
+    body string
+    error string</code></pre>
+<h2 id="runtime-backend">Runtime Backend</h2>
+<p>The C backend keeps release builds portable by delegating draft HTTP requests to the system <code>curl</code> executable at runtime. WalkLang does not link libcurl or ship a TLS stack in generated C yet.</p>
+<p>This is a deliberate draft dependency decision:</p>
+<ul>
+<li>release cross-builds still need only Go and the target C toolchain</li>
+<li>native HTTP programs need <code>curl</code> available on <code>PATH</code> at runtime</li>
+<li>TLS behavior is owned by the host <code>curl</code> build and host certificate store</li>
+<li>missing <code>curl</code>, network failures, DNS failures, TLS failures, and timeout</li>
+<p>failures return <code>HttpResult</code> data instead of runtime-stopping</p>
+</ul>
+<h2 id="security-policy">Security Policy</h2>
+<p>Draft HTTP uses argv-style process execution. It does not invoke a shell.</p>
+<p>Default policy:</p>
+<ul>
+<li>redirects are followed</li>
+<li>timeout is 10 seconds</li>
+<li>response bodies are capped at 1 MiB by the runtime request command</li>
+<li>response bodies are UTF-8 text only</li>
+<li>status codes <code>200</code> through <code>399</code> set <code>ok true</code></li>
+<li>other status codes set <code>ok false</code>, preserve <code>body</code>, and set</li>
+<p><code>error &#39;http status&#39;</code></p>
+<li>empty method or URL returns a recoverable error before any process spawn</li>
+</ul>
+<p>Not included yet:</p>
+<ul>
+<li>custom headers</li>
+<li>cookies or a cookie jar</li>
+<li>authentication helpers</li>
+<li>streaming responses</li>
+<li>binary bodies</li>
+<li>server APIs</li>
+<li>async/event-loop APIs</li>
+</ul>
+<h2 id="testing-policy">Testing Policy</h2>
+<p>Network tests must not depend on public network availability. Compiler/runtime tests use local loopback HTTP servers and skip only when the draft runtime backend dependency, <code>curl</code>, is unavailable.</p>
+</article>
+<footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
+</div>
+</main>
+</div>
+</body>
+</html>

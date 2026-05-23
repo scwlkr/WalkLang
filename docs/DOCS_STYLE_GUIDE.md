@@ -5,6 +5,10 @@ short front doors, clear version boundaries, practical examples, and generated
 reference pages that come from documented public symbols instead of handwritten
 API lists.
 
+Use `LANGUAGE_CONCEPTS.md` as the terminology and documentation-governance
+standard before writing or reshaping language docs. If a language concept is not
+defined there, define it there first or avoid using it as a formal term.
+
 The hosted docs entry point is:
 
 ```text
@@ -28,6 +32,7 @@ Do not turn one page into all of these at once.
 ## Writing Rules
 
 - Lead with what the page is for.
+- Use the exact concept vocabulary from `LANGUAGE_CONCEPTS.md`.
 - Use present tense and active voice.
 - Prefer short sections with one concept each.
 - Keep examples small enough to run or inspect.
@@ -35,6 +40,9 @@ Do not turn one page into all of these at once.
 - Link to adjacent docs instead of duplicating long explanations.
 - Do not claim a command, website route, package workflow, or language feature
   exists unless the repo proves it.
+- Keep language behavior docs synchronous with tests, fixtures, snapshots, or
+  native execution proof. Unproven behavior must be labeled planned, draft, or
+  experimental.
 - Keep root README prose short. Put detailed usage in `docs/`.
 
 ## Generated Reference Pipeline

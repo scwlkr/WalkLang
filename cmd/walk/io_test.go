@@ -2,6 +2,9 @@ package main
 
 import (
 	"errors"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -729,6 +732,117 @@ func TestDraftTerminalInvalidStyleFailsClearly(t *testing.T) {
 	}
 	if got, want := string(output), "walk runtime error: term color unknown\n"; got != want {
 		t.Fatalf("runtime error mismatch:\nwant %q\ngot  %q\nC:\n%s", want, got, cCode)
+	}
+}
+
+func TestDraftNetworkPhase5UsesLocalHTTPAndHTMLHelpers(t *testing.T) {
+	requireCC(t)
+	if _, err := exec.LookPath("curl"); err != nil {
+		t.Skip("draft http runtime needs curl on PATH")
+	}
+
+	server := httptest.NewServer(http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
+		switch request.URL.Path {
+		case "/ok":
+			_, _ = response.Write([]byte("ok-body"))
+		case "/missing":
+			response.WriteHeader(http.StatusNotFound)
+			_, _ = response.Write([]byte("missing-body"))
+		case "/echo":
+			body, _ := io.ReadAll(request.Body)
+			if request.Method != http.MethodPost {
+				response.WriteHeader(http.StatusMethodNotAllowed)
+				return
+			}
+			_, _ = response.Write([]byte("post:" + string(body)))
+		case "/method":
+			body, _ := io.ReadAll(request.Body)
+			_, _ = response.Write([]byte(request.Method + ":" + string(body)))
+		default:
+			response.WriteHeader(http.StatusTeapot)
+			_, _ = response.Write([]byte("unexpected"))
+		}
+	}))
+	defer server.Close()
+
+	dir := t.TempDir()
+	sourcePath := filepath.Join(dir, "main.walk")
+	writeFile(t, sourcePath, strings.Join([]string{
+		"imp: http",
+		"imp: html",
+		"",
+		"var: ok = http.get(" + walkStringLiteral(server.URL+"/ok") + ")",
+		"out: ok.ok",
+		"out: ok.status",
+		"out: ok.body",
+		"out: ok.error",
+		"var: missing = http.get(" + walkStringLiteral(server.URL+"/missing") + ")",
+		"out: missing.ok",
+		"out: missing.status",
+		"out: missing.body",
+		"out: missing.error",
+		"var: posted = http.post(" + walkStringLiteral(server.URL+"/echo") + ", 'hello')",
+		"out: posted.ok",
+		"out: posted.status",
+		"out: posted.body",
+		"var: requested = http.request('PUT', " + walkStringLiteral(server.URL+"/method") + ", 'payload')",
+		"out: requested.ok",
+		"out: requested.status",
+		"out: requested.body",
+		"var: empty = http.get('')",
+		"out: empty.ok",
+		"out: empty.status",
+		"out: empty.error",
+		"out: html.escape('<tag & \"quote\">')",
+		"out: html.h1('Walk <Lang>')",
+		"out: html.p('copy & text')",
+		"out: html.button('Go')",
+		"",
+	}, "\n"))
+
+	cCode, warnings, err := compileFileToCWithOptions(sourcePath, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(warnings) != 0 {
+		t.Fatalf("unexpected warnings: %#v", warnings)
+	}
+
+	exePath := filepath.Join(dir, "program")
+	if err := buildC(cCode, filepath.Join(dir, "program.c"), exePath, nativeBuildOptions{}); err != nil {
+		t.Fatal(err)
+	}
+
+	output, err := exec.Command(exePath).CombinedOutput()
+	if err != nil {
+		t.Fatalf("program failed: %v\noutput:\n%s\nC:\n%s", err, string(output), cCode)
+	}
+	want := strings.Join([]string{
+		"true",
+		"200",
+		"ok-body",
+		"",
+		"false",
+		"404",
+		"missing-body",
+		"http status",
+		"true",
+		"200",
+		"post:hello",
+		"true",
+		"200",
+		"PUT:payload",
+		"false",
+		"-1",
+		"http url empty",
+		"&lt;tag &amp; &quot;quote&quot;&gt;",
+		"<h1>Walk &lt;Lang&gt;</h1>",
+		"<p>copy &amp; text</p>",
+		"<button>Go</button>",
+		"",
+	}, "\n")
+	if got := string(output); got != want {
+		t.Fatalf("stdout mismatch:\nwant %q\ngot  %q\nC:\n%s", want, got, cCode)
 	}
 }
 

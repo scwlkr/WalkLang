@@ -2,9 +2,39 @@
 
 Stable language contract: v1.9.
 
-Current compiler/tooling/docs release: v5.11.0 draft terminal UX IO completion.
+Current compiler/tooling/docs release: v5.12.0 draft network and rich-runtime
+IO completion.
 
 Experimental implemented language surface: v2.2.
+
+State: v5.12.0 completes `IO_PLAN.md` Roadmap Phase 5, Network And Rich
+Runtimes, as draft compiler APIs and design docs. Draft HTTP helpers now cover
+`http.get`, `http.post`, and `http.request` through recoverable `HttpResult`
+values. Draft HTTP uses the system `curl` executable as its runtime backend,
+does not invoke a shell, follows redirects, uses a 10 second timeout, caps
+response bodies at 1 MiB, treats response bodies as UTF-8 text, and returns
+ordinary network, TLS, backend, timeout, size, and HTTP status failures as
+data. Draft HTML helpers now cover `html.escape`, `html.h1`, `html.p`, and
+`html.button` as escaped text helpers only. Rich runtime tracks for web server,
+native graphics, WASM/browser, and playground/compiler explorer integration
+remain future package/backend work documented in `docs/RICH_RUNTIMES.md`.
+Stable language contract remains v1.9.
+
+v5.12.0 verification on 2026-05-23: focused Phase 5 tests first failed because
+`http` and `html` were not built-in modules, then `go test ./cmd/walk -run
+'TestDraftNetworkPhase5|TestV13GeneratedCSnapshots|TestV13FailFixturesHaveExpectedDiagnostics|TestV19ReleaseDocsArePresent'
+-count=1` passed after implementation and generated C snapshot refresh; full
+`go test -count=1 ./...` passed; `go build -trimpath -ldflags "-X
+main.version=v5.12.0" -o build/walk ./cmd/walk` passed; `./build/walk version`
+reported `v5.12.0`; `./build/walk check --warnings=error
+tests/pass/do_effects.walk` passed; `WALK_BIN=$PWD/build/walk
+scripts/stress-v1.sh` passed and reported `v1.9 stress ok`;
+`scripts/build-docs-site.sh` passed; `scripts/check-docs-site.sh` passed after
+staging generated docs; `scripts/release.sh v5.12.0 <temp>/release` produced 5
+platform artifacts plus `SHA256SUMS`; `wc -l <temp>/release/SHA256SUMS`
+reported 5 checksum lines; the host release binary reported `v5.12.0` from
+`walk version`; and `scripts/install-local.sh v5.12.0` refreshed the local
+`walk` install.
 
 State: v5.11.0 completes `IO_PLAN.md` Roadmap Phase 4, Terminal UX, as draft
 compiler APIs. Draft terminal helpers now cover `term.is_tty`, foreground and

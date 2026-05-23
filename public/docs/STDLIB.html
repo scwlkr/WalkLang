@@ -19,6 +19,7 @@
 <h2>Language</h2>
 <a href="SYNTAX.html">v1 Syntax Guide</a>
 <a href="SPEC.html">v1 Specification</a>
+<a href="LANGUAGE_CONCEPTS.html">Language Concepts And Documentation Standard</a>
 <a href="STDLIB.html" aria-current="page">v1.9 Standard Library</a>
 <a href="ERRORS.html">v1 Diagnostics</a>
 <a href="COMPATIBILITY.html">v1.9 Compatibility</a>
@@ -32,6 +33,8 @@
 <a href="V4.html">v4 Professional Tooling</a>
 <a href="V5.html">v5 Runtime and Backend Maturity</a>
 <a href="V5_1.html">v5.1 Public Docs And Reference Site</a>
+<a href="NETWORKING.html">Draft Networking</a>
+<a href="RICH_RUNTIMES.html">Rich Runtime Tracks</a>
 <h2>Reference</h2>
 <a href="reference/api.html">API Reference</a>
 <a href="reference/index.html">Reference index</a>
@@ -63,7 +66,7 @@ time
 random
 testing</code></pre>
 <p>No other built-in module is stable in v1.9.</p>
-<p>The current compiler also includes draft <code>io</code>, <code>parse</code>, <code>process</code>, <code>file</code>, <code>dir</code>, <code>path</code>, and <code>json</code> modules. They are importable and tested, but they are not compatibility-protected in v1.9.</p>
+<p>The current compiler also includes draft <code>io</code>, <code>parse</code>, <code>process</code>, <code>file</code>, <code>dir</code>, <code>path</code>, <code>json</code>, <code>term</code>, <code>http</code>, and <code>html</code> modules. They are importable and tested, but they are not compatibility-protected in v1.9.</p>
 <p>Draft APIs may expose draft result structs. They are documented here so current compiler behavior is visible, but they are not part of the stable v1.9 compatibility contract.</p>
 <p>---</p>
 <h2 id="math">math</h2>
@@ -356,6 +359,45 @@ if: term.is_tty()
 <p>Returns the current terminal height when available, then <code>LINES</code> when it is a positive integer, then <code>24</code>.</p>
 <h3 id="term-read-key-ioreadresult">term.read_key() -&gt; IOReadResult</h3>
 <p>Reads one key from an interactive stdin terminal. On POSIX hosts this enters raw mode for a single key read and restores the terminal before returning.</p>
+<p>---</p>
+<h2 id="draft-http">Draft http</h2>
+<p>Draft <code>http</code> APIs are recoverable value-returning helpers. They do not runtime-stop for ordinary network, DNS, TLS, timeout, missing-backend, or HTTP status failures.</p>
+<pre><code class="language-walk">imp: http
+
+var: response = http.get(&#39;http://127.0.0.1:8080/health&#39;)
+out: response.ok
+out: response.status
+out: response.body
+out: response.error</code></pre>
+<p>Recoverable HTTP helpers return:</p>
+<pre><code class="language-walk">struct: HttpResult
+    ok bool
+    status int
+    body string
+    error string</code></pre>
+<p><code>ok</code> is true for status codes <code>200</code> through <code>399</code>. Other status codes return <code>ok false</code>, preserve <code>body</code>, and set <code>error &#39;http status&#39;</code>. Runtime backend failures such as missing <code>curl</code>, DNS failure, TLS failure, connection failure, timeout, response-size failure, or invalid output return <code>ok false</code> with <code>status</code> from the backend when available, otherwise <code>-1</code>.</p>
+<p>Draft HTTP uses the system <code>curl</code> executable through argv-style process execution. It does not invoke a shell. Redirects are followed, the timeout is 10 seconds, response bodies are capped at 1 MiB, and response bodies are UTF-8 text only. See <a href="NETWORKING.html">Draft networking</a> for the security and backend policy.</p>
+<h3 id="http-get-string-httpresult">http.get(string) -&gt; HttpResult</h3>
+<p>Sends a <code>GET</code> request to the URL.</p>
+<h3 id="http-post-string-string-httpresult">http.post(string, string) -&gt; HttpResult</h3>
+<p>Sends a <code>POST</code> request with the string body.</p>
+<h3 id="http-request-string-string-string-httpresult">http.request(string, string, string) -&gt; HttpResult</h3>
+<p>Sends a request with <code>method</code>, <code>url</code>, and <code>body</code>. Empty method or URL returns a recoverable error before any runtime backend is started.</p>
+<p>---</p>
+<h2 id="draft-html">Draft html</h2>
+<p>Draft <code>html</code> helpers generate escaped HTML strings only. They do not write files, start a web server, run a browser, attach assets, or create a DOM.</p>
+<pre><code class="language-walk">imp: html
+
+out: html.h1(&#39;Walk &lt;Lang&gt;&#39;)
+out: html.p(&#39;copy &amp; text&#39;)</code></pre>
+<h3 id="html-escape-string-string">html.escape(string) -&gt; string</h3>
+<p>Escapes <code>&amp;</code>, <code>&lt;</code>, <code>&gt;</code>, <code>&#34;</code>, and <code>&#39;</code> for HTML text contexts.</p>
+<h3 id="html-h1-string-string">html.h1(string) -&gt; string</h3>
+<p>Returns an escaped <code>&lt;h1&gt;...&lt;/h1&gt;</code> string.</p>
+<h3 id="html-p-string-string">html.p(string) -&gt; string</h3>
+<p>Returns an escaped <code>&lt;p&gt;...&lt;/p&gt;</code> string.</p>
+<h3 id="html-button-string-string">html.button(string) -&gt; string</h3>
+<p>Returns an escaped <code>&lt;button&gt;...&lt;/button&gt;</code> string.</p>
 <p>---</p>
 <h2 id="test-syntax">Test Syntax</h2>
 <p>The stable testing surface also includes syntax:</p>

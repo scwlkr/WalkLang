@@ -1169,7 +1169,7 @@ compiler explorer
 Package example target:
 
 ```walk
-imp: http # later only
+imp: http # draft only
 ```
 
 Networking target:
@@ -1177,17 +1177,18 @@ Networking target:
 ```walk
 imp: http
 
-var: body = http.get('https://example.com')
-out: body
+var: response = http.get('https://example.com')
+out: response.body
 ```
 
-Only add networking when:
+Draft HTTP client helpers are implemented in v5.12.0. Broader networking and
+server/runtime work still requires:
 
 ```text
-error handling is mature
-stdlib design is stable
-package/project model exists
-security rules are documented
+custom header/body design
+server package design
+async/event-loop decisions
+package/runtime boundary decisions
 ```
 
 ---

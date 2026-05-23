@@ -175,6 +175,15 @@ var walkBuiltinDetails = map[string]string{
 	"term.width":          "func() int",
 	"term.height":         "func() int",
 	"term.read_key":       "func() IOReadResult",
+	"http":                "draft built-in module",
+	"http.get":            "func(string) HttpResult",
+	"http.post":           "func(string, string) HttpResult",
+	"http.request":        "func(string, string, string) HttpResult",
+	"html":                "draft built-in module",
+	"html.escape":         "func(string) string",
+	"html.h1":             "func(string) string",
+	"html.p":              "func(string) string",
+	"html.button":         "func(string) string",
 	"IOReadResult":        "draft struct { ok bool, value string, error string }",
 	"ParseIntResult":      "draft struct { ok bool, value int, error string }",
 	"ParseFloatResult":    "draft struct { ok bool, value float, error string }",
@@ -184,6 +193,7 @@ var walkBuiltinDetails = map[string]string{
 	"ProcessResult":       "draft struct { ok bool, status int, stdout string, stderr string, error string }",
 	"ProcessOutputResult": "draft struct { ok bool, value string, status int, error string }",
 	"JsonResult":          "draft struct { ok bool, value string, error string }",
+	"HttpResult":          "draft struct { ok bool, status int, body string, error string }",
 }
 
 func docsCommand(args []string) error {
