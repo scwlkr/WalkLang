@@ -33,6 +33,16 @@ platform artifacts plus `SHA256SUMS`; `wc -l <temp>/release/SHA256SUMS`
 reported 5 checksum lines; and the host release binary reported `v5.7.0` from
 `walk version`.
 
+IO planning update on 2026-05-23: `IO_PLAN.md` now uses a five-phase
+implementation roadmap for future planning and handoffs: CLI text IO, local
+filesystem IO, process and data interop, terminal UX, and network/rich
+runtimes. The older Phase 0-10 notes remain as detailed dependency notes, not
+the primary roadmap. Roadmap Phase 1 is done as draft compiler APIs in
+v5.7.0; the next implementation milestone is Roadmap Phase 2, Local Filesystem
+IO. Its first gates are path policy, UTF-8 file policy, fail-stop versus
+recoverable file API shape, temp-directory tests, and cwd mutation policy for
+`process.chdir`.
+
 State: v5.6.0 completes `IO_PLAN.md` Phase 0 and the implementable Phase 1
 console/process foundation as draft compiler APIs. The stable language contract
 remains v1.9. Draft `do:` effect statements now accept registered effect calls;

@@ -907,7 +907,199 @@ runtime architecture decision. Browser compilation is a backend decision.
 Order: HTML helpers can come after strings are stronger. Web servers and browser
 targets are much later.
 
-## Implementation Order
+## Implementation Roadmap
+
+Use this five-phase roadmap for planning, status, and future handoffs. The
+older fine-grained sections below remain as dependency notes, not the primary
+roadmap.
+
+### Roadmap Phase 1: CLI Text IO
+
+Status: done as draft compiler APIs in `v5.7.0`.
+
+Scope:
+
+```text
+do:
+io.write
+io.write_line
+io.error_line
+process.args
+process.arg_count
+process.env
+process.cwd
+process.exit
+io.read_line
+io.read_all
+parse.int
+parse.float
+parse.bool
+```
+
+This phase proves explicit effect calls, process basics, runtime-owned text,
+stdin tests, EOF-as-data, and the first concrete recoverable result structs.
+The stable language contract remains v1.9.
+
+### Roadmap Phase 2: Local Filesystem IO
+
+Status: next.
+
+Scope:
+
+```text
+file.read
+file.write
+file.append
+file.exists
+dir.list
+dir.make
+dir.delete
+path.join
+path.base
+path.ext
+process.chdir
+recoverable file results
+```
+
+This phase combines the old text-file, directory/path, and file-error phases
+into one local-filesystem milestone. It should make file-backed CLI programs
+possible without starting process spawning, JSON, HTTP, terminal raw mode, or
+browser/runtime work.
+
+Entry gates:
+
+- path policy
+- UTF-8 text policy for files
+- fail-stop vs recoverable file API shape
+- temp-directory tests
+- cwd mutation policy for `process.chdir`
+
+Done when:
+
+- programs can read, write, append, and check UTF-8 text files
+- programs can create, list, and delete directories
+- programs can build paths without hardcoding separators
+- file and directory failures are either recoverable values or clearly
+  documented fail-stop behavior
+- docs state overwrite, encoding, path, cwd, and failure behavior
+
+### Roadmap Phase 3: Process And Data Interop
+
+Status: future.
+
+Scope:
+
+```text
+process.run
+process.output
+process.run_shell
+json.parse
+json.stringify
+json.read
+json.write
+process result structs
+JSON result structs
+```
+
+This phase combines command execution and structured text data. `run_shell`
+must stay explicit and later than argv-style command execution.
+
+Entry gates:
+
+- accepted result struct pattern from filesystem work
+- command result type with status, stdout, stderr, and error
+- deterministic local helper command tests
+- JSON data model decision for objects, maps, dynamic values, or typed structs
+- JSON string escaping and invalid JSON error policy
+
+Done when:
+
+- argv-style process execution works
+- command output and non-zero status are visible as data
+- JSON can round-trip through the documented supported types
+- invalid JSON errors are recoverable and testable
+
+### Roadmap Phase 4: Terminal UX
+
+Status: future.
+
+Scope:
+
+```text
+term.is_tty
+term.color
+term.background
+term.style
+term.reset
+term.clear
+term.move
+term.width
+term.height
+term.read_key
+```
+
+Terminal work stays separate because TTY detection, ANSI behavior, cleanup, and
+Windows support are a distinct portability problem from file/process/data IO.
+
+Entry gates:
+
+- TTY detection
+- ANSI/no-color policy
+- terminal cleanup behavior
+- Windows behavior
+- non-interactive test strategy
+
+Done when:
+
+- redirected output remains clean
+- styling is opt-in and resettable
+- non-interactive tests can still run
+
+### Roadmap Phase 5: Network And Rich Runtimes
+
+Status: future.
+
+Scope:
+
+```text
+http.get
+http.post
+http.request
+html helpers
+web server package
+native graphics package
+WASM/browser backend
+compiler explorer/playground integration
+```
+
+This phase collects everything that changes security posture, backend/runtime
+architecture, event loops, or public network behavior. It should not block the
+CLI, filesystem, process, JSON, or terminal milestones.
+
+Entry gates:
+
+- mature error handling
+- package/project model
+- networking security docs
+- timeout and response-size policy
+- TLS/backend dependency decision
+- runtime/backend architecture decision for web, graphics, and browser targets
+- event loop and asset policies
+
+Done when:
+
+- network tests avoid public-network flakiness
+- failures are recoverable
+- security behavior is documented
+- rich runtime tracks have their own design docs
+
+### Small Helpers
+
+`time.sleep` is not a roadmap phase. Treat it as a small helper that can attach
+to whichever release first needs it, with cross-platform sleep behavior and
+deterministic tests.
+
+## Detailed Dependency Notes
 
 ### Phase 0: IO Design Groundwork
 
@@ -1315,17 +1507,11 @@ Add one general side-effect command before growing IO.
 Grow IO through modules in this order:
 
 ```text
-io/process foundation
-runtime-owned strings
-stdin and parsing
-text file IO
-directories and paths
-recoverable errors
-process spawning
-terminal UI
-JSON
-HTTP
-web/graphics/browser targets
+CLI text IO
+local filesystem IO
+process and data interop
+terminal UX
+network and rich runtimes
 ```
 
 This keeps WalkLang useful for real CLI programs first, while leaving room for
