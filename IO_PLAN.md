@@ -1,7 +1,8 @@
 # WalkLang IO Plan
 
-Status: design draft with Phase 0 and the Phase 1 console/process foundation
-implemented as draft compiler APIs. This is not stable language syntax yet.
+Status: design draft with Phase 0, Phase 1 console/process foundation, and the
+Phase 2 runtime-owned text input/parse slice implemented as draft compiler
+APIs. This is not stable language syntax yet.
 
 Purpose: turn the current input/output brainstorm into a durable implementation
 plan for WalkLang's console, file, process, terminal, data, network, and future
@@ -214,11 +215,11 @@ Recommended error progression:
 1. Keep the first draft small and fail-stop where recovery is not yet possible.
    A failed `file.read` can stop the program with a clear runtime error while
    the API is draft-only.
-2. Add a recoverable result shape before stabilizing broad IO. Options:
-   - module-specific structs such as `FileRead(ok bool, value string, error string)`
-   - a future generic `Result[T]` once generic structs exist
-   - explicit `try_` variants, such as `file.try_read(path)`, if the core API
-     remains fail-stop
+2. Add a recoverable result shape before stabilizing broad IO. The accepted
+   draft shape is concrete module-specific structs with `ok bool`, `value T`,
+   and `error string`. A future generic `Result[T]` can replace this once
+   generic structs exist. Explicit `try_` variants remain possible if a future
+   core API stays fail-stop.
 3. Stable IO docs must state exactly which failures stop the program and which
    failures are returned as values.
 
@@ -977,6 +978,22 @@ Done when:
 ### Phase 2: Runtime-Owned Text Input
 
 Goal: read text safely enough for CLI programs.
+
+Status: draft text input and parse helpers implemented. `time.sleep` remains a
+separate candidate time helper, not part of this text-input completion slice.
+
+Accepted draft recoverable result policy:
+
+```text
+IOReadResult(ok bool, value string, error string)
+ParseIntResult(ok bool, value int, error string)
+ParseFloatResult(ok bool, value float, error string)
+ParseBoolResult(ok bool, value bool, error string)
+```
+
+`error` is `''` on success. `io.read_line()` returns immediate EOF as
+`error 'eof'`. Parse helpers return invalid input as data, not as nullable-only
+missing values and not as runtime stops.
 
 Candidate APIs:
 

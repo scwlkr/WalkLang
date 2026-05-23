@@ -52,6 +52,30 @@
 <h1 id="walklang-release-notes">WalkLang Release Notes</h1>
 <h2 id="unreleased">Unreleased</h2>
 <p>No unreleased changes.</p>
+<h2 id="v5-7-0-draft-recoverable-text-io">v5.7.0 - Draft Recoverable Text IO</h2>
+<p>Date: 2026-05-23</p>
+<p>v5.7.0 adds the next draft IO slice: recoverable stdin reads and parse helpers that return explicit result structs instead of nullable-only values.</p>
+<h3 id="added">Added</h3>
+<ul>
+<li>Draft <code>IOReadResult</code>, <code>ParseIntResult</code>, <code>ParseFloatResult</code>, and <code>ParseBoolResult</code> structs with <code>ok</code>, <code>value</code>, and <code>error</code> fields.</li>
+<li>Draft <code>io.read_line()</code> and <code>io.read_all()</code> for runtime-owned stdin text.</li>
+<li>Draft <code>parse.int</code>, <code>parse.float</code>, and <code>parse.bool</code> helpers.</li>
+<li>Native runtime tests for stdin, EOF-as-data, successful parse results, and invalid parse input.</li>
+<li>Checker diagnostics for invalid draft <code>io.read_line</code> and <code>parse.int</code> calls.</li>
+</ul>
+<h3 id="notes">Notes</h3>
+<ul>
+<li>The stable language contract remains v1.9.</li>
+<li>Draft parse helpers parse the whole input string and return invalid input as data.</li>
+<li>File IO, JSON, process spawning, terminal raw mode, HTTP, and browser targets remain gated by <code>IO_PLAN.md</code>.</li>
+</ul>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<p>None.</p>
+<h3 id="upgrade">Upgrade</h3>
+<p>Regenerate docs and release artifacts with:</p>
+<pre><code class="language-bash">scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.7.0 dist</code></pre>
 <h2 id="v5-6-0-draft-io-foundation">v5.6.0 - Draft IO Foundation</h2>
 <p>Date: 2026-05-22</p>
 <p>v5.6.0 adds the first draft IO/process foundation without promoting it into the stable v1.9 language contract.</p>

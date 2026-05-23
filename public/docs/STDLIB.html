@@ -63,7 +63,8 @@ time
 random
 testing</code></pre>
 <p>No other built-in module is stable in v1.9.</p>
-<p>The current compiler also includes draft <code>io</code> and <code>process</code> modules. They are importable and tested, but they are not compatibility-protected in v1.9.</p>
+<p>The current compiler also includes draft <code>io</code>, <code>parse</code>, and <code>process</code> modules. They are importable and tested, but they are not compatibility-protected in v1.9.</p>
+<p>Draft APIs may expose draft result structs. They are documented here so current compiler behavior is visible, but they are not part of the stable v1.9 compatibility contract.</p>
 <p>---</p>
 <h2 id="math">math</h2>
 <h3 id="math-sqrt-number-float">math.sqrt(number) -&gt; float</h3>
@@ -140,18 +141,57 @@ test: &#39;works&#39;
 <p><code>testing.assert</code> itself does not print or stop a program. The <code>assert:</code> statement owns test failure reporting.</p>
 <p>---</p>
 <h2 id="draft-io">Draft io</h2>
-<p>Use draft <code>io</code> functions with <code>do:</code> because they are effects.</p>
+<p>Use draft <code>io</code> output functions with <code>do:</code> because they are effects. Draft <code>io</code> read functions are expressions because they return result values.</p>
 <pre><code class="language-walk">imp: io
 
 do: io.write(&#39;Loading&#39;)
 do: io.write_line(&#39;done&#39;)
 do: io.error_line(&#39;warning&#39;)</code></pre>
+<p>Recoverable draft reads return:</p>
+<pre><code class="language-walk">struct: IOReadResult
+    ok bool
+    value string
+    error string</code></pre>
+<p><code>ok</code> is true when <code>value</code> contains text. <code>error</code> is <code>&#39;&#39;</code> on success. Immediate EOF from <code>io.read_line()</code> returns <code>ok false</code>, <code>value &#39;&#39;</code>, and <code>error &#39;eof&#39;</code>. Stdin read failure returns <code>error &#39;stdin read failed&#39;</code>. Allocation failure still runtime-stops because the program cannot reliably recover without memory.</p>
 <h3 id="io-write-string-effect">io.write(string) -&gt; effect</h3>
 <p>Writes the string to stdout without adding a newline and flushes stdout.</p>
 <h3 id="io-write-line-string-effect">io.write_line(string) -&gt; effect</h3>
 <p>Writes the string and a trailing newline to stdout and flushes stdout.</p>
 <h3 id="io-error-line-string-effect">io.error_line(string) -&gt; effect</h3>
 <p>Writes the string and a trailing newline to stderr and flushes stderr.</p>
+<h3 id="io-read-line-ioreadresult">io.read_line() -&gt; IOReadResult</h3>
+<p>Reads one line from stdin. A trailing LF or CRLF line ending is stripped. A final unterminated line succeeds. Immediate EOF is returned as data with <code>error &#39;eof&#39;</code>.</p>
+<h3 id="io-read-all-ioreadresult">io.read_all() -&gt; IOReadResult</h3>
+<p>Reads the remaining stdin as one runtime-owned string. EOF is a successful empty or completed read. Stdin read failure is returned as data.</p>
+<p>---</p>
+<h2 id="draft-parse">Draft parse</h2>
+<pre><code class="language-walk">imp: parse
+
+var: age = parse.int(&#39;41&#39;)
+if: age.ok
+    out: age.value</code></pre>
+<p>Parse helpers use draft result structs:</p>
+<pre><code class="language-walk">struct: ParseIntResult
+    ok bool
+    value int
+    error string
+
+struct: ParseFloatResult
+    ok bool
+    value float
+    error string
+
+struct: ParseBoolResult
+    ok bool
+    value bool
+    error string</code></pre>
+<p>The helpers parse the whole input string. Extra characters and leading or trailing whitespace make the result fail instead of being ignored.</p>
+<h3 id="parse-int-string-parseintresult">parse.int(string) -&gt; ParseIntResult</h3>
+<p>Parses a base-10 integer with an optional leading sign. Invalid input returns <code>error &#39;invalid int&#39;</code>; overflow returns <code>error &#39;int out of range&#39;</code>.</p>
+<h3 id="parse-float-string-parsefloatresult">parse.float(string) -&gt; ParseFloatResult</h3>
+<p>Parses a finite floating-point number. Invalid input returns <code>error &#39;invalid float&#39;</code>; range errors return <code>error &#39;float out of range&#39;</code>.</p>
+<h3 id="parse-bool-string-parseboolresult">parse.bool(string) -&gt; ParseBoolResult</h3>
+<p>Parses exactly <code>true</code> or <code>false</code>. Other text returns <code>error &#39;invalid bool&#39;</code>.</p>
 <p>---</p>
 <h2 id="draft-process">Draft process</h2>
 <pre><code class="language-walk">imp: process

@@ -24,8 +24,13 @@ testing
 
 No other built-in module is stable in v1.9.
 
-The current compiler also includes draft `io` and `process` modules. They are
-importable and tested, but they are not compatibility-protected in v1.9.
+The current compiler also includes draft `io`, `parse`, and `process` modules.
+They are importable and tested, but they are not compatibility-protected in
+v1.9.
+
+Draft APIs may expose draft result structs. They are documented here so current
+compiler behavior is visible, but they are not part of the stable v1.9
+compatibility contract.
 
 ---
 
@@ -188,7 +193,8 @@ test: 'works'
 
 ## Draft io
 
-Use draft `io` functions with `do:` because they are effects.
+Use draft `io` output functions with `do:` because they are effects. Draft
+`io` read functions are expressions because they return result values.
 
 ```walk
 imp: io
@@ -197,6 +203,20 @@ do: io.write('Loading')
 do: io.write_line('done')
 do: io.error_line('warning')
 ```
+
+Recoverable draft reads return:
+
+```walk
+struct: IOReadResult
+    ok bool
+    value string
+    error string
+```
+
+`ok` is true when `value` contains text. `error` is `''` on success. Immediate
+EOF from `io.read_line()` returns `ok false`, `value ''`, and `error 'eof'`.
+Stdin read failure returns `error 'stdin read failed'`. Allocation failure still
+runtime-stops because the program cannot reliably recover without memory.
 
 ### io.write(string) -> effect
 
@@ -209,6 +229,65 @@ Writes the string and a trailing newline to stdout and flushes stdout.
 ### io.error_line(string) -> effect
 
 Writes the string and a trailing newline to stderr and flushes stderr.
+
+### io.read_line() -> IOReadResult
+
+Reads one line from stdin. A trailing LF or CRLF line ending is stripped. A final
+unterminated line succeeds. Immediate EOF is returned as data with
+`error 'eof'`.
+
+### io.read_all() -> IOReadResult
+
+Reads the remaining stdin as one runtime-owned string. EOF is a successful empty
+or completed read. Stdin read failure is returned as data.
+
+---
+
+## Draft parse
+
+```walk
+imp: parse
+
+var: age = parse.int('41')
+if: age.ok
+    out: age.value
+```
+
+Parse helpers use draft result structs:
+
+```walk
+struct: ParseIntResult
+    ok bool
+    value int
+    error string
+
+struct: ParseFloatResult
+    ok bool
+    value float
+    error string
+
+struct: ParseBoolResult
+    ok bool
+    value bool
+    error string
+```
+
+The helpers parse the whole input string. Extra characters and leading or
+trailing whitespace make the result fail instead of being ignored.
+
+### parse.int(string) -> ParseIntResult
+
+Parses a base-10 integer with an optional leading sign. Invalid input returns
+`error 'invalid int'`; overflow returns `error 'int out of range'`.
+
+### parse.float(string) -> ParseFloatResult
+
+Parses a finite floating-point number. Invalid input returns
+`error 'invalid float'`; range errors return `error 'float out of range'`.
+
+### parse.bool(string) -> ParseBoolResult
+
+Parses exactly `true` or `false`. Other text returns `error 'invalid bool'`.
 
 ---
 

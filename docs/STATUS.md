@@ -2,9 +2,36 @@
 
 Stable language contract: v1.9.
 
-Current compiler/tooling/docs release: v5.6.0 draft IO foundation.
+Current compiler/tooling/docs release: v5.7.0 draft recoverable text IO.
 
 Experimental implemented language surface: v2.2.
+
+State: v5.7.0 completes the `IO_PLAN.md` Phase 2 runtime-owned text
+input/parse slice as draft compiler APIs. The stable language contract remains
+v1.9. Draft `IOReadResult`, `ParseIntResult`, `ParseFloatResult`, and
+`ParseBoolResult` structs now expose the concrete recoverable result shape
+`ok`, `value`, and `error`. Draft `io.read_line()` and `io.read_all()` read
+runtime-owned stdin text, with immediate `io.read_line()` EOF returned as
+`error 'eof'`; draft `parse.int`, `parse.float`, and `parse.bool` return
+invalid conversion as data instead of nullable-only values or runtime stops.
+`time.sleep` remains a separate candidate time helper. File IO, directory/path
+helpers, process spawning, terminal raw mode, JSON, HTTP, and web/graphics
+targets remain gated by `IO_PLAN.md`.
+
+v5.7.0 verification on 2026-05-23: focused IO/parse tests failed before
+implementation because `parse` was not a built-in module and `io.read_line`
+was unknown; after implementation, `go test ./cmd/walk -run
+'TestRuntimeOwnedTextInputAndParseResults|TestReadLineReportsImmediateEOFAsData|TestV13GeneratedCSnapshots|TestV13FailFixturesHaveExpectedDiagnostics|TestV19ReleaseDocsArePresent'
+-count=1` passed; full `go test -count=1 ./...` passed; `go build -trimpath
+-ldflags "-X main.version=v5.7.0" -o build/walk ./cmd/walk` passed;
+`./build/walk version` reported `v5.7.0`; `./build/walk check
+--warnings=error tests/pass/do_effects.walk` passed; `WALK_BIN=$PWD/build/walk
+scripts/stress-v1.sh` passed and reported `v1.9 stress ok`;
+`scripts/build-docs-site.sh` passed; `scripts/check-docs-site.sh` passed after
+staging generated docs; `scripts/release.sh v5.7.0 <temp>/release` produced 5
+platform artifacts plus `SHA256SUMS`; `wc -l <temp>/release/SHA256SUMS`
+reported 5 checksum lines; and the host release binary reported `v5.7.0` from
+`walk version`.
 
 State: v5.6.0 completes `IO_PLAN.md` Phase 0 and the implementable Phase 1
 console/process foundation as draft compiler APIs. The stable language contract
@@ -173,5 +200,5 @@ Playground example update on 2026-05-22: `playground/route_ranker.walk` now demo
 
 CLI run shortcut update on 2026-05-22: `walk run <source.walk>` now compiles a single file to a temporary native executable, runs it, streams program input and output, and removes the temporary build directory; `walk <source.walk>` is a direct shorthand for the same flow. Verification passed with focused `go test ./cmd/walk -run TestRunCommandRunsSingleFileAndDirectFileAlias -count=1`, `go build -o build/walk ./cmd/walk`, `./build/walk run playground/route_ranker.walk`, `./build/walk playground/route_ranker.walk`, full `go test -count=1 ./...`, `scripts/check-docs-site.sh`, `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh`, `scripts/release.sh v5.1.0 <temp>/release`, a 5-line `SHA256SUMS` check, host release binary `walk version` reporting `v5.1.0`, and `git diff --check`.
 
-Next: implement the existing IO Phase 0 `do:` effect-call decision point when
-IO work resumes.
+Next: continue to `IO_PLAN.md` Phase 3 only after path policy, file error
+policy, and temp-directory tests are explicit.

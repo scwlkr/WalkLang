@@ -102,3 +102,129 @@ func TestProcessExitEffectExitsWithCode(t *testing.T) {
 		t.Fatalf("process.exit should stop before later output, got %q", string(output))
 	}
 }
+
+func TestRuntimeOwnedTextInputAndParseResults(t *testing.T) {
+	requireCC(t)
+
+	dir := t.TempDir()
+	sourcePath := filepath.Join(dir, "main.walk")
+	writeFile(t, sourcePath, strings.Join([]string{
+		"imp: io",
+		"imp: parse",
+		"",
+		"var: first = io.read_line()",
+		"var: second = io.read_line()",
+		"var: rest = io.read_all()",
+		"var: age = parse.int(first.value)",
+		"var: bad_age = parse.int(second.value)",
+		"var: ratio = parse.float('2.5')",
+		"var: bad_ratio = parse.float('2.5x')",
+		"var: flag = parse.bool('true')",
+		"var: bad_flag = parse.bool('yes')",
+		"out: first.ok",
+		"out: first.value",
+		"out: first.error",
+		"out: second.ok",
+		"out: rest.ok",
+		"out: rest.value",
+		"out: age.ok",
+		"out: age.value",
+		"out: age.error",
+		"out: bad_age.ok",
+		"out: bad_age.error",
+		"out: ratio.ok",
+		"out: ratio.value",
+		"out: bad_ratio.ok",
+		"out: bad_ratio.error",
+		"out: flag.ok",
+		"out: flag.value",
+		"out: bad_flag.ok",
+		"out: bad_flag.error",
+		"",
+	}, "\n"))
+
+	cCode, warnings, err := compileFileToCWithOptions(sourcePath, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(warnings) != 0 {
+		t.Fatalf("unexpected warnings: %#v", warnings)
+	}
+
+	exePath := filepath.Join(dir, "program")
+	if err := buildC(cCode, filepath.Join(dir, "program.c"), exePath, nativeBuildOptions{}); err != nil {
+		t.Fatal(err)
+	}
+
+	command := exec.Command(exePath)
+	command.Stdin = strings.NewReader("41\nnope\ntail\nbody")
+	output, err := command.CombinedOutput()
+	if err != nil {
+		t.Fatalf("program failed: %v\noutput:\n%s\nC:\n%s", err, string(output), cCode)
+	}
+	want := strings.Join([]string{
+		"true",
+		"41",
+		"",
+		"true",
+		"true",
+		"tail",
+		"body",
+		"true",
+		"41",
+		"",
+		"false",
+		"invalid int",
+		"true",
+		"2.5",
+		"false",
+		"invalid float",
+		"true",
+		"true",
+		"false",
+		"invalid bool",
+		"",
+	}, "\n")
+	if got := string(output); got != want {
+		t.Fatalf("stdout mismatch:\nwant %q\ngot  %q\nC:\n%s", want, got, cCode)
+	}
+}
+
+func TestReadLineReportsImmediateEOFAsData(t *testing.T) {
+	requireCC(t)
+
+	dir := t.TempDir()
+	sourcePath := filepath.Join(dir, "main.walk")
+	writeFile(t, sourcePath, strings.Join([]string{
+		"imp: io",
+		"",
+		"var: line = io.read_line()",
+		"out: line.ok",
+		"out: line.value",
+		"out: line.error",
+		"",
+	}, "\n"))
+
+	cCode, warnings, err := compileFileToCWithOptions(sourcePath, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(warnings) != 0 {
+		t.Fatalf("unexpected warnings: %#v", warnings)
+	}
+
+	exePath := filepath.Join(dir, "program")
+	if err := buildC(cCode, filepath.Join(dir, "program.c"), exePath, nativeBuildOptions{}); err != nil {
+		t.Fatal(err)
+	}
+
+	command := exec.Command(exePath)
+	command.Stdin = strings.NewReader("")
+	output, err := command.CombinedOutput()
+	if err != nil {
+		t.Fatalf("program failed: %v\noutput:\n%s\nC:\n%s", err, string(output), cCode)
+	}
+	if got, want := string(output), "false\n\neof\n"; got != want {
+		t.Fatalf("stdout mismatch:\nwant %q\ngot  %q\nC:\n%s", want, got, cCode)
+	}
+}

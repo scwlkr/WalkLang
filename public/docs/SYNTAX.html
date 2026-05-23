@@ -296,12 +296,20 @@ out: calc.square(5)</code></pre>
 <p>Package module example:</p>
 <pre><code class="language-walk">imp: geometry.core
 out: geometry.core.double(3)</code></pre>
-<p>Draft process helpers are available in the current compiler, but they are not part of the stable v1.9 syntax contract yet.</p>
+<p>Draft process and IO helpers are available in the current compiler, but they are not part of the stable v1.9 syntax contract yet.</p>
 <pre><code class="language-walk">imp: process
 
 out: process.arg_count()
 out: process.cwd()
 do: process.exit(0)</code></pre>
+<p>Draft recoverable text input and parse helpers return result structs:</p>
+<pre><code class="language-walk">imp: io
+imp: parse
+
+var: line = io.read_line()
+var: age = parse.int(line.value)
+if: age.ok
+    out: age.value</code></pre>
 <p>---</p>
 <h2 id="tests">Tests</h2>
 <p>Use <code>test:</code> and <code>assert:</code> with <code>walk test</code>.</p>

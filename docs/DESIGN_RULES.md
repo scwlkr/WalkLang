@@ -53,6 +53,20 @@ Draft IO APIs must say whether they are fail-stop or recoverable. Until a
 recoverable result shape is stable, broad IO such as files, processes, JSON, and
 networking must remain draft or gated.
 
+Draft recoverable IO uses concrete result structs instead of nullable-only
+returns. The first accepted draft shape is:
+
+```text
+ok bool
+value T
+error string
+```
+
+`ok` is true only when `value` is meaningful. `error` is `''` on success and a
+short machine-testable code on failure, such as `eof`, `invalid int`, or
+`stdin read failed`. This shape is intentionally concrete until generic result
+structs are stable.
+
 Runtime-created strings live for the native process lifetime. This is acceptable
 for CLI-oriented IO and not sufficient justification for long-running servers.
 

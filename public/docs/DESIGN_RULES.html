@@ -74,6 +74,11 @@ generated C snapshot coverage when backend output matters</code></pre>
 <pre><code class="language-walk">do: module.effect(args)</code></pre>
 <p>Do not add one-off command keywords for each IO action. <code>out:</code> and <code>in:</code> stay as the small stable console primitives; broader IO belongs in explicit modules.</p>
 <p>Draft IO APIs must say whether they are fail-stop or recoverable. Until a recoverable result shape is stable, broad IO such as files, processes, JSON, and networking must remain draft or gated.</p>
+<p>Draft recoverable IO uses concrete result structs instead of nullable-only returns. The first accepted draft shape is:</p>
+<pre><code class="language-text">ok bool
+value T
+error string</code></pre>
+<p><code>ok</code> is true only when <code>value</code> is meaningful. <code>error</code> is <code>&#39;&#39;</code> on success and a short machine-testable code on failure, such as <code>eof</code>, <code>invalid int</code>, or <code>stdin read failed</code>. This shape is intentionally concrete until generic result structs are stable.</p>
 <p>Runtime-created strings live for the native process lifetime. This is acceptable for CLI-oriented IO and not sufficient justification for long-running servers.</p>
 <p>Early IO is UTF-8 text IO. Binary IO, streaming handles, and path normalization need separate design before stabilization.</p>
 <p>New built-in IO APIs must be registered in the built-in API registry with their module, function name, parameter types, return type, effect flag, draft/stable status, and C runtime helper.</p>

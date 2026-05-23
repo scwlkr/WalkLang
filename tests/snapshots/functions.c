@@ -41,6 +41,34 @@ static char **__walk_host_argv = NULL;
 #define WALK_UNUSED
 #endif
 
+typedef struct {
+    WalkBool ok;
+    WalkString value;
+    WalkString error;
+} IOReadResult;
+typedef struct { IOReadResult *items; WalkSize len; } WalkArrayIOReadResult;
+
+typedef struct {
+    WalkBool ok;
+    WalkBool value;
+    WalkString error;
+} ParseBoolResult;
+typedef struct { ParseBoolResult *items; WalkSize len; } WalkArrayParseBoolResult;
+
+typedef struct {
+    WalkBool ok;
+    WalkFloat value;
+    WalkString error;
+} ParseFloatResult;
+typedef struct { ParseFloatResult *items; WalkSize len; } WalkArrayParseFloatResult;
+
+typedef struct {
+    WalkBool ok;
+    WalkInt value;
+    WalkString error;
+} ParseIntResult;
+typedef struct { ParseIntResult *items; WalkSize len; } WalkArrayParseIntResult;
+
 static WALK_UNUSED void *__walk_alloc_array(WalkSize len, size_t item_size) {
     if (len <= 0) { return NULL; }
     void *items = calloc((size_t)len, item_size);
@@ -290,6 +318,96 @@ static WALK_UNUSED void __walk_io_error_line(WalkString value) {
     fflush(stderr);
 }
 
+static WALK_UNUSED IOReadResult __walk_io_read_ok(WalkString value) {
+    return (IOReadResult){.ok = true, .value = value, .error = ""};
+}
+
+static WALK_UNUSED IOReadResult __walk_io_read_error(WalkString error) {
+    return (IOReadResult){.ok = false, .value = "", .error = error};
+}
+
+static WALK_UNUSED IOReadResult __walk_io_read_line(void) {
+    size_t cap = 64;
+    size_t len = 0;
+    char *buffer = (char *)malloc(cap);
+    if (buffer == NULL) { __walk_runtime_error("out of memory"); }
+    for (;;) {
+        int ch = fgetc(stdin);
+        if (ch == EOF) {
+            if (ferror(stdin)) {
+                free(buffer);
+                return __walk_io_read_error("stdin read failed");
+            }
+            if (len == 0) {
+                free(buffer);
+                return __walk_io_read_error("eof");
+            }
+            break;
+        }
+        if (ch == '\n') { break; }
+        if (ch == '\r') {
+            int next = fgetc(stdin);
+            if (next == '\n') { break; }
+            if (next == EOF && ferror(stdin)) {
+                free(buffer);
+                return __walk_io_read_error("stdin read failed");
+            }
+            if (next != EOF) { ungetc(next, stdin); }
+        }
+        if (len + 1 >= cap) {
+            if (cap > ((size_t)-1) / 2) {
+                free(buffer);
+                __walk_runtime_error("out of memory");
+            }
+            size_t next_cap = cap * 2;
+            char *next_buffer = (char *)realloc(buffer, next_cap);
+            if (next_buffer == NULL) {
+                free(buffer);
+                __walk_runtime_error("out of memory");
+            }
+            buffer = next_buffer;
+            cap = next_cap;
+        }
+        buffer[len++] = (char)ch;
+    }
+    buffer[len] = '\0';
+    return __walk_io_read_ok(buffer);
+}
+
+static WALK_UNUSED IOReadResult __walk_io_read_all(void) {
+    size_t cap = 64;
+    size_t len = 0;
+    char *buffer = (char *)malloc(cap);
+    if (buffer == NULL) { __walk_runtime_error("out of memory"); }
+    for (;;) {
+        int ch = fgetc(stdin);
+        if (ch == EOF) {
+            if (ferror(stdin)) {
+                free(buffer);
+                return __walk_io_read_error("stdin read failed");
+            }
+            break;
+        }
+        if (len + 1 >= cap) {
+            if (cap > ((size_t)-1) / 2) {
+                free(buffer);
+                __walk_runtime_error("out of memory");
+            }
+            size_t next_cap = cap * 2;
+            char *next_buffer = (char *)realloc(buffer, next_cap);
+            if (next_buffer == NULL) {
+                free(buffer);
+                __walk_runtime_error("out of memory");
+            }
+            buffer = next_buffer;
+            cap = next_cap;
+        }
+        buffer[len++] = (char)ch;
+    }
+    buffer[len] = '\0';
+    return __walk_io_read_ok(buffer);
+}
+
 static WALK_UNUSED WalkInt __walk_process_arg_count(void) {
     return __walk_host_argc > 0 ? (WalkInt)(__walk_host_argc - 1) : 0;
 }
@@ -333,6 +451,52 @@ static WALK_UNUSED WalkString __walk_process_cwd(void) {
 
 static WALK_UNUSED void __walk_process_exit(WalkInt code) {
     exit((int)code);
+}
+
+static WALK_UNUSED WalkBool __walk_parse_starts_with_space(WalkString text) {
+    return text[0] == ' ' || text[0] == '\t' || text[0] == '\n' || text[0] == '\r' || text[0] == '\f' || text[0] == '\v';
+}
+
+static WALK_UNUSED ParseIntResult __walk_parse_int(WalkString text) {
+    if (text == NULL || text[0] == '\0' || __walk_parse_starts_with_space(text)) {
+        return (ParseIntResult){.ok = false, .value = 0, .error = "invalid int"};
+    }
+    errno = 0;
+    char *end = NULL;
+    long long value = strtoll(text, &end, 10);
+    if (end == text || *end != '\0') {
+        return (ParseIntResult){.ok = false, .value = 0, .error = "invalid int"};
+    }
+    if (errno == ERANGE) {
+        return (ParseIntResult){.ok = false, .value = 0, .error = "int out of range"};
+    }
+    return (ParseIntResult){.ok = true, .value = (WalkInt)value, .error = ""};
+}
+
+static WALK_UNUSED ParseFloatResult __walk_parse_float(WalkString text) {
+    if (text == NULL || text[0] == '\0' || __walk_parse_starts_with_space(text)) {
+        return (ParseFloatResult){.ok = false, .value = 0, .error = "invalid float"};
+    }
+    errno = 0;
+    char *end = NULL;
+    double value = strtod(text, &end);
+    if (end == text || *end != '\0' || !isfinite(value)) {
+        return (ParseFloatResult){.ok = false, .value = 0, .error = "invalid float"};
+    }
+    if (errno == ERANGE) {
+        return (ParseFloatResult){.ok = false, .value = 0, .error = "float out of range"};
+    }
+    return (ParseFloatResult){.ok = true, .value = (WalkFloat)value, .error = ""};
+}
+
+static WALK_UNUSED ParseBoolResult __walk_parse_bool(WalkString text) {
+    if (text != NULL && strcmp(text, "true") == 0) {
+        return (ParseBoolResult){.ok = true, .value = true, .error = ""};
+    }
+    if (text != NULL && strcmp(text, "false") == 0) {
+        return (ParseBoolResult){.ok = true, .value = false, .error = ""};
+    }
+    return (ParseBoolResult){.ok = false, .value = false, .error = "invalid bool"};
 }
 
 WalkInt add(WalkInt a, WalkInt b);

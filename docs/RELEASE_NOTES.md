@@ -4,6 +4,41 @@
 
 No unreleased changes.
 
+## v5.7.0 - Draft Recoverable Text IO
+
+Date: 2026-05-23
+
+v5.7.0 adds the next draft IO slice: recoverable stdin reads and parse helpers
+that return explicit result structs instead of nullable-only values.
+
+### Added
+
+- Draft `IOReadResult`, `ParseIntResult`, `ParseFloatResult`, and `ParseBoolResult` structs with `ok`, `value`, and `error` fields.
+- Draft `io.read_line()` and `io.read_all()` for runtime-owned stdin text.
+- Draft `parse.int`, `parse.float`, and `parse.bool` helpers.
+- Native runtime tests for stdin, EOF-as-data, successful parse results, and invalid parse input.
+- Checker diagnostics for invalid draft `io.read_line` and `parse.int` calls.
+
+### Notes
+
+- The stable language contract remains v1.9.
+- Draft parse helpers parse the whole input string and return invalid input as data.
+- File IO, JSON, process spawning, terminal raw mode, HTTP, and browser targets remain gated by `IO_PLAN.md`.
+
+### Breaking Changes
+
+None.
+
+### Upgrade
+
+Regenerate docs and release artifacts with:
+
+```bash
+scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.7.0 dist
+```
+
 ## v5.6.0 - Draft IO Foundation
 
 Date: 2026-05-22

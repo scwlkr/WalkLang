@@ -82,9 +82,13 @@ func CheckWithOptions(program *ast.Program, options Options) ([]Warning, error) 
 			return nil, err
 		}
 	}
+	var err error
+	structs, err = mergeBuiltinStructs(structs)
+	if err != nil {
+		return nil, err
+	}
 	methods := options.Methods
 	if methods == nil {
-		var err error
 		methods, err = MethodDefinitions(program)
 		if err != nil {
 			return nil, err
@@ -101,7 +105,7 @@ func CheckWithOptions(program *ast.Program, options Options) ([]Warning, error) 
 	if c.modules == nil {
 		c.modules = map[string]*Module{}
 	}
-	err := c.check(program)
+	err = c.check(program)
 	return c.warnings, err
 }
 
@@ -214,6 +218,30 @@ func StructDefinitions(program *ast.Program) (map[string]StructDef, error) {
 		structs[decl.Name] = def
 	}
 	return structs, nil
+}
+
+func mergeBuiltinStructs(structs map[string]StructDef) (map[string]StructDef, error) {
+	merged := make(map[string]StructDef, len(structs)+len(builtins.Structs()))
+	for name, def := range structs {
+		merged[name] = def
+	}
+	for _, def := range builtins.Structs() {
+		if existing, exists := merged[def.Name]; exists {
+			return nil, errorAt(existing.Location, "type error: struct %s is reserved by draft built-in APIs", def.Name)
+		}
+		fieldMap := map[string]ast.StructField{}
+		fields := make([]ast.StructField, len(def.Fields))
+		copy(fields, def.Fields)
+		for _, field := range fields {
+			fieldMap[field.Name] = field
+		}
+		merged[def.Name] = StructDef{
+			Name:     def.Name,
+			Fields:   fields,
+			FieldMap: fieldMap,
+		}
+	}
+	return merged, nil
 }
 
 func (c *Checker) checkStructs() error {

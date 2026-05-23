@@ -106,7 +106,7 @@ func TestV19ReleaseDocsArePresent(t *testing.T) {
 	}{
 		{"docs/COMPATIBILITY.md", "Stable v1 code should continue to compile through the v1.x line"},
 		{"docs/INSTALL.md", "Official Install Instructions"},
-		{"docs/RELEASE_NOTES.md", "v5.6.0"},
+		{"docs/RELEASE_NOTES.md", "v5.7.0"},
 		{"docs/MIGRATING.md", "v1.8 to v1.9"},
 		{"docs/DEPRECATION.md", "Current v1.9 Deprecated Surface"},
 	}

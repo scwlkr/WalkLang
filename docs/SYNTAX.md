@@ -495,8 +495,8 @@ imp: geometry.core
 out: geometry.core.double(3)
 ```
 
-Draft process helpers are available in the current compiler, but they are not
-part of the stable v1.9 syntax contract yet.
+Draft process and IO helpers are available in the current compiler, but they
+are not part of the stable v1.9 syntax contract yet.
 
 ```walk
 imp: process
@@ -504,6 +504,18 @@ imp: process
 out: process.arg_count()
 out: process.cwd()
 do: process.exit(0)
+```
+
+Draft recoverable text input and parse helpers return result structs:
+
+```walk
+imp: io
+imp: parse
+
+var: line = io.read_line()
+var: age = parse.int(line.value)
+if: age.ok
+    out: age.value
 ```
 
 ---

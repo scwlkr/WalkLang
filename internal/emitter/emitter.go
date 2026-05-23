@@ -43,10 +43,14 @@ func newCEmitter(modules map[string]*ast.Program) *cEmitter {
 	if modules == nil {
 		modules = map[string]*ast.Program{}
 	}
+	structs := collectBuiltinStructDecls()
+	for name, decl := range collectStructDecls(modules) {
+		structs[name] = decl
+	}
 	return &cEmitter{
 		modules:             modules,
 		moduleFunctionNames: collectModuleFunctionNames(modules),
-		structs:             collectStructDecls(modules),
+		structs:             structs,
 	}
 }
 
@@ -317,6 +321,92 @@ func (e *cEmitter) emit(program *ast.Program, testsOnly bool) (string, error) {
 	out.WriteString("    fprintf(stderr, \"%s\\n\", value == NULL ? \"null\" : value);\n")
 	out.WriteString("    fflush(stderr);\n")
 	out.WriteString("}\n\n")
+	out.WriteString("static WALK_UNUSED IOReadResult __walk_io_read_ok(WalkString value) {\n")
+	out.WriteString("    return (IOReadResult){.ok = true, .value = value, .error = \"\"};\n")
+	out.WriteString("}\n\n")
+	out.WriteString("static WALK_UNUSED IOReadResult __walk_io_read_error(WalkString error) {\n")
+	out.WriteString("    return (IOReadResult){.ok = false, .value = \"\", .error = error};\n")
+	out.WriteString("}\n\n")
+	out.WriteString("static WALK_UNUSED IOReadResult __walk_io_read_line(void) {\n")
+	out.WriteString("    size_t cap = 64;\n")
+	out.WriteString("    size_t len = 0;\n")
+	out.WriteString("    char *buffer = (char *)malloc(cap);\n")
+	out.WriteString("    if (buffer == NULL) { __walk_runtime_error(\"out of memory\"); }\n")
+	out.WriteString("    for (;;) {\n")
+	out.WriteString("        int ch = fgetc(stdin);\n")
+	out.WriteString("        if (ch == EOF) {\n")
+	out.WriteString("            if (ferror(stdin)) {\n")
+	out.WriteString("                free(buffer);\n")
+	out.WriteString("                return __walk_io_read_error(\"stdin read failed\");\n")
+	out.WriteString("            }\n")
+	out.WriteString("            if (len == 0) {\n")
+	out.WriteString("                free(buffer);\n")
+	out.WriteString("                return __walk_io_read_error(\"eof\");\n")
+	out.WriteString("            }\n")
+	out.WriteString("            break;\n")
+	out.WriteString("        }\n")
+	out.WriteString("        if (ch == '\\n') { break; }\n")
+	out.WriteString("        if (ch == '\\r') {\n")
+	out.WriteString("            int next = fgetc(stdin);\n")
+	out.WriteString("            if (next == '\\n') { break; }\n")
+	out.WriteString("            if (next == EOF && ferror(stdin)) {\n")
+	out.WriteString("                free(buffer);\n")
+	out.WriteString("                return __walk_io_read_error(\"stdin read failed\");\n")
+	out.WriteString("            }\n")
+	out.WriteString("            if (next != EOF) { ungetc(next, stdin); }\n")
+	out.WriteString("        }\n")
+	out.WriteString("        if (len + 1 >= cap) {\n")
+	out.WriteString("            if (cap > ((size_t)-1) / 2) {\n")
+	out.WriteString("                free(buffer);\n")
+	out.WriteString("                __walk_runtime_error(\"out of memory\");\n")
+	out.WriteString("            }\n")
+	out.WriteString("            size_t next_cap = cap * 2;\n")
+	out.WriteString("            char *next_buffer = (char *)realloc(buffer, next_cap);\n")
+	out.WriteString("            if (next_buffer == NULL) {\n")
+	out.WriteString("                free(buffer);\n")
+	out.WriteString("                __walk_runtime_error(\"out of memory\");\n")
+	out.WriteString("            }\n")
+	out.WriteString("            buffer = next_buffer;\n")
+	out.WriteString("            cap = next_cap;\n")
+	out.WriteString("        }\n")
+	out.WriteString("        buffer[len++] = (char)ch;\n")
+	out.WriteString("    }\n")
+	out.WriteString("    buffer[len] = '\\0';\n")
+	out.WriteString("    return __walk_io_read_ok(buffer);\n")
+	out.WriteString("}\n\n")
+	out.WriteString("static WALK_UNUSED IOReadResult __walk_io_read_all(void) {\n")
+	out.WriteString("    size_t cap = 64;\n")
+	out.WriteString("    size_t len = 0;\n")
+	out.WriteString("    char *buffer = (char *)malloc(cap);\n")
+	out.WriteString("    if (buffer == NULL) { __walk_runtime_error(\"out of memory\"); }\n")
+	out.WriteString("    for (;;) {\n")
+	out.WriteString("        int ch = fgetc(stdin);\n")
+	out.WriteString("        if (ch == EOF) {\n")
+	out.WriteString("            if (ferror(stdin)) {\n")
+	out.WriteString("                free(buffer);\n")
+	out.WriteString("                return __walk_io_read_error(\"stdin read failed\");\n")
+	out.WriteString("            }\n")
+	out.WriteString("            break;\n")
+	out.WriteString("        }\n")
+	out.WriteString("        if (len + 1 >= cap) {\n")
+	out.WriteString("            if (cap > ((size_t)-1) / 2) {\n")
+	out.WriteString("                free(buffer);\n")
+	out.WriteString("                __walk_runtime_error(\"out of memory\");\n")
+	out.WriteString("            }\n")
+	out.WriteString("            size_t next_cap = cap * 2;\n")
+	out.WriteString("            char *next_buffer = (char *)realloc(buffer, next_cap);\n")
+	out.WriteString("            if (next_buffer == NULL) {\n")
+	out.WriteString("                free(buffer);\n")
+	out.WriteString("                __walk_runtime_error(\"out of memory\");\n")
+	out.WriteString("            }\n")
+	out.WriteString("            buffer = next_buffer;\n")
+	out.WriteString("            cap = next_cap;\n")
+	out.WriteString("        }\n")
+	out.WriteString("        buffer[len++] = (char)ch;\n")
+	out.WriteString("    }\n")
+	out.WriteString("    buffer[len] = '\\0';\n")
+	out.WriteString("    return __walk_io_read_ok(buffer);\n")
+	out.WriteString("}\n\n")
 	out.WriteString("static WALK_UNUSED WalkInt __walk_process_arg_count(void) {\n")
 	out.WriteString("    return __walk_host_argc > 0 ? (WalkInt)(__walk_host_argc - 1) : 0;\n")
 	out.WriteString("}\n\n")
@@ -356,6 +446,48 @@ func (e *cEmitter) emit(program *ast.Program, testsOnly bool) (string, error) {
 	out.WriteString("}\n\n")
 	out.WriteString("static WALK_UNUSED void __walk_process_exit(WalkInt code) {\n")
 	out.WriteString("    exit((int)code);\n")
+	out.WriteString("}\n\n")
+	out.WriteString("static WALK_UNUSED WalkBool __walk_parse_starts_with_space(WalkString text) {\n")
+	out.WriteString("    return text[0] == ' ' || text[0] == '\\t' || text[0] == '\\n' || text[0] == '\\r' || text[0] == '\\f' || text[0] == '\\v';\n")
+	out.WriteString("}\n\n")
+	out.WriteString("static WALK_UNUSED ParseIntResult __walk_parse_int(WalkString text) {\n")
+	out.WriteString("    if (text == NULL || text[0] == '\\0' || __walk_parse_starts_with_space(text)) {\n")
+	out.WriteString("        return (ParseIntResult){.ok = false, .value = 0, .error = \"invalid int\"};\n")
+	out.WriteString("    }\n")
+	out.WriteString("    errno = 0;\n")
+	out.WriteString("    char *end = NULL;\n")
+	out.WriteString("    long long value = strtoll(text, &end, 10);\n")
+	out.WriteString("    if (end == text || *end != '\\0') {\n")
+	out.WriteString("        return (ParseIntResult){.ok = false, .value = 0, .error = \"invalid int\"};\n")
+	out.WriteString("    }\n")
+	out.WriteString("    if (errno == ERANGE) {\n")
+	out.WriteString("        return (ParseIntResult){.ok = false, .value = 0, .error = \"int out of range\"};\n")
+	out.WriteString("    }\n")
+	out.WriteString("    return (ParseIntResult){.ok = true, .value = (WalkInt)value, .error = \"\"};\n")
+	out.WriteString("}\n\n")
+	out.WriteString("static WALK_UNUSED ParseFloatResult __walk_parse_float(WalkString text) {\n")
+	out.WriteString("    if (text == NULL || text[0] == '\\0' || __walk_parse_starts_with_space(text)) {\n")
+	out.WriteString("        return (ParseFloatResult){.ok = false, .value = 0, .error = \"invalid float\"};\n")
+	out.WriteString("    }\n")
+	out.WriteString("    errno = 0;\n")
+	out.WriteString("    char *end = NULL;\n")
+	out.WriteString("    double value = strtod(text, &end);\n")
+	out.WriteString("    if (end == text || *end != '\\0' || !isfinite(value)) {\n")
+	out.WriteString("        return (ParseFloatResult){.ok = false, .value = 0, .error = \"invalid float\"};\n")
+	out.WriteString("    }\n")
+	out.WriteString("    if (errno == ERANGE) {\n")
+	out.WriteString("        return (ParseFloatResult){.ok = false, .value = 0, .error = \"float out of range\"};\n")
+	out.WriteString("    }\n")
+	out.WriteString("    return (ParseFloatResult){.ok = true, .value = (WalkFloat)value, .error = \"\"};\n")
+	out.WriteString("}\n\n")
+	out.WriteString("static WALK_UNUSED ParseBoolResult __walk_parse_bool(WalkString text) {\n")
+	out.WriteString("    if (text != NULL && strcmp(text, \"true\") == 0) {\n")
+	out.WriteString("        return (ParseBoolResult){.ok = true, .value = true, .error = \"\"};\n")
+	out.WriteString("    }\n")
+	out.WriteString("    if (text != NULL && strcmp(text, \"false\") == 0) {\n")
+	out.WriteString("        return (ParseBoolResult){.ok = true, .value = false, .error = \"\"};\n")
+	out.WriteString("    }\n")
+	out.WriteString("    return (ParseBoolResult){.ok = false, .value = false, .error = \"invalid bool\"};\n")
 	out.WriteString("}\n\n")
 
 	for _, name := range sortedModuleNames(e.modules) {
@@ -551,6 +683,14 @@ func collectStructDecls(modules map[string]*ast.Program) map[string]*ast.StructD
 				result[decl.Name] = decl
 			}
 		}
+	}
+	return result
+}
+
+func collectBuiltinStructDecls() map[string]*ast.StructDecl {
+	result := map[string]*ast.StructDecl{}
+	for _, decl := range builtins.StructDecls() {
+		result[decl.Name] = decl
 	}
 	return result
 }

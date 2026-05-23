@@ -501,6 +501,7 @@ Draft built-in modules in the current compiler:
 
 ```text
 io
+parse
 process
 ```
 

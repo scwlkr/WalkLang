@@ -156,7 +156,7 @@ go run ./cmd/walk check --warnings=error examples/v1.walk</code></pre>
 <h2 id="build-flow">Build Flow</h2>
 <p>Native builds still go through generated C and <code>cc</code>.</p>
 <p>Install the local CLI first:</p>
-<pre><code class="language-bash">scripts/install-local.sh v5.6-local
+<pre><code class="language-bash">scripts/install-local.sh v5.7-local
 walk version</code></pre>
 <pre><code class="language-bash">walk build examples/v1.walk -o build/v1 --release
 ./build/v1</code></pre>
@@ -167,7 +167,7 @@ walk version</code></pre>
 <p>Run the focused v1 compatibility suite:</p>
 <pre><code class="language-bash">go test ./cmd/walk -run TestV19CompatibilitySuite</code></pre>
 <p>Build release CLI artifacts:</p>
-<pre><code class="language-bash">scripts/release.sh v5.6.0</code></pre>
+<pre><code class="language-bash">scripts/release.sh v5.7.0</code></pre>
 <h2 id="project-mode">Project Mode</h2>
 <pre><code class="language-bash">walk init hello
 cd hello

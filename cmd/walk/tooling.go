@@ -127,12 +127,22 @@ var walkBuiltinDetails = map[string]string{
 	"io.write":          "effect func(string) void",
 	"io.write_line":     "effect func(string) void",
 	"io.error_line":     "effect func(string) void",
+	"io.read_line":      "func() IOReadResult",
+	"io.read_all":       "func() IOReadResult",
 	"process":           "draft built-in module",
 	"process.args":      "func() array[string]",
 	"process.arg_count": "func() int",
 	"process.env":       "func(string) string?",
 	"process.cwd":       "func() string",
 	"process.exit":      "effect func(int) void",
+	"parse":             "draft built-in module",
+	"parse.int":         "func(string) ParseIntResult",
+	"parse.float":       "func(string) ParseFloatResult",
+	"parse.bool":        "func(string) ParseBoolResult",
+	"IOReadResult":      "draft struct { ok bool, value string, error string }",
+	"ParseIntResult":    "draft struct { ok bool, value int, error string }",
+	"ParseFloatResult":  "draft struct { ok bool, value float, error string }",
+	"ParseBoolResult":   "draft struct { ok bool, value bool, error string }",
 }
 
 func docsCommand(args []string) error {
