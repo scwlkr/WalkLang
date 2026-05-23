@@ -4,6 +4,52 @@
 
 No unreleased changes.
 
+## v5.11.0 - Draft Terminal UX IO
+
+Date: 2026-05-23
+
+v5.11.0 completes `IO_PLAN.md` Roadmap Phase 4 as draft compiler APIs while
+keeping the stable language contract at v1.9.
+
+### Added
+
+- Draft `term.is_tty`, `term.color`, `term.background`, `term.style`,
+  `term.reset`, `term.clear`, `term.move`, `term.width`, `term.height`, and
+  `term.read_key` helpers.
+- ANSI styling policy for TTY output, `NO_COLOR`, and explicit
+  `CLICOLOR_FORCE` testing.
+- Deterministic terminal width and height fallbacks through `COLUMNS`, `LINES`,
+  `80`, and `24`.
+- Recoverable non-interactive `term.read_key` behavior through `IOReadResult`.
+- Native runtime tests for clean redirected output, forced ANSI output,
+  dimensions fallback, non-interactive key reads, invalid terminal names, and
+  invalid-use diagnostics.
+
+### Notes
+
+- The stable language contract remains v1.9.
+- Terminal styling is opt-in and resettable through explicit `do:` effect calls.
+- Redirected stdout remains clean by default because styling, movement, clear,
+  and reset calls no-op when stdout is not a TTY.
+- `term.read_key` uses raw terminal mode only for a single key read and restores
+  the terminal before returning.
+- HTTP, browser targets, graphics, and rich runtimes remain gated by later
+  `IO_PLAN.md` roadmap phases.
+
+### Breaking Changes
+
+None.
+
+### Upgrade
+
+Regenerate docs and release artifacts with:
+
+```bash
+scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.11.0 dist
+```
+
 ## v5.10.0 - Draft Process And Data Interop IO
 
 Date: 2026-05-23

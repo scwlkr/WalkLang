@@ -495,8 +495,8 @@ imp: geometry.core
 out: geometry.core.double(3)
 ```
 
-Draft process and IO helpers are available in the current compiler, but they
-are not part of the stable v1.9 syntax contract yet.
+Draft process, IO, filesystem, JSON, and terminal helpers are available in the
+current compiler, but they are not part of the stable v1.9 syntax contract yet.
 
 ```walk
 imp: process
@@ -516,6 +516,19 @@ var: line = io.read_line()
 var: age = parse.int(line.value)
 if: age.ok
     out: age.value
+```
+
+Draft terminal helpers are ordinary imported function calls. Terminal mutation
+helpers are explicit effects:
+
+```walk
+imp: io
+imp: term
+
+if: term.is_tty()
+    do: term.color('red')
+    do: io.write_line('error')
+    do: term.reset()
 ```
 
 ---

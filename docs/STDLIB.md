@@ -552,6 +552,88 @@ or file write failures runtime-stop with `walk runtime error`.
 
 ---
 
+## Draft term
+
+Draft `term` APIs support terminal-oriented CLI output without changing the
+stable v1.9 language contract. Terminal mutation helpers are effects and must
+use `do:`.
+
+```walk
+imp: io
+imp: term
+
+if: term.is_tty()
+    do: term.color('red')
+    do: io.write_line('error')
+    do: term.reset()
+```
+
+ANSI output policy:
+
+- `term.color`, `term.background`, `term.style`, `term.reset`, `term.clear`,
+  and `term.move` emit ANSI only when stdout is a TTY.
+- `NO_COLOR` disables ANSI output.
+- `CLICOLOR_FORCE=1` forces ANSI output for deterministic tests and explicit
+  scripted use.
+- Redirected stdout stays clean by default because mutation helpers no-op when
+  stdout is not a TTY.
+
+Supported colors are `default`, `black`, `red`, `green`, `yellow`, `blue`,
+`magenta`, `cyan`, and `white`. Supported styles are `bold`, `dim`, `italic`,
+`underline`, `reverse`, `normal`, and `reset`. Unknown color, background, or
+style names runtime-stop with a `walk runtime error`.
+
+`term.read_key()` returns `IOReadResult`. Non-interactive stdin returns
+`ok false`, `value ''`, and `error 'terminal not interactive'` instead of
+blocking. Allocation failure still runtime-stops.
+
+### term.is_tty() -> bool
+
+Returns `true` when stdout is an interactive terminal.
+
+### term.color(string) -> effect
+
+Sets the foreground color by supported color name when ANSI output is enabled.
+
+### term.background(string) -> effect
+
+Sets the background color by supported color name when ANSI output is enabled.
+
+### term.style(string) -> effect
+
+Sets a supported terminal style when ANSI output is enabled.
+
+### term.reset() -> effect
+
+Resets terminal styling when ANSI output is enabled.
+
+### term.clear() -> effect
+
+Clears the terminal screen and moves the cursor home when ANSI output is
+enabled.
+
+### term.move(int, int) -> effect
+
+Moves the cursor to one-based column and row coordinates when ANSI output is
+enabled. Columns and rows less than `1` runtime-stop.
+
+### term.width() -> int
+
+Returns the current terminal width when available, then `COLUMNS` when it is a
+positive integer, then `80`.
+
+### term.height() -> int
+
+Returns the current terminal height when available, then `LINES` when it is a
+positive integer, then `24`.
+
+### term.read_key() -> IOReadResult
+
+Reads one key from an interactive stdin terminal. On POSIX hosts this enters raw
+mode for a single key read and restores the terminal before returning.
+
+---
+
 ## Test Syntax
 
 The stable testing surface also includes syntax:

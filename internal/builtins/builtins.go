@@ -388,6 +388,86 @@ func init() {
 		Draft:  true,
 		CName:  "__walk_json_write",
 	})
+	register(Function{
+		Module: "term",
+		Name:   "is_tty",
+		Return: ast.Basic(ast.TypeBool),
+		Draft:  true,
+		CName:  "__walk_term_is_tty",
+	})
+	register(Function{
+		Module: "term",
+		Name:   "color",
+		Params: []ast.Type{ast.Basic(ast.TypeString)},
+		Return: ast.Basic(ast.TypeVoid),
+		Effect: true,
+		Draft:  true,
+		CName:  "__walk_term_color",
+	})
+	register(Function{
+		Module: "term",
+		Name:   "background",
+		Params: []ast.Type{ast.Basic(ast.TypeString)},
+		Return: ast.Basic(ast.TypeVoid),
+		Effect: true,
+		Draft:  true,
+		CName:  "__walk_term_background",
+	})
+	register(Function{
+		Module: "term",
+		Name:   "style",
+		Params: []ast.Type{ast.Basic(ast.TypeString)},
+		Return: ast.Basic(ast.TypeVoid),
+		Effect: true,
+		Draft:  true,
+		CName:  "__walk_term_style",
+	})
+	register(Function{
+		Module: "term",
+		Name:   "reset",
+		Return: ast.Basic(ast.TypeVoid),
+		Effect: true,
+		Draft:  true,
+		CName:  "__walk_term_reset",
+	})
+	register(Function{
+		Module: "term",
+		Name:   "clear",
+		Return: ast.Basic(ast.TypeVoid),
+		Effect: true,
+		Draft:  true,
+		CName:  "__walk_term_clear",
+	})
+	register(Function{
+		Module: "term",
+		Name:   "move",
+		Params: []ast.Type{ast.Basic(ast.TypeInt), ast.Basic(ast.TypeInt)},
+		Return: ast.Basic(ast.TypeVoid),
+		Effect: true,
+		Draft:  true,
+		CName:  "__walk_term_move",
+	})
+	register(Function{
+		Module: "term",
+		Name:   "width",
+		Return: ast.Basic(ast.TypeInt),
+		Draft:  true,
+		CName:  "__walk_term_width",
+	})
+	register(Function{
+		Module: "term",
+		Name:   "height",
+		Return: ast.Basic(ast.TypeInt),
+		Draft:  true,
+		CName:  "__walk_term_height",
+	})
+	register(Function{
+		Module: "term",
+		Name:   "read_key",
+		Return: ast.Struct("IOReadResult"),
+		Draft:  true,
+		CName:  "__walk_term_read_key",
+	})
 }
 
 func register(fn Function) {

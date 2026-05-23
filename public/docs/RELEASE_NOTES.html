@@ -52,6 +52,39 @@
 <h1 id="walklang-release-notes">WalkLang Release Notes</h1>
 <h2 id="unreleased">Unreleased</h2>
 <p>No unreleased changes.</p>
+<h2 id="v5-11-0-draft-terminal-ux-io">v5.11.0 - Draft Terminal UX IO</h2>
+<p>Date: 2026-05-23</p>
+<p>v5.11.0 completes <code>IO_PLAN.md</code> Roadmap Phase 4 as draft compiler APIs while keeping the stable language contract at v1.9.</p>
+<h3 id="added">Added</h3>
+<ul>
+<li>Draft <code>term.is_tty</code>, <code>term.color</code>, <code>term.background</code>, <code>term.style</code>,</li>
+<p><code>term.reset</code>, <code>term.clear</code>, <code>term.move</code>, <code>term.width</code>, <code>term.height</code>, and <code>term.read_key</code> helpers.</p>
+<li>ANSI styling policy for TTY output, <code>NO_COLOR</code>, and explicit</li>
+<p><code>CLICOLOR_FORCE</code> testing.</p>
+<li>Deterministic terminal width and height fallbacks through <code>COLUMNS</code>, <code>LINES</code>,</li>
+<p><code>80</code>, and <code>24</code>.</p>
+<li>Recoverable non-interactive <code>term.read_key</code> behavior through <code>IOReadResult</code>.</li>
+<li>Native runtime tests for clean redirected output, forced ANSI output,</li>
+<p>dimensions fallback, non-interactive key reads, invalid terminal names, and invalid-use diagnostics.</p>
+</ul>
+<h3 id="notes">Notes</h3>
+<ul>
+<li>The stable language contract remains v1.9.</li>
+<li>Terminal styling is opt-in and resettable through explicit <code>do:</code> effect calls.</li>
+<li>Redirected stdout remains clean by default because styling, movement, clear,</li>
+<p>and reset calls no-op when stdout is not a TTY.</p>
+<li><code>term.read_key</code> uses raw terminal mode only for a single key read and restores</li>
+<p>the terminal before returning.</p>
+<li>HTTP, browser targets, graphics, and rich runtimes remain gated by later</li>
+<p><code>IO_PLAN.md</code> roadmap phases.</p>
+</ul>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<p>None.</p>
+<h3 id="upgrade">Upgrade</h3>
+<p>Regenerate docs and release artifacts with:</p>
+<pre><code class="language-bash">scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.11.0 dist</code></pre>
 <h2 id="v5-10-0-draft-process-and-data-interop-io">v5.10.0 - Draft Process And Data Interop IO</h2>
 <p>Date: 2026-05-23</p>
 <p>v5.10.0 completes <code>IO_PLAN.md</code> Roadmap Phase 3 as draft compiler APIs while keeping the stable language contract at v1.9.</p>

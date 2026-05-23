@@ -1,0 +1,3 @@
+imp: term
+
+do: term.move('left', 1)

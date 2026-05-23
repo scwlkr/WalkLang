@@ -1073,7 +1073,7 @@ Done when:
 
 ### Roadmap Phase 4: Terminal UX
 
-Status: future.
+Status: done as draft compiler APIs in `v5.11.0`.
 
 Scope:
 
@@ -1100,6 +1100,22 @@ Entry gates:
 - terminal cleanup behavior
 - Windows behavior
 - non-interactive test strategy
+
+Phase decisions:
+
+- TTY policy: `term.is_tty()` reports whether stdout is an interactive terminal.
+- ANSI policy: terminal mutation helpers emit ANSI only when stdout is a TTY or
+  `CLICOLOR_FORCE` is set; `NO_COLOR` disables ANSI output.
+- Redirect policy: styling, cursor movement, and clear/reset helpers are no-op
+  for redirected stdout by default, so captured output remains clean.
+- Dimension policy: `term.width()` and `term.height()` use terminal dimensions
+  when available, then `COLUMNS`/`LINES`, then deterministic `80`/`24`
+  fallbacks.
+- Key policy: `term.read_key()` returns `IOReadResult`. Non-interactive stdin
+  returns `ok false`, `value ''`, and `error 'terminal not interactive'`
+  instead of blocking.
+- Cleanup policy: raw terminal mode is scoped to a single `term.read_key()` call
+  and is restored before the result is returned.
 
 Done when:
 

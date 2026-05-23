@@ -296,7 +296,7 @@ out: calc.square(5)</code></pre>
 <p>Package module example:</p>
 <pre><code class="language-walk">imp: geometry.core
 out: geometry.core.double(3)</code></pre>
-<p>Draft process and IO helpers are available in the current compiler, but they are not part of the stable v1.9 syntax contract yet.</p>
+<p>Draft process, IO, filesystem, JSON, and terminal helpers are available in the current compiler, but they are not part of the stable v1.9 syntax contract yet.</p>
 <pre><code class="language-walk">imp: process
 
 out: process.arg_count()
@@ -310,6 +310,14 @@ var: line = io.read_line()
 var: age = parse.int(line.value)
 if: age.ok
     out: age.value</code></pre>
+<p>Draft terminal helpers are ordinary imported function calls. Terminal mutation helpers are explicit effects:</p>
+<pre><code class="language-walk">imp: io
+imp: term
+
+if: term.is_tty()
+    do: term.color(&#39;red&#39;)
+    do: io.write_line(&#39;error&#39;)
+    do: term.reset()</code></pre>
 <p>---</p>
 <h2 id="tests">Tests</h2>
 <p>Use <code>test:</code> and <code>assert:</code> with <code>walk test</code>.</p>

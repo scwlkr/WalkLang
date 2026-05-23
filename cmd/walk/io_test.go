@@ -597,6 +597,141 @@ func TestDraftJSONPhase3ParsesStringifiesReadsAndWritesText(t *testing.T) {
 	}
 }
 
+func TestDraftTerminalPhase4StylesAreOptInAndDimensionsFallback(t *testing.T) {
+	requireCC(t)
+
+	dir := t.TempDir()
+	sourcePath := filepath.Join(dir, "main.walk")
+	writeFile(t, sourcePath, strings.Join([]string{
+		"imp: io",
+		"imp: term",
+		"",
+		"out: term.is_tty()",
+		"out: term.width()",
+		"out: term.height()",
+		"do: term.color('red')",
+		"do: io.write('RED')",
+		"do: term.background('blue')",
+		"do: term.style('bold')",
+		"do: term.move(2, 3)",
+		"do: term.clear()",
+		"do: term.reset()",
+		"do: io.write_line('done')",
+		"",
+	}, "\n"))
+
+	cCode, warnings, err := compileFileToCWithOptions(sourcePath, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(warnings) != 0 {
+		t.Fatalf("unexpected warnings: %#v", warnings)
+	}
+
+	exePath := filepath.Join(dir, "program")
+	if err := buildC(cCode, filepath.Join(dir, "program.c"), exePath, nativeBuildOptions{}); err != nil {
+		t.Fatal(err)
+	}
+
+	command := exec.Command(exePath)
+	command.Env = []string{"COLUMNS=132", "LINES=43", "NO_COLOR=1"}
+	output, err := command.CombinedOutput()
+	if err != nil {
+		t.Fatalf("program failed: %v\noutput:\n%s\nC:\n%s", err, string(output), cCode)
+	}
+	if got, want := string(output), "false\n132\n43\nREDdone\n"; got != want {
+		t.Fatalf("redirected stdout should stay clean:\nwant %q\ngot  %q\nC:\n%s", want, got, cCode)
+	}
+
+	command = exec.Command(exePath)
+	command.Env = []string{"COLUMNS=132", "LINES=43", "CLICOLOR_FORCE=1"}
+	output, err = command.CombinedOutput()
+	if err != nil {
+		t.Fatalf("forced ansi program failed: %v\noutput:\n%s\nC:\n%s", err, string(output), cCode)
+	}
+	want := "false\n132\n43\n\x1b[31mRED\x1b[44m\x1b[1m\x1b[3;2H\x1b[2J\x1b[H\x1b[0mdone\n"
+	if got := string(output); got != want {
+		t.Fatalf("forced ansi stdout mismatch:\nwant %q\ngot  %q\nC:\n%s", want, got, cCode)
+	}
+}
+
+func TestDraftTerminalReadKeyReportsNonInteractiveTTYAsData(t *testing.T) {
+	requireCC(t)
+
+	dir := t.TempDir()
+	sourcePath := filepath.Join(dir, "main.walk")
+	writeFile(t, sourcePath, strings.Join([]string{
+		"imp: term",
+		"",
+		"var: key = term.read_key()",
+		"out: key.ok",
+		"out: key.value",
+		"out: key.error",
+		"",
+	}, "\n"))
+
+	cCode, warnings, err := compileFileToCWithOptions(sourcePath, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(warnings) != 0 {
+		t.Fatalf("unexpected warnings: %#v", warnings)
+	}
+
+	exePath := filepath.Join(dir, "program")
+	if err := buildC(cCode, filepath.Join(dir, "program.c"), exePath, nativeBuildOptions{}); err != nil {
+		t.Fatal(err)
+	}
+
+	command := exec.Command(exePath)
+	command.Stdin = strings.NewReader("x")
+	output, err := command.CombinedOutput()
+	if err != nil {
+		t.Fatalf("program failed: %v\noutput:\n%s\nC:\n%s", err, string(output), cCode)
+	}
+	if got, want := string(output), "false\n\nterminal not interactive\n"; got != want {
+		t.Fatalf("stdout mismatch:\nwant %q\ngot  %q\nC:\n%s", want, got, cCode)
+	}
+}
+
+func TestDraftTerminalInvalidStyleFailsClearly(t *testing.T) {
+	requireCC(t)
+
+	dir := t.TempDir()
+	sourcePath := filepath.Join(dir, "main.walk")
+	writeFile(t, sourcePath, strings.Join([]string{
+		"imp: term",
+		"",
+		"do: term.color('orange')",
+		"",
+	}, "\n"))
+
+	cCode, warnings, err := compileFileToCWithOptions(sourcePath, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(warnings) != 0 {
+		t.Fatalf("unexpected warnings: %#v", warnings)
+	}
+
+	exePath := filepath.Join(dir, "program")
+	if err := buildC(cCode, filepath.Join(dir, "program.c"), exePath, nativeBuildOptions{}); err != nil {
+		t.Fatal(err)
+	}
+
+	output, err := exec.Command(exePath).CombinedOutput()
+	var exitErr *exec.ExitError
+	if !errors.As(err, &exitErr) {
+		t.Fatalf("expected exit error, got %v with output %q", err, string(output))
+	}
+	if code := exitErr.ExitCode(); code == 0 {
+		t.Fatalf("expected non-zero exit code, got %d with output %q", code, string(output))
+	}
+	if got, want := string(output), "walk runtime error: term color unknown\n"; got != want {
+		t.Fatalf("runtime error mismatch:\nwant %q\ngot  %q\nC:\n%s", want, got, cCode)
+	}
+}
+
 func TestDraftFileReadMissingFileFailsClearly(t *testing.T) {
 	requireCC(t)
 

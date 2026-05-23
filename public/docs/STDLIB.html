@@ -315,6 +315,48 @@ if: parsed.ok
 <h3 id="json-write-string-string-effect">json.write(string, string) -&gt; effect</h3>
 <p>Validates and compacts JSON text, then overwrites the target file. Invalid JSON or file write failures runtime-stop with <code>walk runtime error</code>.</p>
 <p>---</p>
+<h2 id="draft-term">Draft term</h2>
+<p>Draft <code>term</code> APIs support terminal-oriented CLI output without changing the stable v1.9 language contract. Terminal mutation helpers are effects and must use <code>do:</code>.</p>
+<pre><code class="language-walk">imp: io
+imp: term
+
+if: term.is_tty()
+    do: term.color(&#39;red&#39;)
+    do: io.write_line(&#39;error&#39;)
+    do: term.reset()</code></pre>
+<p>ANSI output policy:</p>
+<ul>
+<li><code>term.color</code>, <code>term.background</code>, <code>term.style</code>, <code>term.reset</code>, <code>term.clear</code>,</li>
+<p>and <code>term.move</code> emit ANSI only when stdout is a TTY.</p>
+<li><code>NO_COLOR</code> disables ANSI output.</li>
+<li><code>CLICOLOR_FORCE=1</code> forces ANSI output for deterministic tests and explicit</li>
+<p>scripted use.</p>
+<li>Redirected stdout stays clean by default because mutation helpers no-op when</li>
+<p>stdout is not a TTY.</p>
+</ul>
+<p>Supported colors are <code>default</code>, <code>black</code>, <code>red</code>, <code>green</code>, <code>yellow</code>, <code>blue</code>, <code>magenta</code>, <code>cyan</code>, and <code>white</code>. Supported styles are <code>bold</code>, <code>dim</code>, <code>italic</code>, <code>underline</code>, <code>reverse</code>, <code>normal</code>, and <code>reset</code>. Unknown color, background, or style names runtime-stop with a <code>walk runtime error</code>.</p>
+<p><code>term.read_key()</code> returns <code>IOReadResult</code>. Non-interactive stdin returns <code>ok false</code>, <code>value &#39;&#39;</code>, and <code>error &#39;terminal not interactive&#39;</code> instead of blocking. Allocation failure still runtime-stops.</p>
+<h3 id="term-is-tty-bool">term.is_tty() -&gt; bool</h3>
+<p>Returns <code>true</code> when stdout is an interactive terminal.</p>
+<h3 id="term-color-string-effect">term.color(string) -&gt; effect</h3>
+<p>Sets the foreground color by supported color name when ANSI output is enabled.</p>
+<h3 id="term-background-string-effect">term.background(string) -&gt; effect</h3>
+<p>Sets the background color by supported color name when ANSI output is enabled.</p>
+<h3 id="term-style-string-effect">term.style(string) -&gt; effect</h3>
+<p>Sets a supported terminal style when ANSI output is enabled.</p>
+<h3 id="term-reset-effect">term.reset() -&gt; effect</h3>
+<p>Resets terminal styling when ANSI output is enabled.</p>
+<h3 id="term-clear-effect">term.clear() -&gt; effect</h3>
+<p>Clears the terminal screen and moves the cursor home when ANSI output is enabled.</p>
+<h3 id="term-move-int-int-effect">term.move(int, int) -&gt; effect</h3>
+<p>Moves the cursor to one-based column and row coordinates when ANSI output is enabled. Columns and rows less than <code>1</code> runtime-stop.</p>
+<h3 id="term-width-int">term.width() -&gt; int</h3>
+<p>Returns the current terminal width when available, then <code>COLUMNS</code> when it is a positive integer, then <code>80</code>.</p>
+<h3 id="term-height-int">term.height() -&gt; int</h3>
+<p>Returns the current terminal height when available, then <code>LINES</code> when it is a positive integer, then <code>24</code>.</p>
+<h3 id="term-read-key-ioreadresult">term.read_key() -&gt; IOReadResult</h3>
+<p>Reads one key from an interactive stdin terminal. On POSIX hosts this enters raw mode for a single key read and restores the terminal before returning.</p>
+<p>---</p>
 <h2 id="test-syntax">Test Syntax</h2>
 <p>The stable testing surface also includes syntax:</p>
 <pre><code class="language-walk">test: &#39;works&#39;

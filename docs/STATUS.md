@@ -2,9 +2,38 @@
 
 Stable language contract: v1.9.
 
-Current compiler/tooling/docs release: v5.10.0 draft process and data interop IO completion.
+Current compiler/tooling/docs release: v5.11.0 draft terminal UX IO completion.
 
 Experimental implemented language surface: v2.2.
+
+State: v5.11.0 completes `IO_PLAN.md` Roadmap Phase 4, Terminal UX, as draft
+compiler APIs. Draft terminal helpers now cover `term.is_tty`, foreground and
+background color, style, reset, clear, cursor movement, terminal dimensions,
+and recoverable one-key reads. ANSI terminal mutation is explicit through
+`do:` effect calls, disabled for redirected stdout by default, disabled by
+`NO_COLOR`, and forceable for deterministic tests with `CLICOLOR_FORCE`.
+`term.width()` and `term.height()` use TTY dimensions when available, then
+`COLUMNS`/`LINES`, then `80`/`24` fallbacks. `term.read_key()` returns
+`IOReadResult`; non-interactive stdin returns `error 'terminal not interactive'`
+instead of blocking, and raw mode is restored after a single key read. Stable
+language contract remains v1.9. HTTP, browser targets, graphics, and rich
+runtimes remain gated by later `IO_PLAN.md` phases.
+
+v5.11.0 verification on 2026-05-23: focused Phase 4 tests first failed because
+`term` was not a built-in module, then `go test ./cmd/walk -run
+'TestDraftTerminal|TestV13GeneratedCSnapshots|TestV13FailFixturesHaveExpectedDiagnostics|TestV19ReleaseDocsArePresent'
+-count=1` passed after implementation and generated C snapshot refresh; full
+`go test -count=1 ./...` passed; `go build -trimpath -ldflags "-X
+main.version=v5.11.0" -o build/walk ./cmd/walk` passed; `./build/walk version`
+reported `v5.11.0`; `./build/walk check --warnings=error
+tests/pass/do_effects.walk` passed; `WALK_BIN=$PWD/build/walk
+scripts/stress-v1.sh` passed and reported `v1.9 stress ok`;
+`scripts/build-docs-site.sh` passed; `scripts/check-docs-site.sh` passed after
+staging generated docs; `scripts/release.sh v5.11.0 <temp>/release` produced 5
+platform artifacts plus `SHA256SUMS`; `wc -l <temp>/release/SHA256SUMS`
+reported 5 checksum lines; the host release binary reported `v5.11.0` from
+`walk version`; and `scripts/install-local.sh v5.11.0` refreshed the local
+`walk` install.
 
 State: v5.10.0 completes `IO_PLAN.md` Roadmap Phase 3, Process And Data
 Interop, as draft compiler APIs. Draft process helpers now cover argv-style

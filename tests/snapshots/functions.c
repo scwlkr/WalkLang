@@ -14,15 +14,22 @@
 #include <time.h>
 
 #if defined(_WIN32)
+#include <conio.h>
 #include <direct.h>
 #include <io.h>
 #include <process.h>
 #include <windows.h>
 #else
 #include <dirent.h>
+#include <sys/ioctl.h>
+#include <termios.h>
 #include <sys/time.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#endif
+
+#if defined(_WIN32) && !defined(ENABLE_VIRTUAL_TERMINAL_PROCESSING)
+#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 #endif
 
 /* walk runtime: no user pointers; array storage is runtime-owned for the process lifetime. */
@@ -458,6 +465,185 @@ static WALK_UNUSED IOReadResult __walk_io_read_all(void) {
     }
     buffer[len] = '\0';
     return __walk_io_read_ok(buffer);
+}
+
+static WALK_UNUSED WalkBool __walk_term_is_tty(void) {
+#if defined(_WIN32)
+    return _isatty(_fileno(stdout)) != 0;
+#else
+    return isatty(fileno(stdout)) != 0;
+#endif
+}
+
+static WALK_UNUSED WalkBool __walk_term_stdin_is_tty(void) {
+#if defined(_WIN32)
+    return _isatty(_fileno(stdin)) != 0;
+#else
+    return isatty(fileno(stdin)) != 0;
+#endif
+}
+
+static WALK_UNUSED WalkBool __walk_term_force_ansi(void) {
+    const char *value = getenv("CLICOLOR_FORCE");
+    return value != NULL && value[0] != '\0' && strcmp(value, "0") != 0;
+}
+
+static WALK_UNUSED WalkBool __walk_term_ansi_enabled(void) {
+    if (getenv("NO_COLOR") != NULL) { return false; }
+    if (__walk_term_force_ansi()) { return true; }
+    const char *term = getenv("TERM");
+    if (term != NULL && strcmp(term, "dumb") == 0) { return false; }
+#if defined(_WIN32)
+    if (!__walk_term_is_tty()) { return false; }
+    HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (handle == INVALID_HANDLE_VALUE) { return false; }
+    DWORD mode = 0;
+    if (!GetConsoleMode(handle, &mode)) { return false; }
+    if ((mode & ENABLE_VIRTUAL_TERMINAL_PROCESSING) == 0) {
+        if (!SetConsoleMode(handle, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING)) { return false; }
+    }
+    return true;
+#else
+    return __walk_term_is_tty();
+#endif
+}
+
+static WALK_UNUSED const char *__walk_term_color_code(WalkString name, WalkBool background) {
+    if (name == NULL) { return NULL; }
+    if (strcmp(name, "default") == 0) { return background ? "49" : "39"; }
+    if (strcmp(name, "black") == 0) { return background ? "40" : "30"; }
+    if (strcmp(name, "red") == 0) { return background ? "41" : "31"; }
+    if (strcmp(name, "green") == 0) { return background ? "42" : "32"; }
+    if (strcmp(name, "yellow") == 0) { return background ? "43" : "33"; }
+    if (strcmp(name, "blue") == 0) { return background ? "44" : "34"; }
+    if (strcmp(name, "magenta") == 0) { return background ? "45" : "35"; }
+    if (strcmp(name, "cyan") == 0) { return background ? "46" : "36"; }
+    if (strcmp(name, "white") == 0) { return background ? "47" : "37"; }
+    return NULL;
+}
+
+static WALK_UNUSED const char *__walk_term_style_code(WalkString name) {
+    if (name == NULL) { return NULL; }
+    if (strcmp(name, "bold") == 0) { return "1"; }
+    if (strcmp(name, "dim") == 0) { return "2"; }
+    if (strcmp(name, "italic") == 0) { return "3"; }
+    if (strcmp(name, "underline") == 0) { return "4"; }
+    if (strcmp(name, "reverse") == 0) { return "7"; }
+    if (strcmp(name, "normal") == 0 || strcmp(name, "reset") == 0) { return "0"; }
+    return NULL;
+}
+
+static WALK_UNUSED void __walk_term_emit_code(const char *code) {
+    if (!__walk_term_ansi_enabled()) { return; }
+    fprintf(stdout, "\033[%sm", code);
+    fflush(stdout);
+}
+
+static WALK_UNUSED void __walk_term_color(WalkString name) {
+    const char *code = __walk_term_color_code(name, false);
+    if (code == NULL) { __walk_runtime_error("term color unknown"); }
+    __walk_term_emit_code(code);
+}
+
+static WALK_UNUSED void __walk_term_background(WalkString name) {
+    const char *code = __walk_term_color_code(name, true);
+    if (code == NULL) { __walk_runtime_error("term background unknown"); }
+    __walk_term_emit_code(code);
+}
+
+static WALK_UNUSED void __walk_term_style(WalkString name) {
+    const char *code = __walk_term_style_code(name);
+    if (code == NULL) { __walk_runtime_error("term style unknown"); }
+    __walk_term_emit_code(code);
+}
+
+static WALK_UNUSED void __walk_term_reset(void) {
+    __walk_term_emit_code("0");
+}
+
+static WALK_UNUSED void __walk_term_clear(void) {
+    if (!__walk_term_ansi_enabled()) { return; }
+    fputs("\033[2J\033[H", stdout);
+    fflush(stdout);
+}
+
+static WALK_UNUSED void __walk_term_move(WalkInt column, WalkInt row) {
+    if (column < 1 || row < 1) { __walk_runtime_error("term move invalid"); }
+    if (!__walk_term_ansi_enabled()) { return; }
+    fprintf(stdout, "\033[%lld;%lldH", (long long)row, (long long)column);
+    fflush(stdout);
+}
+
+static WALK_UNUSED WalkInt __walk_term_env_dimension(const char *name, WalkInt fallback) {
+    const char *value = getenv(name);
+    if (value == NULL || value[0] == '\0') { return fallback; }
+    errno = 0;
+    char *end = NULL;
+    long long parsed = strtoll(value, &end, 10);
+    if (end != value && *end == '\0' && errno != ERANGE && parsed > 0) { return (WalkInt)parsed; }
+    return fallback;
+}
+
+static WALK_UNUSED WalkInt __walk_term_width(void) {
+#if defined(_WIN32)
+    HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_SCREEN_BUFFER_INFO info;
+    if (__walk_term_is_tty() && handle != INVALID_HANDLE_VALUE && GetConsoleScreenBufferInfo(handle, &info)) {
+        return (WalkInt)(info.srWindow.Right - info.srWindow.Left + 1);
+    }
+#else
+    struct winsize size;
+    if (__walk_term_is_tty() && ioctl(fileno(stdout), TIOCGWINSZ, &size) == 0 && size.ws_col > 0) { return (WalkInt)size.ws_col; }
+#endif
+    return __walk_term_env_dimension("COLUMNS", 80);
+}
+
+static WALK_UNUSED WalkInt __walk_term_height(void) {
+#if defined(_WIN32)
+    HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_SCREEN_BUFFER_INFO info;
+    if (__walk_term_is_tty() && handle != INVALID_HANDLE_VALUE && GetConsoleScreenBufferInfo(handle, &info)) {
+        return (WalkInt)(info.srWindow.Bottom - info.srWindow.Top + 1);
+    }
+#else
+    struct winsize size;
+    if (__walk_term_is_tty() && ioctl(fileno(stdout), TIOCGWINSZ, &size) == 0 && size.ws_row > 0) { return (WalkInt)size.ws_row; }
+#endif
+    return __walk_term_env_dimension("LINES", 24);
+}
+
+static WALK_UNUSED IOReadResult __walk_term_read_key(void) {
+    if (!__walk_term_stdin_is_tty()) { return __walk_io_read_error("terminal not interactive"); }
+#if defined(_WIN32)
+    int ch = _getch();
+    if (ch == 0 || ch == 224) { (void)_getch(); return __walk_io_read_error("terminal key unsupported"); }
+    if (ch < 0) { return __walk_io_read_error("terminal read failed"); }
+    if (ch == 0) { return __walk_io_read_error("terminal key unsupported"); }
+    char *buffer = (char *)malloc(2);
+    if (buffer == NULL) { __walk_runtime_error("out of memory"); }
+    buffer[0] = (char)ch;
+    buffer[1] = '\0';
+    return __walk_io_read_ok(buffer);
+#else
+    struct termios old_mode;
+    if (tcgetattr(fileno(stdin), &old_mode) != 0) { return __walk_io_read_error("terminal read failed"); }
+    struct termios raw = old_mode;
+    raw.c_lflag &= (tcflag_t)~(ICANON | ECHO);
+    raw.c_cc[VMIN] = 1;
+    raw.c_cc[VTIME] = 0;
+    if (tcsetattr(fileno(stdin), TCSANOW, &raw) != 0) { return __walk_io_read_error("terminal raw mode failed"); }
+    char ch = '\0';
+    ssize_t count = read(fileno(stdin), &ch, 1);
+    if (tcsetattr(fileno(stdin), TCSANOW, &old_mode) != 0) { return __walk_io_read_error("terminal restore failed"); }
+    if (count < 0) { return __walk_io_read_error("terminal read failed"); }
+    if (count == 0) { return __walk_io_read_error("eof"); }
+    if (ch == '\0') { return __walk_io_read_error("terminal key unsupported"); }
+    char *buffer = (char *)malloc(2);
+    if (buffer == NULL) { __walk_runtime_error("out of memory"); }
+    buffer[0] = ch;
+    buffer[1] = '\0';
+    return __walk_io_read_ok(buffer);
+#endif
 }
 
 static WALK_UNUSED WalkBool __walk_utf8_cont(unsigned char ch) {
