@@ -51,6 +51,9 @@ func buildSite(docsDir string, publicDir string) error {
 	if err := copyFile("icon_WalkLang.svg", filepath.Join(publicDir, "assets", "icon.svg")); err != nil {
 		return err
 	}
+	if err := copyFile("icon_WalkLang.svg", filepath.Join(publicDir, "favicon.svg")); err != nil {
+		return err
+	}
 	if err := copyFile(filepath.Join("site", "assets", "site.css"), filepath.Join(publicDir, "assets", "site.css")); err != nil {
 		return err
 	}
@@ -197,7 +200,7 @@ func layout(current string, title string, pages []docPage, body string) string {
 	out.WriteString(`<meta charset="utf-8">` + "\n")
 	out.WriteString(`<meta name="viewport" content="width=device-width, initial-scale=1">` + "\n")
 	out.WriteString("<title>" + html.EscapeString(title) + " - WalkLang</title>\n")
-	out.WriteString(`<link rel="icon" href="` + assetPrefix + `assets/icon.svg">` + "\n")
+	out.WriteString(`<link rel="icon" type="image/svg+xml" href="` + assetPrefix + `favicon.svg">` + "\n")
 	out.WriteString(`<link rel="stylesheet" href="` + assetPrefix + `assets/site.css">` + "\n")
 	out.WriteString("</head>\n<body>\n")
 	out.WriteString(`<div class="shell">` + "\n")
@@ -214,7 +217,7 @@ func layout(current string, title string, pages []docPage, body string) string {
 func renderSidebar(current string, pages []docPage) string {
 	var out strings.Builder
 	out.WriteString(`<aside class="sidebar">` + "\n")
-	out.WriteString(`<a class="brand" href="` + relURL(current, "index.html") + `"><img src="` + assetPrefixFor(current) + `assets/logo.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>` + "\n")
+	out.WriteString(`<a class="brand" href="` + relURL(current, "index.html") + `"><img src="` + assetPrefixFor(current) + `assets/icon.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>` + "\n")
 	out.WriteString(`<nav class="nav" aria-label="Documentation">` + "\n")
 	groups := groupedPages(pages)
 	for _, group := range sortedGroups(groups) {

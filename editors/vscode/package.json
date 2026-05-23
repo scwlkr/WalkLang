@@ -26,6 +26,10 @@
         "extensions": [
           ".walk"
         ],
+        "icon": {
+          "light": "./icons/walklang.svg",
+          "dark": "./icons/walklang.svg"
+        },
         "configuration": "./language-configuration.json"
       }
     ],

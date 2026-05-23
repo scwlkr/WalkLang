@@ -31,6 +31,18 @@ checksum lines; the host release binary reported `v5.5.0` from `walk version`;
 `git diff --check` is still blocked by the pre-existing unstaged
 `playground/hangman-v2.walk` trailing whitespace.
 
+Docs brand polish update on 2026-05-22: the generated docs site is now dark-mode
+only, uses a blue WalkLang accent family instead of the previous green tokens,
+publishes the compact WalkLang icon as `/favicon.svg`, uses that compact mark in
+the docs sidebar, and declares the same mark as the VS Code `walk` language icon
+for compatible file icon themes.
+
+Docs brand polish verification on 2026-05-22: focused site-generator tests cover
+the root favicon link, compact sidebar icon, dark blue accent tokens, removed
+green tokens, and existing VS Code language icon asset path; `go test ./scripts
+-count=1` passed; `scripts/build-docs-site.sh` passed; and
+`scripts/check-docs-site.sh` passed after regenerating `public/`.
+
 Live docs TLS recovery on 2026-05-22: root cause was GitHub Pages serving the
 custom domain over HTTP while no Pages TLS certificate existed for
 `walklang.wlkrlabs.com`; DNS was already valid as the DNS-only
