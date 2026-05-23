@@ -228,3 +228,132 @@ func TestReadLineReportsImmediateEOFAsData(t *testing.T) {
 		t.Fatalf("stdout mismatch:\nwant %q\ngot  %q\nC:\n%s", want, got, cCode)
 	}
 }
+
+func TestDraftFileTextIOReadsWritesAndChecksExistence(t *testing.T) {
+	requireCC(t)
+
+	dir := t.TempDir()
+	sourcePath := filepath.Join(dir, "main.walk")
+	writeFile(t, sourcePath, strings.Join([]string{
+		"imp: file",
+		"",
+		"out: file.exists('note.txt')",
+		"do: file.write('note.txt', 'hello from WalkLang')",
+		"out: file.exists('note.txt')",
+		"out: file.read('note.txt')",
+		"",
+	}, "\n"))
+
+	cCode, warnings, err := compileFileToCWithOptions(sourcePath, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(warnings) != 0 {
+		t.Fatalf("unexpected warnings: %#v", warnings)
+	}
+
+	exePath := filepath.Join(dir, "program")
+	if err := buildC(cCode, filepath.Join(dir, "program.c"), exePath, nativeBuildOptions{}); err != nil {
+		t.Fatal(err)
+	}
+
+	command := exec.Command(exePath)
+	command.Dir = dir
+	output, err := command.CombinedOutput()
+	if err != nil {
+		t.Fatalf("program failed: %v\noutput:\n%s\nC:\n%s", err, string(output), cCode)
+	}
+	if got, want := string(output), "false\ntrue\nhello from WalkLang\n"; got != want {
+		t.Fatalf("stdout mismatch:\nwant %q\ngot  %q\nC:\n%s", want, got, cCode)
+	}
+	contents, err := os.ReadFile(filepath.Join(dir, "note.txt"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := string(contents), "hello from WalkLang"; got != want {
+		t.Fatalf("file contents mismatch: want %q, got %q", want, got)
+	}
+}
+
+func TestDraftFileReadMissingFileFailsClearly(t *testing.T) {
+	requireCC(t)
+
+	dir := t.TempDir()
+	sourcePath := filepath.Join(dir, "main.walk")
+	writeFile(t, sourcePath, strings.Join([]string{
+		"imp: file",
+		"",
+		"out: file.read('missing.txt')",
+		"",
+	}, "\n"))
+
+	cCode, warnings, err := compileFileToCWithOptions(sourcePath, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(warnings) != 0 {
+		t.Fatalf("unexpected warnings: %#v", warnings)
+	}
+
+	exePath := filepath.Join(dir, "program")
+	if err := buildC(cCode, filepath.Join(dir, "program.c"), exePath, nativeBuildOptions{}); err != nil {
+		t.Fatal(err)
+	}
+
+	command := exec.Command(exePath)
+	command.Dir = dir
+	output, err := command.CombinedOutput()
+	var exitErr *exec.ExitError
+	if !errors.As(err, &exitErr) {
+		t.Fatalf("expected exit error, got %v with output %q", err, string(output))
+	}
+	if code := exitErr.ExitCode(); code == 0 {
+		t.Fatalf("expected non-zero exit code, got %d with output %q", code, string(output))
+	}
+	if got, want := string(output), "walk runtime error: file read failed\n"; got != want {
+		t.Fatalf("runtime error mismatch:\nwant %q\ngot  %q\nC:\n%s", want, got, cCode)
+	}
+}
+
+func TestDraftFileReadInvalidUTF8FailsClearly(t *testing.T) {
+	requireCC(t)
+
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "bad.txt"), []byte{0xff}, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	sourcePath := filepath.Join(dir, "main.walk")
+	writeFile(t, sourcePath, strings.Join([]string{
+		"imp: file",
+		"",
+		"out: file.read('bad.txt')",
+		"",
+	}, "\n"))
+
+	cCode, warnings, err := compileFileToCWithOptions(sourcePath, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(warnings) != 0 {
+		t.Fatalf("unexpected warnings: %#v", warnings)
+	}
+
+	exePath := filepath.Join(dir, "program")
+	if err := buildC(cCode, filepath.Join(dir, "program.c"), exePath, nativeBuildOptions{}); err != nil {
+		t.Fatal(err)
+	}
+
+	command := exec.Command(exePath)
+	command.Dir = dir
+	output, err := command.CombinedOutput()
+	var exitErr *exec.ExitError
+	if !errors.As(err, &exitErr) {
+		t.Fatalf("expected exit error, got %v with output %q", err, string(output))
+	}
+	if code := exitErr.ExitCode(); code == 0 {
+		t.Fatalf("expected non-zero exit code, got %d with output %q", code, string(output))
+	}
+	if got, want := string(output), "walk runtime error: file invalid utf-8\n"; got != want {
+		t.Fatalf("runtime error mismatch:\nwant %q\ngot  %q\nC:\n%s", want, got, cCode)
+	}
+}

@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <sys/stat.h>
 #include <time.h>
 
 #if defined(_WIN32)
@@ -406,6 +406,142 @@ static WALK_UNUSED IOReadResult __walk_io_read_all(void) {
     }
     buffer[len] = '\0';
     return __walk_io_read_ok(buffer);
+}
+
+static WALK_UNUSED WalkBool __walk_utf8_cont(unsigned char ch) {
+    return (ch & 0xC0) == 0x80;
+}
+
+static WALK_UNUSED WalkBool __walk_is_valid_utf8(WalkString text) {
+    if (text == NULL) { return false; }
+    const unsigned char *bytes = (const unsigned char *)text;
+    size_t len = strlen(text);
+    size_t i = 0;
+    while (i < len) {
+        unsigned char ch = bytes[i];
+        if (ch <= 0x7F) { i++; continue; }
+        if (ch >= 0xC2 && ch <= 0xDF) {
+            if (i + 1 >= len || !__walk_utf8_cont(bytes[i + 1])) { return false; }
+            i += 2;
+            continue;
+        }
+        if (ch == 0xE0) {
+            if (i + 2 >= len || bytes[i + 1] < 0xA0 || bytes[i + 1] > 0xBF || !__walk_utf8_cont(bytes[i + 2])) { return false; }
+            i += 3;
+            continue;
+        }
+        if ((ch >= 0xE1 && ch <= 0xEC) || (ch >= 0xEE && ch <= 0xEF)) {
+            if (i + 2 >= len || !__walk_utf8_cont(bytes[i + 1]) || !__walk_utf8_cont(bytes[i + 2])) { return false; }
+            i += 3;
+            continue;
+        }
+        if (ch == 0xED) {
+            if (i + 2 >= len || bytes[i + 1] < 0x80 || bytes[i + 1] > 0x9F || !__walk_utf8_cont(bytes[i + 2])) { return false; }
+            i += 3;
+            continue;
+        }
+        if (ch == 0xF0) {
+            if (i + 3 >= len || bytes[i + 1] < 0x90 || bytes[i + 1] > 0xBF || !__walk_utf8_cont(bytes[i + 2]) || !__walk_utf8_cont(bytes[i + 3])) { return false; }
+            i += 4;
+            continue;
+        }
+        if (ch >= 0xF1 && ch <= 0xF3) {
+            if (i + 3 >= len || !__walk_utf8_cont(bytes[i + 1]) || !__walk_utf8_cont(bytes[i + 2]) || !__walk_utf8_cont(bytes[i + 3])) { return false; }
+            i += 4;
+            continue;
+        }
+        if (ch == 0xF4) {
+            if (i + 3 >= len || bytes[i + 1] < 0x80 || bytes[i + 1] > 0x8F || !__walk_utf8_cont(bytes[i + 2]) || !__walk_utf8_cont(bytes[i + 3])) { return false; }
+            i += 4;
+            continue;
+        }
+        return false;
+    }
+    return true;
+}
+
+static WALK_UNUSED void __walk_file_require_path(WalkString path) {
+    if (path == NULL || path[0] == '\0') { __walk_runtime_error("file path empty"); }
+}
+
+static WALK_UNUSED WalkBool __walk_file_exists(WalkString path) {
+    if (path == NULL || path[0] == '\0') { return false; }
+#if defined(_WIN32)
+    struct _stat info;
+    return _stat(path, &info) == 0;
+#else
+    struct stat info;
+    return stat(path, &info) == 0;
+#endif
+}
+
+static WALK_UNUSED WalkString __walk_file_read(WalkString path) {
+    __walk_file_require_path(path);
+    FILE *file = fopen(path, "rb");
+    if (file == NULL) { __walk_runtime_error("file read failed"); }
+    size_t cap = 64;
+    size_t len = 0;
+    char *buffer = (char *)malloc(cap);
+    if (buffer == NULL) {
+        fclose(file);
+        __walk_runtime_error("out of memory");
+    }
+    for (;;) {
+        int ch = fgetc(file);
+        if (ch == EOF) {
+            if (ferror(file)) {
+                fclose(file);
+                free(buffer);
+                __walk_runtime_error("file read failed");
+            }
+            break;
+        }
+        if (ch == '\0') {
+            fclose(file);
+            free(buffer);
+            __walk_runtime_error("file contains null byte");
+        }
+        if (len + 1 >= cap) {
+            if (cap > ((size_t)-1) / 2) {
+                fclose(file);
+                free(buffer);
+                __walk_runtime_error("out of memory");
+            }
+            size_t next_cap = cap * 2;
+            char *next_buffer = (char *)realloc(buffer, next_cap);
+            if (next_buffer == NULL) {
+                fclose(file);
+                free(buffer);
+                __walk_runtime_error("out of memory");
+            }
+            buffer = next_buffer;
+            cap = next_cap;
+        }
+        buffer[len++] = (char)ch;
+    }
+    if (fclose(file) != 0) {
+        free(buffer);
+        __walk_runtime_error("file read failed");
+    }
+    buffer[len] = '\0';
+    if (!__walk_is_valid_utf8(buffer)) {
+        free(buffer);
+        __walk_runtime_error("file invalid utf-8");
+    }
+    return buffer;
+}
+
+static WALK_UNUSED void __walk_file_write(WalkString path, WalkString text) {
+    __walk_file_require_path(path);
+    if (text == NULL || !__walk_is_valid_utf8(text)) { __walk_runtime_error("file invalid utf-8"); }
+    FILE *file = fopen(path, "wb");
+    if (file == NULL) { __walk_runtime_error("file write failed"); }
+    size_t len = strlen(text);
+    if (len > 0 && fwrite(text, 1, len, file) != len) {
+        fclose(file);
+        __walk_runtime_error("file write failed");
+    }
+    if (fclose(file) != 0) { __walk_runtime_error("file write failed"); }
 }
 
 static WALK_UNUSED WalkInt __walk_process_arg_count(void) {

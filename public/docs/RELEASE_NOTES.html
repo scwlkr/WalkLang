@@ -52,6 +52,30 @@
 <h1 id="walklang-release-notes">WalkLang Release Notes</h1>
 <h2 id="unreleased">Unreleased</h2>
 <p>No unreleased changes.</p>
+<h2 id="v5-8-0-draft-local-file-text-io">v5.8.0 - Draft Local File Text IO</h2>
+<p>Date: 2026-05-23</p>
+<p>v5.8.0 starts the local filesystem roadmap phase with draft UTF-8 text file helpers.</p>
+<h3 id="added">Added</h3>
+<ul>
+<li>Draft <code>file.read</code>, <code>file.write</code>, and <code>file.exists</code> helpers.</li>
+<li>Native temp-directory tests for read/write/existence behavior.</li>
+<li>Native negative tests for missing files and invalid UTF-8 reads.</li>
+<li>Phase 2 IO plan decisions for path handling, UTF-8 text policy, fail-stop file errors, temp-directory tests, and deferred cwd mutation.</li>
+</ul>
+<h3 id="notes">Notes</h3>
+<ul>
+<li>The stable language contract remains v1.9.</li>
+<li>Draft file paths are passed to the host OS without normalization or <code>~</code> expansion. Relative paths resolve against the native process current working directory.</li>
+<li>Draft <code>file.read</code> and <code>file.write</code> are fail-stop APIs for now. Recoverable file result structs remain future Phase 2 work.</li>
+<li><code>file.append</code>, directory/path helpers, <code>process.chdir</code>, JSON, process spawning, terminal raw mode, HTTP, and browser targets remain gated by <code>IO_PLAN.md</code>.</li>
+</ul>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<p>None.</p>
+<h3 id="upgrade">Upgrade</h3>
+<p>Regenerate docs and release artifacts with:</p>
+<pre><code class="language-bash">scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.8.0 dist</code></pre>
 <h2 id="v5-7-0-draft-recoverable-text-io">v5.7.0 - Draft Recoverable Text IO</h2>
 <p>Date: 2026-05-23</p>
 <p>v5.7.0 adds the next draft IO slice: recoverable stdin reads and parse helpers that return explicit result structs instead of nullable-only values.</p>

@@ -24,9 +24,9 @@ testing
 
 No other built-in module is stable in v1.9.
 
-The current compiler also includes draft `io`, `parse`, and `process` modules.
-They are importable and tested, but they are not compatibility-protected in
-v1.9.
+The current compiler also includes draft `io`, `parse`, `process`, and `file`
+modules. They are importable and tested, but they are not
+compatibility-protected in v1.9.
 
 Draft APIs may expose draft result structs. They are documented here so current
 compiler behavior is visible, but they are not part of the stable v1.9
@@ -291,6 +291,40 @@ Parses exactly `true` or `false`. Other text returns `error 'invalid bool'`.
 
 ---
 
+## Draft file
+
+Draft `file` APIs are UTF-8 text helpers. They use native process paths:
+relative paths resolve against the current working directory, absolute paths
+are passed to the host OS, and this draft slice does not normalize paths or
+expand `~`. Empty paths runtime-stop for reads and writes.
+
+`file.read` and `file.write` are fail-stop in this draft slice. Missing files,
+permission errors, invalid UTF-8, embedded null bytes on read, and write
+failures stop the native program with a `walk runtime error`.
+
+### file.read(string) -> string
+
+Reads the whole UTF-8 text file into a runtime-owned string.
+
+### file.write(string, string) -> effect
+
+Overwrites the target path with UTF-8 text. Create parent directories first;
+this helper does not create them.
+
+```walk
+imp: file
+
+do: file.write('note.txt', 'hello')
+out: file.read('note.txt')
+```
+
+### file.exists(string) -> bool
+
+Returns `true` when the path currently exists according to the host OS and
+`false` when it does not. Empty paths return `false`.
+
+---
+
 ## Draft process
 
 ```walk
@@ -347,10 +381,7 @@ stay consistent, but they are not stable, not importable, and not
 compatibility-protected in v1.9.
 
 ```text
-file.read
-file.write
 file.append
-file.exists
 json.parse
 json.stringify
 matrix.rows

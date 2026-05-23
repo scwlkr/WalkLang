@@ -4,6 +4,41 @@
 
 No unreleased changes.
 
+## v5.8.0 - Draft Local File Text IO
+
+Date: 2026-05-23
+
+v5.8.0 starts the local filesystem roadmap phase with draft UTF-8 text file
+helpers.
+
+### Added
+
+- Draft `file.read`, `file.write`, and `file.exists` helpers.
+- Native temp-directory tests for read/write/existence behavior.
+- Native negative tests for missing files and invalid UTF-8 reads.
+- Phase 2 IO plan decisions for path handling, UTF-8 text policy, fail-stop file errors, temp-directory tests, and deferred cwd mutation.
+
+### Notes
+
+- The stable language contract remains v1.9.
+- Draft file paths are passed to the host OS without normalization or `~` expansion. Relative paths resolve against the native process current working directory.
+- Draft `file.read` and `file.write` are fail-stop APIs for now. Recoverable file result structs remain future Phase 2 work.
+- `file.append`, directory/path helpers, `process.chdir`, JSON, process spawning, terminal raw mode, HTTP, and browser targets remain gated by `IO_PLAN.md`.
+
+### Breaking Changes
+
+None.
+
+### Upgrade
+
+Regenerate docs and release artifacts with:
+
+```bash
+scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.8.0 dist
+```
+
 ## v5.7.0 - Draft Recoverable Text IO
 
 Date: 2026-05-23

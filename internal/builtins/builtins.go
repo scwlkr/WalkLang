@@ -105,6 +105,31 @@ func init() {
 		CName:  "__walk_io_read_all",
 	})
 	register(Function{
+		Module: "file",
+		Name:   "read",
+		Params: []ast.Type{ast.Basic(ast.TypeString)},
+		Return: ast.Basic(ast.TypeString),
+		Draft:  true,
+		CName:  "__walk_file_read",
+	})
+	register(Function{
+		Module: "file",
+		Name:   "write",
+		Params: []ast.Type{ast.Basic(ast.TypeString), ast.Basic(ast.TypeString)},
+		Return: ast.Basic(ast.TypeVoid),
+		Effect: true,
+		Draft:  true,
+		CName:  "__walk_file_write",
+	})
+	register(Function{
+		Module: "file",
+		Name:   "exists",
+		Params: []ast.Type{ast.Basic(ast.TypeString)},
+		Return: ast.Basic(ast.TypeBool),
+		Draft:  true,
+		CName:  "__walk_file_exists",
+	})
+	register(Function{
 		Module: "process",
 		Name:   "args",
 		Return: ast.ArrayOf(ast.Basic(ast.TypeString)),

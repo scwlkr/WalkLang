@@ -73,6 +73,12 @@ for CLI-oriented IO and not sufficient justification for long-running servers.
 Early IO is UTF-8 text IO. Binary IO, streaming handles, and path normalization
 need separate design before stabilization.
 
+The current draft file slice uses native process paths without normalization,
+`~` expansion, or binary mode. Relative paths resolve against the process
+current working directory. Draft `file.read` and `file.write` are fail-stop
+until recoverable file result structs are designed; `file.exists` returns a
+boolean path-existence check.
+
 New built-in IO APIs must be registered in the built-in API registry with their
 module, function name, parameter types, return type, effect flag, draft/stable
 status, and C runtime helper.

@@ -63,7 +63,7 @@ time
 random
 testing</code></pre>
 <p>No other built-in module is stable in v1.9.</p>
-<p>The current compiler also includes draft <code>io</code>, <code>parse</code>, and <code>process</code> modules. They are importable and tested, but they are not compatibility-protected in v1.9.</p>
+<p>The current compiler also includes draft <code>io</code>, <code>parse</code>, <code>process</code>, and <code>file</code> modules. They are importable and tested, but they are not compatibility-protected in v1.9.</p>
 <p>Draft APIs may expose draft result structs. They are documented here so current compiler behavior is visible, but they are not part of the stable v1.9 compatibility contract.</p>
 <p>---</p>
 <h2 id="math">math</h2>
@@ -193,6 +193,20 @@ struct: ParseBoolResult
 <h3 id="parse-bool-string-parseboolresult">parse.bool(string) -&gt; ParseBoolResult</h3>
 <p>Parses exactly <code>true</code> or <code>false</code>. Other text returns <code>error &#39;invalid bool&#39;</code>.</p>
 <p>---</p>
+<h2 id="draft-file">Draft file</h2>
+<p>Draft <code>file</code> APIs are UTF-8 text helpers. They use native process paths: relative paths resolve against the current working directory, absolute paths are passed to the host OS, and this draft slice does not normalize paths or expand <code>~</code>. Empty paths runtime-stop for reads and writes.</p>
+<p><code>file.read</code> and <code>file.write</code> are fail-stop in this draft slice. Missing files, permission errors, invalid UTF-8, embedded null bytes on read, and write failures stop the native program with a <code>walk runtime error</code>.</p>
+<h3 id="file-read-string-string">file.read(string) -&gt; string</h3>
+<p>Reads the whole UTF-8 text file into a runtime-owned string.</p>
+<h3 id="file-write-string-string-effect">file.write(string, string) -&gt; effect</h3>
+<p>Overwrites the target path with UTF-8 text. Create parent directories first; this helper does not create them.</p>
+<pre><code class="language-walk">imp: file
+
+do: file.write(&#39;note.txt&#39;, &#39;hello&#39;)
+out: file.read(&#39;note.txt&#39;)</code></pre>
+<h3 id="file-exists-string-bool">file.exists(string) -&gt; bool</h3>
+<p>Returns <code>true</code> when the path currently exists according to the host OS and <code>false</code> when it does not. Empty paths return <code>false</code>.</p>
+<p>---</p>
 <h2 id="draft-process">Draft process</h2>
 <pre><code class="language-walk">imp: process
 
@@ -219,10 +233,7 @@ do: process.exit(0)</code></pre>
 <p>---</p>
 <h2 id="draft-apis">Draft APIs</h2>
 <p>These names are planned draft APIs only. They are documented here so naming can stay consistent, but they are not stable, not importable, and not compatibility-protected in v1.9.</p>
-<pre><code class="language-text">file.read
-file.write
-file.append
-file.exists
+<pre><code class="language-text">file.append
 json.parse
 json.stringify
 matrix.rows
