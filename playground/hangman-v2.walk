@@ -1,9 +1,26 @@
 imp: random
+imp: string
+imp: array
+
+var: game = true
 
 # secret word selection
-var: word_bank = ['dog', 'cat', 'paddle', 'car', 'bike', 'motor']
-var: secretWord = random.choice(word_bank)
+var: wordBank = ['dog', 'cat', 'paddle', 'car', 'bike', 'motor']
+var: secretWord = random.choice(wordBank)
+
+# game start
+var: secretWordLength = string.len(secretWord)
+const: maxGuesses = 7
 
 # print secret word to user
-var: secretWordLength = string.len(secretWord)
-out: 'the secret word is (secretWordLength)'
+out: 'the secret word is {secretWordLength} characters long'
+
+# guess tracking
+var: guessed array[string] = []
+while: != game false
+      var: guess = in: 'input 1 letter: '
+
+
+
+
+
