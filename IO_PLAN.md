@@ -1,8 +1,8 @@
 # WalkLang IO Plan
 
-Status: design draft with the CLI text IO and local filesystem IO roadmap
-phases implemented as draft compiler APIs. This is not stable language syntax
-yet.
+Status: design draft with the CLI text IO, local filesystem IO, and process/data
+interop roadmap phases implemented as draft compiler APIs. This is not stable
+language syntax yet.
 
 Purpose: turn the current input/output brainstorm into a durable implementation
 plan for WalkLang's console, file, process, terminal, data, network, and future
@@ -84,13 +84,18 @@ path.join
 path.base
 path.ext
 process.chdir
-```
-
-Draft-only stdlib names already called out in `docs/STDLIB.md`:
-
-```text
+process.run
+process.output
+process.run_shell
 json.parse
 json.stringify
+json.read
+json.write
+```
+
+Planned draft-only stdlib names already called out in `docs/STDLIB.md`:
+
+```text
 matrix.rows
 matrix.cols
 matrix.get
@@ -1011,7 +1016,7 @@ Done when:
 
 ### Roadmap Phase 3: Process And Data Interop
 
-Status: future.
+Status: done as draft compiler APIs in `v5.10.0`.
 
 Scope:
 
@@ -1037,6 +1042,27 @@ Entry gates:
 - deterministic local helper command tests
 - JSON data model decision for objects, maps, dynamic values, or typed structs
 - JSON string escaping and invalid JSON error policy
+
+Phase decisions:
+
+- Process result policy: `process.run(command, args)` uses argv-style execution
+  without a shell and returns `ProcessResult` with `ok`, `status`, `stdout`,
+  `stderr`, and `error`. Non-zero status is data, not a runtime stop.
+- Output convenience policy: `process.output(command, args)` returns
+  `ProcessOutputResult` with stdout in `value` while preserving `status` and
+  error data for failures.
+- Shell policy: `process.run_shell(command)` stays explicit and shell-dependent;
+  it exists after argv-style process execution and is documented as unsafe for
+  interpolated untrusted input.
+- Process text policy: captured stdout and stderr are UTF-8 text. Output read
+  failures are returned as process errors; allocation failure remains fail-stop.
+- JSON data model policy: until WalkLang has maps, dynamic values, or generic
+  recursive JSON structs, JSON APIs use validated compact JSON text as the
+  interchange value. `JsonResult.value` is canonical JSON text, not a native map
+  or object.
+- JSON error policy: invalid JSON returns `ok false`, `value ''`, and
+  `error 'invalid json'` for `json.parse` and `json.read`. `json.write` is an
+  effect and fail-stops on invalid JSON or write failure.
 
 Done when:
 

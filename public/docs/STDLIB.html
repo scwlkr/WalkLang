@@ -63,7 +63,7 @@ time
 random
 testing</code></pre>
 <p>No other built-in module is stable in v1.9.</p>
-<p>The current compiler also includes draft <code>io</code>, <code>parse</code>, <code>process</code>, and <code>file</code> modules. They are importable and tested, but they are not compatibility-protected in v1.9.</p>
+<p>The current compiler also includes draft <code>io</code>, <code>parse</code>, <code>process</code>, <code>file</code>, <code>dir</code>, <code>path</code>, and <code>json</code> modules. They are importable and tested, but they are not compatibility-protected in v1.9.</p>
 <p>Draft APIs may expose draft result structs. They are documented here so current compiler behavior is visible, but they are not part of the stable v1.9 compatibility contract.</p>
 <p>---</p>
 <h2 id="math">math</h2>
@@ -259,6 +259,20 @@ out: process.arg_count()
 out: process.cwd()
 do: process.chdir(&#39;data&#39;)
 do: process.exit(0)</code></pre>
+<p>Process execution helpers return draft result structs:</p>
+<pre><code class="language-walk">struct: ProcessResult
+    ok bool
+    status int
+    stdout string
+    stderr string
+    error string
+
+struct: ProcessOutputResult
+    ok bool
+    value string
+    status int
+    error string</code></pre>
+<p><code>process.run</code> and <code>process.output</code> use argv-style execution. <code>process.run_shell</code> is explicit shell execution and should not be used with interpolated untrusted input.</p>
 <h3 id="process-args-array-string">process.args() -&gt; array[string]</h3>
 <p>Returns command-line arguments passed after the executable path.</p>
 <h3 id="process-arg-count-int">process.arg_count() -&gt; int</h3>
@@ -269,8 +283,37 @@ do: process.exit(0)</code></pre>
 <p>Returns the current working directory as a runtime-owned string.</p>
 <h3 id="process-chdir-string-effect">process.chdir(string) -&gt; effect</h3>
 <p>Changes the native process current working directory. This is process-global state; tests and programs that use it should change back when needed. Empty paths and failed changes runtime-stop.</p>
+<h3 id="process-run-string-array-string-processresult">process.run(string, array[string]) -&gt; ProcessResult</h3>
+<p>Runs a command without invoking a shell. The first argument is the executable path or command name and the second argument is the argv array passed after the command. Captured stdout and stderr are UTF-8 text. A zero status returns <code>ok true</code>; a non-zero status returns <code>ok false</code>, keeps <code>stdout</code>, <code>stderr</code>, and <code>status</code> as data, and sets <code>error &#39;process exited non-zero&#39;</code>.</p>
+<p>Spawn or wait failures return <code>ok false</code>, <code>status -1</code>, and a process error. Allocation failure still runtime-stops.</p>
+<h3 id="process-output-string-array-string-processoutputresult">process.output(string, array[string]) -&gt; ProcessOutputResult</h3>
+<p>Runs a command without invoking a shell and returns stdout in <code>value</code>. It is a convenience wrapper around <code>process.run</code>; non-zero status is still returned as data.</p>
+<h3 id="process-run-shell-string-processresult">process.run_shell(string) -&gt; ProcessResult</h3>
+<p>Runs a command through the host shell (<code>/bin/sh -c</code> on POSIX hosts and <code>cmd.exe /C</code> on Windows hosts). This helper exists for explicit shell-dependent programs only; prefer <code>process.run</code> when arguments are known.</p>
 <h3 id="process-exit-int-effect">process.exit(int) -&gt; effect</h3>
 <p>Exits the native process with the given status code.</p>
+<p>---</p>
+<h2 id="draft-json">Draft json</h2>
+<p>The draft <code>json</code> module is a conservative text boundary. WalkLang does not yet have maps, dynamic values, or generic JSON value structs, so <code>json.parse</code> returns canonical JSON text inside a result struct instead of pretending object fields are native WalkLang data.</p>
+<pre><code class="language-walk">imp: json
+
+var: parsed = json.parse(&#39;{{&#34;name&#34;:&#34;walk&#34;}}&#39;)
+if: parsed.ok
+    do: json.write(&#39;data.json&#39;, parsed.value)</code></pre>
+<p>Recoverable JSON helpers return:</p>
+<pre><code class="language-walk">struct: JsonResult
+    ok bool
+    value string
+    error string</code></pre>
+<p><code>value</code> contains compact validated JSON text on success. Invalid JSON returns <code>ok false</code>, <code>value &#39;&#39;</code>, and <code>error &#39;invalid json&#39;</code>.</p>
+<h3 id="json-parse-string-jsonresult">json.parse(string) -&gt; JsonResult</h3>
+<p>Validates JSON text and returns compact JSON text with insignificant whitespace removed. Supported JSON text includes objects, arrays, strings, finite JSON number syntax, <code>true</code>, <code>false</code>, and <code>null</code>.</p>
+<h3 id="json-stringify-string-string">json.stringify(string) -&gt; string</h3>
+<p>Escapes one WalkLang string as a JSON string literal.</p>
+<h3 id="json-read-string-jsonresult">json.read(string) -&gt; JsonResult</h3>
+<p>Reads a UTF-8 text file with the same file path policy as <code>file.read</code>, then parses it as JSON. File read failures and invalid JSON are returned as data.</p>
+<h3 id="json-write-string-string-effect">json.write(string, string) -&gt; effect</h3>
+<p>Validates and compacts JSON text, then overwrites the target file. Invalid JSON or file write failures runtime-stop with <code>walk runtime error</code>.</p>
 <p>---</p>
 <h2 id="test-syntax">Test Syntax</h2>
 <p>The stable testing surface also includes syntax:</p>
@@ -281,9 +324,7 @@ do: process.exit(0)</code></pre>
 <p>---</p>
 <h2 id="draft-apis">Draft APIs</h2>
 <p>These names are planned draft APIs only. They are documented here so naming can stay consistent, but they are not stable, not importable, and not compatibility-protected in v1.9.</p>
-<pre><code class="language-text">json.parse
-json.stringify
-matrix.rows
+<pre><code class="language-text">matrix.rows
 matrix.cols
 matrix.get</code></pre>
 </article>

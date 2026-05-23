@@ -4,6 +4,44 @@
 
 No unreleased changes.
 
+## v5.10.0 - Draft Process And Data Interop IO
+
+Date: 2026-05-23
+
+v5.10.0 completes `IO_PLAN.md` Roadmap Phase 3 as draft compiler APIs while
+keeping the stable language contract at v1.9.
+
+### Added
+
+- Draft `process.run`, `process.output`, and `process.run_shell` helpers.
+- Draft `ProcessResult` and `ProcessOutputResult` structs for command status, stdout, stderr, and error data.
+- Draft `json.parse`, `json.stringify`, `json.read`, and `json.write` helpers.
+- Draft `JsonResult` for recoverable JSON parse/read failures.
+- Native helper-command tests for argv-style process execution, stdout/stderr capture, non-zero status as data, and explicit shell execution.
+- Native JSON tests for string escaping, compact validation, invalid JSON as data, and file-backed JSON read/write behavior.
+
+### Notes
+
+- The stable language contract remains v1.9.
+- `process.run` is argv-style and does not invoke a shell.
+- `process.run_shell` is intentionally explicit and shell-dependent; prefer `process.run` when arguments are known.
+- Draft JSON APIs use compact validated JSON text as the interchange value until WalkLang has maps, dynamic values, or recursive generic JSON structs.
+- Terminal raw mode, HTTP, and browser targets remain gated by later `IO_PLAN.md` roadmap phases.
+
+### Breaking Changes
+
+None.
+
+### Upgrade
+
+Regenerate docs and release artifacts with:
+
+```bash
+scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.10.0 dist
+```
+
 ## v5.9.0 - Draft Local Filesystem IO Completion
 
 Date: 2026-05-23

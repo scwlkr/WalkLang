@@ -24,8 +24,8 @@ testing
 
 No other built-in module is stable in v1.9.
 
-The current compiler also includes draft `io`, `parse`, `process`, and `file`
-modules. They are importable and tested, but they are not
+The current compiler also includes draft `io`, `parse`, `process`, `file`,
+`dir`, `path`, and `json` modules. They are importable and tested, but they are not
 compatibility-protected in v1.9.
 
 Draft APIs may expose draft result structs. They are documented here so current
@@ -431,6 +431,27 @@ do: process.chdir('data')
 do: process.exit(0)
 ```
 
+Process execution helpers return draft result structs:
+
+```walk
+struct: ProcessResult
+    ok bool
+    status int
+    stdout string
+    stderr string
+    error string
+
+struct: ProcessOutputResult
+    ok bool
+    value string
+    status int
+    error string
+```
+
+`process.run` and `process.output` use argv-style execution. `process.run_shell`
+is explicit shell execution and should not be used with interpolated untrusted
+input.
+
 ### process.args() -> array[string]
 
 Returns command-line arguments passed after the executable path.
@@ -453,9 +474,81 @@ Changes the native process current working directory. This is process-global
 state; tests and programs that use it should change back when needed. Empty
 paths and failed changes runtime-stop.
 
+### process.run(string, array[string]) -> ProcessResult
+
+Runs a command without invoking a shell. The first argument is the executable
+path or command name and the second argument is the argv array passed after the
+command. Captured stdout and stderr are UTF-8 text. A zero status returns
+`ok true`; a non-zero status returns `ok false`, keeps `stdout`, `stderr`, and
+`status` as data, and sets `error 'process exited non-zero'`.
+
+Spawn or wait failures return `ok false`, `status -1`, and a process error.
+Allocation failure still runtime-stops.
+
+### process.output(string, array[string]) -> ProcessOutputResult
+
+Runs a command without invoking a shell and returns stdout in `value`. It is a
+convenience wrapper around `process.run`; non-zero status is still returned as
+data.
+
+### process.run_shell(string) -> ProcessResult
+
+Runs a command through the host shell (`/bin/sh -c` on POSIX hosts and
+`cmd.exe /C` on Windows hosts). This helper exists for explicit shell-dependent
+programs only; prefer `process.run` when arguments are known.
+
 ### process.exit(int) -> effect
 
 Exits the native process with the given status code.
+
+---
+
+## Draft json
+
+The draft `json` module is a conservative text boundary. WalkLang does not yet
+have maps, dynamic values, or generic JSON value structs, so `json.parse` returns
+canonical JSON text inside a result struct instead of pretending object fields
+are native WalkLang data.
+
+```walk
+imp: json
+
+var: parsed = json.parse('{{"name":"walk"}}')
+if: parsed.ok
+    do: json.write('data.json', parsed.value)
+```
+
+Recoverable JSON helpers return:
+
+```walk
+struct: JsonResult
+    ok bool
+    value string
+    error string
+```
+
+`value` contains compact validated JSON text on success. Invalid JSON returns
+`ok false`, `value ''`, and `error 'invalid json'`.
+
+### json.parse(string) -> JsonResult
+
+Validates JSON text and returns compact JSON text with insignificant whitespace
+removed. Supported JSON text includes objects, arrays, strings, finite JSON
+number syntax, `true`, `false`, and `null`.
+
+### json.stringify(string) -> string
+
+Escapes one WalkLang string as a JSON string literal.
+
+### json.read(string) -> JsonResult
+
+Reads a UTF-8 text file with the same file path policy as `file.read`, then
+parses it as JSON. File read failures and invalid JSON are returned as data.
+
+### json.write(string, string) -> effect
+
+Validates and compacts JSON text, then overwrites the target file. Invalid JSON
+or file write failures runtime-stop with `walk runtime error`.
 
 ---
 
@@ -483,8 +576,6 @@ stay consistent, but they are not stable, not importable, and not
 compatibility-protected in v1.9.
 
 ```text
-json.parse
-json.stringify
 matrix.rows
 matrix.cols
 matrix.get

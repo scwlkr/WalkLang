@@ -136,6 +136,9 @@ func TestV13FailFixturesHaveExpectedDiagnostics(t *testing.T) {
 		{"bad_dir_make_as_expression.walk", "tests/fail/bad_dir_make_as_expression.walk:3:6: type error: dir.make is an effect; use do: dir.make(...)"},
 		{"bad_path_join_arg.walk", "tests/fail/bad_path_join_arg.walk:3:24: type error: arg 2 to path.join is string, got int"},
 		{"bad_process_chdir_arg.walk", "tests/fail/bad_process_chdir_arg.walk:3:19: type error: arg 1 to process.chdir is string, got int"},
+		{"bad_process_run_arg.walk", "tests/fail/bad_process_run_arg.walk:3:35: type error: arg 2 to process.run is array[string], got string"},
+		{"bad_json_parse_arg.walk", "tests/fail/bad_json_parse_arg.walk:3:26: type error: arg 1 to json.parse is string, got int"},
+		{"bad_json_write_as_expression.walk", "tests/fail/bad_json_write_as_expression.walk:3:6: type error: json.write is an effect; use do: json.write(...)"},
 		{"unknown_library.walk", "tests/fail/unknown_library.walk:2:6: name error: unknown library function math.nope"},
 		{"top_break.walk", "tests/fail/top_break.walk:1:1: syntax error: break outside loop"},
 	}

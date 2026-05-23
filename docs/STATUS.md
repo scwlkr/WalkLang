@@ -2,9 +2,36 @@
 
 Stable language contract: v1.9.
 
-Current compiler/tooling/docs release: v5.9.0 draft local filesystem IO completion.
+Current compiler/tooling/docs release: v5.10.0 draft process and data interop IO completion.
 
 Experimental implemented language surface: v2.2.
+
+State: v5.10.0 completes `IO_PLAN.md` Roadmap Phase 3, Process And Data
+Interop, as draft compiler APIs. Draft process helpers now cover argv-style
+`process.run`, stdout convenience `process.output`, and explicit shell
+`process.run_shell`, with command status, stdout, stderr, and error data exposed
+through `ProcessResult` and `ProcessOutputResult`. Draft JSON helpers now cover
+`json.parse`, `json.stringify`, `json.read`, and `json.write` through a
+conservative text boundary: `JsonResult.value` is compact validated JSON text
+until WalkLang has maps, dynamic values, or recursive generic JSON structs.
+Stable language contract remains v1.9. Terminal raw mode, HTTP, and browser
+targets remain gated by later `IO_PLAN.md` phases.
+
+v5.10.0 verification on 2026-05-23: focused Phase 3 tests first failed because
+`process.run` was unknown and `json` was not a built-in module, then
+`go test ./cmd/walk -run
+'TestDraftProcessPhase3|TestDraftJSONPhase3|TestV13GeneratedCSnapshots|TestV13FailFixturesHaveExpectedDiagnostics|TestV19ReleaseDocsArePresent'
+-count=1` passed after implementation and generated C snapshot refresh; full
+`go test -count=1 ./...` passed; `go build -trimpath -ldflags "-X
+main.version=v5.10.0" -o build/walk ./cmd/walk` passed; `./build/walk version`
+reported `v5.10.0`; `./build/walk check --warnings=error
+tests/pass/do_effects.walk` passed; `WALK_BIN=$PWD/build/walk
+scripts/stress-v1.sh` passed and reported `v1.9 stress ok`;
+`scripts/build-docs-site.sh` passed; `scripts/check-docs-site.sh` passed after
+staging generated docs; `scripts/release.sh v5.10.0 <temp>/release` produced 5
+platform artifacts plus `SHA256SUMS`; `wc -l <temp>/release/SHA256SUMS`
+reported 5 checksum lines; and the host release binary reported `v5.10.0` from
+`walk version`.
 
 State: v5.9.0 completes `IO_PLAN.md` Roadmap Phase 2, Local Filesystem IO, as
 draft compiler APIs. Draft text file helpers now cover fail-stop

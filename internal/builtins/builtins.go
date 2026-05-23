@@ -81,6 +81,36 @@ func init() {
 		},
 		Draft: true,
 	})
+	registerStruct(Struct{
+		Name: "ProcessResult",
+		Fields: []ast.StructField{
+			field("ok", ast.Basic(ast.TypeBool)),
+			field("status", ast.Basic(ast.TypeInt)),
+			field("stdout", ast.Basic(ast.TypeString)),
+			field("stderr", ast.Basic(ast.TypeString)),
+			field("error", ast.Basic(ast.TypeString)),
+		},
+		Draft: true,
+	})
+	registerStruct(Struct{
+		Name: "ProcessOutputResult",
+		Fields: []ast.StructField{
+			field("ok", ast.Basic(ast.TypeBool)),
+			field("value", ast.Basic(ast.TypeString)),
+			field("status", ast.Basic(ast.TypeInt)),
+			field("error", ast.Basic(ast.TypeString)),
+		},
+		Draft: true,
+	})
+	registerStruct(Struct{
+		Name: "JsonResult",
+		Fields: []ast.StructField{
+			field("ok", ast.Basic(ast.TypeBool)),
+			field("value", ast.Basic(ast.TypeString)),
+			field("error", ast.Basic(ast.TypeString)),
+		},
+		Draft: true,
+	})
 	register(Function{
 		Module: "io",
 		Name:   "write",
@@ -270,6 +300,30 @@ func init() {
 	})
 	register(Function{
 		Module: "process",
+		Name:   "run",
+		Params: []ast.Type{ast.Basic(ast.TypeString), ast.ArrayOf(ast.Basic(ast.TypeString))},
+		Return: ast.Struct("ProcessResult"),
+		Draft:  true,
+		CName:  "__walk_process_run",
+	})
+	register(Function{
+		Module: "process",
+		Name:   "output",
+		Params: []ast.Type{ast.Basic(ast.TypeString), ast.ArrayOf(ast.Basic(ast.TypeString))},
+		Return: ast.Struct("ProcessOutputResult"),
+		Draft:  true,
+		CName:  "__walk_process_output",
+	})
+	register(Function{
+		Module: "process",
+		Name:   "run_shell",
+		Params: []ast.Type{ast.Basic(ast.TypeString)},
+		Return: ast.Struct("ProcessResult"),
+		Draft:  true,
+		CName:  "__walk_process_run_shell",
+	})
+	register(Function{
+		Module: "process",
 		Name:   "exit",
 		Params: []ast.Type{ast.Basic(ast.TypeInt)},
 		Return: ast.Basic(ast.TypeVoid),
@@ -300,6 +354,39 @@ func init() {
 		Return: ast.Struct("ParseBoolResult"),
 		Draft:  true,
 		CName:  "__walk_parse_bool",
+	})
+	register(Function{
+		Module: "json",
+		Name:   "parse",
+		Params: []ast.Type{ast.Basic(ast.TypeString)},
+		Return: ast.Struct("JsonResult"),
+		Draft:  true,
+		CName:  "__walk_json_parse",
+	})
+	register(Function{
+		Module: "json",
+		Name:   "stringify",
+		Params: []ast.Type{ast.Basic(ast.TypeString)},
+		Return: ast.Basic(ast.TypeString),
+		Draft:  true,
+		CName:  "__walk_json_stringify",
+	})
+	register(Function{
+		Module: "json",
+		Name:   "read",
+		Params: []ast.Type{ast.Basic(ast.TypeString)},
+		Return: ast.Struct("JsonResult"),
+		Draft:  true,
+		CName:  "__walk_json_read",
+	})
+	register(Function{
+		Module: "json",
+		Name:   "write",
+		Params: []ast.Type{ast.Basic(ast.TypeString), ast.Basic(ast.TypeString)},
+		Return: ast.Basic(ast.TypeVoid),
+		Effect: true,
+		Draft:  true,
+		CName:  "__walk_json_write",
 	})
 }
 

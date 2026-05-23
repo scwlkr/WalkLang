@@ -427,6 +427,176 @@ func TestDraftRecoverableFileResults(t *testing.T) {
 	}
 }
 
+func TestDraftProcessPhase3RunsCommandsAndCapturesOutput(t *testing.T) {
+	requireCC(t)
+
+	dir := t.TempDir()
+	helperPath := filepath.Join(dir, "helper")
+	helperCPath := filepath.Join(dir, "helper.c")
+	writeFile(t, helperCPath, strings.Join([]string{
+		"#include <stdio.h>",
+		"#include <string.h>",
+		"",
+		"int main(int argc, char **argv) {",
+		"    if (argc > 1 && strcmp(argv[1], \"fail\") == 0) {",
+		"        printf(\"fail-out\");",
+		"        fprintf(stderr, \"fail-err\");",
+		"        return 9;",
+		"    }",
+		"    printf(\"arg-count=%d\", argc - 1);",
+		"    if (argc > 1) { printf(\";first=%s\", argv[1]); }",
+		"    fprintf(stderr, \"helper-err\");",
+		"    return 0;",
+		"}",
+		"",
+	}, "\n"))
+	if output, err := exec.Command("cc", helperCPath, "-o", helperPath).CombinedOutput(); err != nil {
+		t.Fatalf("helper build failed: %v\n%s", err, string(output))
+	}
+
+	sourcePath := filepath.Join(dir, "main.walk")
+	writeFile(t, sourcePath, strings.Join([]string{
+		"imp: process",
+		"imp: string",
+		"",
+		"var: ok_args = ['alpha']",
+		"var: fail_args = ['fail']",
+		"var: ok_run = process.run(" + walkStringLiteral(helperPath) + ", ok_args)",
+		"out: ok_run.ok",
+		"out: ok_run.status",
+		"out: ok_run.stdout",
+		"out: ok_run.stderr",
+		"out: ok_run.error",
+		"var: failed = process.run(" + walkStringLiteral(helperPath) + ", fail_args)",
+		"out: failed.ok",
+		"out: failed.status",
+		"out: failed.stdout",
+		"out: failed.stderr",
+		"out: failed.error",
+		"var: output = process.output(" + walkStringLiteral(helperPath) + ", ok_args)",
+		"out: output.ok",
+		"out: output.status",
+		"out: output.value",
+		"out: output.error",
+		"var: shell = process.run_shell('echo shell-out')",
+		"out: shell.ok",
+		"out: shell.status",
+		"out: string.contains(shell.stdout, 'shell-out')",
+		"",
+	}, "\n"))
+
+	cCode, warnings, err := compileFileToCWithOptions(sourcePath, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(warnings) != 0 {
+		t.Fatalf("unexpected warnings: %#v", warnings)
+	}
+
+	exePath := filepath.Join(dir, "program")
+	if err := buildC(cCode, filepath.Join(dir, "program.c"), exePath, nativeBuildOptions{}); err != nil {
+		t.Fatal(err)
+	}
+
+	output, err := exec.Command(exePath).CombinedOutput()
+	if err != nil {
+		t.Fatalf("program failed: %v\noutput:\n%s\nC:\n%s", err, string(output), cCode)
+	}
+	want := strings.Join([]string{
+		"true",
+		"0",
+		"arg-count=1;first=alpha",
+		"helper-err",
+		"",
+		"false",
+		"9",
+		"fail-out",
+		"fail-err",
+		"process exited non-zero",
+		"true",
+		"0",
+		"arg-count=1;first=alpha",
+		"",
+		"true",
+		"0",
+		"true",
+		"",
+	}, "\n")
+	if got := string(output); got != want {
+		t.Fatalf("stdout mismatch:\nwant %q\ngot  %q\nC:\n%s", want, got, cCode)
+	}
+}
+
+func TestDraftJSONPhase3ParsesStringifiesReadsAndWritesText(t *testing.T) {
+	requireCC(t)
+
+	dir := t.TempDir()
+	sourcePath := filepath.Join(dir, "main.walk")
+	writeFile(t, sourcePath, strings.Join([]string{
+		"imp: json",
+		"",
+		"var: escaped = json.stringify('hi \"walk\"\\n')",
+		"out: escaped",
+		"var: parsed = json.parse(' {{ \"name\" : \"walk\", \"items\" : [1, true, null] }} ')",
+		"out: parsed.ok",
+		"out: parsed.value",
+		"out: parsed.error",
+		"var: invalid = json.parse('{{bad')",
+		"out: invalid.ok",
+		"out: invalid.value",
+		"out: invalid.error",
+		"do: json.write('data.json', parsed.value)",
+		"var: loaded = json.read('data.json')",
+		"out: loaded.ok",
+		"out: loaded.value",
+		"out: loaded.error",
+		"",
+	}, "\n"))
+
+	cCode, warnings, err := compileFileToCWithOptions(sourcePath, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(warnings) != 0 {
+		t.Fatalf("unexpected warnings: %#v", warnings)
+	}
+
+	exePath := filepath.Join(dir, "program")
+	if err := buildC(cCode, filepath.Join(dir, "program.c"), exePath, nativeBuildOptions{}); err != nil {
+		t.Fatal(err)
+	}
+
+	command := exec.Command(exePath)
+	command.Dir = dir
+	output, err := command.CombinedOutput()
+	if err != nil {
+		t.Fatalf("program failed: %v\noutput:\n%s\nC:\n%s", err, string(output), cCode)
+	}
+	want := strings.Join([]string{
+		"\"hi \\\"walk\\\"\\n\"",
+		"true",
+		"{\"name\":\"walk\",\"items\":[1,true,null]}",
+		"",
+		"false",
+		"",
+		"invalid json",
+		"true",
+		"{\"name\":\"walk\",\"items\":[1,true,null]}",
+		"",
+		"",
+	}, "\n")
+	if got := string(output); got != want {
+		t.Fatalf("stdout mismatch:\nwant %q\ngot  %q\nC:\n%s", want, got, cCode)
+	}
+	contents, err := os.ReadFile(filepath.Join(dir, "data.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := string(contents), "{\"name\":\"walk\",\"items\":[1,true,null]}"; got != want {
+		t.Fatalf("json file mismatch: want %q, got %q", want, got)
+	}
+}
+
 func TestDraftFileReadMissingFileFailsClearly(t *testing.T) {
 	requireCC(t)
 
@@ -508,4 +678,10 @@ func TestDraftFileReadInvalidUTF8FailsClearly(t *testing.T) {
 	if got, want := string(output), "walk runtime error: file invalid utf-8\n"; got != want {
 		t.Fatalf("runtime error mismatch:\nwant %q\ngot  %q\nC:\n%s", want, got, cCode)
 	}
+}
+
+func walkStringLiteral(value string) string {
+	escaped := strings.ReplaceAll(value, "\\", "\\\\")
+	escaped = strings.ReplaceAll(escaped, "'", "\\'")
+	return "'" + escaped + "'"
 }

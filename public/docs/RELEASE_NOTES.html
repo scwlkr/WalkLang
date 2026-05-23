@@ -52,6 +52,33 @@
 <h1 id="walklang-release-notes">WalkLang Release Notes</h1>
 <h2 id="unreleased">Unreleased</h2>
 <p>No unreleased changes.</p>
+<h2 id="v5-10-0-draft-process-and-data-interop-io">v5.10.0 - Draft Process And Data Interop IO</h2>
+<p>Date: 2026-05-23</p>
+<p>v5.10.0 completes <code>IO_PLAN.md</code> Roadmap Phase 3 as draft compiler APIs while keeping the stable language contract at v1.9.</p>
+<h3 id="added">Added</h3>
+<ul>
+<li>Draft <code>process.run</code>, <code>process.output</code>, and <code>process.run_shell</code> helpers.</li>
+<li>Draft <code>ProcessResult</code> and <code>ProcessOutputResult</code> structs for command status, stdout, stderr, and error data.</li>
+<li>Draft <code>json.parse</code>, <code>json.stringify</code>, <code>json.read</code>, and <code>json.write</code> helpers.</li>
+<li>Draft <code>JsonResult</code> for recoverable JSON parse/read failures.</li>
+<li>Native helper-command tests for argv-style process execution, stdout/stderr capture, non-zero status as data, and explicit shell execution.</li>
+<li>Native JSON tests for string escaping, compact validation, invalid JSON as data, and file-backed JSON read/write behavior.</li>
+</ul>
+<h3 id="notes">Notes</h3>
+<ul>
+<li>The stable language contract remains v1.9.</li>
+<li><code>process.run</code> is argv-style and does not invoke a shell.</li>
+<li><code>process.run_shell</code> is intentionally explicit and shell-dependent; prefer <code>process.run</code> when arguments are known.</li>
+<li>Draft JSON APIs use compact validated JSON text as the interchange value until WalkLang has maps, dynamic values, or recursive generic JSON structs.</li>
+<li>Terminal raw mode, HTTP, and browser targets remain gated by later <code>IO_PLAN.md</code> roadmap phases.</li>
+</ul>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<p>None.</p>
+<h3 id="upgrade">Upgrade</h3>
+<p>Regenerate docs and release artifacts with:</p>
+<pre><code class="language-bash">scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.10.0 dist</code></pre>
 <h2 id="v5-9-0-draft-local-filesystem-io-completion">v5.9.0 - Draft Local Filesystem IO Completion</h2>
 <p>Date: 2026-05-23</p>
 <p>v5.9.0 completes <code>IO_PLAN.md</code> Roadmap Phase 2 as draft compiler APIs while keeping the stable language contract at v1.9.</p>
