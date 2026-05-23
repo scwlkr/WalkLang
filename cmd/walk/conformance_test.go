@@ -23,6 +23,7 @@ func TestV13PassFixturesBuildAndRun(t *testing.T) {
 		{"function_values.walk", "5\n"},
 		{"stdlib.walk", "3\n8\n4\na\nl\ntrue\nfalse\nwalklang\n3\n2\ntrue\nfalse\ntrue\n7\nfixed\ntrue\n"},
 		{"interpolation.walk", "the secret word is 6 characters long\nsecret: paddle\nscore 3 ok true\nplural paddles\n{word}\n{\n}\n"},
+		{"do_effects.walk", "loading\ndone\n"},
 		{"modules.walk", "25\n10\n"},
 	}
 
@@ -124,6 +125,11 @@ func TestV13FailFixturesHaveExpectedDiagnostics(t *testing.T) {
 		{"bad_array_push.walk", "tests/fail/bad_array_push.walk:3:25: type error: arg 2 to array.push is int, got string"},
 		{"bad_random_choice.walk", "tests/fail/bad_random_choice.walk:2:20: type error: random.choice needs array arg, got string"},
 		{"bad_interpolation.walk", "tests/fail/bad_interpolation.walk:2:13: type error: interpolation needs int, float, bool, or string, got array[int]"},
+		{"bad_do_value.walk", "tests/fail/bad_do_value.walk:1:1: type error: do needs effect call, got int"},
+		{"bad_do_pure_call.walk", "tests/fail/bad_do_pure_call.walk:3:1: type error: do needs effect call, got float"},
+		{"bad_effect_as_expression.walk", "tests/fail/bad_effect_as_expression.walk:3:14: type error: io.write is an effect; use do: io.write(...)"},
+		{"bad_io_write_arg.walk", "tests/fail/bad_io_write_arg.walk:3:14: type error: arg 1 to io.write is string, got int"},
+		{"bad_process_exit_arg.walk", "tests/fail/bad_process_exit_arg.walk:3:18: type error: arg 1 to process.exit is int, got string"},
 		{"unknown_library.walk", "tests/fail/unknown_library.walk:2:6: name error: unknown library function math.nope"},
 		{"top_break.walk", "tests/fail/top_break.walk:1:1: syntax error: break outside loop"},
 	}

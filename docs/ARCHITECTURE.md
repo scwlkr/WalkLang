@@ -76,6 +76,14 @@ out: name
 ```
 
 `in:` reads one required stdin line. Larger IO surfaces belong in explicit modules.
+Draft side-effect module calls go through `do:` so effects remain visible:
+
+```walk
+imp: io
+
+do: io.write('Loading')
+do: io.write_line('done')
+```
 
 ---
 
@@ -445,6 +453,17 @@ process-lifetime array storage
 source comments in generated C
 optimized native release builds
 runtime/backend contract docs
+```
+
+Current IO groundwork:
+
+```text
+do: effect statements
+draft io/process modules
+built-in API registry for new IO functions
+process-lifetime runtime-created strings
+fail-stop policy until recoverable IO results exist
+UTF-8 text IO before binary IO
 ```
 
 Later:

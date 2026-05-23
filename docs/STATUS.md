@@ -2,9 +2,37 @@
 
 Stable language contract: v1.9.
 
-Current compiler/tooling/docs release: v5.5.0 string interpolation.
+Current compiler/tooling/docs release: v5.6.0 draft IO foundation.
 
 Experimental implemented language surface: v2.2.
+
+State: v5.6.0 completes `IO_PLAN.md` Phase 0 and the implementable Phase 1
+console/process foundation as draft compiler APIs. The stable language contract
+remains v1.9. Draft `do:` effect statements now accept registered effect calls;
+draft `io.write`, `io.write_line`, and `io.error_line` cover stdout/stderr line
+helpers; draft `process.args`, `process.arg_count`, `process.env`,
+`process.cwd`, and `process.exit` cover the first process helpers; and new IO
+functions are recorded in a built-in API registry with draft/effect/runtime
+metadata. Later IO phases remain gated on their documented prerequisites,
+especially recoverable error results, text/path policy, richer data modeling,
+and networking security policy.
+
+v5.6.0 verification on 2026-05-22: the focused IO/process tests failed before
+implementation because `do:` was unsupported and `io` was not a built-in
+module; after implementation, `go test ./cmd/walk ./internal/format -run
+'TestDoEffectConsoleAndProcessFoundation|TestProcessExitEffectExitsWithCode|TestV13PassFixturesBuildAndRun|TestV13FailFixturesHaveExpectedDiagnostics|TestV19ReleaseDocsArePresent|TestFormatterNormalizesDoEffectStatement'
+-count=1` passed; full `go test -count=1 ./...` passed after refreshing the
+generated C snapshots for the new runtime helper block; `go build -trimpath
+-ldflags "-X main.version=v5.6.0" -o build/walk ./cmd/walk` passed;
+`./build/walk version` reported `v5.6.0`; `./build/walk check
+--warnings=error tests/pass/do_effects.walk` passed; `./build/walk
+tests/pass/do_effects.walk` printed `loading` and `done`; `WALK_BIN=$PWD/build/walk
+scripts/stress-v1.sh` passed and reported `v1.9 stress ok`;
+`scripts/build-docs-site.sh` passed; `scripts/check-docs-site.sh` passed after
+staging generated docs; `scripts/release.sh v5.6.0 <temp>/release` produced 5
+platform artifacts plus `SHA256SUMS`; `wc -l <temp>/release/SHA256SUMS`
+reported 5 checksum lines; and the host release binary reported `v5.6.0` from
+`walk version`.
 
 State: v5.5.0 adds the v1.9 stable string interpolation surface. Single-quoted
 strings can include `{expression}` display values, interpolation supports

@@ -69,6 +69,14 @@ negative tests when invalid forms matter
 generated C snapshot coverage when backend output matters</code></pre>
 <h2 id="small-standard-library">Small Standard Library</h2>
 <p>The standard library grows only when behavior is clear, testable, and documented. Draft APIs must stay out of <code>STDLIB.md</code> stable sections until they compile and pass tests.</p>
+<h2 id="io-effect-policy">IO Effect Policy</h2>
+<p>Side-effect module calls use one draft statement form:</p>
+<pre><code class="language-walk">do: module.effect(args)</code></pre>
+<p>Do not add one-off command keywords for each IO action. <code>out:</code> and <code>in:</code> stay as the small stable console primitives; broader IO belongs in explicit modules.</p>
+<p>Draft IO APIs must say whether they are fail-stop or recoverable. Until a recoverable result shape is stable, broad IO such as files, processes, JSON, and networking must remain draft or gated.</p>
+<p>Runtime-created strings live for the native process lifetime. This is acceptable for CLI-oriented IO and not sufficient justification for long-running servers.</p>
+<p>Early IO is UTF-8 text IO. Binary IO, streaming handles, and path normalization need separate design before stabilization.</p>
+<p>New built-in IO APIs must be registered in the built-in API registry with their module, function name, parameter types, return type, effect flag, draft/stable status, and C runtime helper.</p>
 <h2 id="no-surprise-magic">No Surprise Magic</h2>
 <p>Do not add implicit conversions, hidden imports, global state, or syntax aliases unless the spec is updated first and conformance tests prove the behavior.</p>
 <h2 id="native-backend-discipline">Native Backend Discipline</h2>

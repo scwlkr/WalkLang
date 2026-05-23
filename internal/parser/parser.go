@@ -130,6 +130,9 @@ func parseStatementAt(nodes []lineNode, index int) (ast.Statement, int, error) {
 		case "out":
 			value, err := parseCommandExpression(payload, node.children, first.Location)
 			return &ast.Out{Location: first.Location, Value: value}, index + 1, err
+		case "do":
+			value, err := parseCommandExpression(payload, node.children, first.Location)
+			return &ast.Do{Location: first.Location, Value: value}, index + 1, err
 		case "test":
 			statement, err := parseTestDecl(payload, node.children, first.Location)
 			return statement, index + 1, err

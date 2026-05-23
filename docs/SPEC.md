@@ -126,6 +126,16 @@ break:
 continue:
 ```
 
+Draft implemented statement:
+
+```text
+do:
+```
+
+`do:` is the current compiler's draft effect-call statement. It is documented so
+draft IO programs can be tested, but it is not part of the v1.9 stable
+compatibility contract yet.
+
 One statement appears on each physical line. Semicolons are not part of v1.1 syntax.
 
 ---
@@ -486,6 +496,16 @@ time
 random
 testing
 ```
+
+Draft built-in modules in the current compiler:
+
+```text
+io
+process
+```
+
+Draft modules are importable for experimentation, but they are not
+compatibility-protected by the v1.9 stable contract.
 
 Stable built-in functions:
 

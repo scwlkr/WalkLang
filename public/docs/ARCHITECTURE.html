@@ -87,7 +87,11 @@ print a + b</code></pre>
 <p>Core text IO stays small:</p>
 <pre><code class="language-walk">var: name = in: &#39;Name? &#39;
 out: name</code></pre>
-<p><code>in:</code> reads one required stdin line. Larger IO surfaces belong in explicit modules.</p>
+<p><code>in:</code> reads one required stdin line. Larger IO surfaces belong in explicit modules. Draft side-effect module calls go through <code>do:</code> so effects remain visible:</p>
+<pre><code class="language-walk">imp: io
+
+do: io.write(&#39;Loading&#39;)
+do: io.write_line(&#39;done&#39;)</code></pre>
 <p>---</p>
 <h2 id="2-design-priorities">2. Design Priorities</h2>
 <p>Order matters:</p>
@@ -279,6 +283,13 @@ process-lifetime array storage
 source comments in generated C
 optimized native release builds
 runtime/backend contract docs</code></pre>
+<p>Current IO groundwork:</p>
+<pre><code class="language-text">do: effect statements
+draft io/process modules
+built-in API registry for new IO functions
+process-lifetime runtime-created strings
+fail-stop policy until recoverable IO results exist
+UTF-8 text IO before binary IO</code></pre>
 <p>Later:</p>
 <pre><code class="language-text">debugger
 reference site

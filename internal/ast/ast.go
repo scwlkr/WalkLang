@@ -159,6 +159,14 @@ type Out struct {
 func (s *Out) Loc() Location  { return s.Location }
 func (s *Out) statementNode() {}
 
+type Do struct {
+	Location Location
+	Value    Expression
+}
+
+func (s *Do) Loc() Location  { return s.Location }
+func (s *Do) statementNode() {}
+
 type TestDecl struct {
 	Location Location
 	Name     string

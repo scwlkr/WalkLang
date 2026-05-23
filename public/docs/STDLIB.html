@@ -63,6 +63,7 @@ time
 random
 testing</code></pre>
 <p>No other built-in module is stable in v1.9.</p>
+<p>The current compiler also includes draft <code>io</code> and <code>process</code> modules. They are importable and tested, but they are not compatibility-protected in v1.9.</p>
 <p>---</p>
 <h2 id="math">math</h2>
 <h3 id="math-sqrt-number-float">math.sqrt(number) -&gt; float</h3>
@@ -138,6 +139,37 @@ test: &#39;works&#39;
     assert: testing.assert(true)</code></pre>
 <p><code>testing.assert</code> itself does not print or stop a program. The <code>assert:</code> statement owns test failure reporting.</p>
 <p>---</p>
+<h2 id="draft-io">Draft io</h2>
+<p>Use draft <code>io</code> functions with <code>do:</code> because they are effects.</p>
+<pre><code class="language-walk">imp: io
+
+do: io.write(&#39;Loading&#39;)
+do: io.write_line(&#39;done&#39;)
+do: io.error_line(&#39;warning&#39;)</code></pre>
+<h3 id="io-write-string-effect">io.write(string) -&gt; effect</h3>
+<p>Writes the string to stdout without adding a newline and flushes stdout.</p>
+<h3 id="io-write-line-string-effect">io.write_line(string) -&gt; effect</h3>
+<p>Writes the string and a trailing newline to stdout and flushes stdout.</p>
+<h3 id="io-error-line-string-effect">io.error_line(string) -&gt; effect</h3>
+<p>Writes the string and a trailing newline to stderr and flushes stderr.</p>
+<p>---</p>
+<h2 id="draft-process">Draft process</h2>
+<pre><code class="language-walk">imp: process
+
+out: process.arg_count()
+out: process.cwd()
+do: process.exit(0)</code></pre>
+<h3 id="process-args-array-string">process.args() -&gt; array[string]</h3>
+<p>Returns command-line arguments passed after the executable path.</p>
+<h3 id="process-arg-count-int">process.arg_count() -&gt; int</h3>
+<p>Returns the number of command-line arguments passed after the executable path.</p>
+<h3 id="process-env-string-string">process.env(string) -&gt; string?</h3>
+<p>Returns an environment variable value, or <code>null</code> when the variable is not set.</p>
+<h3 id="process-cwd-string">process.cwd() -&gt; string</h3>
+<p>Returns the current working directory as a runtime-owned string.</p>
+<h3 id="process-exit-int-effect">process.exit(int) -&gt; effect</h3>
+<p>Exits the native process with the given status code.</p>
+<p>---</p>
 <h2 id="test-syntax">Test Syntax</h2>
 <p>The stable testing surface also includes syntax:</p>
 <pre><code class="language-walk">test: &#39;works&#39;
@@ -149,6 +181,7 @@ test: &#39;works&#39;
 <p>These names are planned draft APIs only. They are documented here so naming can stay consistent, but they are not stable, not importable, and not compatibility-protected in v1.9.</p>
 <pre><code class="language-text">file.read
 file.write
+file.append
 file.exists
 json.parse
 json.stringify

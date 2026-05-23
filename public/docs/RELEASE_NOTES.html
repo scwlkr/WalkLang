@@ -52,6 +52,30 @@
 <h1 id="walklang-release-notes">WalkLang Release Notes</h1>
 <h2 id="unreleased">Unreleased</h2>
 <p>No unreleased changes.</p>
+<h2 id="v5-6-0-draft-io-foundation">v5.6.0 - Draft IO Foundation</h2>
+<p>Date: 2026-05-22</p>
+<p>v5.6.0 adds the first draft IO/process foundation without promoting it into the stable v1.9 language contract.</p>
+<h3 id="added">Added</h3>
+<ul>
+<li>Draft <code>do:</code> effect statements for explicit side-effect module calls.</li>
+<li>Draft <code>io.write</code>, <code>io.write_line</code>, and <code>io.error_line</code>.</li>
+<li>Draft <code>process.args</code>, <code>process.arg_count</code>, <code>process.env</code>, <code>process.cwd</code>, and <code>process.exit</code>.</li>
+<li>A small built-in API registry for new IO/process functions, including effect and draft metadata.</li>
+<li>Conformance, fail-fixture, formatter, and native runtime tests for the draft IO/process surface.</li>
+</ul>
+<h3 id="notes">Notes</h3>
+<ul>
+<li><code>io</code> and <code>process</code> are importable draft modules in the current compiler.</li>
+<li>Runtime-created strings from the draft process helpers live for the native process lifetime.</li>
+<li>Broader IO remains gated on recoverable error and data-model decisions.</li>
+</ul>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<p>None.</p>
+<h3 id="upgrade">Upgrade</h3>
+<p>Regenerate docs and release artifacts with:</p>
+<pre><code class="language-bash">scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.6.0 dist</code></pre>
 <h2 id="v5-5-0-string-interpolation">v5.5.0 - String Interpolation</h2>
 <p>Date: 2026-05-22</p>
 <p>v5.5.0 adds the v1.9 stable string interpolation syntax for simple display text.</p>

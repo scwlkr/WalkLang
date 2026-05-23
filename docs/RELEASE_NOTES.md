@@ -4,6 +4,41 @@
 
 No unreleased changes.
 
+## v5.6.0 - Draft IO Foundation
+
+Date: 2026-05-22
+
+v5.6.0 adds the first draft IO/process foundation without promoting it into the
+stable v1.9 language contract.
+
+### Added
+
+- Draft `do:` effect statements for explicit side-effect module calls.
+- Draft `io.write`, `io.write_line`, and `io.error_line`.
+- Draft `process.args`, `process.arg_count`, `process.env`, `process.cwd`, and `process.exit`.
+- A small built-in API registry for new IO/process functions, including effect and draft metadata.
+- Conformance, fail-fixture, formatter, and native runtime tests for the draft IO/process surface.
+
+### Notes
+
+- `io` and `process` are importable draft modules in the current compiler.
+- Runtime-created strings from the draft process helpers live for the native process lifetime.
+- Broader IO remains gated on recoverable error and data-model decisions.
+
+### Breaking Changes
+
+None.
+
+### Upgrade
+
+Regenerate docs and release artifacts with:
+
+```bash
+scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.6.0 dist
+```
+
 ## v5.5.0 - String Interpolation
 
 Date: 2026-05-22

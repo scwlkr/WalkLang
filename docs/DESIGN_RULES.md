@@ -38,6 +38,31 @@ generated C snapshot coverage when backend output matters
 
 The standard library grows only when behavior is clear, testable, and documented. Draft APIs must stay out of `STDLIB.md` stable sections until they compile and pass tests.
 
+## IO Effect Policy
+
+Side-effect module calls use one draft statement form:
+
+```walk
+do: module.effect(args)
+```
+
+Do not add one-off command keywords for each IO action. `out:` and `in:` stay
+as the small stable console primitives; broader IO belongs in explicit modules.
+
+Draft IO APIs must say whether they are fail-stop or recoverable. Until a
+recoverable result shape is stable, broad IO such as files, processes, JSON, and
+networking must remain draft or gated.
+
+Runtime-created strings live for the native process lifetime. This is acceptable
+for CLI-oriented IO and not sufficient justification for long-running servers.
+
+Early IO is UTF-8 text IO. Binary IO, streaming handles, and path normalization
+need separate design before stabilization.
+
+New built-in IO APIs must be registered in the built-in API registry with their
+module, function name, parameter types, return type, effect flag, draft/stable
+status, and C runtime helper.
+
 ## No Surprise Magic
 
 Do not add implicit conversions, hidden imports, global state, or syntax aliases unless the spec is updated first and conformance tests prove the behavior.

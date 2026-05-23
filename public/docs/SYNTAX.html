@@ -79,6 +79,12 @@ out: x</code></pre>
         1
         2
         3</code></pre>
+<p>Draft effect calls use <code>do:</code>. The expression after <code>do:</code> must be a draft effect function, not an ordinary value expression.</p>
+<pre><code class="language-walk">imp: io
+
+do: io.write(&#39;Loading&#39;)
+do: io.write_line(&#39;done&#39;)
+do: io.error_line(&#39;warning&#39;)</code></pre>
 <p>---</p>
 <h2 id="names">Names</h2>
 <p>Names use letters, digits, and <code>_</code>, and cannot be reserved words.</p>
@@ -129,6 +135,12 @@ var: name string? = null</code></pre>
 out: + 1 2
 out: true</code></pre>
 <p>Arrays and function values cannot be printed directly.</p>
+<p>The draft <code>io</code> module gives explicit effect calls for output without a newline and for stderr. Import it and call those functions with <code>do:</code>.</p>
+<pre><code class="language-walk">imp: io
+
+do: io.write(&#39;prefix&#39;)
+do: io.write_line(&#39; line&#39;)
+do: io.error_line(&#39;error&#39;)</code></pre>
 <p>---</p>
 <h2 id="input">Input</h2>
 <p>Use <code>in:</code> to read one required line from stdin.</p>
@@ -284,6 +296,12 @@ out: calc.square(5)</code></pre>
 <p>Package module example:</p>
 <pre><code class="language-walk">imp: geometry.core
 out: geometry.core.double(3)</code></pre>
+<p>Draft process helpers are available in the current compiler, but they are not part of the stable v1.9 syntax contract yet.</p>
+<pre><code class="language-walk">imp: process
+
+out: process.arg_count()
+out: process.cwd()
+do: process.exit(0)</code></pre>
 <p>---</p>
 <h2 id="tests">Tests</h2>
 <p>Use <code>test:</code> and <code>assert:</code> with <code>walk test</code>.</p>

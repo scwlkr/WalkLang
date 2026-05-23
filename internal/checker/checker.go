@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"walklang/internal/ast"
+	"walklang/internal/builtins"
 	"walklang/internal/diagnostic"
 )
 
@@ -64,6 +65,7 @@ type Checker struct {
 	inFunction    bool
 	loopDepth     int
 	blockDepth    int
+	effectContext bool
 }
 
 func Check(program *ast.Program) error {
@@ -352,6 +354,8 @@ func (c *Checker) checkStatement(statement ast.Statement) error {
 			return errorAt(s.Location, "type error: cannot output %s", valueType.String())
 		}
 		return nil
+	case *ast.Do:
+		return c.checkDo(s)
 	case *ast.TestDecl:
 		return c.checkNestedBlock(s.Body)
 	case *ast.Assert:
@@ -442,6 +446,20 @@ func (c *Checker) checkStatement(statement ast.Statement) error {
 	default:
 		return errorAt(statement.Loc(), "internal error: unknown statement")
 	}
+}
+
+func (c *Checker) checkDo(statement *ast.Do) error {
+	previous := c.effectContext
+	c.effectContext = true
+	valueType, err := c.checkExpression(statement.Value)
+	c.effectContext = previous
+	if err != nil {
+		return err
+	}
+	if !isEffectBuiltinCall(statement.Value) {
+		return errorAt(statement.Location, "type error: do needs effect call, got %s", valueType.String())
+	}
+	return nil
 }
 
 func (c *Checker) checkFuncDecl(fn *ast.FuncDecl) error {
@@ -903,6 +921,12 @@ func (c *Checker) checkModuleCall(call *ast.Call) (ast.Type, error) {
 		}
 		return c.checkFunctionCall(call, fnType)
 	}
+	if fn, ok := builtins.Lookup(module, name); ok {
+		if fn.Effect && !c.effectContext {
+			return ast.Type{}, errorAt(call.Loc(), "type error: %s is an effect; use do: %s(...)", fn.QualifiedName(), fn.QualifiedName())
+		}
+		return c.checkBuiltinFunctionCall(call, fn)
+	}
 	switch module + "." + name {
 	case "math.sqrt":
 		if len(call.Args) != 1 {
@@ -1093,6 +1117,22 @@ func (c *Checker) checkModuleCall(call *ast.Call) (ast.Type, error) {
 		return ast.Basic(ast.TypeBool), nil
 	}
 	return ast.Type{}, errorAt(call.Loc(), "name error: unknown library function %s", call.Callee)
+}
+
+func (c *Checker) checkBuiltinFunctionCall(call *ast.Call, fn builtins.Function) (ast.Type, error) {
+	if len(call.Args) != len(fn.Params) {
+		return ast.Type{}, errorAt(call.Loc(), "type error: %s expects %d args, got %d", fn.QualifiedName(), len(fn.Params), len(call.Args))
+	}
+	for i, arg := range call.Args {
+		argType, err := c.checkExpression(arg)
+		if err != nil {
+			return ast.Type{}, err
+		}
+		if !assignable(argType, fn.Params[i]) {
+			return ast.Type{}, errorAt(arg.Loc(), "type error: arg %d to %s is %s, got %s", i+1, fn.QualifiedName(), fn.Params[i].String(), argType.String())
+		}
+	}
+	return fn.Return, nil
 }
 
 func splitQualifiedCall(callee string) (string, string, bool) {
@@ -1412,6 +1452,10 @@ func blockReturns(statements []ast.Statement) bool {
 		switch s := statement.(type) {
 		case *ast.Return:
 			return true
+		case *ast.Do:
+			if callsQualifiedEffect(s.Value, "process.exit") {
+				return true
+			}
 		case *ast.If:
 			if len(s.Else) > 0 && blockReturns(s.Then) && blockReturns(s.Else) {
 				return true
@@ -1427,6 +1471,8 @@ func statementTerminates(statement ast.Statement) bool {
 		return true
 	case *ast.If:
 		return len(s.Else) > 0 && blockTerminates(s.Then) && blockTerminates(s.Else)
+	case *ast.Do:
+		return callsQualifiedEffect(s.Value, "process.exit")
 	default:
 		return false
 	}
@@ -1454,6 +1500,20 @@ func rootName(expression ast.Expression) (string, bool) {
 	}
 }
 
+func isEffectBuiltinCall(expression ast.Expression) bool {
+	call, ok := expression.(*ast.Call)
+	if !ok {
+		return false
+	}
+	fn, ok := builtins.LookupQualified(call.Callee)
+	return ok && fn.Effect
+}
+
+func callsQualifiedEffect(expression ast.Expression, qualified string) bool {
+	call, ok := expression.(*ast.Call)
+	return ok && call.Callee == qualified
+}
+
 func errorAt(location ast.Location, format string, args ...any) error {
 	return diagnostic.Errorf(location, format, args...)
 }
@@ -1463,7 +1523,7 @@ func IsBuiltinModule(name string) bool {
 	case "math", "string", "array", "time", "random", "testing":
 		return true
 	default:
-		return false
+		return builtins.IsModule(name)
 	}
 }
 

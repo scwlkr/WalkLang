@@ -1,0 +1,5 @@
+imp: io
+
+do: io.write('load')
+do: io.write_line('ing')
+out: 'done'

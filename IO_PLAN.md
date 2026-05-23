@@ -1,6 +1,7 @@
 # WalkLang IO Plan
 
-Status: design draft. This is not stable language syntax yet.
+Status: design draft with Phase 0 and the Phase 1 console/process foundation
+implemented as draft compiler APIs. This is not stable language syntax yet.
 
 Purpose: turn the current input/output brainstorm into a durable implementation
 plan for WalkLang's console, file, process, terminal, data, network, and future
@@ -49,6 +50,20 @@ array
 time
 random
 testing
+```
+
+Draft implemented IO/process surface:
+
+```text
+do:
+io.write
+io.write_line
+io.error_line
+process.args
+process.arg_count
+process.env
+process.cwd
+process.exit
 ```
 
 Draft-only stdlib names already called out in `docs/STDLIB.md`:

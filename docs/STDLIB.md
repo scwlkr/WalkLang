@@ -24,6 +24,9 @@ testing
 
 No other built-in module is stable in v1.9.
 
+The current compiler also includes draft `io` and `process` modules. They are
+importable and tested, but they are not compatibility-protected in v1.9.
+
 ---
 
 ## math
@@ -183,6 +186,64 @@ test: 'works'
 
 ---
 
+## Draft io
+
+Use draft `io` functions with `do:` because they are effects.
+
+```walk
+imp: io
+
+do: io.write('Loading')
+do: io.write_line('done')
+do: io.error_line('warning')
+```
+
+### io.write(string) -> effect
+
+Writes the string to stdout without adding a newline and flushes stdout.
+
+### io.write_line(string) -> effect
+
+Writes the string and a trailing newline to stdout and flushes stdout.
+
+### io.error_line(string) -> effect
+
+Writes the string and a trailing newline to stderr and flushes stderr.
+
+---
+
+## Draft process
+
+```walk
+imp: process
+
+out: process.arg_count()
+out: process.cwd()
+do: process.exit(0)
+```
+
+### process.args() -> array[string]
+
+Returns command-line arguments passed after the executable path.
+
+### process.arg_count() -> int
+
+Returns the number of command-line arguments passed after the executable path.
+
+### process.env(string) -> string?
+
+Returns an environment variable value, or `null` when the variable is not set.
+
+### process.cwd() -> string
+
+Returns the current working directory as a runtime-owned string.
+
+### process.exit(int) -> effect
+
+Exits the native process with the given status code.
+
+---
+
 ## Test Syntax
 
 The stable testing surface also includes syntax:
@@ -202,11 +263,14 @@ walk test tests.walk
 
 ## Draft APIs
 
-These names are planned draft APIs only. They are documented here so naming can stay consistent, but they are not stable, not importable, and not compatibility-protected in v1.9.
+These names are planned draft APIs only. They are documented here so naming can
+stay consistent, but they are not stable, not importable, and not
+compatibility-protected in v1.9.
 
 ```text
 file.read
 file.write
+file.append
 file.exists
 json.parse
 json.stringify

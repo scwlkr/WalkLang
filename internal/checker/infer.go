@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"walklang/internal/ast"
+	"walklang/internal/builtins"
 )
 
 type inferSymbol struct {
@@ -161,6 +162,9 @@ func (i *functionInferencer) inferStatement(statement ast.Statement) error {
 			return i.assignTargetType(s.Target, valueType)
 		}
 	case *ast.Out:
+		_, err := i.inferExpression(s.Value, ast.Type{})
+		return err
+	case *ast.Do:
 		_, err := i.inferExpression(s.Value, ast.Type{})
 		return err
 	case *ast.Assert:
@@ -420,6 +424,17 @@ func (i *functionInferencer) inferModuleCall(call *ast.Call) (ast.Type, error) {
 				return *fnType.Return, nil
 			}
 		}
+	}
+	if fn, ok := builtins.Lookup(module, name); ok {
+		for index, arg := range call.Args {
+			if index >= len(fn.Params) {
+				break
+			}
+			if _, err := i.inferExpression(arg, fn.Params[index]); err != nil {
+				return ast.Type{}, err
+			}
+		}
+		return fn.Return, nil
 	}
 	switch module + "." + name {
 	case "math.sqrt", "math.pow":

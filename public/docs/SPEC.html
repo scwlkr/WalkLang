@@ -121,6 +121,9 @@ repeat:
 for:
 break:
 continue:</code></pre>
+<p>Draft implemented statement:</p>
+<pre><code class="language-text">do:</code></pre>
+<p><code>do:</code> is the current compiler&#39;s draft effect-call statement. It is documented so draft IO programs can be tested, but it is not part of the v1.9 stable compatibility contract yet.</p>
 <p>One statement appears on each physical line. Semicolons are not part of v1.1 syntax.</p>
 <p>---</p>
 <h2 id="6-reserved-words">6. Reserved Words</h2>
@@ -302,6 +305,10 @@ array
 time
 random
 testing</code></pre>
+<p>Draft built-in modules in the current compiler:</p>
+<pre><code class="language-text">io
+process</code></pre>
+<p>Draft modules are importable for experimentation, but they are not compatibility-protected by the v1.9 stable contract.</p>
 <p>Stable built-in functions:</p>
 <pre><code class="language-text">math.sqrt(number) -&gt; float
 math.pow(number, number) -&gt; float

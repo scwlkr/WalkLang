@@ -57,6 +57,17 @@ out:
         3
 ```
 
+Draft effect calls use `do:`. The expression after `do:` must be a draft
+effect function, not an ordinary value expression.
+
+```walk
+imp: io
+
+do: io.write('Loading')
+do: io.write_line('done')
+do: io.error_line('warning')
+```
+
 ---
 
 ## Names
@@ -163,6 +174,17 @@ out: true
 ```
 
 Arrays and function values cannot be printed directly.
+
+The draft `io` module gives explicit effect calls for output without a newline
+and for stderr. Import it and call those functions with `do:`.
+
+```walk
+imp: io
+
+do: io.write('prefix')
+do: io.write_line(' line')
+do: io.error_line('error')
+```
 
 ---
 
@@ -471,6 +493,17 @@ Package module example:
 ```walk
 imp: geometry.core
 out: geometry.core.double(3)
+```
+
+Draft process helpers are available in the current compiler, but they are not
+part of the stable v1.9 syntax contract yet.
+
+```walk
+imp: process
+
+out: process.arg_count()
+out: process.cwd()
+do: process.exit(0)
 ```
 
 ---
