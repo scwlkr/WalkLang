@@ -36,6 +36,19 @@ reported 5 checksum lines; the host release binary reported `v5.12.0` from
 `walk version`; and `scripts/install-local.sh v5.12.0` refreshed the local
 `walk` install.
 
+Language documentation standard update on 2026-05-23: added
+`docs/LANGUAGE_CONCEPTS.md` as the canonical language vocabulary and
+documentation-governance standard. It defines firm concepts, stability words,
+the target `SPEC.md` spine, documentation roles, and the TDD-synchronous proof
+matrix for future language docs. `AGENTS.md` now points agents at that standard
+before creating or reshaping language docs, and the docs front door, docs style
+guide, static-site page list, and generated public docs include the new page.
+
+Language documentation standard verification on 2026-05-23:
+`go test -count=1 ./...` passed; `git diff --check` passed;
+`scripts/build-docs-site.sh` passed; and `scripts/check-docs-site.sh` passed
+after staging generated docs artifacts under `docs/reference` and `public`.
+
 State: v5.11.0 completes `IO_PLAN.md` Roadmap Phase 4, Terminal UX, as draft
 compiler APIs. Draft terminal helpers now cover `term.is_tty`, foreground and
 background color, style, reset, clear, cursor movement, terminal dimensions,

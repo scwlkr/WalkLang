@@ -9,6 +9,13 @@ Compiler target: `.walk` → Go compiler → C backend → native executable
 - After each successfully completed task proceed with commiting/syncing changes and going through the new release flow
 - Every feature should be backed by tdd, it is unacceptable to have a feature not proven as either working/failed. e.g. if you have a random.choice function you must always verify that it is truly random via tdd.
 
+# Language Documentation Standard
+
+- Treat `docs/LANGUAGE_CONCEPTS.md` as the canonical vocabulary and docs-governance standard before creating or reshaping language docs.
+- New language docs must use the concepts defined there, choose one clear doc role, and label behavior as stable, draft, experimental, planned, deprecated, or removed.
+- Language docs and implementation move in the same TDD slice: update the contract or draft doc, add positive proof, add negative proof when invalid forms matter, update formatter/snapshots when syntax or backend output changes, then verify through the public compiler or CLI.
+- Do not claim a syntax form, type rule, runtime behavior, or standard-library API exists unless repo tests, fixtures, generated docs, or native execution prove it.
+
 # Agent Context Shortcuts
 
 For named `docs/ROADMAP.md` phase work, read only:
