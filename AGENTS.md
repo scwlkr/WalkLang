@@ -7,7 +7,7 @@ Compiler target: `.walk` → Go compiler → C backend → native executable
 
 - After each non-trivial project conversation, update `docs/STATUS.md` with the current version, verification, and next step.
 - After each successfully completed task proceed with commiting/syncing changes and going through the new release flow
-- Every feature should be backed by tdd, it is unacceptable to have a feature not proven as either working/failed. e.g. if you have a random.choice function you must always verify that it is truly random via tdd. 
+- Every feature should be backed by tdd, it is unacceptable to have a feature not proven as either working/failed. e.g. if you have a random.choice function you must always verify that it is truly random via tdd.
 
 # Agent Context Shortcuts
 

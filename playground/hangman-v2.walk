@@ -7,6 +7,7 @@ var: game = true
 # secret word selection
 var: wordBank = ['dog', 'cat', 'paddle', 'car', 'bike', 'motor']
 var: secretWord = random.choice(wordBank)
+var: letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
 
 # game start
 var: secretWordLength = string.len(secretWord)
@@ -15,12 +16,30 @@ const: maxGuesses = 7
 # print secret word to user
 out: 'the secret word is {secretWordLength} characters long'
 
+# 1. ask for letter
+var: guess = in: 'input 1 letter: '
+      if: guess # 2. validate it
+
+
+# 3. check if it was already guessed
+
+# 4. add it to guessed list
+
+# 5. check whether it is in secrete word
+
+# 6. if wrong, increase missedGuesses
+
+# 7. rebuild the visible word
+
+# 8. Check win
+
+# 9. Check lose
+
+
 # guess tracking
-var: guessed array[string] = []
-while: != game false
-      var: guess = in: 'input 1 letter: '
-
-
-
-
+# var: guessed array[string] = []
+# while: != game false
+#       var: guess = in: 'input 1 letter: '
+#      
+#      out: guessed[0]
 
