@@ -20,38 +20,35 @@
 <nav class="nav" aria-label="Documentation">
 <h2>Start</h2>
 <a href="index.html">Documentation</a>
-<a href="INSTALL.html">Install Instructions</a>
+<a href="INSTALL.html">Install</a>
 <a href="PROJECTS.html">Project Mode</a>
 <h2>Language</h2>
-<a href="SYNTAX.html">v1 Syntax Guide</a>
-<a href="SPEC.html">v1.9 Specification</a>
-<a href="LANGUAGE_CONCEPTS.html">Language Concepts And Documentation Standard</a>
-<a href="STDLIB.html">v1.9 Standard Library</a>
-<a href="ERRORS.html">v1 Diagnostics</a>
-<a href="COMPATIBILITY.html">v1.9 Compatibility</a>
-<a href="MIGRATING.html">Migration Guide</a>
-<a href="DEPRECATION.html">Deprecation Policy</a>
-<h2>Versions</h2>
-<a href="V1.html">v1 / v1.9</a>
-<a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
-<a href="V3.html">v3 Package Ecosystem</a>
-<h2>Tools</h2>
-<a href="V4.html">v4 Professional Tooling</a>
-<a href="V5.html">v5 Runtime and Backend Maturity</a>
-<a href="V5_1.html">v5.1 Public Docs And Reference Site</a>
-<a href="NETWORKING.html">Draft Networking</a>
-<a href="RICH_RUNTIMES.html">Rich Runtime Tracks</a>
+<a href="SYNTAX.html">Syntax</a>
+<a href="SPEC.html">Specification</a>
+<a href="LANGUAGE_CONCEPTS.html">Language Concepts</a>
+<a href="STDLIB.html">Standard Library</a>
+<a href="ERRORS.html">Diagnostics</a>
+<a href="COMPATIBILITY.html">Compatibility</a>
+<a href="MIGRATING.html">Migration</a>
+<a href="DEPRECATION.html">Deprecation</a>
 <h2>Reference</h2>
 <a href="reference/api.html">API Reference</a>
-<a href="reference/index.html">Reference index</a>
+<a href="V5_1.html">Docs Site</a>
+<a href="reference/index.html">Reference Index</a>
+<h2>Tools</h2>
+<a href="V4.html">Editor And Docs Tools</a>
+<a href="V5.html">Runtime And Backend</a>
+<a href="NETWORKING.html">Draft Networking</a>
+<a href="RICH_RUNTIMES.html">Rich Runtimes</a>
 <h2>Project</h2>
-<a href="ARCHITECTURE.html">ARCHITECTURE.md</a>
-<a href="DESIGN_RULES.html">v1 Design Rules</a>
+<a href="ARCHITECTURE.html">Architecture</a>
+<a href="DESIGN_RULES.html">Design Rules</a>
 <a href="DOCS_STYLE_GUIDE.html">Docs Style Guide</a>
 <a href="PURPOSE.html">Purpose</a>
-<a href="RELEASE_NOTES.html" aria-current="page">Release Notes</a>
-<a href="ROADMAP.html">ROADMAP.md</a>
+<a href="ROADMAP.html">Roadmap</a>
 <a href="STATUS.html">Status</a>
+<h2>Releases</h2>
+<a href="RELEASE_NOTES.html" aria-current="page">Version History</a>
 </nav>
 </aside>
 <main class="content">
@@ -61,6 +58,32 @@
 <h1 id="walklang-release-notes">WalkLang Release Notes</h1>
 <h2 id="unreleased">Unreleased</h2>
 <p>No unreleased changes.</p>
+<h2 id="v5-12-3-sidebar-navigation-cleanup">v5.12.3 - Sidebar Navigation Cleanup</h2>
+<p>Date: 2026-05-24</p>
+<p>v5.12.3 cleans up the generated docs sidebar so the public navigation is organized by reader task and document role instead of exposed release milestones. The stable language contract remains v1.9 and the draft runtime API surface is unchanged from v5.12.0.</p>
+<h3 id="improved">Improved</h3>
+<ul>
+<li>Sidebar links now use topic labels such as <code>Syntax</code>, <code>Specification</code>,</li>
+<p><code>Standard Library</code>, <code>API Reference</code>, <code>Architecture</code>, and <code>Purpose</code> instead of version-heavy page titles.</p>
+<li>The primary sidebar groups now follow the documentation roles: Start,</li>
+<p>Language, Reference, Tools, Project, and Releases.</p>
+<li>Historical <code>V1</code>, <code>V2</code>, and <code>V3</code> milestone pages remain generated and</li>
+<p>linkable, but they no longer appear as top-level sidebar entries.</p>
+<li>Release notes now appear in the sidebar as <code>Version History</code>.</li>
+</ul>
+<h3 id="notes">Notes</h3>
+<ul>
+<li>Page titles, generated pages, search metadata, and release history remain</li>
+<p>intact. This release changes navigation presentation, not language behavior.</p>
+<li>The stable language contract remains v1.9.</li>
+</ul>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<p>None.</p>
+<h3 id="upgrade">Upgrade</h3>
+<p>Regenerate docs and release artifacts with:</p>
+<pre><code class="language-bash">scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.12.3 dist</code></pre>
 <h2 id="v5-12-2-search-result-previews">v5.12.2 - Search Result Previews</h2>
 <p>Date: 2026-05-24</p>
 <p>v5.12.2 improves the generated docs search result cards while keeping the stable language contract at v1.9 and the draft runtime API surface unchanged from v5.12.0.</p>

@@ -4,6 +4,46 @@
 
 No unreleased changes.
 
+## v5.12.3 - Sidebar Navigation Cleanup
+
+Date: 2026-05-24
+
+v5.12.3 cleans up the generated docs sidebar so the public navigation is
+organized by reader task and document role instead of exposed release
+milestones. The stable language contract remains v1.9 and the draft runtime API
+surface is unchanged from v5.12.0.
+
+### Improved
+
+- Sidebar links now use topic labels such as `Syntax`, `Specification`,
+  `Standard Library`, `API Reference`, `Architecture`, and `Purpose` instead
+  of version-heavy page titles.
+- The primary sidebar groups now follow the documentation roles: Start,
+  Language, Reference, Tools, Project, and Releases.
+- Historical `V1`, `V2`, and `V3` milestone pages remain generated and
+  linkable, but they no longer appear as top-level sidebar entries.
+- Release notes now appear in the sidebar as `Version History`.
+
+### Notes
+
+- Page titles, generated pages, search metadata, and release history remain
+  intact. This release changes navigation presentation, not language behavior.
+- The stable language contract remains v1.9.
+
+### Breaking Changes
+
+None.
+
+### Upgrade
+
+Regenerate docs and release artifacts with:
+
+```bash
+scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.12.3 dist
+```
+
 ## v5.12.2 - Search Result Previews
 
 Date: 2026-05-24

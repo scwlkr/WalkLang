@@ -42,9 +42,9 @@ WalkLang currently has three version layers:
 
 - **Stable language contract:** `v1.9`, defined by `docs/SPEC.md`,
   `docs/COMPATIBILITY.md`, and the v1 compatibility tests.
-- **Current compiler/tooling/docs release:** `v5.12.2`, focused on cleaner
-  docs search result previews over the v5.12.1 search feature and v5.12.0
-  draft network/rich-runtime IO surface while keeping v1.9 stable.
+- **Current compiler/tooling/docs release:** `v5.12.3`, focused on a cleaner
+  topic-based docs sidebar over the v5.12.2 search result preview work and the
+  v5.12.0 draft network/rich-runtime IO surface while keeping v1.9 stable.
 - **Experimental implemented language surface:** v2 through v2.2 features such
   as structs, methods, and simple generic functions are implemented, but are not
   part of the stable v1 compatibility promise.

@@ -2,11 +2,40 @@
 
 Stable language contract: v1.9.
 
-Current compiler/tooling/docs release: v5.12.2 docs search result previews
-over the v5.12.1 generated search feature and the v5.12.0 draft network and
-rich-runtime IO completion.
+Current compiler/tooling/docs release: v5.12.3 docs sidebar navigation cleanup
+over the v5.12.2 generated search result previews and the v5.12.0 draft
+network and rich-runtime IO completion.
 
 Experimental implemented language surface: v2.2.
+
+State: v5.12.3 cleans up the generated docs sidebar so public navigation is
+organized by reader task and document role instead of exposed release
+milestones. Sidebar labels now use topic names such as `Syntax`,
+`Specification`, `Standard Library`, `API Reference`, `Architecture`,
+`Purpose`, and `Version History`. Historical `V1`, `V2`, and `V3` milestone
+pages remain generated and linkable, but they no longer appear as top-level
+sidebar entries. The stable language contract remains v1.9, and the draft
+runtime API surface remains unchanged from v5.12.0.
+
+v5.12.3 verification on 2026-05-24: focused site-generator tests passed with
+`go test ./scripts -run TestSidebarUsesTopicNavigationInsteadOfVersionMilestones
+-count=1`; full site-generator tests passed with `go test ./scripts -count=1`;
+full `go test -count=1 ./...` passed; `go build -trimpath -ldflags "-X
+main.version=v5.12.3" -o build/walk ./cmd/walk` passed; `./build/walk
+version` reported `v5.12.3`; `./build/walk check --warnings=error
+tests/pass/walk_tests.walk` passed; `WALK_BIN=$PWD/build/walk
+scripts/stress-v1.sh` passed and reported `v1.9 stress ok`;
+`scripts/build-docs-site.sh` passed; `scripts/check-docs-site.sh` passed after
+staging generated docs; a generated HTML check confirmed
+`public/docs/SPEC.html` contains topic sidebar labels for `Syntax`,
+`Specification`, `API Reference`, `Architecture`, `Purpose`, and `Version
+History` without top-level `V1`, `V2`, or `V3` entries; a local Chrome headless
+smoke against `python3 -m http.server` captured
+`/tmp/walklang-sidebar-v5123.png`; `scripts/release.sh v5.12.3 <temp>/release`
+produced 5 platform artifacts plus `SHA256SUMS`; `wc -l
+<temp>/release/SHA256SUMS` reported 5 checksum lines; the host release binary
+reported `v5.12.3` from `walk version`; and scoped `git diff --check` passed
+for the release files changed in this slice.
 
 State: v5.12.2 improves generated docs search result quality. The site
 generator now emits section-level search entries with parent doc/group context,

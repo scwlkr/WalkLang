@@ -24,6 +24,7 @@ v5: runtime/backend maturity
 v5.12: draft network and rich-runtime boundary
 v5.12.1: docs search
 v5.12.2: docs search result previews
+v5.12.3: docs sidebar navigation cleanup
 later: package/runtime tracks and advanced language work
 ```
 

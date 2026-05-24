@@ -20,38 +20,35 @@
 <nav class="nav" aria-label="Documentation">
 <h2>Start</h2>
 <a href="index.html">Documentation</a>
-<a href="INSTALL.html">Install Instructions</a>
+<a href="INSTALL.html">Install</a>
 <a href="PROJECTS.html">Project Mode</a>
 <h2>Language</h2>
-<a href="SYNTAX.html">v1 Syntax Guide</a>
-<a href="SPEC.html">v1.9 Specification</a>
-<a href="LANGUAGE_CONCEPTS.html">Language Concepts And Documentation Standard</a>
-<a href="STDLIB.html">v1.9 Standard Library</a>
-<a href="ERRORS.html">v1 Diagnostics</a>
-<a href="COMPATIBILITY.html">v1.9 Compatibility</a>
-<a href="MIGRATING.html">Migration Guide</a>
-<a href="DEPRECATION.html">Deprecation Policy</a>
-<h2>Versions</h2>
-<a href="V1.html">v1 / v1.9</a>
-<a href="V2.html">v2 Data Modeling, Methods, And Simple Generics</a>
-<a href="V3.html">v3 Package Ecosystem</a>
-<h2>Tools</h2>
-<a href="V4.html">v4 Professional Tooling</a>
-<a href="V5.html">v5 Runtime and Backend Maturity</a>
-<a href="V5_1.html">v5.1 Public Docs And Reference Site</a>
-<a href="NETWORKING.html">Draft Networking</a>
-<a href="RICH_RUNTIMES.html">Rich Runtime Tracks</a>
+<a href="SYNTAX.html">Syntax</a>
+<a href="SPEC.html">Specification</a>
+<a href="LANGUAGE_CONCEPTS.html">Language Concepts</a>
+<a href="STDLIB.html">Standard Library</a>
+<a href="ERRORS.html">Diagnostics</a>
+<a href="COMPATIBILITY.html">Compatibility</a>
+<a href="MIGRATING.html">Migration</a>
+<a href="DEPRECATION.html">Deprecation</a>
 <h2>Reference</h2>
 <a href="reference/api.html">API Reference</a>
-<a href="reference/index.html">Reference index</a>
+<a href="V5_1.html">Docs Site</a>
+<a href="reference/index.html">Reference Index</a>
+<h2>Tools</h2>
+<a href="V4.html">Editor And Docs Tools</a>
+<a href="V5.html">Runtime And Backend</a>
+<a href="NETWORKING.html">Draft Networking</a>
+<a href="RICH_RUNTIMES.html">Rich Runtimes</a>
 <h2>Project</h2>
-<a href="ARCHITECTURE.html">ARCHITECTURE.md</a>
-<a href="DESIGN_RULES.html">v1 Design Rules</a>
+<a href="ARCHITECTURE.html">Architecture</a>
+<a href="DESIGN_RULES.html">Design Rules</a>
 <a href="DOCS_STYLE_GUIDE.html">Docs Style Guide</a>
 <a href="PURPOSE.html">Purpose</a>
-<a href="RELEASE_NOTES.html">Release Notes</a>
-<a href="ROADMAP.html">ROADMAP.md</a>
+<a href="ROADMAP.html">Roadmap</a>
 <a href="STATUS.html" aria-current="page">Status</a>
+<h2>Releases</h2>
+<a href="RELEASE_NOTES.html">Version History</a>
 </nav>
 </aside>
 <main class="content">
@@ -60,8 +57,10 @@
 <article class="doc">
 <h1 id="walklang-status">WalkLang Status</h1>
 <p>Stable language contract: v1.9.</p>
-<p>Current compiler/tooling/docs release: v5.12.2 docs search result previews over the v5.12.1 generated search feature and the v5.12.0 draft network and rich-runtime IO completion.</p>
+<p>Current compiler/tooling/docs release: v5.12.3 docs sidebar navigation cleanup over the v5.12.2 generated search result previews and the v5.12.0 draft network and rich-runtime IO completion.</p>
 <p>Experimental implemented language surface: v2.2.</p>
+<p>State: v5.12.3 cleans up the generated docs sidebar so public navigation is organized by reader task and document role instead of exposed release milestones. Sidebar labels now use topic names such as <code>Syntax</code>, <code>Specification</code>, <code>Standard Library</code>, <code>API Reference</code>, <code>Architecture</code>, <code>Purpose</code>, and <code>Version History</code>. Historical <code>V1</code>, <code>V2</code>, and <code>V3</code> milestone pages remain generated and linkable, but they no longer appear as top-level sidebar entries. The stable language contract remains v1.9, and the draft runtime API surface remains unchanged from v5.12.0.</p>
+<p>v5.12.3 verification on 2026-05-24: focused site-generator tests passed with <code>go test ./scripts -run TestSidebarUsesTopicNavigationInsteadOfVersionMilestones -count=1</code>; full site-generator tests passed with <code>go test ./scripts -count=1</code>; full <code>go test -count=1 ./...</code> passed; <code>go build -trimpath -ldflags &#34;-X main.version=v5.12.3&#34; -o build/walk ./cmd/walk</code> passed; <code>./build/walk version</code> reported <code>v5.12.3</code>; <code>./build/walk check --warnings=error tests/pass/walk_tests.walk</code> passed; <code>WALK_BIN=$PWD/build/walk scripts/stress-v1.sh</code> passed and reported <code>v1.9 stress ok</code>; <code>scripts/build-docs-site.sh</code> passed; <code>scripts/check-docs-site.sh</code> passed after staging generated docs; a generated HTML check confirmed <code>public/docs/SPEC.html</code> contains topic sidebar labels for <code>Syntax</code>, <code>Specification</code>, <code>API Reference</code>, <code>Architecture</code>, <code>Purpose</code>, and <code>Version History</code> without top-level <code>V1</code>, <code>V2</code>, or <code>V3</code> entries; a local Chrome headless smoke against <code>python3 -m http.server</code> captured <code>/tmp/walklang-sidebar-v5123.png</code>; <code>scripts/release.sh v5.12.3 &lt;temp&gt;/release</code> produced 5 platform artifacts plus <code>SHA256SUMS</code>; <code>wc -l &lt;temp&gt;/release/SHA256SUMS</code> reported 5 checksum lines; the host release binary reported <code>v5.12.3</code> from <code>walk version</code>; and scoped <code>git diff --check</code> passed for the release files changed in this slice.</p>
 <p>State: v5.12.2 improves generated docs search result quality. The site generator now emits section-level search entries with parent doc/group context, section anchors, clean prose summaries, and cleaned full text. The client-side search UI now renders a section title, context line, and readable preview instead of a raw sliced Markdown snippet, with ranking boosts for section, summary, and API-shaped matches such as <code>array.push</code>. The stable language contract remains v1.9, and the draft runtime API surface remains unchanged from v5.12.0.</p>
 <p>v5.12.2 verification on 2026-05-24: focused site-generator tests passed with <code>go test ./scripts -run &#39;TestLayoutUsesRootFaviconAndCompactSidebarIcon|TestSearchIndexUsesSectionsAndCleanSummaries|TestSiteCSSUsesDarkWalkLangBlueTheme&#39; -count=1</code>; full <code>go test -count=1 ./...</code> passed; <code>go build -trimpath -ldflags &#34;-X main.version=v5.12.2&#34; -o build/walk ./cmd/walk</code> passed; <code>./build/walk version</code> reported <code>v5.12.2</code>; <code>./build/walk check --warnings=error tests/pass/walk_tests.walk</code> passed; <code>WALK_BIN=$PWD/build/walk scripts/stress-v1.sh</code> passed and reported <code>v1.9 stress ok</code>; <code>scripts/build-docs-site.sh</code> passed; <code>scripts/check-docs-site.sh</code> passed after staging generated docs; a local Chrome headless smoke against <code>python3 -m http.server</code> typed <code>function</code> and <code>push</code> into the docs search box, captured <code>/tmp/walklang-docs-search-function.png</code> and <code>/tmp/walklang-docs-search-push.png</code>, verified clean section/context/summary cards, and confirmed <code>push</code> ranks <code>array.push(array[T], T) -&gt; array[T]</code> first; and <code>scripts/release.sh v5.12.2 &lt;temp&gt;/release</code> produced 5 platform artifacts plus <code>SHA256SUMS</code>, with the host release binary reporting <code>v5.12.2</code> from <code>walk version</code>.</p>
 <p>State: v5.12.1 adds a generated static docs search box to every hosted docs page. The site generator now emits <code>docs/search.json</code> from repo Markdown docs, loads a small client-side search script, and ranks API-heading matches such as <code>array.push</code> above broad roadmap/status mentions. The stable language contract remains v1.9, and the draft runtime API surface remains unchanged from v5.12.0.</p>

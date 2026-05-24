@@ -14,10 +14,12 @@ import (
 )
 
 type docPage struct {
-	Source string
-	Output string
-	Title  string
-	Group  string
+	Source      string
+	Output      string
+	Title       string
+	NavTitle    string
+	Group       string
+	HideFromNav bool
 }
 
 type searchEntry struct {
@@ -138,33 +140,33 @@ func hydratePageTitles(pages []docPage) error {
 
 func sitePages() []docPage {
 	return []docPage{
-		{Source: "README.md", Output: "docs/index.html", Title: "WalkLang Documentation", Group: "Start"},
-		{Source: "INSTALL.md", Output: "docs/INSTALL.html", Group: "Start"},
-		{Source: "PROJECTS.md", Output: "docs/PROJECTS.html", Group: "Start"},
-		{Source: "SYNTAX.md", Output: "docs/SYNTAX.html", Group: "Language"},
-		{Source: "SPEC.md", Output: "docs/SPEC.html", Group: "Language"},
-		{Source: "LANGUAGE_CONCEPTS.md", Output: "docs/LANGUAGE_CONCEPTS.html", Group: "Language"},
-		{Source: "STDLIB.md", Output: "docs/STDLIB.html", Group: "Language"},
-		{Source: "ERRORS.md", Output: "docs/ERRORS.html", Group: "Language"},
-		{Source: "COMPATIBILITY.md", Output: "docs/COMPATIBILITY.html", Group: "Language"},
-		{Source: "MIGRATING.md", Output: "docs/MIGRATING.html", Group: "Language"},
-		{Source: "DEPRECATION.md", Output: "docs/DEPRECATION.html", Group: "Language"},
-		{Source: "V1.md", Output: "docs/V1.html", Group: "Versions"},
-		{Source: "V2.md", Output: "docs/V2.html", Group: "Versions"},
-		{Source: "V3.md", Output: "docs/V3.html", Group: "Versions"},
-		{Source: "V4.md", Output: "docs/V4.html", Group: "Tools"},
-		{Source: "V5.md", Output: "docs/V5.html", Group: "Tools"},
-		{Source: "V5_1.md", Output: "docs/V5_1.html", Group: "Tools"},
-		{Source: "NETWORKING.md", Output: "docs/NETWORKING.html", Group: "Tools"},
-		{Source: "RICH_RUNTIMES.md", Output: "docs/RICH_RUNTIMES.html", Group: "Tools"},
-		{Source: "reference/api.md", Output: "docs/reference/api.html", Title: "WalkLang API Reference", Group: "Reference"},
-		{Source: "ARCHITECTURE.md", Output: "docs/ARCHITECTURE.html", Group: "Project"},
-		{Source: "DESIGN_RULES.md", Output: "docs/DESIGN_RULES.html", Group: "Project"},
-		{Source: "DOCS_STYLE_GUIDE.md", Output: "docs/DOCS_STYLE_GUIDE.html", Group: "Project"},
-		{Source: "PURPOSE.md", Output: "docs/PURPOSE.html", Group: "Project"},
-		{Source: "RELEASE_NOTES.md", Output: "docs/RELEASE_NOTES.html", Group: "Project"},
-		{Source: "ROADMAP.md", Output: "docs/ROADMAP.html", Group: "Project"},
-		{Source: "STATUS.md", Output: "docs/STATUS.html", Group: "Project"},
+		{Source: "README.md", Output: "docs/index.html", Title: "WalkLang Documentation", NavTitle: "Documentation", Group: "Start"},
+		{Source: "INSTALL.md", Output: "docs/INSTALL.html", NavTitle: "Install", Group: "Start"},
+		{Source: "PROJECTS.md", Output: "docs/PROJECTS.html", NavTitle: "Project Mode", Group: "Start"},
+		{Source: "SYNTAX.md", Output: "docs/SYNTAX.html", NavTitle: "Syntax", Group: "Language"},
+		{Source: "SPEC.md", Output: "docs/SPEC.html", NavTitle: "Specification", Group: "Language"},
+		{Source: "LANGUAGE_CONCEPTS.md", Output: "docs/LANGUAGE_CONCEPTS.html", NavTitle: "Language Concepts", Group: "Language"},
+		{Source: "STDLIB.md", Output: "docs/STDLIB.html", NavTitle: "Standard Library", Group: "Language"},
+		{Source: "ERRORS.md", Output: "docs/ERRORS.html", NavTitle: "Diagnostics", Group: "Language"},
+		{Source: "COMPATIBILITY.md", Output: "docs/COMPATIBILITY.html", NavTitle: "Compatibility", Group: "Language"},
+		{Source: "MIGRATING.md", Output: "docs/MIGRATING.html", NavTitle: "Migration", Group: "Language"},
+		{Source: "DEPRECATION.md", Output: "docs/DEPRECATION.html", NavTitle: "Deprecation", Group: "Language"},
+		{Source: "V1.md", Output: "docs/V1.html", Group: "Releases", HideFromNav: true},
+		{Source: "V2.md", Output: "docs/V2.html", Group: "Releases", HideFromNav: true},
+		{Source: "V3.md", Output: "docs/V3.html", Group: "Releases", HideFromNav: true},
+		{Source: "V4.md", Output: "docs/V4.html", NavTitle: "Editor And Docs Tools", Group: "Tools"},
+		{Source: "V5.md", Output: "docs/V5.html", NavTitle: "Runtime And Backend", Group: "Tools"},
+		{Source: "NETWORKING.md", Output: "docs/NETWORKING.html", NavTitle: "Draft Networking", Group: "Tools"},
+		{Source: "RICH_RUNTIMES.md", Output: "docs/RICH_RUNTIMES.html", NavTitle: "Rich Runtimes", Group: "Tools"},
+		{Source: "reference/api.md", Output: "docs/reference/api.html", Title: "WalkLang API Reference", NavTitle: "API Reference", Group: "Reference"},
+		{Source: "V5_1.md", Output: "docs/V5_1.html", NavTitle: "Docs Site", Group: "Reference"},
+		{Source: "ARCHITECTURE.md", Output: "docs/ARCHITECTURE.html", NavTitle: "Architecture", Group: "Project"},
+		{Source: "DESIGN_RULES.md", Output: "docs/DESIGN_RULES.html", NavTitle: "Design Rules", Group: "Project"},
+		{Source: "DOCS_STYLE_GUIDE.md", Output: "docs/DOCS_STYLE_GUIDE.html", NavTitle: "Docs Style Guide", Group: "Project"},
+		{Source: "PURPOSE.md", Output: "docs/PURPOSE.html", NavTitle: "Purpose", Group: "Project"},
+		{Source: "ROADMAP.md", Output: "docs/ROADMAP.html", NavTitle: "Roadmap", Group: "Project"},
+		{Source: "STATUS.md", Output: "docs/STATUS.html", NavTitle: "Status", Group: "Project"},
+		{Source: "RELEASE_NOTES.md", Output: "docs/RELEASE_NOTES.html", NavTitle: "Version History", Group: "Releases"},
 	}
 }
 
@@ -256,7 +258,13 @@ func renderSidebar(current string, pages []docPage) string {
 	for _, group := range sortedGroups(groups) {
 		out.WriteString("<h2>" + html.EscapeString(group) + "</h2>\n")
 		for _, page := range groups[group] {
-			title := page.Title
+			if page.HideFromNav {
+				continue
+			}
+			title := page.NavTitle
+			if title == "" {
+				title = page.Title
+			}
 			if title == "" {
 				title = strings.TrimSuffix(filepath.Base(page.Output), ".html")
 			}
@@ -267,7 +275,7 @@ func renderSidebar(current string, pages []docPage) string {
 			out.WriteString(`<a href="` + relURL(current, page.Output) + `"` + currentAttr + `>` + html.EscapeString(shortTitle(title)) + `</a>` + "\n")
 		}
 		if group == "Reference" {
-			out.WriteString(`<a href="` + relURL(current, "docs/reference/index.html") + `">Reference index</a>` + "\n")
+			out.WriteString(`<a href="` + relURL(current, "docs/reference/index.html") + `">Reference Index</a>` + "\n")
 		}
 	}
 	out.WriteString("</nav>\n</aside>\n")
@@ -288,13 +296,16 @@ func renderSearch(current string) string {
 func groupedPages(pages []docPage) map[string][]docPage {
 	groups := map[string][]docPage{}
 	for _, page := range pages {
+		if page.HideFromNav {
+			continue
+		}
 		groups[page.Group] = append(groups[page.Group], page)
 	}
 	return groups
 }
 
 func sortedGroups(groups map[string][]docPage) []string {
-	order := []string{"Start", "Language", "Versions", "Tools", "Reference", "Project"}
+	order := []string{"Start", "Language", "Reference", "Tools", "Project", "Releases"}
 	seen := map[string]bool{}
 	var result []string
 	for _, group := range order {
