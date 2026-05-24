@@ -17,10 +17,13 @@ v1.8: terminal game helpers
 v1.9: string interpolation
 v2: data modeling
 v2.1: methods and stronger composition
+v2.2: simple generic functions
 v3: ecosystem
 v4: professional tooling
-later: advanced language/runtime work
-````
+v5: runtime/backend maturity
+v5.12: draft network and rich-runtime boundary
+later: package/runtime tracks and advanced language work
+```
 
 WalkLang should become real in layers:
 
@@ -1154,11 +1157,11 @@ Pages workflow can deploy public/ from main
 
 ## Later Ecosystem
 
-Later tools:
+Later tools and package/runtime tracks:
 
 ```text
 debugger
-networking
+server networking
 project templates
 playground
 online package index
@@ -1166,7 +1169,7 @@ formatter service
 compiler explorer
 ```
 
-Package example target:
+Draft HTTP client example:
 
 ```walk
 imp: http # draft only
@@ -1207,7 +1210,7 @@ async
 concurrency
 error values
 result types
-generics
+generic structs
 traits
 WASM backend
 self-hosted compiler experiments
@@ -1385,7 +1388,7 @@ v2.1
   methods
 
 v2.2
-  stronger composition, maybe traits/generics
+  stronger composition with simple generic functions
 
 v3
   package ecosystem
@@ -1402,18 +1405,9 @@ v5
 v5.1
   public docs + generated reference site
 
+v5.12
+  draft HTTP/HTML helpers + rich-runtime boundaries
+
 later
-  networking + reference site + playground + advanced features
+  server networking + package/runtime tracks + playground + advanced features
 ```
-
-````
-
-I would make this the new roadmap, then split some of the detail into separate docs later:
-
-```text
-docs/ROADMAP.md
-docs/DESIGN_RULES.md
-docs/COMPATIBILITY.md
-docs/STDLIB.md
-docs/ERRORS.md
-````

@@ -58,7 +58,9 @@ tests/compat/v1/
 tests/snapshots/
 ```
 
-If a feature is accepted by the compiler but absent from those files, treat it as experimental.
+If a feature is accepted by the compiler but absent from the stable surface,
+treat it as draft, experimental, or planned according to the labels in
+`docs/LANGUAGE_CONCEPTS.md`.
 
 ## Compatibility Test Suite
 
@@ -76,7 +78,7 @@ go test ./...
 
 The suite covers representative stable programs, test syntax, user-module exports, stable stdlib APIs, and selected stable diagnostic first lines.
 
-## Experimental Or Future Features
+## Draft, Experimental, Or Future Features
 
 These are not compatibility-protected in v1:
 
@@ -84,11 +86,13 @@ These are not compatibility-protected in v1:
 structs (implemented as experimental in v2)
 methods (implemented as experimental in v2.1)
 generic functions (implemented as experimental in v2.2)
+do: effect calls (draft)
+io, parse, process, file, dir, path, json, term, http, and html APIs (draft)
+matrix APIs (planned)
 traits
 interfaces
 closures
 anonymous functions
-file/json/matrix APIs
 package manager behavior
 project config behavior
 LSP/debugger behavior

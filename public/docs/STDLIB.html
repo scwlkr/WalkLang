@@ -18,7 +18,7 @@
 <a href="PROJECTS.html">Project Mode</a>
 <h2>Language</h2>
 <a href="SYNTAX.html">v1 Syntax Guide</a>
-<a href="SPEC.html">v1 Specification</a>
+<a href="SPEC.html">v1.9 Specification</a>
 <a href="LANGUAGE_CONCEPTS.html">Language Concepts And Documentation Standard</a>
 <a href="STDLIB.html" aria-current="page">v1.9 Standard Library</a>
 <a href="ERRORS.html">v1 Diagnostics</a>
@@ -68,74 +68,89 @@ testing</code></pre>
 <p>No other built-in module is stable in v1.9.</p>
 <p>The current compiler also includes draft <code>io</code>, <code>parse</code>, <code>process</code>, <code>file</code>, <code>dir</code>, <code>path</code>, <code>json</code>, <code>term</code>, <code>http</code>, and <code>html</code> modules. They are importable and tested, but they are not compatibility-protected in v1.9.</p>
 <p>Draft APIs may expose draft result structs. They are documented here so current compiler behavior is visible, but they are not part of the stable v1.9 compatibility contract.</p>
+<p>Stable APIs in this document are pure expression calls unless an entry says otherwise. Invalid argument counts, argument types, or effect placement are compiler diagnostics. Runtime failures named below are part of the documented behavior for valid programs at runtime.</p>
+<p>Proof surface: stable APIs are covered by <code>tests/pass/stdlib.walk</code>, <code>tests/pass/walk_tests.walk</code>, <code>tests/compat/v1/stable.walk</code>, <code>tests/compat/v1/tests.walk</code>, <code>cmd/walk/compatibility_test.go</code>, and <code>cmd/walk/conformance_test.go</code>.</p>
 <p>---</p>
 <h2 id="math">math</h2>
 <h3 id="math-sqrt-number-float">math.sqrt(number) -&gt; float</h3>
-<p>Accepts <code>int</code> or <code>float</code>.</p>
+<p>Stability: stable. Effect status: pure expression.</p>
+<p>Accepts <code>int</code> or <code>float</code> and returns the native C <code>sqrt</code> result as <code>float</code>. Valid numeric arguments have no WalkLang-defined runtime failure.</p>
 <pre><code class="language-walk">imp: math
 out: math.sqrt(9)</code></pre>
 <h3 id="math-pow-number-number-float">math.pow(number, number) -&gt; float</h3>
-<p>Accepts <code>int</code> or <code>float</code> arguments.</p>
+<p>Stability: stable. Effect status: pure expression.</p>
+<p>Accepts <code>int</code> or <code>float</code> arguments and returns the native C <code>pow</code> result as <code>float</code>. Valid numeric arguments have no WalkLang-defined runtime failure.</p>
 <pre><code class="language-walk">imp: math
 out: math.pow(2, 3)</code></pre>
 <p>---</p>
 <h2 id="string">string</h2>
 <h3 id="string-len-string-int">string.len(string) -&gt; int</h3>
+<p>Stability: stable. Effect status: pure expression.</p>
 <p>Returns the byte length of a string as emitted through C <code>strlen</code>.</p>
 <pre><code class="language-walk">imp: string
 out: string.len(&#39;walk&#39;)</code></pre>
 <h3 id="string-at-string-int-string">string.at(string, int) -&gt; string</h3>
-<p>Returns the one-character string at a zero-based byte index. Out-of-range indexes runtime-stop.</p>
+<p>Stability: stable. Effect status: pure expression.</p>
+<p>Returns the one-character string at a zero-based byte index. Out-of-range indexes runtime-stop with <code>walk runtime error: string index out of range</code>. Allocation failure runtime-stops with <code>walk runtime error: out of memory</code>.</p>
 <pre><code class="language-walk">imp: string
 out: string.at(&#39;walk&#39;, 1)</code></pre>
 <p>String indexing is equivalent:</p>
 <pre><code class="language-walk">out: &#39;walk&#39;[1]</code></pre>
 <h3 id="string-contains-string-string-bool">string.contains(string, string) -&gt; bool</h3>
+<p>Stability: stable. Effect status: pure expression.</p>
 <p>Returns <code>true</code> when the second string appears inside the first. An empty search string returns <code>true</code>.</p>
 <pre><code class="language-walk">imp: string
 out: string.contains(&#39;walk&#39;, &#39;al&#39;)</code></pre>
 <h3 id="string-concat-string-string-string">string.concat(string, string) -&gt; string</h3>
-<p>Returns a new string made from the left string followed by the right string.</p>
+<p>Stability: stable. Effect status: pure expression.</p>
+<p>Returns a new string made from the left string followed by the right string. Allocation failure runtime-stops with <code>walk runtime error: out of memory</code>.</p>
 <pre><code class="language-walk">imp: string
 out: string.concat(&#39;walk&#39;, &#39;lang&#39;)</code></pre>
 <p>---</p>
 <h2 id="array">array</h2>
 <h3 id="array-len-array-t-int">array.len(array[T]) -&gt; int</h3>
+<p>Stability: stable. Effect status: pure expression.</p>
 <p>Returns the length stored with a stable v1 array.</p>
 <pre><code class="language-walk">imp: array
 var: nums = [1, 2, 3]
 out: array.len(nums)</code></pre>
 <h3 id="array-contains-array-t-t-bool">array.contains(array[T], T) -&gt; bool</h3>
+<p>Stability: stable. Effect status: pure expression.</p>
 <p>Returns <code>true</code> when a stable native array contains an equal item. Supported stable element types are <code>int</code>, <code>float</code>, <code>bool</code>, and <code>string</code>.</p>
 <pre><code class="language-walk">imp: array
 var: letters = [&#39;w&#39;, &#39;a&#39;]
 out: array.contains(letters, &#39;w&#39;)</code></pre>
 <h3 id="array-push-array-t-t-array-t">array.push(array[T], T) -&gt; array[T]</h3>
-<p>Returns a new array with the item appended. <code>array.push</code> does not mutate the input array in place.</p>
+<p>Stability: stable. Effect status: pure expression.</p>
+<p>Returns a new array with the item appended. <code>array.push</code> does not mutate the input array in place. Allocation failure runtime-stops with <code>walk runtime error: out of memory</code>.</p>
 <pre><code class="language-walk">imp: array
 var: guessed array[string] = []
 guessed = array.push(guessed, &#39;w&#39;)</code></pre>
 <p>---</p>
 <h2 id="time">time</h2>
 <h3 id="time-now-int">time.now() -&gt; int</h3>
+<p>Stability: stable. Effect status: pure expression.</p>
 <p>Returns the current Unix timestamp in seconds from the native C runtime.</p>
 <pre><code class="language-walk">imp: time
 out: &gt; time.now() 0</code></pre>
 <p>---</p>
 <h2 id="random">random</h2>
 <h3 id="random-int-int-int-int">random.int(int, int) -&gt; int</h3>
+<p>Stability: stable. Effect status: pure expression.</p>
 <p>Returns an integer in the inclusive range. If <code>max &lt; min</code>, v1 returns <code>min</code>.</p>
 <p><code>random.int</code> and <code>random.choice</code> use a runtime-owned PRNG seeded once per native process. v1 does not expose manual seeding.</p>
 <pre><code class="language-walk">imp: random
 out: random.int(1, 10)</code></pre>
 <h3 id="random-choice-array-t-t">random.choice(array[T]) -&gt; T</h3>
-<p>Returns one item from a non-empty stable native array. Calling <code>random.choice</code> on an empty array runtime-stops.</p>
+<p>Stability: stable. Effect status: pure expression.</p>
+<p>Returns one item from a non-empty stable native array. Calling <code>random.choice</code> on an empty array runtime-stops with <code>walk runtime error: random.choice on empty array</code>.</p>
 <pre><code class="language-walk">imp: random
 var: words = [&#39;dog&#39;, &#39;cat&#39;]
 out: random.choice(words)</code></pre>
 <p>---</p>
 <h2 id="testing">testing</h2>
 <h3 id="testing-assert-bool-bool">testing.assert(bool) -&gt; bool</h3>
+<p>Stability: stable. Effect status: pure expression.</p>
 <p>Returns the bool argument unchanged. Use it with <code>assert:</code> when a test wants the assertion helper to be visibly namespaced.</p>
 <pre><code class="language-walk">imp: testing
 
@@ -406,8 +421,8 @@ out: html.p(&#39;copy &amp; text&#39;)</code></pre>
 <p>Run it with:</p>
 <pre><code class="language-bash">walk test tests.walk</code></pre>
 <p>---</p>
-<h2 id="draft-apis">Draft APIs</h2>
-<p>These names are planned draft APIs only. They are documented here so naming can stay consistent, but they are not stable, not importable, and not compatibility-protected in v1.9.</p>
+<h2 id="planned-api-names">Planned API Names</h2>
+<p>These names are planned only. They are documented here so naming can stay consistent, but they are not stable, not draft-implemented, not importable, and not compatibility-protected in v1.9.</p>
 <pre><code class="language-text">matrix.rows
 matrix.cols
 matrix.get</code></pre>

@@ -48,7 +48,9 @@ Draft or experimental features can change without a deprecation period. They sho
 Current draft or experimental areas include:
 
 ```text
-file/json/matrix APIs
+do: effect calls
+io, parse, process, file, dir, path, json, term, http, and html APIs
+matrix APIs
 structs
 methods
 generic functions

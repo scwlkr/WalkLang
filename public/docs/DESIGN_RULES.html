@@ -18,7 +18,7 @@
 <a href="PROJECTS.html">Project Mode</a>
 <h2>Language</h2>
 <a href="SYNTAX.html">v1 Syntax Guide</a>
-<a href="SPEC.html">v1 Specification</a>
+<a href="SPEC.html">v1.9 Specification</a>
 <a href="LANGUAGE_CONCEPTS.html">Language Concepts And Documentation Standard</a>
 <a href="STDLIB.html">v1.9 Standard Library</a>
 <a href="ERRORS.html">v1 Diagnostics</a>
@@ -84,7 +84,7 @@ error string</code></pre>
 <p><code>ok</code> is true only when <code>value</code> is meaningful. <code>error</code> is <code>&#39;&#39;</code> on success and a short machine-testable code on failure, such as <code>eof</code>, <code>invalid int</code>, or <code>stdin read failed</code>. This shape is intentionally concrete until generic result structs are stable.</p>
 <p>Runtime-created strings live for the native process lifetime. This is acceptable for CLI-oriented IO and not sufficient justification for long-running servers.</p>
 <p>Early IO is UTF-8 text IO. Binary IO, streaming handles, and path normalization need separate design before stabilization.</p>
-<p>The current draft file slice uses native process paths without normalization, <code>~</code> expansion, or binary mode. Relative paths resolve against the process current working directory. Draft <code>file.read</code> and <code>file.write</code> are fail-stop until recoverable file result structs are designed; <code>file.exists</code> returns a boolean path-existence check.</p>
+<p>The current draft file slice uses native process paths without normalization, <code>~</code> expansion, or binary mode. Relative paths resolve against the process current working directory. Draft <code>file.read</code>, <code>file.write</code>, and <code>file.append</code> are fail-stop helpers; <code>file.try_read</code>, <code>file.try_write</code>, and <code>file.try_append</code> return draft recoverable result structs for ordinary file/path/read/write failures; <code>file.exists</code> returns a boolean path-existence check.</p>
 <p>New built-in IO APIs must be registered in the built-in API registry with their module, function name, parameter types, return type, effect flag, draft/stable status, and C runtime helper.</p>
 <h2 id="no-surprise-magic">No Surprise Magic</h2>
 <p>Do not add implicit conversions, hidden imports, global state, or syntax aliases unless the spec is updated first and conformance tests prove the behavior.</p>

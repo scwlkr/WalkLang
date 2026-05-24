@@ -18,7 +18,7 @@
 <a href="PROJECTS.html">Project Mode</a>
 <h2>Language</h2>
 <a href="SYNTAX.html">v1 Syntax Guide</a>
-<a href="SPEC.html">v1 Specification</a>
+<a href="SPEC.html">v1.9 Specification</a>
 <a href="LANGUAGE_CONCEPTS.html">Language Concepts And Documentation Standard</a>
 <a href="STDLIB.html">v1.9 Standard Library</a>
 <a href="ERRORS.html">v1 Diagnostics</a>
@@ -91,23 +91,25 @@ tests/pass/
 tests/fail/
 tests/compat/v1/
 tests/snapshots/</code></pre>
-<p>If a feature is accepted by the compiler but absent from those files, treat it as experimental.</p>
+<p>If a feature is accepted by the compiler but absent from the stable surface, treat it as draft, experimental, or planned according to the labels in <code>docs/LANGUAGE_CONCEPTS.md</code>.</p>
 <h2 id="compatibility-test-suite">Compatibility Test Suite</h2>
 <p>Run the focused v1 compatibility suite with:</p>
 <pre><code class="language-bash">go test ./cmd/walk -run TestV19CompatibilitySuite</code></pre>
 <p>The full repository test command also runs it:</p>
 <pre><code class="language-bash">go test ./...</code></pre>
 <p>The suite covers representative stable programs, test syntax, user-module exports, stable stdlib APIs, and selected stable diagnostic first lines.</p>
-<h2 id="experimental-or-future-features">Experimental Or Future Features</h2>
+<h2 id="draft-experimental-or-future-features">Draft, Experimental, Or Future Features</h2>
 <p>These are not compatibility-protected in v1:</p>
 <pre><code class="language-text">structs (implemented as experimental in v2)
 methods (implemented as experimental in v2.1)
 generic functions (implemented as experimental in v2.2)
+do: effect calls (draft)
+io, parse, process, file, dir, path, json, term, http, and html APIs (draft)
+matrix APIs (planned)
 traits
 interfaces
 closures
 anonymous functions
-file/json/matrix APIs
 package manager behavior
 project config behavior
 LSP/debugger behavior

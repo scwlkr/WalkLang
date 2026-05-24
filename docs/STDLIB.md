@@ -32,13 +32,26 @@ Draft APIs may expose draft result structs. They are documented here so current
 compiler behavior is visible, but they are not part of the stable v1.9
 compatibility contract.
 
+Stable APIs in this document are pure expression calls unless an entry says
+otherwise. Invalid argument counts, argument types, or effect placement are
+compiler diagnostics. Runtime failures named below are part of the documented
+behavior for valid programs at runtime.
+
+Proof surface: stable APIs are covered by `tests/pass/stdlib.walk`,
+`tests/pass/walk_tests.walk`, `tests/compat/v1/stable.walk`,
+`tests/compat/v1/tests.walk`, `cmd/walk/compatibility_test.go`, and
+`cmd/walk/conformance_test.go`.
+
 ---
 
 ## math
 
 ### math.sqrt(number) -> float
 
-Accepts `int` or `float`.
+Stability: stable. Effect status: pure expression.
+
+Accepts `int` or `float` and returns the native C `sqrt` result as `float`.
+Valid numeric arguments have no WalkLang-defined runtime failure.
 
 ```walk
 imp: math
@@ -47,7 +60,10 @@ out: math.sqrt(9)
 
 ### math.pow(number, number) -> float
 
-Accepts `int` or `float` arguments.
+Stability: stable. Effect status: pure expression.
+
+Accepts `int` or `float` arguments and returns the native C `pow` result as
+`float`. Valid numeric arguments have no WalkLang-defined runtime failure.
 
 ```walk
 imp: math
@@ -60,6 +76,8 @@ out: math.pow(2, 3)
 
 ### string.len(string) -> int
 
+Stability: stable. Effect status: pure expression.
+
 Returns the byte length of a string as emitted through C `strlen`.
 
 ```walk
@@ -69,7 +87,11 @@ out: string.len('walk')
 
 ### string.at(string, int) -> string
 
-Returns the one-character string at a zero-based byte index. Out-of-range indexes runtime-stop.
+Stability: stable. Effect status: pure expression.
+
+Returns the one-character string at a zero-based byte index. Out-of-range
+indexes runtime-stop with `walk runtime error: string index out of range`.
+Allocation failure runtime-stops with `walk runtime error: out of memory`.
 
 ```walk
 imp: string
@@ -84,6 +106,8 @@ out: 'walk'[1]
 
 ### string.contains(string, string) -> bool
 
+Stability: stable. Effect status: pure expression.
+
 Returns `true` when the second string appears inside the first. An empty search string returns `true`.
 
 ```walk
@@ -93,7 +117,10 @@ out: string.contains('walk', 'al')
 
 ### string.concat(string, string) -> string
 
+Stability: stable. Effect status: pure expression.
+
 Returns a new string made from the left string followed by the right string.
+Allocation failure runtime-stops with `walk runtime error: out of memory`.
 
 ```walk
 imp: string
@@ -106,6 +133,8 @@ out: string.concat('walk', 'lang')
 
 ### array.len(array[T]) -> int
 
+Stability: stable. Effect status: pure expression.
+
 Returns the length stored with a stable v1 array.
 
 ```walk
@@ -115,6 +144,8 @@ out: array.len(nums)
 ```
 
 ### array.contains(array[T], T) -> bool
+
+Stability: stable. Effect status: pure expression.
 
 Returns `true` when a stable native array contains an equal item. Supported stable element types are `int`, `float`, `bool`, and `string`.
 
@@ -126,7 +157,10 @@ out: array.contains(letters, 'w')
 
 ### array.push(array[T], T) -> array[T]
 
+Stability: stable. Effect status: pure expression.
+
 Returns a new array with the item appended. `array.push` does not mutate the input array in place.
+Allocation failure runtime-stops with `walk runtime error: out of memory`.
 
 ```walk
 imp: array
@@ -139,6 +173,8 @@ guessed = array.push(guessed, 'w')
 ## time
 
 ### time.now() -> int
+
+Stability: stable. Effect status: pure expression.
 
 Returns the current Unix timestamp in seconds from the native C runtime.
 
@@ -153,6 +189,8 @@ out: > time.now() 0
 
 ### random.int(int, int) -> int
 
+Stability: stable. Effect status: pure expression.
+
 Returns an integer in the inclusive range. If `max < min`, v1 returns `min`.
 
 `random.int` and `random.choice` use a runtime-owned PRNG seeded once per native process. v1 does not expose manual seeding.
@@ -164,7 +202,11 @@ out: random.int(1, 10)
 
 ### random.choice(array[T]) -> T
 
-Returns one item from a non-empty stable native array. Calling `random.choice` on an empty array runtime-stops.
+Stability: stable. Effect status: pure expression.
+
+Returns one item from a non-empty stable native array. Calling
+`random.choice` on an empty array runtime-stops with
+`walk runtime error: random.choice on empty array`.
 
 ```walk
 imp: random
@@ -177,6 +219,8 @@ out: random.choice(words)
 ## testing
 
 ### testing.assert(bool) -> bool
+
+Stability: stable. Effect status: pure expression.
 
 Returns the bool argument unchanged. Use it with `assert:` when a test wants the assertion helper to be visibly namespaced.
 
@@ -734,11 +778,11 @@ walk test tests.walk
 
 ---
 
-## Draft APIs
+## Planned API Names
 
-These names are planned draft APIs only. They are documented here so naming can
-stay consistent, but they are not stable, not importable, and not
-compatibility-protected in v1.9.
+These names are planned only. They are documented here so naming can stay
+consistent, but they are not stable, not draft-implemented, not importable, and
+not compatibility-protected in v1.9.
 
 ```text
 matrix.rows

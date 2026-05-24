@@ -33,6 +33,7 @@ func TestV19CompatibilitySuitePassPrograms(t *testing.T) {
 				"1",
 				"true",
 				"7",
+				"10",
 				"stable",
 				"true",
 				"length 4",

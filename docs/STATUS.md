@@ -49,6 +49,24 @@ Language documentation standard verification on 2026-05-23:
 `scripts/build-docs-site.sh` passed; and `scripts/check-docs-site.sh` passed
 after staging generated docs artifacts under `docs/reference` and `public`.
 
+Docs alignment cleanup on 2026-05-24: `docs/SPEC.md` now follows the
+`docs/LANGUAGE_CONCEPTS.md` required spine for lexical structure, types,
+values, expressions, statements, declarations, functions, modules, errors, and
+standard library. `docs/SYNTAX.md` keeps the readable-guide role instead of a
+second spec. `docs/STDLIB.md` now calls out stable API effect status, runtime
+failure behavior, and proof surface; the v1 compatibility fixture proves
+`random.int(max < min)` returning `min`, and conformance tests prove stable
+runtime failures for out-of-range string indexing and empty `random.choice`.
+`docs/ERRORS.md`, compatibility, deprecation, design, roadmap, and IO planning
+docs now use the `LANGUAGE_CONCEPTS.md` terminology more directly and remove
+stale draft/future contradictions.
+
+Docs alignment verification on 2026-05-24: focused
+`go test ./cmd/walk -run 'TestV19CompatibilitySuite|TestStableRuntimeFailuresAreClear|TestV13FailFixturesHaveExpectedDiagnostics|TestDoEffectConsoleAndProcessFoundation|TestRuntimeOwnedTextInputAndParseResults|TestReadLineReportsImmediateEOFAsData|TestDraftFileTextIOReadsWritesAndChecksExistence|TestDraftLocalFilesystemPhase2CompletesFileDirPathAndCwd|TestDraftRecoverableFileResults|TestDraftProcessPhase3RunsCommandsAndCapturesOutput|TestDraftJSONPhase3ParsesStringifiesReadsAndWritesText|TestDraftTerminalPhase4StylesAreOptInAndDimensionsFallback|TestDraftTerminalReadKeyReportsNonInteractiveTTYAsData|TestDraftNetworkPhase5UsesLocalHTTPAndHTMLHelpers' -count=1`
+passed; full `go test -count=1 ./...` passed; `git diff --check` passed;
+`scripts/build-docs-site.sh` passed; and `scripts/check-docs-site.sh` passed
+after staging generated docs artifacts under `docs/reference` and `public`.
+
 State: v5.11.0 completes `IO_PLAN.md` Roadmap Phase 4, Terminal UX, as draft
 compiler APIs. Draft terminal helpers now cover `term.is_tty`, foreground and
 background color, style, reset, clear, cursor movement, terminal dimensions,

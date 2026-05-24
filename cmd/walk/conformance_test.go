@@ -104,6 +104,60 @@ func TestRandomChoiceSeedsFreshProcesses(t *testing.T) {
 	}
 }
 
+func TestStableRuntimeFailuresAreClear(t *testing.T) {
+	requireCC(t)
+	cases := []struct {
+		name   string
+		source string
+		want   string
+	}{
+		{
+			name: "string index out of range",
+			source: strings.Join([]string{
+				"out: 'walk'[9]",
+				"",
+			}, "\n"),
+			want: "walk runtime error: string index out of range\n",
+		},
+		{
+			name: "random choice empty array",
+			source: strings.Join([]string{
+				"imp: random",
+				"var: choices array[string] = []",
+				"out: random.choice(choices)",
+				"",
+			}, "\n"),
+			want: "walk runtime error: random.choice on empty array\n",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			dir := t.TempDir()
+			sourcePath := filepath.Join(dir, "main.walk")
+			writeFile(t, sourcePath, tc.source)
+			cCode, warnings, err := compileFileToCWithOptions(sourcePath, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(warnings) != 0 {
+				t.Fatalf("unexpected warnings: %#v", warnings)
+			}
+			exePath := filepath.Join(dir, "program")
+			if err := buildC(cCode, filepath.Join(dir, "program.c"), exePath, nativeBuildOptions{}); err != nil {
+				t.Fatal(err)
+			}
+			output, err := exec.Command(exePath).CombinedOutput()
+			if err == nil {
+				t.Fatalf("expected runtime failure, got success with output %q", string(output))
+			}
+			if got := string(output); got != tc.want {
+				t.Fatalf("runtime failure mismatch:\nwant %q\ngot  %q\nC:\n%s", tc.want, got, cCode)
+			}
+		})
+	}
+}
+
 func TestV13FailFixturesHaveExpectedDiagnostics(t *testing.T) {
 	root := repoRoot(t)
 	cases := []struct {

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>WalkLang v1 Specification - WalkLang</title>
+<title>WalkLang v1.9 Specification - WalkLang</title>
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <link rel="stylesheet" href="../assets/site.css">
 </head>
@@ -18,7 +18,7 @@
 <a href="PROJECTS.html">Project Mode</a>
 <h2>Language</h2>
 <a href="SYNTAX.html">v1 Syntax Guide</a>
-<a href="SPEC.html" aria-current="page">v1 Specification</a>
+<a href="SPEC.html" aria-current="page">v1.9 Specification</a>
 <a href="LANGUAGE_CONCEPTS.html">Language Concepts And Documentation Standard</a>
 <a href="STDLIB.html">v1.9 Standard Library</a>
 <a href="ERRORS.html">v1 Diagnostics</a>
@@ -52,58 +52,108 @@
 <div class="topbar"><a href="index.html">Docs</a><a href="reference/api.html">Reference</a><a href="https://github.com/scwlkr/WalkLang">GitHub</a></div>
 <div class="page">
 <article class="doc">
-<h1 id="walklang-v1-specification">WalkLang v1 Specification</h1>
-<p>This document is the stable WalkLang language contract for the v1 line. v1.9 keeps the v1.8 compatibility policy and adds string interpolation for display text.</p>
+<h1 id="walklang-v1-9-specification">WalkLang v1.9 Specification</h1>
+<p>This document is the stable WalkLang language contract for the v1 line. It is normative and intentionally concise. <code>docs/SYNTAX.md</code>, <code>docs/STDLIB.md</code>, <code>docs/ERRORS.md</code>, and <code>docs/COMPATIBILITY.md</code> provide readable examples and longer explanations.</p>
 <p>Core rule:</p>
 <pre><code class="language-text">If it is not in SPEC.md, it is not stable WalkLang.
 If the compiler disagrees with SPEC.md, either the compiler or the spec must change.</code></pre>
+<p>Draft, experimental, planned, deprecated, and removed behavior must be labeled with the stability words defined in <code>docs/LANGUAGE_CONCEPTS.md</code>.</p>
 <p>---</p>
-<h2 id="1-source-files">1. Source Files</h2>
-<p>WalkLang source files are UTF-8 text files ending in <code>.walk</code>.</p>
-<pre><code class="language-text">main.walk</code></pre>
-<p>A source file contains zero or more statements. Blank lines are ignored. <code>#</code> starts a comment outside strings.</p>
-<pre><code class="language-walk"># comment
-var: x = 1 # inline comment
-out: x</code></pre>
-<p>---</p>
-<h2 id="2-compilation-contract">2. Compilation Contract</h2>
-<p>The stable compiler pipeline is:</p>
-<pre><code class="language-text">.walk source -&gt; lexer -&gt; parser -&gt; AST -&gt; type checker -&gt; C emitter -&gt; native executable</code></pre>
-<p>The <code>walk build</code> command writes generated C next to the executable path unless <code>--emit-c</code> chooses another path. Native builds use <code>cc</code> by default and link with <code>-lm</code>.</p>
-<p>---</p>
-<h2 id="3-blocks-and-indentation">3. Blocks And Indentation</h2>
-<p>Indentation owns blocks.</p>
-<pre><code class="language-walk">if: true
-    out: &#39;inside&#39;
-out: &#39;outside&#39;</code></pre>
-<p>Rules:</p>
-<ul>
-<li>spaces define indentation</li>
-<li>tabs are invalid</li>
-<li>a greater indentation level starts a child block</li>
-<li>a lower indentation level closes blocks</li>
-<li>formatter output uses 4 spaces per block level</li>
-</ul>
-<p>---</p>
-<h2 id="4-lexical-rules">4. Lexical Rules</h2>
-<p>Stable tokens:</p>
-<pre><code class="language-text">names       letters, digits, and _
-numbers     int and float literals
-strings     single-quoted strings
-symbols     ( ) [ ] , : = + - * / ^ &gt; &lt; ? .
-comments    # outside strings</code></pre>
-<p>Strings support these escapes:</p>
+<h2 id="1-lexical-structure">1. Lexical Structure</h2>
+<p>A source file is UTF-8 text ending in <code>.walk</code>. A source file contains zero or more statements. Blank lines are ignored. Comments start with <code>#</code> outside strings and are not statements.</p>
+<p>WalkLang statement structure is line-based. Semicolons are not statement separators.</p>
+<p>Stable token classes:</p>
+<pre><code class="language-text">name      letters, digits, and _
+number    int and float literals
+string    single-quoted string literals
+symbol    ( ) [ ] , : = + - * / ^ &gt; &lt; ? .</code></pre>
+<p>Names cannot start with a digit and cannot be reserved keywords.</p>
+<p>Reserved keywords:</p>
+<pre><code class="language-text">var const out if else while for repeat break continue
+func return imp exp true false null and or not in test assert</code></pre>
+<p>Stable strings are single-quoted. Stable string escapes:</p>
 <pre><code class="language-text">\&#39; single quote
 \\ backslash
 \n newline
 \t tab</code></pre>
-<p>Strings support interpolation with <code>{expression}</code>. Interpolation formats <code>int</code>, <code>float</code>, <code>bool</code>, <code>string</code>, and nullable string values into the surrounding string.</p>
-<pre><code class="language-walk">var: name = &#39;Walker&#39;
-var: length = string.len(name)
-out: &#39;name {name} has {length} characters&#39;</code></pre>
-<p>Use doubled braces for literal braces:</p>
-<pre><code class="language-walk">out: &#39;{{name}}&#39;</code></pre>
+<p>Stable string interpolation uses <code>{expression}</code> inside a single-quoted string. Interpolation accepts display expressions of type <code>int</code>, <code>float</code>, <code>bool</code>, <code>string</code>, and nullable string. Doubled braces emit literal braces.</p>
+<pre><code class="language-walk">out: &#39;score {score}&#39;
+out: &#39;{{literal}}&#39;</code></pre>
 <p>Double-quoted strings are not valid WalkLang.</p>
+<p>Blocks are indentation-based. Spaces define indentation, tabs are invalid, a greater indentation level starts a child block, and a lower indentation level closes blocks. <code>walk fmt</code> emits 4 spaces per block level.</p>
+<p>---</p>
+<h2 id="2-types">2. Types</h2>
+<p>Stable value types:</p>
+<pre><code class="language-text">int
+float
+bool
+string
+string?
+array[T]
+func(T...) R</code></pre>
+<p><code>void</code> is an internal function return marker for functions with no return value. It is not a value type.</p>
+<p>Stable native array element types are:</p>
+<pre><code class="language-text">int
+float
+bool
+string</code></pre>
+<p>Struct and generic types are implemented in the experimental v2 surface. They are not part of the stable v1.9 compatibility contract.</p>
+<p>---</p>
+<h2 id="3-values">3. Values</h2>
+<p>Stable literals create values of these types:</p>
+<pre><code class="language-text">int
+float
+bool
+string
+null</code></pre>
+<p><code>null</code> is stable for nullable strings:</p>
+<pre><code class="language-walk">var: name string? = null</code></pre>
+<p>Other nullable scalar forms are not part of the stable v1.9 native contract.</p>
+<p>Array literals are homogeneous. Empty arrays need an explicit array annotation.</p>
+<pre><code class="language-walk">var: nums = [1, 2, 3]
+var: guessed array[string] = []</code></pre>
+<p>Runtime-created strings from stable <code>in:</code> and string interpolation are owned by the native program.</p>
+<p>---</p>
+<h2 id="4-expressions">4. Expressions</h2>
+<p>Stable expressions:</p>
+<pre><code class="language-text">literals
+names
+in:
+prefix operators
+grouped expressions
+function calls
+qualified module calls
+array literals
+index expressions
+block expressions under commands</code></pre>
+<p><code>in:</code> reads one required line from stdin and returns a <code>string</code>.</p>
+<pre><code class="language-walk">var: name = in:
+var: name = in: &#39;Name? &#39;</code></pre>
+<p>The optional prompt expression must be <code>string</code>. It is written to stdout without a newline, and stdout is flushed before reading.</p>
+<p><code>in:</code> reads from stdin only, consumes one line, strips the final LF or CRLF line ending, preserves all other whitespace, returns <code>&#39;&#39;</code> for an empty line, accepts final unterminated input as a line, has no language-level line length limit, and runtime-stops on immediate EOF, stdin read failure, or allocation failure.</p>
+<p>Index expressions work on arrays and strings.</p>
+<pre><code class="language-walk">var: nums = [1, 2, 3]
+out: nums[0]
+out: &#39;walk&#39;[1]</code></pre>
+<p>String indexing returns a one-character string by zero-based byte index and runtime-stops when the index is out of range.</p>
+<p>Grouping uses parentheses:</p>
+<pre><code class="language-walk">var: x = * (+ 1 2) (- 9 4)</code></pre>
+<p>Numeric operators:</p>
+<pre><code class="language-text">+  2 or more args
+*  2 or more args
+-  exactly 2 args
+/  exactly 2 args, returns float
+^  exactly 2 args</code></pre>
+<p>Comparison operators:</p>
+<pre><code class="language-text">&gt; &lt; &gt;= &lt;= == !=</code></pre>
+<p>Boolean operators:</p>
+<pre><code class="language-text">and  2 or more bool args
+or   2 or more bool args
+not  exactly 1 bool arg</code></pre>
+<p>Negative numeric literals are stable. Unary negation of names is not stable v1 syntax; use subtraction from zero.</p>
+<pre><code class="language-walk">var: x = -4
+var: y = - 0 x</code></pre>
+<p>Typed input is not part of <code>in:</code>. Read text first, then parse explicitly with draft parse APIs when using the current compiler&#39;s draft surface.</p>
 <p>---</p>
 <h2 id="5-statements">5. Statements</h2>
 <p>Stable statements:</p>
@@ -124,195 +174,62 @@ repeat:
 for:
 break:
 continue:</code></pre>
-<p>Draft implemented statement:</p>
-<pre><code class="language-text">do:</code></pre>
-<p><code>do:</code> is the current compiler&#39;s draft effect-call statement. It is documented so draft IO programs can be tested, but it is not part of the v1.9 stable compatibility contract yet.</p>
-<p>One statement appears on each physical line. Semicolons are not part of v1.1 syntax.</p>
-<p>---</p>
-<h2 id="6-reserved-words">6. Reserved Words</h2>
-<p>These words cannot be user-defined names:</p>
-<pre><code class="language-text">var const out if else while for repeat break continue
-func return imp exp true false null and or not in test assert</code></pre>
-<p>---</p>
-<h2 id="7-types">7. Types</h2>
-<p>Stable value types:</p>
-<pre><code class="language-text">int
-float
-bool
-string
-array[T]
-func(T...) R</code></pre>
-<p><code>void</code> is used internally for functions with no return type. It is not a value type.</p>
-<p><code>null</code> is stable for nullable strings in native v1.1 programs:</p>
-<pre><code class="language-walk">var: name string? = null</code></pre>
-<p>Other nullable scalar forms are not part of the v1.1 stable native contract.</p>
-<p>---</p>
-<h2 id="8-type-inference-and-type-lock">8. Type Inference And Type Lock</h2>
-<p><code>var:</code> and <code>const:</code> infer a type from their initializer unless an explicit type annotation is present.</p>
+<p><code>out:</code> writes one stable scalar value and a trailing newline. Stable output types are <code>int</code>, <code>float</code>, <code>bool</code>, <code>string</code>, and nullable string. Arrays, functions, and <code>void</code> values cannot be output directly.</p>
+<p><code>var:</code> creates a mutable binding. <code>const:</code> creates an immutable binding. <code>var:</code> and <code>const:</code> infer a type from their initializer unless an explicit type annotation is present. Once a name is declared, its type is locked.</p>
 <pre><code class="language-walk">var: x = 1
-var: y float = 1
-const: name = &#39;Walker&#39;</code></pre>
-<p>Once a name is declared, its type is locked.</p>
-<pre><code class="language-walk">var: x = 1
-x = 2      # ok
-x = &#39;two&#39;  # type error</code></pre>
+x = 2
+const: limit = 10</code></pre>
 <p><code>int</code> values may initialize or assign to <code>float</code> values. Other implicit conversions are not stable.</p>
-<p>Function parameters and return types may also be inferred from the function body when the result is local and unambiguous. Omitted function parameter types are not inferred from call sites.</p>
-<p>---</p>
-<h2 id="9-variables-and-constants">9. Variables And Constants</h2>
-<p><code>var:</code> creates a mutable binding.</p>
-<pre><code class="language-walk">var: count = 0
-count = + count 1</code></pre>
-<p><code>const:</code> creates an immutable binding.</p>
-<pre><code class="language-walk">const: limit = 10</code></pre>
 <p>Reassigning a <code>const:</code> name is a type error. Assigning through an indexed target rooted at a <code>const:</code> array is also a type error.</p>
+<p><code>if:</code> and <code>while:</code> conditions must be <code>bool</code>. <code>repeat:</code> counts must be <code>int</code>. <code>for:</code> iterates arrays. <code>break:</code> and <code>continue:</code> are valid only inside loops.</p>
+<pre><code class="language-walk">for: n in nums
+    out: n</code></pre>
+<p><code>test:</code> defines a test block for <code>walk test</code>. <code>assert:</code> requires a bool expression. Failed assertions make the generated test executable exit non-zero. Normal <code>walk build</code> ignores <code>test:</code> blocks.</p>
+<p>The current compiler also implements the draft <code>do:</code> statement for effect calls. <code>do:</code> is not part of the stable v1.9 compatibility contract.</p>
 <p>---</p>
-<h2 id="10-output">10. Output</h2>
-<p><code>out:</code> writes one value and a trailing newline.</p>
-<pre><code class="language-walk">out: &#39;hello&#39;
-out: + 1 2</code></pre>
-<p>Stable output types:</p>
-<pre><code class="language-text">int
-float
-bool
-string
-nullable string</code></pre>
-<p>Arrays, functions, and void values cannot be output.</p>
+<h2 id="6-declarations">6. Declarations</h2>
+<p>Stable declarations introduce or expose named surface:</p>
+<pre><code class="language-text">imp:
+exp:
+var:
+const:
+func:
+test:</code></pre>
+<p><code>imp:</code> imports a built-in module, sibling user module, or package module namespace. <code>exp:</code> exposes an existing module symbol.</p>
+<p>User modules are <code>.walk</code> files imported by module name. A bare module import such as <code>imp: calc</code> resolves to <code>calc.walk</code> in the importing file&#39;s directory. Package module imports use dotted names resolved through project/package rules.</p>
+<p>User module rules:</p>
+<pre><code class="language-text">imported calls stay namespaced
+only functions listed with exp: are callable from another file
+module files may contain only imp:, struct:, func:, and exp: at top level
+import cycles are errors</code></pre>
+<p><code>struct:</code> declarations are implemented in the experimental v2 surface and are allowed in module files by the current compiler, but structs are not part of the stable v1.9 contract.</p>
 <p>---</p>
-<h2 id="11-input">11. Input</h2>
-<p><code>in:</code> reads one required line from stdin and returns a <code>string</code>.</p>
-<pre><code class="language-walk">var: name = in:</code></pre>
-<p><code>in:</code> may take an optional prompt expression. The prompt must be <code>string</code>.</p>
-<pre><code class="language-walk">var: prompt = &#39;Name? &#39;
-var: name = in: prompt</code></pre>
-<p>Prompt behavior:</p>
-<pre><code class="language-text">write prompt to stdout
-add no newline
-flush stdout before reading</code></pre>
-<p>Input behavior:</p>
-<pre><code class="language-text">reads from stdin only
-consumes exactly one line
-strips the final \n or \r\n line ending
-preserves all other whitespace
-returns &#39;&#39; for an empty line
-has no language-level line length limit
-returns final unterminated input as a line
-runtime-stops if EOF happens before any text is read
-runtime-stops on stdin read failure or allocation failure</code></pre>
-<p><code>in:</code> is an expression and may appear anywhere an expression is valid.</p>
-<pre><code class="language-walk">out: in: &#39;Say something: &#39;</code></pre>
-<p>Typed input is not part of <code>in:</code>. Read text first, then parse it explicitly when a parse API exists.</p>
-<p>---</p>
-<h2 id="12-expressions">12. Expressions</h2>
-<p>Stable expressions:</p>
-<pre><code class="language-text">literals
-names
-in:
-prefix operators
-grouped expressions
-function calls
-qualified module calls
-array literals
-index expressions
-block expressions under commands</code></pre>
-<p>Index expressions work on arrays and strings.</p>
-<pre><code class="language-walk">var: nums = [1, 2, 3]
-out: nums[0]
-out: &#39;walk&#39;[1]</code></pre>
-<p>String indexing returns a one-character string by zero-based byte index and runtime-stops when the index is out of range.</p>
-<p>Grouping uses parentheses:</p>
-<pre><code class="language-walk">var: x = * (+ 1 2) (- 9 4)</code></pre>
-<p>---</p>
-<h2 id="13-operators">13. Operators</h2>
-<p>Numeric operators:</p>
-<pre><code class="language-text">+  2 or more args
-*  2 or more args
--  exactly 2 args
-/  exactly 2 args, returns float
-^  exactly 2 args</code></pre>
-<p>Comparison operators:</p>
-<pre><code class="language-text">&gt; &lt; &gt;= &lt;= == !=</code></pre>
-<p>Boolean operators:</p>
-<pre><code class="language-text">and  2 or more bool args
-or   2 or more bool args
-not  exactly 1 bool arg</code></pre>
-<p>Negative numeric literals are supported:</p>
-<pre><code class="language-walk">var: x = -4</code></pre>
-<p>Unary negation of variables is not v1.1 syntax. Use subtraction from zero:</p>
-<pre><code class="language-walk">var: y = - 0 x</code></pre>
-<p>---</p>
-<h2 id="14-arrays">14. Arrays</h2>
-<p>Array literals are homogeneous. Empty arrays need an explicit array annotation.</p>
-<pre><code class="language-walk">var: nums = [1, 2, 3]
-var: words = [&#39;a&#39;, &#39;b&#39;]
-var: guessed array[string] = []</code></pre>
-<p>Stable native array element types:</p>
-<pre><code class="language-text">int
-float
-bool
-string</code></pre>
-<p>Indexing is zero-based.</p>
-<pre><code class="language-walk">out: nums[0]
-nums[1] = 9</code></pre>
-<p>Nested array emission is not a stable v1.8 native feature.</p>
-<p>---</p>
-<h2 id="15-functions">15. Functions</h2>
-<p>Function declarations may use typed parameters.</p>
+<h2 id="7-functions">7. Functions</h2>
+<p>Stable functions are named reusable blocks declared with <code>func:</code>.</p>
 <pre><code class="language-walk">func: add(a int, b int) int
     return: + a b</code></pre>
-<p>Obvious local functions may omit parameter and return types. Whole-number arithmetic infers <code>int</code>; float contexts infer <code>float</code>; boolean contexts infer <code>bool</code>.</p>
+<p>Stable functions may use typed parameters and a typed return. Obvious local functions may omit parameter and return types when the body proves the types clearly. Whole-number arithmetic infers <code>int</code>; float contexts infer <code>float</code>; boolean contexts infer <code>bool</code>.</p>
 <pre><code class="language-walk">func: power_four(n)
     return: ^ n 4</code></pre>
 <p>If a parameter type cannot be inferred from the function body, the parameter needs an explicit annotation. Function types are not inferred from later call sites.</p>
-<pre><code class="language-walk">func: identity(value) # type error until value is annotated
-    return: value</code></pre>
-<p>If a return type is omitted and the function has no <code>return:</code> value, the function returns <code>void</code> and should end normally.</p>
-<pre><code class="language-walk">func: say(message string)
-    out: message</code></pre>
-<p><code>return:</code> requires a value and is valid only inside a function with a compatible return type.</p>
-<p>Non-void functions must return on all paths.</p>
-<p>---</p>
-<h2 id="16-function-values">16. Function Values</h2>
-<p>Named functions may be passed as values.</p>
+<p>If a return type is omitted and the function has no value return, the function returns <code>void</code> and should end normally.</p>
+<p><code>return:</code> requires a value and is valid only inside a function with a compatible return type. Non-void functions must return on all paths.</p>
+<p>Named functions may be passed as values to typed function parameters.</p>
 <pre><code class="language-walk">func: inc(x int) int
     return: + x 1
 
 func: apply(f func(int) int, x int) int
-    return: f(x)
-
-out: apply(inc, 4)</code></pre>
-<p>Anonymous functions and closures are not v1.1 syntax.</p>
+    return: f(x)</code></pre>
+<p>Anonymous functions and closures are not stable v1 syntax.</p>
 <p>---</p>
-<h2 id="17-control-flow">17. Control Flow</h2>
-<p><code>if:</code> conditions must be <code>bool</code>.</p>
-<pre><code class="language-walk">if: &gt; age 18
-    out: &#39;adult&#39;
-else:
-    out: &#39;minor&#39;</code></pre>
-<p><code>while:</code> conditions must be <code>bool</code>.</p>
-<pre><code class="language-walk">while: &lt; count 3
-    count = + count 1</code></pre>
-<p><code>repeat:</code> counts must be <code>int</code>.</p>
-<pre><code class="language-walk">repeat: 3
-    out: &#39;again&#39;</code></pre>
-<p><code>for:</code> iterates arrays.</p>
-<pre><code class="language-walk">for: n in nums
-    out: n</code></pre>
-<p><code>break:</code> and <code>continue:</code> are valid only inside loops.</p>
-<p>---</p>
-<h2 id="18-modules">18. Modules</h2>
-<p>Built-in modules:</p>
+<h2 id="8-modules">8. Modules</h2>
+<p>Stable built-in modules:</p>
 <pre><code class="language-text">math
 string
 array
 time
 random
 testing</code></pre>
-<p>Draft built-in modules in the current compiler:</p>
-<pre><code class="language-text">io
-parse
-process</code></pre>
-<p>Draft modules are importable for experimentation, but they are not compatibility-protected by the v1.9 stable contract.</p>
 <p>Stable built-in functions:</p>
 <pre><code class="language-text">math.sqrt(number) -&gt; float
 math.pow(number, number) -&gt; float
@@ -328,102 +245,86 @@ random.int(int, int) -&gt; int
 random.choice(array[T]) -&gt; T
 testing.assert(bool) -&gt; bool</code></pre>
 <p><code>array.contains</code>, <code>array.push</code>, and <code>random.choice</code> are stable for arrays whose elements are <code>int</code>, <code>float</code>, <code>bool</code>, or <code>string</code>.</p>
-<p>User modules are sibling <code>.walk</code> files imported by bare module name.</p>
-<pre><code class="language-walk">imp: calc
-out: calc.square(5)</code></pre>
-<p><code>calc</code> resolves to <code>calc.walk</code> in the importing file&#39;s directory.</p>
-<p>User module rules:</p>
-<ul>
-<li>imported calls stay namespaced</li>
-<li>only functions listed with <code>exp:</code> are callable from another file</li>
-<li>module files may contain only <code>imp:</code>, <code>func:</code>, and <code>exp:</code> at top level</li>
-<li>import cycles are errors</li>
-</ul>
+<p>The current compiler also includes draft built-in modules:</p>
+<pre><code class="language-text">io
+parse
+process
+file
+dir
+path
+json
+term
+http
+html</code></pre>
+<p>Draft modules are importable for experimentation, but they are not compatibility-protected by the v1.9 stable contract. See <code>docs/STDLIB.md</code> for their signatures, effect status, result structs, runtime behavior, and failure behavior.</p>
 <p>---</p>
-<h2 id="19-tests">19. Tests</h2>
-<p><code>test:</code> defines a test block for <code>walk test</code>.</p>
-<pre><code class="language-walk">test: &#39;add works&#39;
-    assert: == add(2, 3) 5</code></pre>
-<p><code>assert:</code> requires a bool expression. Failed assertions make the generated test executable exit non-zero.</p>
-<p><code>testing.assert(bool)</code> is a stable v1.3 stdlib helper that returns its bool argument unchanged. It is intended to be paired with <code>assert:</code>:</p>
-<pre><code class="language-walk">imp: testing
-
-test: &#39;wrapped assertion works&#39;
-    assert: testing.assert(true)</code></pre>
-<p>Normal <code>walk build</code> ignores <code>test:</code> blocks.</p>
-<p>---</p>
-<h2 id="20-formatter">20. Formatter</h2>
-<p><code>walk fmt</code> emits stable spacing and indentation:</p>
-<pre><code class="language-walk">var:x=+ 1 2</code></pre>
-<p>becomes:</p>
-<pre><code class="language-walk">var: x = + 1 2</code></pre>
-<p>Formatter output uses 4 spaces for indentation.</p>
-<p>---</p>
-<h2 id="21-diagnostics">21. Diagnostics</h2>
-<p>Compiler diagnostics use this shape:</p>
+<h2 id="9-errors">9. Errors</h2>
+<p>Use <code>diagnostic</code> for compiler-reported errors and warnings. Compiler diagnostics use this stable first-line shape:</p>
 <pre><code class="language-text">file.walk:line:column: category: message</code></pre>
-<p>The command-line display may add a source snippet, caret, and focused suggestion under that stable first line:</p>
-<pre><code class="language-text">main.walk:1:16: type error: age is int, got string
-
-var: age int = &#39;old&#39;
-               ^ string cannot initialize int</code></pre>
-<p>Stable categories:</p>
+<p>The command-line display may add a source snippet, caret, and focused suggestion under that stable first line.</p>
+<p>Stable diagnostic categories:</p>
 <pre><code class="language-text">syntax error
 type error
 name error
 module error
 warning
 internal error</code></pre>
-<p>Warnings do not fail by default. <code>--warnings=error</code> promotes warnings to errors. Stable v1.4 warnings cover shadowing an outer name and unreachable statements after <code>return:</code>, <code>break</code>, or <code>continue</code>.</p>
+<p>Warnings do not fail by default. <code>--warnings=error</code> promotes warnings to errors. Stable warnings cover shadowing an outer name and unreachable statements after <code>return:</code>, <code>break:</code>, or <code>continue</code>.</p>
+<p>Stable v1.9 runtime failures include:</p>
+<pre><code class="language-text">walk runtime error: input reached EOF
+walk runtime error: stdin read failed
+walk runtime error: out of memory
+walk runtime error: format failed
+walk runtime error: string index out of range
+walk runtime error: random.choice on empty array</code></pre>
+<p>Failed assertions and draft recoverable result data are not compiler diagnostics. Draft runtime failures are documented with their draft APIs in <code>docs/STDLIB.md</code>.</p>
 <p>---</p>
-<h2 id="22-non-goals">22. Non-Goals</h2>
-<p>These are not stable v1 features:</p>
-<pre><code class="language-text">classes
-structs
+<h2 id="10-standard-library">10. Standard Library</h2>
+<p>The stable standard library is the set of stable built-in modules and functions listed in this specification and documented in <code>docs/STDLIB.md</code>.</p>
+<p>A stable standard library API must name:</p>
+<pre><code class="language-text">module
+function
+parameter types
+return type
+effect status
+runtime behavior
+failure behavior</code></pre>
+<p>No other built-in module is stable in v1.9.</p>
+<p>---</p>
+<h2 id="non-stable-current-compiler-surface">Non-Stable Current Compiler Surface</h2>
+<p>The current compiler accepts experimental v2 data-modeling features and draft IO/runtime APIs that are not stable v1.9 behavior.</p>
+<p>Experimental language surface:</p>
+<pre><code class="language-text">structs
 methods
-generic functions
+generic functions</code></pre>
+<p>Draft statement/API surface:</p>
+<pre><code class="language-text">do:
+io
+parse
+process
+file
+dir
+path
+json
+term
+http
+html</code></pre>
+<p>Planned or not-current stable v1 features include:</p>
+<pre><code class="language-text">classes
 inheritance
 interfaces
 traits
 anonymous functions
 closures
 try/catch
-networking
-package manager
+networking server/runtime APIs
 debugger
 full LSP
-file/json/matrix stdlib APIs
-empty arrays
+matrix stdlib APIs
 nested arrays in native output</code></pre>
 <p>---</p>
-<h2 id="23-minimal-valid-program">23. Minimal Valid Program</h2>
+<h2 id="minimal-valid-program">Minimal Valid Program</h2>
 <pre><code class="language-walk">out: &#39;hello&#39;</code></pre>
-<p>---</p>
-<h2 id="24-representative-v1-1-program">24. Representative v1.1 Program</h2>
-<pre><code class="language-walk">imp: math
-
-func: add(a int, b int) int
-    return: + a b
-
-func: distance(x1 float, y1 float, x2 float, y2 float) float
-    return:
-        math.sqrt(
-            +:
-                ^ (- x2 x1) 2
-                ^ (- y2 y1) 2
-        )
-
-var: nums = [1, 2, 3]
-
-for: n in nums
-    out: add(n, 10)
-
-var: d = distance(0, 0, 3, 4)
-
-if: == d 5
-    out: &#39;distance is 5&#39;
-else:
-    out: &#39;distance is not 5&#39;</code></pre>
 </article>
 <footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
 </div>

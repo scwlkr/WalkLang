@@ -18,7 +18,7 @@
 <a href="PROJECTS.html">Project Mode</a>
 <h2>Language</h2>
 <a href="SYNTAX.html">v1 Syntax Guide</a>
-<a href="SPEC.html">v1 Specification</a>
+<a href="SPEC.html">v1.9 Specification</a>
 <a href="LANGUAGE_CONCEPTS.html">Language Concepts And Documentation Standard</a>
 <a href="STDLIB.html">v1.9 Standard Library</a>
 <a href="ERRORS.html" aria-current="page">v1 Diagnostics</a>
@@ -53,7 +53,8 @@
 <div class="page">
 <article class="doc">
 <h1 id="walklang-v1-diagnostics">WalkLang v1 Diagnostics</h1>
-<p>WalkLang diagnostics are intended to be deterministic enough for conformance tests.</p>
+<p>WalkLang diagnostics are compiler-reported errors and warnings. They are intended to be deterministic enough for conformance tests.</p>
+<p>Use <code>runtime failure</code> for native program failures after compilation. Use <code>failed assertion</code> for <code>walk test</code> assertion failures. Use <code>recoverable result data</code> for draft APIs that return <code>ok</code>, <code>value</code>, and <code>error</code> fields instead of stopping the native program.</p>
 <h2 id="shape">Shape</h2>
 <p>Compiler diagnostics keep this stable first line:</p>
 <pre><code class="language-text">file.walk:line:column: category: message</code></pre>
@@ -113,14 +114,15 @@ if: true
 walk check --warnings=default main.walk
 walk check --warnings=error main.walk</code></pre>
 <h2 id="runtime-failures">Runtime Failures</h2>
-<p><code>walk test</code> builds and runs a native executable. Failed assertions print failure lines and make the executable exit non-zero.</p>
-<p>Stable v1.9 runtime failures include:</p>
+<p><code>walk test</code> builds and runs a native executable. Failed assertions print failure lines and make the executable exit non-zero. A failed assertion is not a compiler diagnostic.</p>
+<p>Stable v1.9 runtime failure messages include:</p>
 <pre><code class="language-text">walk runtime error: input reached EOF
 walk runtime error: stdin read failed
 walk runtime error: out of memory
 walk runtime error: format failed
 walk runtime error: string index out of range
 walk runtime error: random.choice on empty array</code></pre>
+<p>Draft APIs may either runtime-stop or return recoverable result data. Their current failure behavior is documented with each draft API in <code>docs/STDLIB.md</code>.</p>
 <p>Other native C runtime failures are outside the stable diagnostic contract unless a WalkLang conformance test explicitly covers them.</p>
 </article>
 <footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>

@@ -1,6 +1,12 @@
 # WalkLang v1 Diagnostics
 
-WalkLang diagnostics are intended to be deterministic enough for conformance tests.
+WalkLang diagnostics are compiler-reported errors and warnings. They are
+intended to be deterministic enough for conformance tests.
+
+Use `runtime failure` for native program failures after compilation. Use
+`failed assertion` for `walk test` assertion failures. Use `recoverable result
+data` for draft APIs that return `ok`, `value`, and `error` fields instead of
+stopping the native program.
 
 ## Shape
 
@@ -122,9 +128,11 @@ walk check --warnings=error main.walk
 
 ## Runtime Failures
 
-`walk test` builds and runs a native executable. Failed assertions print failure lines and make the executable exit non-zero.
+`walk test` builds and runs a native executable. Failed assertions print failure
+lines and make the executable exit non-zero. A failed assertion is not a
+compiler diagnostic.
 
-Stable v1.9 runtime failures include:
+Stable v1.9 runtime failure messages include:
 
 ```text
 walk runtime error: input reached EOF
@@ -135,4 +143,8 @@ walk runtime error: string index out of range
 walk runtime error: random.choice on empty array
 ```
 
-Other native C runtime failures are outside the stable diagnostic contract unless a WalkLang conformance test explicitly covers them.
+Draft APIs may either runtime-stop or return recoverable result data. Their
+current failure behavior is documented with each draft API in `docs/STDLIB.md`.
+
+Other native C runtime failures are outside the stable diagnostic contract
+unless a WalkLang conformance test explicitly covers them.

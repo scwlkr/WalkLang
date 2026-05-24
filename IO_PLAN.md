@@ -2,7 +2,8 @@
 
 Status: design draft with the CLI text IO, local filesystem IO, process/data
 interop, terminal UX, and network/rich runtime roadmap phases implemented as
-draft compiler APIs. This is not stable language syntax yet.
+draft compiler APIs. `out:` and `in:` are stable; the broader IO/runtime APIs
+listed here remain draft unless another doc explicitly promotes them.
 
 Purpose: turn the current input/output brainstorm into a durable implementation
 plan for WalkLang's console, file, process, terminal, data, network, and future
@@ -42,7 +43,7 @@ strips the final line ending, preserves other whitespace, returns `''` for an
 empty line, accepts final unterminated input, and runtime-stops on immediate EOF
 stdin failure, or allocation failure.
 
-Stable v1.7 built-in modules:
+Stable v1.9 built-in modules:
 
 ```text
 math
@@ -118,9 +119,9 @@ matrix.cols
 matrix.get
 ```
 
-Networking is explicitly later roadmap work. The roadmap says to add it only
-after error handling is mature, stdlib design is stable, the project/package
-model exists, and security rules are documented.
+Draft HTTP client helpers are implemented. Broader networking, server runtime,
+event-loop, asset, graphics, browser, and playground/compiler-explorer work
+remains future package/backend work.
 
 ## Durable Direction
 
@@ -1144,13 +1145,18 @@ Done when:
 
 Status: done as draft compiler APIs and design docs in `v5.12.0`.
 
-Scope:
+Implemented draft API scope:
 
 ```text
 http.get
 http.post
 http.request
 html helpers
+```
+
+Future package/backend scope:
+
+```text
 web server package
 native graphics package
 WASM/browser backend

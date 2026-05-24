@@ -405,7 +405,7 @@ func: apply(f func(int) int, x int) int
 out: apply(inc, 4)
 ```
 
-Anonymous functions and closures are not v1.1 syntax.
+Anonymous functions and closures are not stable v1 syntax.
 
 ---
 
@@ -463,7 +463,8 @@ if: != email null
 
 ## Imports And Exports
 
-Use `imp:` to import built-in modules, sibling user modules, or v3 package modules.
+Use `imp:` to import built-in modules, sibling user modules, or current
+package modules.
 
 ```walk
 imp: math
@@ -495,8 +496,9 @@ imp: geometry.core
 out: geometry.core.double(3)
 ```
 
-Draft process, IO, filesystem, JSON, and terminal helpers are available in the
-current compiler, but they are not part of the stable v1.9 syntax contract yet.
+Draft process, IO, filesystem, JSON, terminal, HTTP, and HTML helpers are
+available in the current compiler, but they are not part of the stable v1.9
+syntax contract yet.
 
 ```walk
 imp: process
@@ -530,6 +532,9 @@ if: term.is_tty()
     do: io.write_line('error')
     do: term.reset()
 ```
+
+Draft HTTP and HTML helpers are ordinary imported function calls that return
+result structs or strings. They are documented in `docs/STDLIB.md`.
 
 ---
 

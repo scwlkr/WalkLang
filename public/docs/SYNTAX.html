@@ -18,7 +18,7 @@
 <a href="PROJECTS.html">Project Mode</a>
 <h2>Language</h2>
 <a href="SYNTAX.html" aria-current="page">v1 Syntax Guide</a>
-<a href="SPEC.html">v1 Specification</a>
+<a href="SPEC.html">v1.9 Specification</a>
 <a href="LANGUAGE_CONCEPTS.html">Language Concepts And Documentation Standard</a>
 <a href="STDLIB.html">v1.9 Standard Library</a>
 <a href="ERRORS.html">v1 Diagnostics</a>
@@ -253,7 +253,7 @@ func: apply(f func(int) int, x int) int
     return: f(x)
 
 out: apply(inc, 4)</code></pre>
-<p>Anonymous functions and closures are not v1.1 syntax.</p>
+<p>Anonymous functions and closures are not stable v1 syntax.</p>
 <p>---</p>
 <h2 id="arrays">Arrays</h2>
 <p>Arrays use brackets and commas.</p>
@@ -283,7 +283,7 @@ if: != email null
     out: email</code></pre>
 <p>---</p>
 <h2 id="imports-and-exports">Imports And Exports</h2>
-<p>Use <code>imp:</code> to import built-in modules, sibling user modules, or v3 package modules.</p>
+<p>Use <code>imp:</code> to import built-in modules, sibling user modules, or current package modules.</p>
 <pre><code class="language-walk">imp: math
 out: math.sqrt(9)</code></pre>
 <p>User module example:</p>
@@ -299,7 +299,7 @@ out: calc.square(5)</code></pre>
 <p>Package module example:</p>
 <pre><code class="language-walk">imp: geometry.core
 out: geometry.core.double(3)</code></pre>
-<p>Draft process, IO, filesystem, JSON, and terminal helpers are available in the current compiler, but they are not part of the stable v1.9 syntax contract yet.</p>
+<p>Draft process, IO, filesystem, JSON, terminal, HTTP, and HTML helpers are available in the current compiler, but they are not part of the stable v1.9 syntax contract yet.</p>
 <pre><code class="language-walk">imp: process
 
 out: process.arg_count()
@@ -321,6 +321,7 @@ if: term.is_tty()
     do: term.color(&#39;red&#39;)
     do: io.write_line(&#39;error&#39;)
     do: term.reset()</code></pre>
+<p>Draft HTTP and HTML helpers are ordinary imported function calls that return result structs or strings. They are documented in <code>docs/STDLIB.md</code>.</p>
 <p>---</p>
 <h2 id="tests">Tests</h2>
 <p>Use <code>test:</code> and <code>assert:</code> with <code>walk test</code>.</p>

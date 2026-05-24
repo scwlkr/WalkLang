@@ -1,6 +1,9 @@
-# WalkLang v1 Specification
+# WalkLang v1.9 Specification
 
-This document is the stable WalkLang language contract for the v1 line. v1.9 keeps the v1.8 compatibility policy and adds string interpolation for display text.
+This document is the stable WalkLang language contract for the v1 line. It is
+normative and intentionally concise. `docs/SYNTAX.md`, `docs/STDLIB.md`,
+`docs/ERRORS.md`, and `docs/COMPATIBILITY.md` provide readable examples and
+longer explanations.
 
 Core rule:
 
@@ -9,71 +12,39 @@ If it is not in SPEC.md, it is not stable WalkLang.
 If the compiler disagrees with SPEC.md, either the compiler or the spec must change.
 ```
 
+Draft, experimental, planned, deprecated, and removed behavior must be labeled
+with the stability words defined in `docs/LANGUAGE_CONCEPTS.md`.
+
 ---
 
-## 1. Source Files
+## 1. Lexical Structure
 
-WalkLang source files are UTF-8 text files ending in `.walk`.
+A source file is UTF-8 text ending in `.walk`. A source file contains zero or
+more statements. Blank lines are ignored. Comments start with `#` outside
+strings and are not statements.
+
+WalkLang statement structure is line-based. Semicolons are not statement
+separators.
+
+Stable token classes:
 
 ```text
-main.walk
+name      letters, digits, and _
+number    int and float literals
+string    single-quoted string literals
+symbol    ( ) [ ] , : = + - * / ^ > < ? .
 ```
 
-A source file contains zero or more statements. Blank lines are ignored. `#` starts a comment outside strings.
+Names cannot start with a digit and cannot be reserved keywords.
 
-```walk
-# comment
-var: x = 1 # inline comment
-out: x
-```
-
----
-
-## 2. Compilation Contract
-
-The stable compiler pipeline is:
+Reserved keywords:
 
 ```text
-.walk source -> lexer -> parser -> AST -> type checker -> C emitter -> native executable
+var const out if else while for repeat break continue
+func return imp exp true false null and or not in test assert
 ```
 
-The `walk build` command writes generated C next to the executable path unless `--emit-c` chooses another path. Native builds use `cc` by default and link with `-lm`.
-
----
-
-## 3. Blocks And Indentation
-
-Indentation owns blocks.
-
-```walk
-if: true
-    out: 'inside'
-out: 'outside'
-```
-
-Rules:
-
-- spaces define indentation
-- tabs are invalid
-- a greater indentation level starts a child block
-- a lower indentation level closes blocks
-- formatter output uses 4 spaces per block level
-
----
-
-## 4. Lexical Rules
-
-Stable tokens:
-
-```text
-names       letters, digits, and _
-numbers     int and float literals
-strings     single-quoted strings
-symbols     ( ) [ ] , : = + - * / ^ > < ? .
-comments    # outside strings
-```
-
-Strings support these escapes:
+Stable strings are single-quoted. Stable string escapes:
 
 ```text
 \' single quote
@@ -82,23 +53,169 @@ Strings support these escapes:
 \t tab
 ```
 
-Strings support interpolation with `{expression}`. Interpolation formats `int`,
-`float`, `bool`, `string`, and nullable string values into the surrounding
-string.
+Stable string interpolation uses `{expression}` inside a single-quoted string.
+Interpolation accepts display expressions of type `int`, `float`, `bool`,
+`string`, and nullable string. Doubled braces emit literal braces.
 
 ```walk
-var: name = 'Walker'
-var: length = string.len(name)
-out: 'name {name} has {length} characters'
-```
-
-Use doubled braces for literal braces:
-
-```walk
-out: '{{name}}'
+out: 'score {score}'
+out: '{{literal}}'
 ```
 
 Double-quoted strings are not valid WalkLang.
+
+Blocks are indentation-based. Spaces define indentation, tabs are invalid, a
+greater indentation level starts a child block, and a lower indentation level
+closes blocks. `walk fmt` emits 4 spaces per block level.
+
+---
+
+## 2. Types
+
+Stable value types:
+
+```text
+int
+float
+bool
+string
+string?
+array[T]
+func(T...) R
+```
+
+`void` is an internal function return marker for functions with no return
+value. It is not a value type.
+
+Stable native array element types are:
+
+```text
+int
+float
+bool
+string
+```
+
+Struct and generic types are implemented in the experimental v2 surface. They
+are not part of the stable v1.9 compatibility contract.
+
+---
+
+## 3. Values
+
+Stable literals create values of these types:
+
+```text
+int
+float
+bool
+string
+null
+```
+
+`null` is stable for nullable strings:
+
+```walk
+var: name string? = null
+```
+
+Other nullable scalar forms are not part of the stable v1.9 native contract.
+
+Array literals are homogeneous. Empty arrays need an explicit array annotation.
+
+```walk
+var: nums = [1, 2, 3]
+var: guessed array[string] = []
+```
+
+Runtime-created strings from stable `in:` and string interpolation are owned by
+the native program.
+
+---
+
+## 4. Expressions
+
+Stable expressions:
+
+```text
+literals
+names
+in:
+prefix operators
+grouped expressions
+function calls
+qualified module calls
+array literals
+index expressions
+block expressions under commands
+```
+
+`in:` reads one required line from stdin and returns a `string`.
+
+```walk
+var: name = in:
+var: name = in: 'Name? '
+```
+
+The optional prompt expression must be `string`. It is written to stdout without
+a newline, and stdout is flushed before reading.
+
+`in:` reads from stdin only, consumes one line, strips the final LF or CRLF line
+ending, preserves all other whitespace, returns `''` for an empty line, accepts
+final unterminated input as a line, has no language-level line length limit, and
+runtime-stops on immediate EOF, stdin read failure, or allocation failure.
+
+Index expressions work on arrays and strings.
+
+```walk
+var: nums = [1, 2, 3]
+out: nums[0]
+out: 'walk'[1]
+```
+
+String indexing returns a one-character string by zero-based byte index and
+runtime-stops when the index is out of range.
+
+Grouping uses parentheses:
+
+```walk
+var: x = * (+ 1 2) (- 9 4)
+```
+
+Numeric operators:
+
+```text
++  2 or more args
+*  2 or more args
+-  exactly 2 args
+/  exactly 2 args, returns float
+^  exactly 2 args
+```
+
+Comparison operators:
+
+```text
+> < >= <= == !=
+```
+
+Boolean operators:
+
+```text
+and  2 or more bool args
+or   2 or more bool args
+not  exactly 1 bool arg
+```
+
+Negative numeric literals are stable. Unary negation of names is not stable v1
+syntax; use subtraction from zero.
+
+```walk
+var: x = -4
+var: y = - 0 x
+```
+
+Typed input is not part of `in:`. Read text first, then parse explicitly with
+draft parse APIs when using the current compiler's draft surface.
 
 ---
 
@@ -126,313 +243,108 @@ break:
 continue:
 ```
 
-Draft implemented statement:
+`out:` writes one stable scalar value and a trailing newline. Stable output
+types are `int`, `float`, `bool`, `string`, and nullable string. Arrays,
+functions, and `void` values cannot be output directly.
 
-```text
-do:
-```
-
-`do:` is the current compiler's draft effect-call statement. It is documented so
-draft IO programs can be tested, but it is not part of the v1.9 stable
-compatibility contract yet.
-
-One statement appears on each physical line. Semicolons are not part of v1.1 syntax.
-
----
-
-## 6. Reserved Words
-
-These words cannot be user-defined names:
-
-```text
-var const out if else while for repeat break continue
-func return imp exp true false null and or not in test assert
-```
-
----
-
-## 7. Types
-
-Stable value types:
-
-```text
-int
-float
-bool
-string
-array[T]
-func(T...) R
-```
-
-`void` is used internally for functions with no return type. It is not a value type.
-
-`null` is stable for nullable strings in native v1.1 programs:
-
-```walk
-var: name string? = null
-```
-
-Other nullable scalar forms are not part of the v1.1 stable native contract.
-
----
-
-## 8. Type Inference And Type Lock
-
-`var:` and `const:` infer a type from their initializer unless an explicit type annotation is present.
+`var:` creates a mutable binding. `const:` creates an immutable binding.
+`var:` and `const:` infer a type from their initializer unless an explicit type
+annotation is present. Once a name is declared, its type is locked.
 
 ```walk
 var: x = 1
-var: y float = 1
-const: name = 'Walker'
-```
-
-Once a name is declared, its type is locked.
-
-```walk
-var: x = 1
-x = 2      # ok
-x = 'two'  # type error
-```
-
-`int` values may initialize or assign to `float` values. Other implicit conversions are not stable.
-
-Function parameters and return types may also be inferred from the function body when the result is local and unambiguous. Omitted function parameter types are not inferred from call sites.
-
----
-
-## 9. Variables And Constants
-
-`var:` creates a mutable binding.
-
-```walk
-var: count = 0
-count = + count 1
-```
-
-`const:` creates an immutable binding.
-
-```walk
+x = 2
 const: limit = 10
 ```
 
-Reassigning a `const:` name is a type error. Assigning through an indexed target rooted at a `const:` array is also a type error.
+`int` values may initialize or assign to `float` values. Other implicit
+conversions are not stable.
+
+Reassigning a `const:` name is a type error. Assigning through an indexed target
+rooted at a `const:` array is also a type error.
+
+`if:` and `while:` conditions must be `bool`. `repeat:` counts must be `int`.
+`for:` iterates arrays. `break:` and `continue:` are valid only inside loops.
+
+```walk
+for: n in nums
+    out: n
+```
+
+`test:` defines a test block for `walk test`. `assert:` requires a bool
+expression. Failed assertions make the generated test executable exit non-zero.
+Normal `walk build` ignores `test:` blocks.
+
+The current compiler also implements the draft `do:` statement for effect
+calls. `do:` is not part of the stable v1.9 compatibility contract.
 
 ---
 
-## 10. Output
+## 6. Declarations
 
-`out:` writes one value and a trailing newline.
-
-```walk
-out: 'hello'
-out: + 1 2
-```
-
-Stable output types:
+Stable declarations introduce or expose named surface:
 
 ```text
-int
-float
-bool
-string
-nullable string
+imp:
+exp:
+var:
+const:
+func:
+test:
 ```
 
-Arrays, functions, and void values cannot be output.
+`imp:` imports a built-in module, sibling user module, or package module
+namespace. `exp:` exposes an existing module symbol.
+
+User modules are `.walk` files imported by module name. A bare module import
+such as `imp: calc` resolves to `calc.walk` in the importing file's directory.
+Package module imports use dotted names resolved through project/package rules.
+
+User module rules:
+
+```text
+imported calls stay namespaced
+only functions listed with exp: are callable from another file
+module files may contain only imp:, struct:, func:, and exp: at top level
+import cycles are errors
+```
+
+`struct:` declarations are implemented in the experimental v2 surface and are
+allowed in module files by the current compiler, but structs are not part of
+the stable v1.9 contract.
 
 ---
 
-## 11. Input
+## 7. Functions
 
-`in:` reads one required line from stdin and returns a `string`.
-
-```walk
-var: name = in:
-```
-
-`in:` may take an optional prompt expression. The prompt must be `string`.
-
-```walk
-var: prompt = 'Name? '
-var: name = in: prompt
-```
-
-Prompt behavior:
-
-```text
-write prompt to stdout
-add no newline
-flush stdout before reading
-```
-
-Input behavior:
-
-```text
-reads from stdin only
-consumes exactly one line
-strips the final \n or \r\n line ending
-preserves all other whitespace
-returns '' for an empty line
-has no language-level line length limit
-returns final unterminated input as a line
-runtime-stops if EOF happens before any text is read
-runtime-stops on stdin read failure or allocation failure
-```
-
-`in:` is an expression and may appear anywhere an expression is valid.
-
-```walk
-out: in: 'Say something: '
-```
-
-Typed input is not part of `in:`. Read text first, then parse it explicitly when a parse API exists.
-
----
-
-## 12. Expressions
-
-Stable expressions:
-
-```text
-literals
-names
-in:
-prefix operators
-grouped expressions
-function calls
-qualified module calls
-array literals
-index expressions
-block expressions under commands
-```
-
-Index expressions work on arrays and strings.
-
-```walk
-var: nums = [1, 2, 3]
-out: nums[0]
-out: 'walk'[1]
-```
-
-String indexing returns a one-character string by zero-based byte index and runtime-stops when the index is out of range.
-
-Grouping uses parentheses:
-
-```walk
-var: x = * (+ 1 2) (- 9 4)
-```
-
----
-
-## 13. Operators
-
-Numeric operators:
-
-```text
-+  2 or more args
-*  2 or more args
--  exactly 2 args
-/  exactly 2 args, returns float
-^  exactly 2 args
-```
-
-Comparison operators:
-
-```text
-> < >= <= == !=
-```
-
-Boolean operators:
-
-```text
-and  2 or more bool args
-or   2 or more bool args
-not  exactly 1 bool arg
-```
-
-Negative numeric literals are supported:
-
-```walk
-var: x = -4
-```
-
-Unary negation of variables is not v1.1 syntax. Use subtraction from zero:
-
-```walk
-var: y = - 0 x
-```
-
----
-
-## 14. Arrays
-
-Array literals are homogeneous. Empty arrays need an explicit array annotation.
-
-```walk
-var: nums = [1, 2, 3]
-var: words = ['a', 'b']
-var: guessed array[string] = []
-```
-
-Stable native array element types:
-
-```text
-int
-float
-bool
-string
-```
-
-Indexing is zero-based.
-
-```walk
-out: nums[0]
-nums[1] = 9
-```
-
-Nested array emission is not a stable v1.8 native feature.
-
----
-
-## 15. Functions
-
-Function declarations may use typed parameters.
+Stable functions are named reusable blocks declared with `func:`.
 
 ```walk
 func: add(a int, b int) int
     return: + a b
 ```
 
-Obvious local functions may omit parameter and return types. Whole-number arithmetic infers `int`; float contexts infer `float`; boolean contexts infer `bool`.
+Stable functions may use typed parameters and a typed return. Obvious local
+functions may omit parameter and return types when the body proves the types
+clearly. Whole-number arithmetic infers `int`; float contexts infer `float`;
+boolean contexts infer `bool`.
 
 ```walk
 func: power_four(n)
     return: ^ n 4
 ```
 
-If a parameter type cannot be inferred from the function body, the parameter needs an explicit annotation. Function types are not inferred from later call sites.
+If a parameter type cannot be inferred from the function body, the parameter
+needs an explicit annotation. Function types are not inferred from later call
+sites.
 
-```walk
-func: identity(value) # type error until value is annotated
-    return: value
-```
+If a return type is omitted and the function has no value return, the function
+returns `void` and should end normally.
 
-If a return type is omitted and the function has no `return:` value, the function returns `void` and should end normally.
+`return:` requires a value and is valid only inside a function with a compatible
+return type. Non-void functions must return on all paths.
 
-```walk
-func: say(message string)
-    out: message
-```
-
-`return:` requires a value and is valid only inside a function with a compatible return type.
-
-Non-void functions must return on all paths.
-
----
-
-## 16. Function Values
-
-Named functions may be passed as values.
+Named functions may be passed as values to typed function parameters.
 
 ```walk
 func: inc(x int) int
@@ -440,53 +352,15 @@ func: inc(x int) int
 
 func: apply(f func(int) int, x int) int
     return: f(x)
-
-out: apply(inc, 4)
 ```
 
-Anonymous functions and closures are not v1.1 syntax.
+Anonymous functions and closures are not stable v1 syntax.
 
 ---
 
-## 17. Control Flow
+## 8. Modules
 
-`if:` conditions must be `bool`.
-
-```walk
-if: > age 18
-    out: 'adult'
-else:
-    out: 'minor'
-```
-
-`while:` conditions must be `bool`.
-
-```walk
-while: < count 3
-    count = + count 1
-```
-
-`repeat:` counts must be `int`.
-
-```walk
-repeat: 3
-    out: 'again'
-```
-
-`for:` iterates arrays.
-
-```walk
-for: n in nums
-    out: n
-```
-
-`break:` and `continue:` are valid only inside loops.
-
----
-
-## 18. Modules
-
-Built-in modules:
+Stable built-in modules:
 
 ```text
 math
@@ -496,17 +370,6 @@ time
 random
 testing
 ```
-
-Draft built-in modules in the current compiler:
-
-```text
-io
-parse
-process
-```
-
-Draft modules are importable for experimentation, but they are not
-compatibility-protected by the v1.9 stable contract.
 
 Stable built-in functions:
 
@@ -526,86 +389,44 @@ random.choice(array[T]) -> T
 testing.assert(bool) -> bool
 ```
 
-`array.contains`, `array.push`, and `random.choice` are stable for arrays whose elements are `int`, `float`, `bool`, or `string`.
+`array.contains`, `array.push`, and `random.choice` are stable for arrays whose
+elements are `int`, `float`, `bool`, or `string`.
 
-User modules are sibling `.walk` files imported by bare module name.
+The current compiler also includes draft built-in modules:
 
-```walk
-imp: calc
-out: calc.square(5)
+```text
+io
+parse
+process
+file
+dir
+path
+json
+term
+http
+html
 ```
 
-`calc` resolves to `calc.walk` in the importing file's directory.
-
-User module rules:
-
-- imported calls stay namespaced
-- only functions listed with `exp:` are callable from another file
-- module files may contain only `imp:`, `func:`, and `exp:` at top level
-- import cycles are errors
+Draft modules are importable for experimentation, but they are not
+compatibility-protected by the v1.9 stable contract. See `docs/STDLIB.md` for
+their signatures, effect status, result structs, runtime behavior, and failure
+behavior.
 
 ---
 
-## 19. Tests
+## 9. Errors
 
-`test:` defines a test block for `walk test`.
-
-```walk
-test: 'add works'
-    assert: == add(2, 3) 5
-```
-
-`assert:` requires a bool expression. Failed assertions make the generated test executable exit non-zero.
-
-`testing.assert(bool)` is a stable v1.3 stdlib helper that returns its bool argument unchanged. It is intended to be paired with `assert:`:
-
-```walk
-imp: testing
-
-test: 'wrapped assertion works'
-    assert: testing.assert(true)
-```
-
-Normal `walk build` ignores `test:` blocks.
-
----
-
-## 20. Formatter
-
-`walk fmt` emits stable spacing and indentation:
-
-```walk
-var:x=+ 1 2
-```
-
-becomes:
-
-```walk
-var: x = + 1 2
-```
-
-Formatter output uses 4 spaces for indentation.
-
----
-
-## 21. Diagnostics
-
-Compiler diagnostics use this shape:
+Use `diagnostic` for compiler-reported errors and warnings. Compiler
+diagnostics use this stable first-line shape:
 
 ```text
 file.walk:line:column: category: message
 ```
 
-The command-line display may add a source snippet, caret, and focused suggestion under that stable first line:
+The command-line display may add a source snippet, caret, and focused
+suggestion under that stable first line.
 
-```text
-main.walk:1:16: type error: age is int, got string
-
-var: age int = 'old'
-               ^ string cannot initialize int
-```
-
-Stable categories:
+Stable diagnostic categories:
 
 ```text
 syntax error
@@ -616,69 +437,98 @@ warning
 internal error
 ```
 
-Warnings do not fail by default. `--warnings=error` promotes warnings to errors. Stable v1.4 warnings cover shadowing an outer name and unreachable statements after `return:`, `break`, or `continue`.
+Warnings do not fail by default. `--warnings=error` promotes warnings to
+errors. Stable warnings cover shadowing an outer name and unreachable statements
+after `return:`, `break:`, or `continue`.
+
+Stable v1.9 runtime failures include:
+
+```text
+walk runtime error: input reached EOF
+walk runtime error: stdin read failed
+walk runtime error: out of memory
+walk runtime error: format failed
+walk runtime error: string index out of range
+walk runtime error: random.choice on empty array
+```
+
+Failed assertions and draft recoverable result data are not compiler
+diagnostics. Draft runtime failures are documented with their draft APIs in
+`docs/STDLIB.md`.
 
 ---
 
-## 22. Non-Goals
+## 10. Standard Library
 
-These are not stable v1 features:
+The stable standard library is the set of stable built-in modules and functions
+listed in this specification and documented in `docs/STDLIB.md`.
+
+A stable standard library API must name:
 
 ```text
-classes
+module
+function
+parameter types
+return type
+effect status
+runtime behavior
+failure behavior
+```
+
+No other built-in module is stable in v1.9.
+
+---
+
+## Non-Stable Current Compiler Surface
+
+The current compiler accepts experimental v2 data-modeling features and draft
+IO/runtime APIs that are not stable v1.9 behavior.
+
+Experimental language surface:
+
+```text
 structs
 methods
 generic functions
+```
+
+Draft statement/API surface:
+
+```text
+do:
+io
+parse
+process
+file
+dir
+path
+json
+term
+http
+html
+```
+
+Planned or not-current stable v1 features include:
+
+```text
+classes
 inheritance
 interfaces
 traits
 anonymous functions
 closures
 try/catch
-networking
-package manager
+networking server/runtime APIs
 debugger
 full LSP
-file/json/matrix stdlib APIs
-empty arrays
+matrix stdlib APIs
 nested arrays in native output
 ```
 
 ---
 
-## 23. Minimal Valid Program
+## Minimal Valid Program
 
 ```walk
 out: 'hello'
-```
-
----
-
-## 24. Representative v1.1 Program
-
-```walk
-imp: math
-
-func: add(a int, b int) int
-    return: + a b
-
-func: distance(x1 float, y1 float, x2 float, y2 float) float
-    return:
-        math.sqrt(
-            +:
-                ^ (- x2 x1) 2
-                ^ (- y2 y1) 2
-        )
-
-var: nums = [1, 2, 3]
-
-for: n in nums
-    out: add(n, 10)
-
-var: d = distance(0, 0, 3, 4)
-
-if: == d 5
-    out: 'distance is 5'
-else:
-    out: 'distance is not 5'
 ```
