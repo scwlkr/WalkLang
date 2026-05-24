@@ -61,6 +61,32 @@
 <h1 id="walklang-release-notes">WalkLang Release Notes</h1>
 <h2 id="unreleased">Unreleased</h2>
 <p>No unreleased changes.</p>
+<h2 id="v5-12-2-search-result-previews">v5.12.2 - Search Result Previews</h2>
+<p>Date: 2026-05-24</p>
+<p>v5.12.2 improves the generated docs search result cards while keeping the stable language contract at v1.9 and the draft runtime API surface unchanged from v5.12.0.</p>
+<h3 id="improved">Improved</h3>
+<ul>
+<li>Generated search index entries are now section-level records with parent doc</li>
+<p>context, group labels, section anchors, readable summaries, and full cleaned search text.</p>
+<li>Search result cards now show a section title, parent doc/group context, and a</li>
+<p>prose preview instead of a raw sliced Markdown snippet.</p>
+<li>Ranking now boosts section headings, section summaries, and API-shaped</li>
+<p>matches such as <code>array.push</code>, so targeted searches land on the most useful docs section first.</p>
+<li>Markdown link targets are stripped from search previews so list summaries keep</li>
+<p>human labels without leaking file names.</p>
+</ul>
+<h3 id="notes">Notes</h3>
+<ul>
+<li>Search remains static and local to the generated docs site.</li>
+<li>The stable language contract remains v1.9.</li>
+</ul>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<p>None.</p>
+<h3 id="upgrade">Upgrade</h3>
+<p>Regenerate docs and release artifacts with:</p>
+<pre><code class="language-bash">scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.12.2 dist</code></pre>
 <h2 id="v5-12-1-docs-search">v5.12.1 - Docs Search</h2>
 <p>Date: 2026-05-24</p>
 <p>v5.12.1 adds a small generated docs search experience while keeping the stable language contract at v1.9 and the draft runtime API surface unchanged from v5.12.0.</p>

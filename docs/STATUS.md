@@ -2,10 +2,38 @@
 
 Stable language contract: v1.9.
 
-Current compiler/tooling/docs release: v5.12.1 docs search over the v5.12.0
-draft network and rich-runtime IO completion.
+Current compiler/tooling/docs release: v5.12.2 docs search result previews
+over the v5.12.1 generated search feature and the v5.12.0 draft network and
+rich-runtime IO completion.
 
 Experimental implemented language surface: v2.2.
+
+State: v5.12.2 improves generated docs search result quality. The site
+generator now emits section-level search entries with parent doc/group context,
+section anchors, clean prose summaries, and cleaned full text. The client-side
+search UI now renders a section title, context line, and readable preview
+instead of a raw sliced Markdown snippet, with ranking boosts for section,
+summary, and API-shaped matches such as `array.push`. The stable language
+contract remains v1.9, and the draft runtime API surface remains unchanged from
+v5.12.0.
+
+v5.12.2 verification on 2026-05-24: focused site-generator tests passed with
+`go test ./scripts -run
+'TestLayoutUsesRootFaviconAndCompactSidebarIcon|TestSearchIndexUsesSectionsAndCleanSummaries|TestSiteCSSUsesDarkWalkLangBlueTheme'
+-count=1`; full `go test -count=1 ./...` passed; `go build -trimpath
+-ldflags "-X main.version=v5.12.2" -o build/walk ./cmd/walk` passed;
+`./build/walk version` reported `v5.12.2`; `./build/walk check
+--warnings=error tests/pass/walk_tests.walk` passed; `WALK_BIN=$PWD/build/walk
+scripts/stress-v1.sh` passed and reported `v1.9 stress ok`;
+`scripts/build-docs-site.sh` passed; `scripts/check-docs-site.sh` passed after
+staging generated docs; a local Chrome headless smoke against
+`python3 -m http.server` typed `function` and `push` into the docs search box,
+captured `/tmp/walklang-docs-search-function.png` and
+`/tmp/walklang-docs-search-push.png`, verified clean section/context/summary
+cards, and confirmed `push` ranks `array.push(array[T], T) -> array[T]` first;
+and `scripts/release.sh v5.12.2 <temp>/release` produced 5 platform artifacts
+plus `SHA256SUMS`, with the host release binary reporting `v5.12.2` from
+`walk version`.
 
 State: v5.12.1 adds a generated static docs search box to every hosted docs
 page. The site generator now emits `docs/search.json` from repo Markdown docs,

@@ -5,25 +5,42 @@
 
   function resultScore(item, query, terms) {
     var title = item.title.toLowerCase();
+    var section = (item.section || "").toLowerCase();
+    var summary = (item.summary || "").toLowerCase();
     var text = item.text.toLowerCase();
     var score = 0;
 
+    if (section === query) {
+      score += 60;
+    }
+    if (section.indexOf(query) !== -1) {
+      score += 42;
+    }
     if (title.indexOf(query) !== -1) {
       score += 20;
     }
+    if (summary.indexOf(query) !== -1) {
+      score += 16;
+    }
     if (text.indexOf(query) !== -1) {
-      score += 10;
+      score += 8;
     }
     terms.forEach(function (term) {
       var occurrences = text.split(term).length - 1;
       score += occurrences;
+      if (section.indexOf(term) !== -1) {
+        score += 18;
+      }
       if (title.indexOf(term) !== -1) {
         score += 8;
       }
-      if (text.indexOf("### " + term) !== -1 || text.indexOf("### array." + term) !== -1) {
+      if (summary.indexOf(term) !== -1) {
+        score += 8;
+      }
+      if (section.indexOf(term + "(") !== -1 || section.indexOf("array." + term) !== -1) {
         score += 28;
       }
-      if (text.indexOf("`array." + term) !== -1) {
+      if (text.indexOf("array." + term) !== -1) {
         score += 6;
       }
       if (text.indexOf(term) !== -1) {
@@ -33,23 +50,15 @@
     return score;
   }
 
-  function snippet(text, terms) {
-    var lower = text.toLowerCase();
-    var index = -1;
+  function resultTitle(item) {
+    return item.section || item.title;
+  }
 
-    for (var i = 0; i < terms.length; i += 1) {
-      index = lower.indexOf(terms[i]);
-      if (index !== -1) {
-        break;
-      }
+  function resultContext(item) {
+    if (item.section && item.section !== item.title) {
+      return item.title + " / " + item.group;
     }
-    if (index === -1) {
-      index = 0;
-    }
-
-    var start = Math.max(0, index - 58);
-    var end = Math.min(text.length, index + 112);
-    return (start > 0 ? "..." : "") + text.slice(start, end).trim() + (end < text.length ? "..." : "");
+    return item.group;
   }
 
   function renderResults(root, results, resultsEl) {
@@ -66,13 +75,16 @@
     results.forEach(function (result) {
       var link = document.createElement("a");
       var title = document.createElement("strong");
+      var context = document.createElement("small");
       var summary = document.createElement("span");
 
       link.href = root + result.item.url;
-      title.textContent = result.item.title;
-      summary.textContent = result.snippet;
+      title.textContent = resultTitle(result.item);
+      context.textContent = resultContext(result.item);
+      summary.textContent = result.item.summary || "Open this section in the WalkLang docs.";
 
       link.appendChild(title);
+      link.appendChild(context);
       link.appendChild(summary);
       resultsEl.appendChild(link);
     });
@@ -120,7 +132,6 @@
           return {
             item: item,
             score: resultScore(item, query, terms),
-            snippet: snippet(item.text, terms),
           };
         })
         .filter(function (result) {

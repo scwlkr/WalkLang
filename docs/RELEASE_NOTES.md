@@ -4,6 +4,46 @@
 
 No unreleased changes.
 
+## v5.12.2 - Search Result Previews
+
+Date: 2026-05-24
+
+v5.12.2 improves the generated docs search result cards while keeping the
+stable language contract at v1.9 and the draft runtime API surface unchanged
+from v5.12.0.
+
+### Improved
+
+- Generated search index entries are now section-level records with parent doc
+  context, group labels, section anchors, readable summaries, and full cleaned
+  search text.
+- Search result cards now show a section title, parent doc/group context, and a
+  prose preview instead of a raw sliced Markdown snippet.
+- Ranking now boosts section headings, section summaries, and API-shaped
+  matches such as `array.push`, so targeted searches land on the most useful
+  docs section first.
+- Markdown link targets are stripped from search previews so list summaries keep
+  human labels without leaking file names.
+
+### Notes
+
+- Search remains static and local to the generated docs site.
+- The stable language contract remains v1.9.
+
+### Breaking Changes
+
+None.
+
+### Upgrade
+
+Regenerate docs and release artifacts with:
+
+```bash
+scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.12.2 dist
+```
+
 ## v5.12.1 - Docs Search
 
 Date: 2026-05-24

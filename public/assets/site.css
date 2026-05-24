@@ -137,6 +137,7 @@ a {
 }
 
 .search-results strong,
+.search-results small,
 .search-results span {
   display: block;
   min-width: 0;
@@ -145,11 +146,19 @@ a {
 
 .search-results strong {
   font-size: 0.88rem;
+  line-height: 1.28;
+}
+
+.search-results small {
+  margin-top: 3px;
+  color: var(--accent-strong);
+  font-size: 0.72rem;
+  line-height: 1.3;
 }
 
 .search-results span,
 .search-empty {
-  margin: 3px 0 0;
+  margin: 6px 0 0;
   color: var(--muted);
   font-size: 0.78rem;
   line-height: 1.35;

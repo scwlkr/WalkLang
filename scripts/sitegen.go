@@ -21,9 +21,20 @@ type docPage struct {
 }
 
 type searchEntry struct {
-	Title string `json:"title"`
-	URL   string `json:"url"`
-	Text  string `json:"text"`
+	Title   string `json:"title"`
+	Section string `json:"section,omitempty"`
+	Group   string `json:"group"`
+	URL     string `json:"url"`
+	Summary string `json:"summary"`
+	Text    string `json:"text"`
+	Level   int    `json:"level"`
+}
+
+type searchSection struct {
+	Heading string
+	Level   int
+	Anchor  string
+	Lines   []string
 }
 
 func main() {
@@ -318,7 +329,7 @@ func markdownTitle(source string) string {
 }
 
 func searchIndexJSON(pages []docPage) ([]byte, error) {
-	entries := make([]searchEntry, 0, len(pages))
+	var entries []searchEntry
 	for _, page := range pages {
 		source, err := os.ReadFile(page.Source)
 		if err != nil {
@@ -328,11 +339,25 @@ func searchIndexJSON(pages []docPage) ([]byte, error) {
 		if title == "" {
 			title = markdownTitle(string(source))
 		}
-		entries = append(entries, searchEntry{
-			Title: title,
-			URL:   filepath.ToSlash(page.Output),
-			Text:  compactSearchText(string(source)),
-		})
+		for _, section := range searchSections(string(source)) {
+			sectionTitle := section.Heading
+			if sectionTitle == "" {
+				sectionTitle = title
+			}
+			url := filepath.ToSlash(page.Output)
+			if section.Anchor != "" {
+				url += "#" + section.Anchor
+			}
+			entries = append(entries, searchEntry{
+				Title:   title,
+				Section: sectionTitle,
+				Group:   page.Group,
+				URL:     url,
+				Summary: searchSummary(section.Lines),
+				Text:    searchText(title, section),
+				Level:   section.Level,
+			})
+		}
 	}
 	data, err := json.MarshalIndent(entries, "", "  ")
 	if err != nil {
@@ -341,8 +366,139 @@ func searchIndexJSON(pages []docPage) ([]byte, error) {
 	return append(data, '\n'), nil
 }
 
-func compactSearchText(source string) string {
+func searchSections(source string) []searchSection {
+	var sections []searchSection
+	current := searchSection{}
+	inCode := false
+
+	flush := func() {
+		if current.Heading == "" && len(current.Lines) == 0 {
+			return
+		}
+		sections = append(sections, current)
+	}
+
+	for _, line := range strings.Split(source, "\n") {
+		trimmed := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmed, "```") {
+			inCode = !inCode
+			current.Lines = append(current.Lines, line)
+			continue
+		}
+		if !inCode {
+			if level, text, ok := heading(trimmed); ok {
+				flush()
+				current = searchSection{
+					Heading: text,
+					Level:   level,
+					Anchor:  slug(text),
+				}
+				continue
+			}
+		}
+		current.Lines = append(current.Lines, line)
+	}
+	flush()
+
+	if len(sections) == 0 {
+		return []searchSection{{Lines: []string{source}}}
+	}
+	return sections
+}
+
+func searchText(title string, section searchSection) string {
+	parts := []string{title, section.Heading}
+	parts = append(parts, section.Lines...)
+	return cleanSearchText(strings.Join(parts, " "))
+}
+
+func searchSummary(lines []string) string {
+	prose := summaryCandidates(lines, false)
+	if len(prose) == 0 {
+		prose = summaryCandidates(lines, true)
+	}
+	if len(prose) == 0 {
+		return "Open this section in the WalkLang docs."
+	}
+	return shortenSummary(strings.Join(prose, " "), 210)
+}
+
+func summaryCandidates(lines []string, includeCode bool) []string {
+	var result []string
+	inCode := false
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmed, "```") {
+			inCode = !inCode
+			continue
+		}
+		if trimmed == "" || strings.HasPrefix(trimmed, "---") {
+			continue
+		}
+		if inCode && !includeCode {
+			continue
+		}
+		if !includeCode && summaryMetadataLine(trimmed) {
+			continue
+		}
+		cleaned := cleanSummaryLine(trimmed, inCode)
+		if cleaned == "" {
+			continue
+		}
+		result = append(result, cleaned)
+		if len(result) >= 2 {
+			break
+		}
+	}
+	return result
+}
+
+func summaryMetadataLine(line string) bool {
+	for _, prefix := range []string{"Date:", "Status:", "Stability:", "Effect status:"} {
+		if strings.HasPrefix(line, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
+func cleanSummaryLine(line string, inCode bool) string {
+	if strings.HasPrefix(line, "- ") {
+		line = strings.TrimSpace(strings.TrimPrefix(line, "- "))
+	}
+	line = strings.TrimPrefix(line, "> ")
+	line = strings.TrimSpace(line)
+	if inCode {
+		return line
+	}
+	return cleanSearchText(line)
+}
+
+func cleanSearchText(source string) string {
+	source = linkRE.ReplaceAllString(source, "$1")
+	source = strings.ReplaceAll(source, "`", "")
+	source = strings.ReplaceAll(source, "\\", "")
+	source = strings.ReplaceAll(source, "#", "")
+	source = strings.ReplaceAll(source, "*", "")
+	source = strings.ReplaceAll(source, "_", " ")
+	source = strings.ReplaceAll(source, "[", "")
+	source = strings.ReplaceAll(source, "]", "")
+	source = strings.ReplaceAll(source, "(", " ")
+	source = strings.ReplaceAll(source, ")", " ")
+	source = strings.ReplaceAll(source, "{", " ")
+	source = strings.ReplaceAll(source, "}", " ")
 	return strings.Join(strings.Fields(source), " ")
+}
+
+func shortenSummary(text string, limit int) string {
+	if len(text) <= limit {
+		return text
+	}
+	cut := strings.LastIndex(text[:limit], " ")
+	if cut < 80 {
+		cut = limit
+	}
+	return strings.TrimSpace(text[:cut]) + "..."
 }
 
 func markdownToHTML(source string, current string) string {

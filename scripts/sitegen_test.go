@@ -26,25 +26,45 @@ func TestLayoutUsesRootFaviconAndCompactSidebarIcon(t *testing.T) {
 	}
 }
 
-func TestSearchIndexIncludesRawDocText(t *testing.T) {
+func TestSearchIndexUsesSectionsAndCleanSummaries(t *testing.T) {
 	dir := t.TempDir()
 	source := filepath.Join(dir, "STDLIB.md")
-	if err := os.WriteFile(source, []byte("# Standard Library\n\n`array.push` returns a new array.\n"), 0o644); err != nil {
+	if err := os.WriteFile(source, []byte("# Standard Library\n\n### array.push(array[T], T) -> array[T]\n\nStability: stable. Effect status: pure expression.\n\nReturns a new array with the item appended. `array.push` does not mutate the input array in place.\n\n```walk\nguessed = array.push(guessed, 'w')\n```\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	pages := []docPage{{Source: source, Output: "docs/STDLIB.html"}}
+	pages := []docPage{{Source: source, Output: "docs/STDLIB.html", Group: "Language"}}
 
 	data, err := searchIndexJSON(pages)
 	if err != nil {
 		t.Fatal(err)
 	}
-	text := string(data)
 
-	for _, want := range []string{`"title": "Standard Library"`, `"url": "docs/STDLIB.html"`, "`array.push` returns a new array."} {
-		if !strings.Contains(text, want) {
-			t.Fatalf("search index missing %q in:\n%s", want, text)
-		}
+	var entries []searchEntry
+	if err := json.Unmarshal(data, &entries); err != nil {
+		t.Fatal(err)
 	}
+	for _, entry := range entries {
+		if entry.Section != "array.push(array[T], T) -> array[T]" {
+			continue
+		}
+		if entry.Title != "Standard Library" || entry.Group != "Language" {
+			t.Fatalf("wrong search context: %#v", entry)
+		}
+		if entry.URL != "docs/STDLIB.html#array-push-array-t-t-array-t" {
+			t.Fatalf("wrong section URL: %s", entry.URL)
+		}
+		if strings.Contains(entry.Summary, "`") || strings.Contains(entry.Summary, "Stability:") || !strings.Contains(entry.Summary, "Returns a new array with the item appended.") {
+			t.Fatalf("summary should be readable prose, got %q", entry.Summary)
+		}
+		if !strings.Contains(entry.Text, "guessed = array.push") {
+			t.Fatalf("search text should still include code examples, got %q", entry.Text)
+		}
+		if got := cleanSearchText("[Install WalkLang](INSTALL.md)"); got != "Install WalkLang" {
+			t.Fatalf("markdown link search text should keep only the label, got %q", got)
+		}
+		return
+	}
+	t.Fatalf("array.push section missing from search entries: %#v", entries)
 }
 
 func TestSiteCSSUsesDarkWalkLangBlueTheme(t *testing.T) {
