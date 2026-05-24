@@ -22,6 +22,7 @@ v3: ecosystem
 v4: professional tooling
 v5: runtime/backend maturity
 v5.12: draft network and rich-runtime boundary
+v5.12.1: docs search
 later: package/runtime tracks and advanced language work
 ```
 
@@ -1407,6 +1408,9 @@ v5.1
 
 v5.12
   draft HTTP/HTML helpers + rich-runtime boundaries
+
+v5.12.1
+  generated docs search
 
 later
   server networking + package/runtime tracks + playground + advanced features

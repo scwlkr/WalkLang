@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"html"
@@ -17,6 +18,12 @@ type docPage struct {
 	Output string
 	Title  string
 	Group  string
+}
+
+type searchEntry struct {
+	Title string `json:"title"`
+	URL   string `json:"url"`
+	Text  string `json:"text"`
 }
 
 func main() {
@@ -57,6 +64,9 @@ func buildSite(docsDir string, publicDir string) error {
 	if err := copyFile(filepath.Join("site", "assets", "site.css"), filepath.Join(publicDir, "assets", "site.css")); err != nil {
 		return err
 	}
+	if err := copyFile(filepath.Join("site", "assets", "site.js"), filepath.Join(publicDir, "assets", "site.js")); err != nil {
+		return err
+	}
 	if err := os.WriteFile(filepath.Join(publicDir, "CNAME"), []byte("walklang.wlkrlabs.com\n"), 0o644); err != nil {
 		return err
 	}
@@ -74,6 +84,13 @@ func buildSite(docsDir string, publicDir string) error {
 		return err
 	}
 	if err := copyFile(filepath.Join(docsDir, "reference", "api.json"), filepath.Join(publicDir, "docs", "reference", "api.json")); err != nil {
+		return err
+	}
+	searchIndex, err := searchIndexJSON(pages)
+	if err != nil {
+		return err
+	}
+	if err := writeFile(publicDir, "docs/search.json", searchIndex); err != nil {
 		return err
 	}
 
@@ -205,6 +222,7 @@ func layout(current string, title string, pages []docPage, body string) string {
 	out.WriteString("<title>" + html.EscapeString(title) + " - WalkLang</title>\n")
 	out.WriteString(`<link rel="icon" type="image/svg+xml" href="` + assetPrefix + `favicon.svg">` + "\n")
 	out.WriteString(`<link rel="stylesheet" href="` + assetPrefix + `assets/site.css">` + "\n")
+	out.WriteString(`<script defer src="` + assetPrefix + `assets/site.js"></script>` + "\n")
 	out.WriteString("</head>\n<body>\n")
 	out.WriteString(`<div class="shell">` + "\n")
 	out.WriteString(renderSidebar(current, pages))
@@ -221,6 +239,7 @@ func renderSidebar(current string, pages []docPage) string {
 	var out strings.Builder
 	out.WriteString(`<aside class="sidebar">` + "\n")
 	out.WriteString(`<a class="brand" href="` + relURL(current, "index.html") + `"><img src="` + assetPrefixFor(current) + `assets/icon.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>` + "\n")
+	out.WriteString(renderSearch(current))
 	out.WriteString(`<nav class="nav" aria-label="Documentation">` + "\n")
 	groups := groupedPages(pages)
 	for _, group := range sortedGroups(groups) {
@@ -242,6 +261,17 @@ func renderSidebar(current string, pages []docPage) string {
 	}
 	out.WriteString("</nav>\n</aside>\n")
 	return out.String()
+}
+
+func renderSearch(current string) string {
+	root := assetPrefixFor(current)
+	return strings.Join([]string{
+		`<form class="doc-search" role="search" data-site-root="` + root + `" data-search-index="` + root + `docs/search.json">`,
+		`<label for="doc-search-input">Search docs</label>`,
+		`<input id="doc-search-input" type="search" autocomplete="off" placeholder="try push or array.push">`,
+		`<div class="search-results" id="doc-search-results" aria-live="polite"></div>`,
+		`</form>`,
+	}, "\n") + "\n"
 }
 
 func groupedPages(pages []docPage) map[string][]docPage {
@@ -285,6 +315,34 @@ func markdownTitle(source string) string {
 		}
 	}
 	return "Documentation"
+}
+
+func searchIndexJSON(pages []docPage) ([]byte, error) {
+	entries := make([]searchEntry, 0, len(pages))
+	for _, page := range pages {
+		source, err := os.ReadFile(page.Source)
+		if err != nil {
+			return nil, err
+		}
+		title := page.Title
+		if title == "" {
+			title = markdownTitle(string(source))
+		}
+		entries = append(entries, searchEntry{
+			Title: title,
+			URL:   filepath.ToSlash(page.Output),
+			Text:  compactSearchText(string(source)),
+		})
+	}
+	data, err := json.MarshalIndent(entries, "", "  ")
+	if err != nil {
+		return nil, err
+	}
+	return append(data, '\n'), nil
+}
+
+func compactSearchText(source string) string {
+	return strings.Join(strings.Fields(source), " ")
 }
 
 func markdownToHTML(source string, current string) string {
@@ -460,11 +518,15 @@ func relURL(from string, to string) string {
 }
 
 func writeHTML(root string, output string, contents string) error {
+	return writeFile(root, output, []byte(contents))
+}
+
+func writeFile(root string, output string, contents []byte) error {
 	path := filepath.Join(root, output)
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err
 	}
-	return os.WriteFile(path, []byte(contents), 0o644)
+	return os.WriteFile(path, contents, 0o644)
 }
 
 func copyFile(source string, target string) error {

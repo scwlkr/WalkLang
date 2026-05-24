@@ -82,6 +82,79 @@ a {
   margin-top: 30px;
 }
 
+.doc-search {
+  margin-top: 24px;
+}
+
+.doc-search label {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.doc-search input {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.92rem;
+  padding: 8px 10px;
+}
+
+.doc-search input:focus {
+  border-color: var(--accent);
+  outline: 2px solid rgba(92, 108, 255, 0.28);
+  outline-offset: 2px;
+}
+
+.search-results {
+  margin-top: 8px;
+}
+
+.search-results a {
+  display: block;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--ink);
+  padding: 9px 10px;
+  text-decoration: none;
+}
+
+.search-results a + a {
+  margin-top: 6px;
+}
+
+.search-results a:hover {
+  border-color: var(--accent);
+}
+
+.search-results strong,
+.search-results span {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.search-results strong {
+  font-size: 0.88rem;
+}
+
+.search-results span,
+.search-empty {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
 .nav h2 {
   margin: 22px 0 8px;
   color: var(--muted);

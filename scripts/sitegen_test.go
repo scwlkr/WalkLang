@@ -18,6 +18,33 @@ func TestLayoutUsesRootFaviconAndCompactSidebarIcon(t *testing.T) {
 	if !strings.Contains(got, `<img src="../assets/icon.svg" alt="">`) {
 		t.Fatalf("sidebar brand should use compact icon.svg, got:\n%s", got)
 	}
+	if !strings.Contains(got, `<script defer src="../assets/site.js"></script>`) {
+		t.Fatalf("layout should load the docs search script, got:\n%s", got)
+	}
+	if !strings.Contains(got, `data-search-index="../docs/search.json"`) {
+		t.Fatalf("sidebar should point search at the generated index, got:\n%s", got)
+	}
+}
+
+func TestSearchIndexIncludesRawDocText(t *testing.T) {
+	dir := t.TempDir()
+	source := filepath.Join(dir, "STDLIB.md")
+	if err := os.WriteFile(source, []byte("# Standard Library\n\n`array.push` returns a new array.\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	pages := []docPage{{Source: source, Output: "docs/STDLIB.html"}}
+
+	data, err := searchIndexJSON(pages)
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := string(data)
+
+	for _, want := range []string{`"title": "Standard Library"`, `"url": "docs/STDLIB.html"`, "`array.push` returns a new array."} {
+		if !strings.Contains(text, want) {
+			t.Fatalf("search index missing %q in:\n%s", want, text)
+		}
+	}
 }
 
 func TestSiteCSSUsesDarkWalkLangBlueTheme(t *testing.T) {

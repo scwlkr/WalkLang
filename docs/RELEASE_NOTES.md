@@ -4,6 +4,44 @@
 
 No unreleased changes.
 
+## v5.12.1 - Docs Search
+
+Date: 2026-05-24
+
+v5.12.1 adds a small generated docs search experience while keeping the stable
+language contract at v1.9 and the draft runtime API surface unchanged from
+v5.12.0.
+
+### Added
+
+- Sidebar docs search box on every generated static docs page.
+- Generated `docs/search.json` index containing page titles, URLs, and compact
+  source text from the docs Markdown files.
+- Small client-side search script that ranks title and body matches and links
+  directly to matching docs pages.
+- Site-generator tests covering the search script link and searchable index
+  contents.
+
+### Notes
+
+- Search is intentionally static and local to the generated site. It does not
+  use a hosted search service or require a backend.
+- The stable language contract remains v1.9.
+
+### Breaking Changes
+
+None.
+
+### Upgrade
+
+Regenerate docs and release artifacts with:
+
+```bash
+scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.12.1 dist
+```
+
 ## v5.12.0 - Draft Network And Rich Runtime IO
 
 Date: 2026-05-23

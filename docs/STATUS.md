@@ -2,10 +2,33 @@
 
 Stable language contract: v1.9.
 
-Current compiler/tooling/docs release: v5.12.0 draft network and rich-runtime
-IO completion.
+Current compiler/tooling/docs release: v5.12.1 docs search over the v5.12.0
+draft network and rich-runtime IO completion.
 
 Experimental implemented language surface: v2.2.
+
+State: v5.12.1 adds a generated static docs search box to every hosted docs
+page. The site generator now emits `docs/search.json` from repo Markdown docs,
+loads a small client-side search script, and ranks API-heading matches such as
+`array.push` above broad roadmap/status mentions. The stable language contract
+remains v1.9, and the draft runtime API surface remains unchanged from
+v5.12.0.
+
+v5.12.1 verification on 2026-05-24: focused site-generator tests passed with
+`go test ./scripts -run
+'TestLayoutUsesRootFaviconAndCompactSidebarIcon|TestSearchIndexIncludesRawDocText|TestSiteCSSUsesDarkWalkLangBlueTheme'
+-count=1`; full `go test -count=1 ./...` passed; `go build -trimpath
+-ldflags "-X main.version=v5.12.1" -o build/walk ./cmd/walk` passed;
+`./build/walk version` reported `v5.12.1`; `./build/walk check
+--warnings=error tests/pass/walk_tests.walk` passed; `WALK_BIN=$PWD/build/walk
+scripts/stress-v1.sh` passed and reported `v1.9 stress ok`;
+`scripts/build-docs-site.sh` passed; `scripts/check-docs-site.sh` passed after
+staging generated docs; a local Chrome headless smoke against
+`python3 -m http.server` typed `push` into the docs search box and verified the
+first result linked to `../docs/STDLIB.html` with the `array.push` snippet; and
+`scripts/release.sh v5.12.1 <temp>/release` produced 5 platform artifacts plus
+`SHA256SUMS`, with the host release binary reporting `v5.12.1` from
+`walk version`; `git diff --check --cached` and `git diff --check` passed.
 
 State: v5.12.0 completes `IO_PLAN.md` Roadmap Phase 5, Network And Rich
 Runtimes, as draft compiler APIs and design docs. Draft HTTP helpers now cover

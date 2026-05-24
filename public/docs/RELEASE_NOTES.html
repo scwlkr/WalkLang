@@ -6,11 +6,17 @@
 <title>WalkLang Release Notes - WalkLang</title>
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <link rel="stylesheet" href="../assets/site.css">
+<script defer src="../assets/site.js"></script>
 </head>
 <body>
 <div class="shell">
 <aside class="sidebar">
 <a class="brand" href="../index.html"><img src="../assets/icon.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>
+<form class="doc-search" role="search" data-site-root="../" data-search-index="../docs/search.json">
+<label for="doc-search-input">Search docs</label>
+<input id="doc-search-input" type="search" autocomplete="off" placeholder="try push or array.push">
+<div class="search-results" id="doc-search-results" aria-live="polite"></div>
+</form>
 <nav class="nav" aria-label="Documentation">
 <h2>Start</h2>
 <a href="index.html">Documentation</a>
@@ -55,6 +61,32 @@
 <h1 id="walklang-release-notes">WalkLang Release Notes</h1>
 <h2 id="unreleased">Unreleased</h2>
 <p>No unreleased changes.</p>
+<h2 id="v5-12-1-docs-search">v5.12.1 - Docs Search</h2>
+<p>Date: 2026-05-24</p>
+<p>v5.12.1 adds a small generated docs search experience while keeping the stable language contract at v1.9 and the draft runtime API surface unchanged from v5.12.0.</p>
+<h3 id="added">Added</h3>
+<ul>
+<li>Sidebar docs search box on every generated static docs page.</li>
+<li>Generated <code>docs/search.json</code> index containing page titles, URLs, and compact</li>
+<p>source text from the docs Markdown files.</p>
+<li>Small client-side search script that ranks title and body matches and links</li>
+<p>directly to matching docs pages.</p>
+<li>Site-generator tests covering the search script link and searchable index</li>
+<p>contents.</p>
+</ul>
+<h3 id="notes">Notes</h3>
+<ul>
+<li>Search is intentionally static and local to the generated site. It does not</li>
+<p>use a hosted search service or require a backend.</p>
+<li>The stable language contract remains v1.9.</li>
+</ul>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<p>None.</p>
+<h3 id="upgrade">Upgrade</h3>
+<p>Regenerate docs and release artifacts with:</p>
+<pre><code class="language-bash">scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.12.1 dist</code></pre>
 <h2 id="v5-12-0-draft-network-and-rich-runtime-io">v5.12.0 - Draft Network And Rich Runtime IO</h2>
 <p>Date: 2026-05-23</p>
 <p>v5.12.0 completes <code>IO_PLAN.md</code> Roadmap Phase 5 as draft compiler APIs and design docs while keeping the stable language contract at v1.9.</p>
