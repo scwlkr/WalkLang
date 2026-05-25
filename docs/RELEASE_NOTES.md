@@ -2,7 +2,9 @@
 
 ## Unreleased
 
-No unreleased changes.
+### Added
+
+- `docs/EXPLICIT_SYSTEMS_TRACK.md` records the one-pass implementation contract for draft `defer:`, result-value policy, package collections, and first-class build modes.
 
 ## v5.12.3 - Sidebar Navigation Cleanup
 

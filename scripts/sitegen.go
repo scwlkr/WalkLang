@@ -162,6 +162,7 @@ func sitePages() []docPage {
 		{Source: "V5_1.md", Output: "docs/V5_1.html", NavTitle: "Docs Site", Group: "Reference"},
 		{Source: "ARCHITECTURE.md", Output: "docs/ARCHITECTURE.html", NavTitle: "Architecture", Group: "Project"},
 		{Source: "DESIGN_RULES.md", Output: "docs/DESIGN_RULES.html", NavTitle: "Design Rules", Group: "Project"},
+		{Source: "EXPLICIT_SYSTEMS_TRACK.md", Output: "docs/EXPLICIT_SYSTEMS_TRACK.html", NavTitle: "Explicit Systems Track", Group: "Project"},
 		{Source: "DOCS_STYLE_GUIDE.md", Output: "docs/DOCS_STYLE_GUIDE.html", NavTitle: "Docs Style Guide", Group: "Project"},
 		{Source: "PURPOSE.md", Output: "docs/PURPOSE.html", NavTitle: "Purpose", Group: "Project"},
 		{Source: "ROADMAP.md", Output: "docs/ROADMAP.html", NavTitle: "Roadmap", Group: "Project"},

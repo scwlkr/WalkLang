@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WalkLang Explicit Systems Track - WalkLang</title>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="stylesheet" href="../assets/site.css">
+<script defer src="../assets/site.js"></script>
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+<a class="brand" href="../index.html"><img src="../assets/icon.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>
+<form class="doc-search" role="search" data-site-root="../" data-search-index="../docs/search.json">
+<label for="doc-search-input">Search docs</label>
+<input id="doc-search-input" type="search" autocomplete="off" placeholder="try push or array.push">
+<div class="search-results" id="doc-search-results" aria-live="polite"></div>
+</form>
+<nav class="nav" aria-label="Documentation">
+<h2>Start</h2>
+<a href="index.html">Documentation</a>
+<a href="INSTALL.html">Install</a>
+<a href="PROJECTS.html">Project Mode</a>
+<h2>Language</h2>
+<a href="SYNTAX.html">Syntax</a>
+<a href="SPEC.html">Specification</a>
+<a href="LANGUAGE_CONCEPTS.html">Language Concepts</a>
+<a href="STDLIB.html">Standard Library</a>
+<a href="ERRORS.html">Diagnostics</a>
+<a href="COMPATIBILITY.html">Compatibility</a>
+<a href="MIGRATING.html">Migration</a>
+<a href="DEPRECATION.html">Deprecation</a>
+<h2>Reference</h2>
+<a href="reference/api.html">API Reference</a>
+<a href="V5_1.html">Docs Site</a>
+<a href="reference/index.html">Reference Index</a>
+<h2>Tools</h2>
+<a href="V4.html">Editor And Docs Tools</a>
+<a href="V5.html">Runtime And Backend</a>
+<a href="NETWORKING.html">Draft Networking</a>
+<a href="RICH_RUNTIMES.html">Rich Runtimes</a>
+<h2>Project</h2>
+<a href="ARCHITECTURE.html">Architecture</a>
+<a href="DESIGN_RULES.html">Design Rules</a>
+<a href="EXPLICIT_SYSTEMS_TRACK.html" aria-current="page">Explicit Systems Track</a>
+<a href="DOCS_STYLE_GUIDE.html">Docs Style Guide</a>
+<a href="PURPOSE.html">Purpose</a>
+<a href="ROADMAP.html">Roadmap</a>
+<a href="STATUS.html">Status</a>
+<h2>Releases</h2>
+<a href="RELEASE_NOTES.html">Version History</a>
+</nav>
+</aside>
+<main class="content">
+<div class="topbar"><a href="index.html">Docs</a><a href="reference/api.html">Reference</a><a href="https://github.com/scwlkr/WalkLang">GitHub</a></div>
+<div class="page">
+<article class="doc">
+<h1 id="walklang-explicit-systems-track">WalkLang Explicit Systems Track</h1>
+<p>Status: planned.</p>
+<p>Date opened: 2026-05-25.</p>
+<p>This document is the persistent tracker for one explicit-language implementation slice. It covers four related improvements inspired by Odin-style language discipline:</p>
+<p>1. Scope cleanup with <code>defer:</code>. 2. Result values instead of exception-like control flow. 3. Package collections as explicit import roots. 4. First-class build modes.</p>
+<p>This is one implementation track, not multiple phases. Implement all four items in one release slice, or stop and record the blocker here before changing the scope.</p>
+<h2 id="design-position">Design Position</h2>
+<p>WalkLang stays explicit.</p>
+<ul>
+<li>Keep imports visible.</li>
+<li>Keep side effects visible through <code>do:</code> or another documented effect form.</li>
+<li>Keep calls namespaced.</li>
+<li>Do not add hidden preludes, implicit imports, operator overloading, exceptions,</li>
+<p>broad macros, or reflection-heavy runtime behavior in this track.</p>
+<li>Do not claim stable behavior until <code>docs/SPEC.md</code>, <code>docs/STDLIB.md</code>, tests,</li>
+<p>generated docs, native execution, status, release notes, and release artifacts prove it.</p>
+</ul>
+<h2 id="status">Status</h2>
+<p>| Item | Status | Notes | | --- | --- | --- | | <code>defer:</code> scope cleanup | Planned | New draft statement form. | | Result-value policy | Planned | Standardize recoverable result behavior before adding broader APIs. | | Package collections | Planned | Formalize explicit import roots without changing existing import syntax. | | Build modes | Planned | Make debug/release mode selection explicit and testable. |</p>
+<h2 id="one-pass-scope">One-Pass Scope</h2>
+<h3 id="1-defer-scope-cleanup">1. <code>defer:</code> Scope Cleanup</h3>
+<p>Goal: add explicit cleanup that runs at scope exit without hidden destructors.</p>
+<p>Required first-pass syntax:</p>
+<pre><code class="language-walk">imp: term
+imp: io
+
+do: term.color(&#39;red&#39;)
+defer: do term.reset()
+do: io.write_line(&#39;error&#39;)</code></pre>
+<p>Required behavior:</p>
+<ul>
+<li><code>defer:</code> is draft until promoted by a later compatibility decision.</li>
+<li>A first-pass deferred statement may only be <code>do: module.effect(args)</code>.</li>
+<li><code>defer:</code> may appear anywhere a statement is allowed inside <code>main</code>, <code>func:</code>,</li>
+<p><code>if:</code>, <code>while:</code>, <code>for:</code>, and <code>test:</code> blocks.</p>
+<li>Deferred statements are owned by the lexical block that contains them.</li>
+<li>Deferred statements execute in last-in, first-out order when that block exits.</li>
+<li>Deferred statements execute on normal fallthrough and before a <code>return:</code> leaves</li>
+<p>the owning block or any parent block.</p>
+<li>A <code>defer:</code> inside a loop body is scoped to that iteration&#39;s loop-body block and</li>
+<p>runs before the next iteration starts or before the loop exits.</p>
+<li>Deferred effect-call arguments are evaluated when the <code>defer:</code> statement is</li>
+<p>encountered. The cleanup call uses those captured values at scope exit.</p>
+<li>If a deferred effect runtime-stops, native execution stops immediately; later</li>
+<p>deferred effects are not guaranteed to run.</p>
+</ul>
+<p>Required diagnostics:</p>
+<ul>
+<li>Reject <code>defer:</code> at top level in imported module files unless the module file is</li>
+<p>being compiled as an entry or test source.</p>
+<li>Reject non-effect calls: <code>type error: defer requires do: effect call</code>.</li>
+<li>Reject non-call bodies such as <code>defer: out: &#39;x&#39;</code>, <code>defer: return: 1</code>,</li>
+<p><code>defer: var: x = 1</code>, and nested <code>defer: defer: ...</code>.</p>
+<li>Reject unknown modules, unimported modules, bad argument counts, and bad</li>
+<p>argument types through the existing module-call diagnostics.</p>
+</ul>
+<p>Proof required:</p>
+<ul>
+<li>Parser/formatter test for <code>defer: do term.reset()</code>.</li>
+<li>Checker fail fixtures for each invalid form above.</li>
+<li>Native runtime test proving LIFO order.</li>
+<li>Native runtime test proving <code>defer:</code> runs before early <code>return:</code>.</li>
+<li>Native runtime test proving loop-body defers run once per iteration.</li>
+<li>Generated C snapshot update when emitter output changes.</li>
+</ul>
+<h3 id="2-result-values-instead-of-exceptions">2. Result Values Instead Of Exceptions</h3>
+<p>Goal: make recoverable failure explicit data, not hidden control flow.</p>
+<p>Required first-pass scope:</p>
+<ul>
+<li>Do not add exceptions.</li>
+<li>Do not add a generic <code>Result[T]</code> type in this pass.</li>
+<li>Keep current concrete result structs, such as <code>IOReadResult</code>,</li>
+<p><code>ParseIntResult</code>, <code>FileReadResult</code>, and <code>HttpResult</code>.</p>
+<li>Promote the recoverable-result shape to a documented language design rule:</li>
+</ul>
+<pre><code class="language-text">ok bool
+value T
+error string</code></pre>
+<p>Required behavior:</p>
+<ul>
+<li><code>ok</code> is true only when <code>value</code> is meaningful.</li>
+<li><code>error</code> is <code>&#39;&#39;</code> on success.</li>
+<li><code>error</code> is a short, stable, machine-testable code on ordinary recoverable</li>
+<p>failure.</p>
+<li>Allocation failure, invalid compiler state, and unrecoverable backend/runtime</li>
+<p>failures may still runtime-stop.</p>
+<li>APIs that are intended to be recoverable must not runtime-stop for ordinary</li>
+<p>documented failures.</p>
+<li>APIs that intentionally fail-stop must say so in <code>docs/STDLIB.md</code>.</li>
+</ul>
+<p>Required diagnostics and docs:</p>
+<ul>
+<li><code>docs/LANGUAGE_CONCEPTS.md</code> must define recoverable result data separately from</li>
+<p>runtime failure.</p>
+<li><code>docs/DESIGN_RULES.md</code> must make result values the preferred recoverable-error</li>
+<p>policy.</p>
+<li><code>docs/STDLIB.md</code> must label each draft IO/process/file/json/term/http API as</li>
+<p>recoverable or fail-stop.</p>
+<li><code>docs/ERRORS.md</code> must keep compiler diagnostics, failed assertions,</li>
+<p>recoverable result data, and runtime failures distinct.</p>
+</ul>
+<p>Proof required:</p>
+<ul>
+<li>Native tests proving representative recoverable APIs return <code>ok false</code> and a</li>
+<p>stable <code>error</code> string for ordinary failures.</p>
+<li>Native tests proving representative fail-stop APIs still produce the documented</li>
+<p><code>walk runtime error: ...</code> message.</p>
+<li>Conformance test proving docs and current runtime behavior match for at least</li>
+<p>one <code>io</code>, one <code>file</code>, one <code>parse</code>, and one <code>http</code> result shape.</p>
+</ul>
+<h3 id="3-package-collections">3. Package Collections</h3>
+<p>Goal: formalize explicit import roots without adding hidden package behavior.</p>
+<p>Required first-pass scope:</p>
+<ul>
+<li>Do not change import syntax.</li>
+<li>Keep user, package, and built-in imports explicit through <code>imp:</code>.</li>
+<li>Treat the first segment of a dotted package import as the collection root.</li>
+<li>Keep existing package imports such as <code>imp: geometry.core</code> valid.</li>
+<li>Reserve <code>std</code> as a future first-party collection root.</li>
+<li>Reject publishing a user package named <code>std</code>.</li>
+<li>Do not move current built-in modules from <code>math</code>, <code>string</code>, <code>array</code>, <code>time</code>,</li>
+<p><code>random</code>, <code>testing</code>, or draft module names into <code>std.*</code> in this pass.</p>
+</ul>
+<p>Required package model:</p>
+<pre><code class="language-text">imp: geometry.core
+
+collection root: geometry
+module path: geometry/core.walk
+generated C prefix: geometry__core__</code></pre>
+<p>Required diagnostics:</p>
+<ul>
+<li><code>walk package init std</code> must fail with a clear reserved-name diagnostic.</li>
+<li><code>walk package publish</code> must reject package names reserved for current or future</li>
+<p>built-in roots.</p>
+<li>Import-cycle and module-not-found diagnostics must keep naming dotted package</li>
+<p>modules precisely.</p>
+</ul>
+<p>Proof required:</p>
+<ul>
+<li>Package lifecycle test showing a collection-root package imports and runs.</li>
+<li>Package publish/init tests rejecting <code>std</code>.</li>
+<li>Existing v3 package tests must keep passing.</li>
+<li>Docs must explain collection roots in <code>docs/PROJECTS.md</code> and <code>docs/V3.md</code>.</li>
+</ul>
+<h3 id="4-first-class-build-modes">4. First-Class Build Modes</h3>
+<p>Goal: make debug and release behavior explicit in CLI, project config, docs, and generated native builds.</p>
+<p>Required first-pass CLI:</p>
+<pre><code class="language-bash">walk build --mode debug
+walk build --mode release
+walk build --debug
+walk build --release
+walk run --mode debug
+walk run --mode release
+walk run --debug
+walk run --release</code></pre>
+<p>Required compatibility:</p>
+<ul>
+<li>Keep <code>--release</code> as a supported alias for <code>--mode release</code>.</li>
+<li>Add <code>--debug</code> as a supported alias for <code>--mode debug</code>.</li>
+<li>Default mode is <code>debug</code>.</li>
+<li>Project config may use <code>mode = &#34;debug&#34;</code> or <code>mode = &#34;release&#34;</code> under <code>[build]</code>.</li>
+<li>Existing <code>release = true|false</code> remains supported for compatibility.</li>
+<li>If both <code>mode</code> and <code>release</code> appear in <code>walk.toml</code>, <code>mode</code> wins and a warning</li>
+<p>is emitted.</p>
+<li>CLI mode wins over project config.</li>
+<li>Reject conflicting CLI flags such as <code>--debug --release</code> or</li>
+<p><code>--mode debug --release</code>.</p>
+</ul>
+<p>Required native behavior:</p>
+<ul>
+<li>Debug mode emits native compiler flags suitable for inspection:</li>
+<p><code>-g -O0</code>.</p>
+<li>Release mode keeps current behavior:</li>
+<p><code>-O3 -DNDEBUG</code>.</p>
+<li>User-supplied <code>--cflag</code> values append after mode flags.</li>
+<li>The generated C remains inspectable in both modes.</li>
+</ul>
+<p>Required diagnostics:</p>
+<ul>
+<li>Unknown mode error: <code>unknown build mode &#34;&lt;value&gt;&#34;</code>.</li>
+<li>Conflict error: <code>build mode conflict: choose one of debug or release</code>.</li>
+<li>Invalid project config error must point at <code>[build].mode</code>.</li>
+</ul>
+<p>Proof required:</p>
+<ul>
+<li>CLI parser tests for <code>--mode</code>, aliases, defaults, and conflicts.</li>
+<li>Project config tests for <code>mode</code>, compatibility with <code>release</code>, warning when</li>
+<p>both are present, and CLI override.</p>
+<li>Native build test proving debug flags are present.</li>
+<li>Existing release test proving <code>-O3 -DNDEBUG</code> remains present.</li>
+<li>Docs updates in <code>docs/PROJECTS.md</code>, <code>docs/V5.md</code>, <code>docs/ARCHITECTURE.md</code>, and</li>
+<p>release notes.</p>
+</ul>
+<h2 id="required-one-pass-execution-order">Required One-Pass Execution Order</h2>
+<p>Follow this order in one branch and one release slice:</p>
+<p>1. Read this file, <code>docs/LANGUAGE_CONCEPTS.md</code>, <code>docs/DESIGN_RULES.md</code>, <code>docs/SPEC.md</code>, <code>docs/STDLIB.md</code>, <code>docs/PROJECTS.md</code>, <code>docs/V3.md</code>, <code>docs/V5.md</code>, <code>IO_PLAN.md</code>, and the current checker/parser/emitter/package code. 2. Add failing tests for all four items before implementation. 3. Implement parser, AST, formatter, checker, emitter/runtime, CLI, project config, package, and docs changes needed by those tests. 4. Update generated snapshots and generated docs only after source docs and code behavior agree. 5. Run the full verification gate below. 6. Update <code>docs/STATUS.md</code> and <code>docs/RELEASE_NOTES.md</code> with exact commands and outcomes. 7. Commit, tag, publish, and refresh the local installed <code>walk</code> binary following the repo release flow.</p>
+<p>Do not split this into separate defer/result/package/build-mode phases. If the slice becomes too large to finish safely, stop before partial implementation, record the blocker in this file, and leave tests/docs showing the exact boundary.</p>
+<h2 id="verification-gate">Verification Gate</h2>
+<p>Minimum commands before this track can be marked complete:</p>
+<pre><code class="language-bash">go test -count=1 ./...
+go build -trimpath -ldflags &#34;-X main.version=&lt;version&gt;&#34; -o build/walk ./cmd/walk
+./build/walk version
+./build/walk check --warnings=error tests/pass/walk_tests.walk
+WALK_BIN=$PWD/build/walk scripts/stress-v1.sh
+scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh &lt;version&gt; &lt;temp&gt;/release
+wc -l &lt;temp&gt;/release/SHA256SUMS
+git diff --check</code></pre>
+<p>Also run focused tests added for this track and record their exact names in <code>docs/STATUS.md</code>.</p>
+<h2 id="status-log">Status Log</h2>
+<ul>
+<li>2026-05-25: Track opened from design discussion. No implementation has started.</li>
+<p>Current decision: keep WalkLang explicit and implement these four items as one future release slice.</p>
+</ul>
+</article>
+<footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
+</div>
+</main>
+</div>
+</body>
+</html>

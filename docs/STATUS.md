@@ -8,6 +8,11 @@ network and rich-runtime IO completion.
 
 Experimental implemented language surface: v2.2.
 
+Planning status on 2026-05-25: `docs/EXPLICIT_SYSTEMS_TRACK.md` now tracks the
+future one-pass explicit-systems implementation slice: draft `defer:`, a
+recoverable result-value policy, package collections, and first-class build
+modes. No compiler behavior changed in this planning update.
+
 State: v5.12.3 cleans up the generated docs sidebar so public navigation is
 organized by reader task and document role instead of exposed release
 milestones. Sidebar labels now use topic names such as `Syntax`,

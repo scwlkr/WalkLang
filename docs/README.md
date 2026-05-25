@@ -53,6 +53,7 @@ are not part of the stable v1.9 contract yet.
 ## Project Direction
 
 - [Roadmap](ROADMAP.md)
+- [Explicit systems track](EXPLICIT_SYSTEMS_TRACK.md)
 - [Design rules](DESIGN_RULES.md)
 - [Purpose](PURPOSE.md)
 - [Docs style guide](DOCS_STYLE_GUIDE.md)
