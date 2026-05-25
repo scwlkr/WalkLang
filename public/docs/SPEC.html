@@ -189,7 +189,7 @@ const: limit = 10</code></pre>
 <pre><code class="language-walk">for: n in nums
     out: n</code></pre>
 <p><code>test:</code> defines a test block for <code>walk test</code>. <code>assert:</code> requires a bool expression. Failed assertions make the generated test executable exit non-zero. Normal <code>walk build</code> ignores <code>test:</code> blocks.</p>
-<p>The current compiler also implements the draft <code>do:</code> statement for effect calls. <code>do:</code> is not part of the stable v1.9 compatibility contract.</p>
+<p>The current compiler also implements draft <code>do:</code> effect calls and draft <code>defer:</code> scope cleanup. They are not part of the stable v1.9 compatibility contract.</p>
 <p>---</p>
 <h2 id="6-declarations">6. Declarations</h2>
 <p>Stable declarations introduce or expose named surface:</p>
@@ -303,6 +303,7 @@ methods
 generic functions</code></pre>
 <p>Draft statement/API surface:</p>
 <pre><code class="language-text">do:
+defer:
 io
 parse
 process

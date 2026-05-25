@@ -53,6 +53,11 @@ Draft IO APIs must say whether they are fail-stop or recoverable. Until a
 recoverable result shape is stable, broad IO such as files, processes, JSON, and
 networking must remain draft or gated.
 
+Recoverable result values are the preferred policy for ordinary documented failures.
+Use fail-stop runtime failures only when the program cannot reliably continue,
+when the API is intentionally an effect helper with no recovery surface, or
+when a separate recoverable helper already exists.
+
 Draft recoverable IO uses concrete result structs instead of nullable-only
 returns. The first accepted draft shape is:
 

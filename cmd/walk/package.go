@@ -51,6 +51,9 @@ func packageInitCommand(args []string) error {
 	if !validPackageName(name) {
 		return fmt.Errorf("package name %q may contain only letters, numbers, and underscore, and must start with a letter or underscore", name)
 	}
+	if name == "std" {
+		return fmt.Errorf("package error: package name %q is reserved for a built-in collection root", name)
+	}
 	if _, err := os.Stat(projectPath); err == nil {
 		return fmt.Errorf("package already exists: %s", projectPath)
 	} else if !os.IsNotExist(err) {
@@ -166,6 +169,9 @@ func packagePublishCommand(args []string) error {
 	}
 	if !validPackageName(config.name) {
 		return fmt.Errorf("package error: package name %q may contain only letters, numbers, and underscore, and must start with a letter or underscore", config.name)
+	}
+	if reservedPackageCollectionRoot(config.name) {
+		return fmt.Errorf("package error: package name %q is reserved for a built-in collection root", config.name)
 	}
 	if !validSemver(config.version) {
 		return fmt.Errorf("package error: package version %q must be MAJOR.MINOR.PATCH", config.version)
@@ -518,6 +524,17 @@ func validPackageName(name string) bool {
 	return true
 }
 
+func reservedPackageCollectionRoot(name string) bool {
+	switch name {
+	case "std",
+		"math", "string", "array", "time", "random", "testing",
+		"io", "parse", "process", "file", "dir", "path", "json", "term", "http", "html":
+		return true
+	default:
+		return false
+	}
+}
+
 func validSemver(version string) bool {
 	parts := strings.Split(version, ".")
 	if len(parts) != 3 {
@@ -537,7 +554,7 @@ func validSemver(version string) bool {
 }
 
 func initialPackageConfig(name string) string {
-	return fmt.Sprintf("name = %q\nversion = \"0.1.0\"\nentry = \"src/main.walk\"\n\n[build]\noutput = %q\nrelease = false\n\n[dependencies]\n", name, filepath.ToSlash(filepath.Join("build", name)))
+	return fmt.Sprintf("name = %q\nversion = \"0.1.0\"\nentry = \"src/main.walk\"\n\n[build]\noutput = %q\nmode = \"debug\"\n\n[dependencies]\n", name, filepath.ToSlash(filepath.Join("build", name)))
 }
 
 func initialPackageReadme(name string) string {

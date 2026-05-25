@@ -68,6 +68,19 @@ do: io.write_line('done')
 do: io.error_line('warning')
 ```
 
+Draft scope cleanup uses `defer:` with an explicit effect call:
+
+```walk
+imp: term
+
+do: term.color('red')
+defer: do term.reset()
+```
+
+`defer:` is draft. A deferred cleanup belongs to the lexical block that contains
+it, runs in last-in, first-out order at block exit, and captures call arguments
+when the `defer:` line is reached.
+
 ---
 
 ## Names
@@ -567,7 +580,7 @@ test: 'wrapped assertion works'
 
 ```text
 var const out if else while for repeat break continue
-func return imp exp true false null and or not in test assert
+func return imp exp true false null and or not in test assert defer
 ```
 
 ---

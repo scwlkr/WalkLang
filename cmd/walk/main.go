@@ -257,9 +257,17 @@ const (
 	warningError   warningMode = "error"
 )
 
+type buildMode string
+
+const (
+	buildModeDebug   buildMode = "debug"
+	buildModeRelease buildMode = "release"
+)
+
 type nativeBuildOptions struct {
 	cc      string
 	release bool
+	modeSet bool
 	cFlags  []string
 }
 
@@ -305,7 +313,25 @@ func parseBuildArgs(args []string) (buildConfig, error) {
 			}
 			config.cOutput = args[i]
 		case "--release":
-			config.native.release = true
+			if err := config.native.setBuildMode(buildModeRelease); err != nil {
+				return buildConfig{}, err
+			}
+		case "--debug":
+			if err := config.native.setBuildMode(buildModeDebug); err != nil {
+				return buildConfig{}, err
+			}
+		case "--mode":
+			i++
+			if i >= len(args) {
+				return buildConfig{}, fmt.Errorf("build requires a value after --mode")
+			}
+			mode, err := parseBuildMode(args[i])
+			if err != nil {
+				return buildConfig{}, err
+			}
+			if err := config.native.setBuildMode(mode); err != nil {
+				return buildConfig{}, err
+			}
 		case "--cc":
 			i++
 			if i >= len(args) {
@@ -319,6 +345,16 @@ func parseBuildArgs(args []string) (buildConfig, error) {
 			}
 			config.native.cFlags = append(config.native.cFlags, args[i])
 		default:
+			if strings.HasPrefix(args[i], "--mode=") {
+				mode, err := parseBuildMode(strings.TrimPrefix(args[i], "--mode="))
+				if err != nil {
+					return buildConfig{}, err
+				}
+				if err := config.native.setBuildMode(mode); err != nil {
+					return buildConfig{}, err
+				}
+				continue
+			}
 			if mode, ok, err := parseWarningArg(args, &i); ok || err != nil {
 				if err != nil {
 					return buildConfig{}, err
@@ -343,7 +379,25 @@ func parseRunArgs(args []string) (runConfig, error) {
 	for i := 0; i < len(args); i++ {
 		switch args[i] {
 		case "--release":
-			config.native.release = true
+			if err := config.native.setBuildMode(buildModeRelease); err != nil {
+				return runConfig{}, err
+			}
+		case "--debug":
+			if err := config.native.setBuildMode(buildModeDebug); err != nil {
+				return runConfig{}, err
+			}
+		case "--mode":
+			i++
+			if i >= len(args) {
+				return runConfig{}, fmt.Errorf("run requires a value after --mode")
+			}
+			mode, err := parseBuildMode(args[i])
+			if err != nil {
+				return runConfig{}, err
+			}
+			if err := config.native.setBuildMode(mode); err != nil {
+				return runConfig{}, err
+			}
 		case "--cc":
 			i++
 			if i >= len(args) {
@@ -357,6 +411,16 @@ func parseRunArgs(args []string) (runConfig, error) {
 			}
 			config.native.cFlags = append(config.native.cFlags, args[i])
 		default:
+			if strings.HasPrefix(args[i], "--mode=") {
+				mode, err := parseBuildMode(strings.TrimPrefix(args[i], "--mode="))
+				if err != nil {
+					return runConfig{}, err
+				}
+				if err := config.native.setBuildMode(mode); err != nil {
+					return runConfig{}, err
+				}
+				continue
+			}
 			if mode, ok, err := parseWarningArg(args, &i); ok || err != nil {
 				if err != nil {
 					return runConfig{}, err
@@ -374,6 +438,27 @@ func parseRunArgs(args []string) (runConfig, error) {
 		return runConfig{}, fmt.Errorf("usage: walk run [--release] [--warnings=off|default|error] [--cc <cc>] [--cflag <flag>] <source.walk>")
 	}
 	return config, nil
+}
+
+func parseBuildMode(value string) (buildMode, error) {
+	switch value {
+	case string(buildModeDebug):
+		return buildModeDebug, nil
+	case string(buildModeRelease):
+		return buildModeRelease, nil
+	default:
+		return "", fmt.Errorf("unknown build mode %q", value)
+	}
+}
+
+func (options *nativeBuildOptions) setBuildMode(mode buildMode) error {
+	release := mode == buildModeRelease
+	if options.modeSet && options.release != release {
+		return fmt.Errorf("build mode conflict: choose one of debug or release")
+	}
+	options.modeSet = true
+	options.release = release
+	return nil
 }
 
 func parseEmitCArgs(args []string) (emitCConfig, error) {
@@ -654,6 +739,8 @@ func validateModuleSurface(program *ast.Program) error {
 		switch statement.(type) {
 		case *ast.Import, *ast.FuncDecl, *ast.StructDecl, *ast.Export:
 			continue
+		case *ast.Defer:
+			return errorAt(statement.Loc(), "module error: top-level defer is only valid in an entry or test source")
 		default:
 			return errorAt(statement.Loc(), "module error: modules may contain only imp, struct, func, and exp at top level")
 		}
@@ -834,6 +921,8 @@ func nativeBuildArgs(cPath string, output string, options nativeBuildOptions) []
 	args := []string{cPath, "-o", output}
 	if options.release {
 		args = append(args, "-O3", "-DNDEBUG")
+	} else {
+		args = append(args, "-g", "-O0")
 	}
 	args = append(args, options.cFlags...)
 	args = append(args, "-lm")

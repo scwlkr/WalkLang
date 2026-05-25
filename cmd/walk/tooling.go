@@ -100,7 +100,7 @@ type docsSymbol struct {
 var walkKeywords = []string{
 	"imp", "exp", "var", "const", "out", "if", "else", "while", "for",
 	"repeat", "break", "continue", "func", "return", "test", "assert",
-	"struct", "true", "false", "null", "and", "or", "not", "in", "do",
+	"struct", "true", "false", "null", "and", "or", "not", "in", "do", "defer",
 }
 
 var walkBuiltinDetails = map[string]string{

@@ -167,6 +167,11 @@ func (i *functionInferencer) inferStatement(statement ast.Statement) error {
 	case *ast.Do:
 		_, err := i.inferExpression(s.Value, ast.Type{})
 		return err
+	case *ast.Defer:
+		if s.Value != nil {
+			_, err := i.inferExpression(s.Value, ast.Type{})
+			return err
+		}
 	case *ast.Assert:
 		_, err := i.inferExpression(s.Value, ast.Basic(ast.TypeBool))
 		return err

@@ -37,6 +37,12 @@ type cEmitter struct {
 	moduleFunctionNames map[string]map[string]bool
 	structs             map[string]*ast.StructDecl
 	structOrder         []string
+	deferScopes         []deferScope
+	loopCleanupMarks    []int
+}
+
+type deferScope struct {
+	cleanups []string
 }
 
 func newCEmitter(modules map[string]*ast.Program) *cEmitter {
@@ -1468,6 +1474,7 @@ func (e *cEmitter) emit(program *ast.Program, testsOnly bool) (string, error) {
 		out.WriteString("    long long __walk_tests = 0;\n")
 		out.WriteString("    long long __walk_failures = 0;\n")
 	}
+	mainScope := e.pushDeferScope()
 	for _, statement := range program.Statements {
 		switch s := statement.(type) {
 		case *ast.FuncDecl, *ast.StructDecl, *ast.Import, *ast.Export:
@@ -1511,6 +1518,12 @@ func (e *cEmitter) emit(program *ast.Program, testsOnly bool) (string, error) {
 			out.WriteByte('\n')
 		}
 	}
+	for _, line := range e.deferredCleanupLines(mainScope) {
+		out.WriteString(e.indentString())
+		out.WriteString(line)
+		out.WriteByte('\n')
+	}
+	e.popDeferScope()
 	if testsOnly {
 		out.WriteString("    if (__walk_failures == 0) {\n")
 		out.WriteString("        printf(\"ok %lld tests\\n\", __walk_tests);\n")
@@ -1772,6 +1785,10 @@ func collectGenericCalls(statements []ast.Statement, skipGenericFunctions bool) 
 			visitExpression(s.Value)
 		case *ast.Do:
 			visitExpression(s.Value)
+		case *ast.Defer:
+			if s.Value != nil {
+				visitExpression(s.Value)
+			}
 		case *ast.TestDecl:
 			for _, nested := range s.Body {
 				visitStatement(nested)
@@ -1899,6 +1916,12 @@ func cloneStatement(statement ast.Statement, bindings map[string]ast.Type) ast.S
 		return &ast.Out{Location: s.Location, Value: cloneExpression(s.Value, bindings)}
 	case *ast.Do:
 		return &ast.Do{Location: s.Location, Value: cloneExpression(s.Value, bindings)}
+	case *ast.Defer:
+		var value ast.Expression
+		if s.Value != nil {
+			value = cloneExpression(s.Value, bindings)
+		}
+		return &ast.Defer{Location: s.Location, Value: value}
 	case *ast.TestDecl:
 		return &ast.TestDecl{Location: s.Location, Name: s.Name, Body: cloneStatements(s.Body, bindings)}
 	case *ast.Assert:
@@ -2166,6 +2189,18 @@ func (e *cEmitter) emitFunctionSignature(fn *ast.FuncDecl, prototype bool) (stri
 }
 
 func (e *cEmitter) emitBlock(statements []ast.Statement) ([]string, error) {
+	return e.emitBlockWithOptions(statements, false)
+}
+
+func (e *cEmitter) emitLoopBlock(statements []ast.Statement) ([]string, error) {
+	return e.emitBlockWithOptions(statements, true)
+}
+
+func (e *cEmitter) emitBlockWithOptions(statements []ast.Statement, loopBody bool) ([]string, error) {
+	scopeIndex := e.pushDeferScope()
+	if loopBody {
+		e.loopCleanupMarks = append(e.loopCleanupMarks, scopeIndex)
+	}
 	var out []string
 	for _, statement := range statements {
 		lines, err := e.emitStatementWithComment(statement)
@@ -2174,7 +2209,43 @@ func (e *cEmitter) emitBlock(statements []ast.Statement) ([]string, error) {
 		}
 		out = append(out, lines...)
 	}
+	out = append(out, e.deferredCleanupLines(scopeIndex)...)
+	if loopBody {
+		e.loopCleanupMarks = e.loopCleanupMarks[:len(e.loopCleanupMarks)-1]
+	}
+	e.popDeferScope()
 	return out, nil
+}
+
+func (e *cEmitter) pushDeferScope() int {
+	e.deferScopes = append(e.deferScopes, deferScope{})
+	return len(e.deferScopes) - 1
+}
+
+func (e *cEmitter) popDeferScope() {
+	e.deferScopes = e.deferScopes[:len(e.deferScopes)-1]
+}
+
+func (e *cEmitter) addDeferCleanup(line string) {
+	if len(e.deferScopes) == 0 {
+		return
+	}
+	current := len(e.deferScopes) - 1
+	e.deferScopes[current].cleanups = append(e.deferScopes[current].cleanups, line)
+}
+
+func (e *cEmitter) deferredCleanupLines(start int) []string {
+	var lines []string
+	if start < 0 {
+		start = 0
+	}
+	for scopeIndex := len(e.deferScopes) - 1; scopeIndex >= start; scopeIndex-- {
+		scope := e.deferScopes[scopeIndex]
+		for i := len(scope.cleanups) - 1; i >= 0; i-- {
+			lines = append(lines, scope.cleanups[i])
+		}
+	}
+	return lines
 }
 
 func (e *cEmitter) emitStatementWithComment(statement ast.Statement) ([]string, error) {
@@ -2204,6 +2275,8 @@ func (e *cEmitter) emitStatement(statement ast.Statement) ([]string, error) {
 		return []string{line}, err
 	case *ast.Do:
 		return e.emitDo(s)
+	case *ast.Defer:
+		return e.emitDefer(s)
 	case *ast.Assert:
 		return e.emitAssert(s)
 	case *ast.Return:
@@ -2211,7 +2284,9 @@ func (e *cEmitter) emitStatement(statement ast.Statement) ([]string, error) {
 		if err != nil {
 			return nil, err
 		}
-		return []string{fmt.Sprintf("return %s;", value)}, nil
+		lines := e.deferredCleanupLines(0)
+		lines = append(lines, fmt.Sprintf("return %s;", value))
+		return lines, nil
 	case *ast.If:
 		return e.emitIf(s)
 	case *ast.While:
@@ -2221,9 +2296,13 @@ func (e *cEmitter) emitStatement(statement ast.Statement) ([]string, error) {
 	case *ast.For:
 		return e.emitFor(s)
 	case *ast.Break:
-		return []string{"break;"}, nil
+		lines := e.deferredCleanupLines(e.currentLoopCleanupMark())
+		lines = append(lines, "break;")
+		return lines, nil
 	case *ast.Continue:
-		return []string{"continue;"}, nil
+		lines := e.deferredCleanupLines(e.currentLoopCleanupMark())
+		lines = append(lines, "continue;")
+		return lines, nil
 	default:
 		return nil, errorAt(statement.Loc(), "internal error: unknown statement")
 	}
@@ -2239,6 +2318,41 @@ func (e *cEmitter) emitDo(statement *ast.Do) ([]string, error) {
 		return nil, err
 	}
 	return []string{rendered + ";"}, nil
+}
+
+func (e *cEmitter) emitDefer(statement *ast.Defer) ([]string, error) {
+	call, ok := statement.Value.(*ast.Call)
+	if !ok {
+		return nil, errorAt(statement.Location, "internal error: defer has non-call value")
+	}
+	fn, ok := builtins.LookupQualified(call.Callee)
+	if !ok || !fn.Effect {
+		return nil, errorAt(statement.Location, "internal error: defer has non-effect call")
+	}
+	var lines []string
+	args := make([]string, 0, len(call.Args))
+	for index, arg := range call.Args {
+		rendered, err := e.emitExpression(arg)
+		if err != nil {
+			return nil, err
+		}
+		temp := e.nextTemp(fmt.Sprintf("__defer_%s_%d", strings.ReplaceAll(call.Callee, ".", "_"), index+1))
+		decl, err := cDecl(arg.ExprType(), temp, true)
+		if err != nil {
+			return nil, err
+		}
+		lines = append(lines, fmt.Sprintf("%s = %s;", decl, rendered))
+		args = append(args, temp)
+	}
+	e.addDeferCleanup(fmt.Sprintf("%s(%s);", fn.CName, strings.Join(args, ", ")))
+	return lines, nil
+}
+
+func (e *cEmitter) currentLoopCleanupMark() int {
+	if len(e.loopCleanupMarks) == 0 {
+		return len(e.deferScopes)
+	}
+	return e.loopCleanupMarks[len(e.loopCleanupMarks)-1]
 }
 
 func (e *cEmitter) emitTestDecl(test *ast.TestDecl) ([]string, error) {
@@ -2356,7 +2470,7 @@ func (e *cEmitter) emitWhile(statement *ast.While) ([]string, error) {
 	}
 	lines := []string{fmt.Sprintf("while (%s) {", cond)}
 	e.indent++
-	body, err := e.emitBlock(statement.Body)
+	body, err := e.emitLoopBlock(statement.Body)
 	e.indent--
 	if err != nil {
 		return nil, err
@@ -2374,7 +2488,7 @@ func (e *cEmitter) emitRepeat(statement *ast.Repeat) ([]string, error) {
 	i := e.nextTemp("__repeat")
 	lines := []string{fmt.Sprintf("for (long long %s = 0; %s < (%s); %s++) {", i, i, count, i)}
 	e.indent++
-	body, err := e.emitBlock(statement.Body)
+	body, err := e.emitLoopBlock(statement.Body)
 	e.indent--
 	if err != nil {
 		return nil, err
@@ -2397,7 +2511,7 @@ func (e *cEmitter) emitFor(statement *ast.For) ([]string, error) {
 	lines := []string{fmt.Sprintf("for (long long %s = 0; %s < %s.len; %s++) {", i, i, iterable, i)}
 	lines = append(lines, fmt.Sprintf("    %s %s = %s.items[%s];", itemType, statement.Name, iterable, i))
 	e.indent++
-	body, err := e.emitBlock(statement.Body)
+	body, err := e.emitLoopBlock(statement.Body)
 	e.indent--
 	if err != nil {
 		return nil, err

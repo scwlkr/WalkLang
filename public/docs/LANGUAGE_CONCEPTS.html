@@ -165,6 +165,14 @@ package module</code></pre>
 <p>A collection is a value that contains other values. Stable v1 collections are arrays. Struct values are experimental data-modeling values in v2. Maps, sets, and tuples are not current WalkLang concepts.</p>
 <h3 id="error">Error</h3>
 <p>Use diagnostic for compiler-reported errors and warnings. Use runtime failure for native program failures after compilation. Do not use error loosely when the doc means warning, failed assertion, recoverable result data, or runtime stop.</p>
+<h3 id="recoverable-result-data">Recoverable Result Data</h3>
+<p>Recoverable result data is an ordinary runtime value that reports an ordinary documented failure without stopping the native program. It is not a compiler diagnostic, not a failed assertion, and not a runtime failure.</p>
+<p>The current draft result shape is concrete per API:</p>
+<pre><code class="language-text">ok bool
+value T
+error string</code></pre>
+<p><code>ok</code> is true only when <code>value</code> is meaningful. <code>error</code> is <code>&#39;&#39;</code> on success and a short machine-testable code on ordinary recoverable failure. Draft APIs may use module-specific fields when the successful value needs a clearer name, such as <code>HttpResult.body</code> or <code>ProcessResult.stdout</code>.</p>
+<p>Allocation failure, invalid compiler state, and unrecoverable backend/runtime failures may still runtime-stop. Do not describe recoverable result data as exceptions, thrown errors, or hidden control flow.</p>
 <h3 id="standard-library-api">Standard Library API</h3>
 <p>A standard library API is a built-in module function or built-in result type documented in <code>docs/STDLIB.md</code>. A standard library API must name its module, function, parameter types, return type, effect status, stability, runtime behavior, and failure behavior.</p>
 <p>---</p>

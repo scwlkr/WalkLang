@@ -57,6 +57,17 @@ func TestFormatterNormalizesDoEffectStatement(t *testing.T) {
 	}
 }
 
+func TestFormatterNormalizesDeferEffectStatement(t *testing.T) {
+	formatted, err := Format("defer:do term.reset()\n", "main.walk")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := "defer: do term.reset()\n"
+	if formatted != want {
+		t.Fatalf("want %q, got %q", want, formatted)
+	}
+}
+
 func TestFormatterPreservesStringInterpolation(t *testing.T) {
 	formatted, err := Format("out:'value {+ 1 2}'\nout:'{{literal}}'\n", "main.walk")
 	if err != nil {

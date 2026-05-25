@@ -79,12 +79,13 @@ cd geometry</code></pre>
   tests/
     main_test.walk
   build/</code></pre>
-<p>Package names must contain only letters, numbers, and <code>_</code>, and must start with a letter or <code>_</code>. This keeps package names usable as import namespaces.</p>
+<p>Package names must contain only letters, numbers, and <code>_</code>, and must start with a letter or <code>_</code>. This keeps package names usable as import namespaces. <code>std</code> is reserved as a future first-party collection root. Publishing also rejects package names reserved for current or future built-in roots, including current built-in module names such as <code>math</code>, <code>string</code>, <code>array</code>, <code>io</code>, <code>file</code>, <code>process</code>, <code>json</code>, <code>term</code>, <code>http</code>, and <code>html</code>.</p>
 <h2 id="package-modules">Package Modules</h2>
 <p>Package modules are imported with dotted names:</p>
 <pre><code class="language-walk">imp: geometry.core
 
 out: geometry.core.double(3)</code></pre>
+<p>The first segment is the collection root. In <code>imp: geometry.core</code>, the collection root is <code>geometry</code>, the module path is <code>geometry/core.walk</code>, and the generated C prefix is <code>geometry__core__</code>.</p>
 <p>The import maps to:</p>
 <pre><code class="language-text">src/geometry/core.walk</code></pre>
 <p>Exports still use <code>exp:</code> inside the module.</p>
@@ -100,7 +101,7 @@ entry = &#34;src/main.walk&#34;
 
 [build]
 output = &#34;build/shape_app&#34;
-release = false
+mode = &#34;debug&#34;
 
 [dependencies]
 geometry = &#34;0.1.0&#34;</code></pre>
@@ -118,6 +119,7 @@ geometry = &#34;0.1.0&#34;</code></pre>
 <p>Publish rules:</p>
 <pre><code class="language-text">README.md is required and must be non-empty
 package name must be import-safe
+package name must not be a reserved built-in collection root
 package version must be MAJOR.MINOR.PATCH
 walk check --warnings=error must pass
 walk test --warnings=error must pass

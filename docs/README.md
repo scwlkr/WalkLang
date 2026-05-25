@@ -35,11 +35,11 @@ these docs explain how to install, learn, use, verify, and evolve WalkLang.
 
 WalkLang version names use separate stability layers. The stable language
 contract is `v1.9`. The current compiler, tooling, backend, release, and docs
-milestone is `v5.12.3`. Experimental v2 through v2.2 language features are
+milestone is `v5.13.0`. Experimental v2 through v2.2 language features are
 implemented, but they are not part of the stable v1 compatibility promise.
-Draft `do:`, `io`, `parse`, `process`, `file`, `dir`, `path`, `json`, `term`,
-`http`, and `html` helpers are implemented for current compiler experiments and
-are not part of the stable v1.9 contract yet.
+Draft `do:`, `defer:`, `io`, `parse`, `process`, `file`, `dir`, `path`,
+`json`, `term`, `http`, and `html` helpers are implemented for current compiler
+experiments and are not part of the stable v1.9 contract yet.
 
 - [v1 / v1.9 stable contract](V1.md)
 - [v2 data modeling, methods, and generics](V2.md)

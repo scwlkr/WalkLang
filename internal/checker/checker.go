@@ -384,6 +384,8 @@ func (c *Checker) checkStatement(statement ast.Statement) error {
 		return nil
 	case *ast.Do:
 		return c.checkDo(s)
+	case *ast.Defer:
+		return c.checkDefer(s)
 	case *ast.TestDecl:
 		return c.checkNestedBlock(s.Body)
 	case *ast.Assert:
@@ -486,6 +488,26 @@ func (c *Checker) checkDo(statement *ast.Do) error {
 	}
 	if !isEffectBuiltinCall(statement.Value) {
 		return errorAt(statement.Location, "type error: do needs effect call, got %s", valueType.String())
+	}
+	return nil
+}
+
+func (c *Checker) checkDefer(statement *ast.Defer) error {
+	if statement.Value == nil {
+		return errorAt(statement.Location, "type error: defer requires do: effect call")
+	}
+	previous := c.effectContext
+	c.effectContext = true
+	valueType, err := c.checkExpression(statement.Value)
+	c.effectContext = previous
+	if err != nil {
+		return err
+	}
+	if !isEffectBuiltinCall(statement.Value) {
+		return errorAt(statement.Location, "type error: defer requires do: effect call")
+	}
+	if valueType.Kind != ast.TypeVoid {
+		return errorAt(statement.Location, "type error: defer requires do: effect call")
 	}
 	return nil
 }

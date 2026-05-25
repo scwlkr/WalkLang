@@ -1,6 +1,6 @@
 # WalkLang Explicit Systems Track
 
-Status: planned.
+Status: implemented in v5.13.0.
 
 Date opened: 2026-05-25.
 
@@ -34,10 +34,10 @@ WalkLang stays explicit.
 
 | Item | Status | Notes |
 | --- | --- | --- |
-| `defer:` scope cleanup | Planned | New draft statement form. |
-| Result-value policy | Planned | Standardize recoverable result behavior before adding broader APIs. |
-| Package collections | Planned | Formalize explicit import roots without changing existing import syntax. |
-| Build modes | Planned | Make debug/release mode selection explicit and testable. |
+| `defer:` scope cleanup | Implemented | New draft statement form. |
+| Result-value policy | Implemented | Recoverable result behavior standardized in docs and conformance tests. |
+| Package collections | Implemented | Explicit import roots documented; reserved roots enforced. |
+| Build modes | Implemented | Debug/release mode selection is explicit and testable. |
 
 ## One-Pass Scope
 
@@ -286,3 +286,7 @@ Also run focused tests added for this track and record their exact names in
 - 2026-05-25: Track opened from design discussion. No implementation has started.
   Current decision: keep WalkLang explicit and implement these four items as one
   future release slice.
+- 2026-05-25: Track implemented for v5.13.0. Draft `defer:` cleanup,
+  recoverable-result policy docs, package collection-root enforcement, and
+  first-class build modes are covered by focused tests and the release
+  verification gate recorded in `docs/STATUS.md`.

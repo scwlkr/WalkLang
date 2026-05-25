@@ -41,7 +41,7 @@
     "group": "Start",
     "url": "docs/index.html#track-versions",
     "summary": "WalkLang version names use separate stability layers. The stable language contract is v1.9. The current compiler, tooling, backend, release, and docs",
-    "text": "WalkLang Documentation Track Versions WalkLang version names use separate stability layers. The stable language contract is v1.9. The current compiler, tooling, backend, release, and docs milestone is v5.12.3. Experimental v2 through v2.2 language features are implemented, but they are not part of the stable v1 compatibility promise. Draft do:, io, parse, process, file, dir, path, json, term, http, and html helpers are implemented for current compiler experiments and are not part of the stable v1.9 contract yet. - v1 / v1.9 stable contract - v2 data modeling, methods, and generics - v3 package ecosystem - v4 professional tooling - v5 runtime and backend maturity - v5.1 public docs and reference site - Release notes - Current status",
+    "text": "WalkLang Documentation Track Versions WalkLang version names use separate stability layers. The stable language contract is v1.9. The current compiler, tooling, backend, release, and docs milestone is v5.13.0. Experimental v2 through v2.2 language features are implemented, but they are not part of the stable v1 compatibility promise. Draft do:, defer:, io, parse, process, file, dir, path, json, term, http, and html helpers are implemented for current compiler experiments and are not part of the stable v1.9 contract yet. - v1 / v1.9 stable contract - v2 data modeling, methods, and generics - v3 package ecosystem - v4 professional tooling - v5 runtime and backend maturity - v5.1 public docs and reference site - Release notes - Current status",
     "level": 2
   },
   {
@@ -131,7 +131,7 @@
     "group": "Start",
     "url": "docs/PROJECTS.html#config",
     "summary": "walk.toml is intentionally small: Rules:",
-    "text": "WalkLang Project Mode Config walk.toml is intentionally small: toml name = \"hello\" version = \"0.1.0\" entry = \"src/main.walk\" build output = \"build/hello\" release = false Rules: - name is required and may contain letters, numbers, , and -. - version defaults to 0.1.0. - entry defaults to src/main.walk. - build.output defaults to build/\u003cname\u003e. - project paths must be relative and stay inside the project root. - dependencies pins package dependencies by exact MAJOR.MINOR.PATCH version. Package dependency example: toml dependencies geometry = \"0.1.0\"",
+    "text": "WalkLang Project Mode Config walk.toml is intentionally small: toml name = \"hello\" version = \"0.1.0\" entry = \"src/main.walk\" build output = \"build/hello\" mode = \"debug\" Rules: - name is required and may contain letters, numbers, , and -. - version defaults to 0.1.0. - entry defaults to src/main.walk. - build.output defaults to build/\u003cname\u003e. - build.mode may be debug or release; the default is debug. - build.release = true|false is still accepted for compatibility. When both build.mode and build.release are present, build.mode wins and the compiler emits a warning. - project paths must be relative and stay inside the project root. - dependencies pins package dependencies by exact MAJOR.MINOR.PATCH version. Package dependency example: toml dependencies geometry = \"0.1.0\"",
     "level": 2
   },
   {
@@ -149,7 +149,7 @@
     "group": "Start",
     "url": "docs/PROJECTS.html#module-search",
     "summary": "Project tests can import modules from src/. The importing file's directory is searched first. The project entry directory is searched next.",
-    "text": "WalkLang Project Mode Module Search Project tests can import modules from src/. walk imp: math extra test: 'cube works' assert: == math extra.cube 3 27 The importing file's directory is searched first. The project entry directory is searched next. Package dependencies add locked package src/ directories after local project search paths. Package imports use dotted module names: walk imp: geometry.core out: geometry.core.double 3 This import resolves from: text .walk/packages/geometry/0.1.0/src/geometry/core.walk",
+    "text": "WalkLang Project Mode Module Search Project tests can import modules from src/. walk imp: math extra test: 'cube works' assert: == math extra.cube 3 27 The importing file's directory is searched first. The project entry directory is searched next. Package dependencies add locked package src/ directories after local project search paths. Package imports use dotted module names: walk imp: geometry.core out: geometry.core.double 3 The first segment of a dotted package import is the package collection root. For imp: geometry.core, the collection root is geometry, the module path is geometry/core.walk, and generated C names use the prefix geometry core . This import resolves from: text .walk/packages/geometry/0.1.0/src/geometry/core.walk",
     "level": 2
   },
   {
@@ -158,7 +158,7 @@
     "group": "Start",
     "url": "docs/PROJECTS.html#packages",
     "summary": "Create a package project: Publish a documented package to a local registry:",
-    "text": "WalkLang Project Mode Packages Create a package project: bash walk package init geometry Publish a documented package to a local registry: bash cd geometry walk package publish ../registry Resolve an app's pinned dependencies from that registry: bash cd ../shape app walk package resolve ../registry Package behavior: - walk package publish requires non-empty README.md. - Publish runs walk check --warnings=error and walk test --warnings=error. - Published packages are copied to \u003cregistry\u003e/\u003cname\u003e/\u003cversion\u003e/. - walk package resolve copies packages into .walk/packages/ and writes walk.lock. - walk check, walk test, and walk build verify package cache checksums before using dependencies. - Build commands do not download packages automatically.",
+    "text": "WalkLang Project Mode Packages Create a package project: bash walk package init geometry Publish a documented package to a local registry: bash cd geometry walk package publish ../registry Resolve an app's pinned dependencies from that registry: bash cd ../shape app walk package resolve ../registry Package behavior: - walk package publish requires non-empty README.md. - std is reserved as a future first-party collection root. - walk package publish rejects package names reserved for current or future built-in roots, including std and current built-in module roots. - Publish runs walk check --warnings=error and walk test --warnings=error. - Published packages are copied to \u003cregistry\u003e/\u003cname\u003e/\u003cversion\u003e/. - walk package resolve copies packages into .walk/packages/ and writes walk.lock. - walk check, walk test, and walk build verify package cache checksums before using dependencies. - Build commands do not download packages automatically.",
     "level": 2
   },
   {
@@ -194,7 +194,7 @@
     "group": "Language",
     "url": "docs/SYNTAX.html#commands",
     "summary": "Command statements use keyword:. Long expressions can use a block after a command.",
-    "text": "WalkLang v1 Syntax Guide Commands Command statements use keyword:. walk var: x = 1 const: limit = 10 out: x Long expressions can use a block after a command. walk out: +: 1 2 3 Draft effect calls use do:. The expression after do: must be a draft effect function, not an ordinary value expression. walk imp: io do: io.write 'Loading' do: io.write line 'done' do: io.error line 'warning' ---",
+    "text": "WalkLang v1 Syntax Guide Commands Command statements use keyword:. walk var: x = 1 const: limit = 10 out: x Long expressions can use a block after a command. walk out: +: 1 2 3 Draft effect calls use do:. The expression after do: must be a draft effect function, not an ordinary value expression. walk imp: io do: io.write 'Loading' do: io.write line 'done' do: io.error line 'warning' Draft scope cleanup uses defer: with an explicit effect call: walk imp: term do: term.color 'red' defer: do term.reset defer: is draft. A deferred cleanup belongs to the lexical block that contains it, runs in last-in, first-out order at block exit, and captures call arguments when the defer: line is reached. ---",
     "level": 2
   },
   {
@@ -355,8 +355,8 @@
     "section": "Reserved Words",
     "group": "Language",
     "url": "docs/SYNTAX.html#reserved-words",
-    "summary": "var const out if else while for repeat break continue func return imp exp true false null and or not in test assert",
-    "text": "WalkLang v1 Syntax Guide Reserved Words text var const out if else while for repeat break continue func return imp exp true false null and or not in test assert ---",
+    "summary": "var const out if else while for repeat break continue func return imp exp true false null and or not in test assert defer",
+    "text": "WalkLang v1 Syntax Guide Reserved Words text var const out if else while for repeat break continue func return imp exp true false null and or not in test assert defer ---",
     "level": 2
   },
   {
@@ -419,7 +419,7 @@
     "group": "Language",
     "url": "docs/SPEC.html#5-statements",
     "summary": "Stable statements: out: writes one stable scalar value and a trailing newline. Stable output",
-    "text": "WalkLang v1.9 Specification 5. Statements Stable statements: text imp: exp: var: const: assignment out: test: assert: func: return: if: else: while: repeat: for: break: continue: out: writes one stable scalar value and a trailing newline. Stable output types are int, float, bool, string, and nullable string. Arrays, functions, and void values cannot be output directly. var: creates a mutable binding. const: creates an immutable binding. var: and const: infer a type from their initializer unless an explicit type annotation is present. Once a name is declared, its type is locked. walk var: x = 1 x = 2 const: limit = 10 int values may initialize or assign to float values. Other implicit conversions are not stable. Reassigning a const: name is a type error. Assigning through an indexed target rooted at a const: array is also a type error. if: and while: conditions must be bool. repeat: counts must be int. for: iterates arrays. break: and continue: are valid only inside loops. walk for: n in nums out: n test: defines a test block for walk test. assert: requires a bool expression. Failed assertions make the generated test executable exit non-zero. Normal walk build ignores test: blocks. The current compiler also implements the draft do: statement for effect calls. do: is not part of the stable v1.9 compatibility contract. ---",
+    "text": "WalkLang v1.9 Specification 5. Statements Stable statements: text imp: exp: var: const: assignment out: test: assert: func: return: if: else: while: repeat: for: break: continue: out: writes one stable scalar value and a trailing newline. Stable output types are int, float, bool, string, and nullable string. Arrays, functions, and void values cannot be output directly. var: creates a mutable binding. const: creates an immutable binding. var: and const: infer a type from their initializer unless an explicit type annotation is present. Once a name is declared, its type is locked. walk var: x = 1 x = 2 const: limit = 10 int values may initialize or assign to float values. Other implicit conversions are not stable. Reassigning a const: name is a type error. Assigning through an indexed target rooted at a const: array is also a type error. if: and while: conditions must be bool. repeat: counts must be int. for: iterates arrays. break: and continue: are valid only inside loops. walk for: n in nums out: n test: defines a test block for walk test. assert: requires a bool expression. Failed assertions make the generated test executable exit non-zero. Normal walk build ignores test: blocks. The current compiler also implements draft do: effect calls and draft defer: scope cleanup. They are not part of the stable v1.9 compatibility contract. ---",
     "level": 2
   },
   {
@@ -473,7 +473,7 @@
     "group": "Language",
     "url": "docs/SPEC.html#non-stable-current-compiler-surface",
     "summary": "The current compiler accepts experimental v2 data-modeling features and draft IO/runtime APIs that are not stable v1.9 behavior.",
-    "text": "WalkLang v1.9 Specification Non-Stable Current Compiler Surface The current compiler accepts experimental v2 data-modeling features and draft IO/runtime APIs that are not stable v1.9 behavior. Experimental language surface: text structs methods generic functions Draft statement/API surface: text do: io parse process file dir path json term http html Planned or not-current stable v1 features include: text classes inheritance interfaces traits anonymous functions closures try/catch networking server/runtime APIs debugger full LSP matrix stdlib APIs nested arrays in native output ---",
+    "text": "WalkLang v1.9 Specification Non-Stable Current Compiler Surface The current compiler accepts experimental v2 data-modeling features and draft IO/runtime APIs that are not stable v1.9 behavior. Experimental language surface: text structs methods generic functions Draft statement/API surface: text do: defer: io parse process file dir path json term http html Planned or not-current stable v1 features include: text classes inheritance interfaces traits anonymous functions closures try/catch networking server/runtime APIs debugger full LSP matrix stdlib APIs nested arrays in native output ---",
     "level": 2
   },
   {
@@ -672,6 +672,15 @@
     "url": "docs/LANGUAGE_CONCEPTS.html#error",
     "summary": "Use diagnostic for compiler-reported errors and warnings. Use runtime failure for native program failures after compilation. Do not use error loosely when the",
     "text": "WalkLang Language Concepts And Documentation Standard Error Use diagnostic for compiler-reported errors and warnings. Use runtime failure for native program failures after compilation. Do not use error loosely when the doc means warning, failed assertion, recoverable result data, or runtime stop.",
+    "level": 3
+  },
+  {
+    "title": "WalkLang Language Concepts And Documentation Standard",
+    "section": "Recoverable Result Data",
+    "group": "Language",
+    "url": "docs/LANGUAGE_CONCEPTS.html#recoverable-result-data",
+    "summary": "Recoverable result data is an ordinary runtime value that reports an ordinary documented failure without stopping the native program. It is not a compiler",
+    "text": "WalkLang Language Concepts And Documentation Standard Recoverable Result Data Recoverable result data is an ordinary runtime value that reports an ordinary documented failure without stopping the native program. It is not a compiler diagnostic, not a failed assertion, and not a runtime failure. The current draft result shape is concrete per API: text ok bool value T error string ok is true only when value is meaningful. error is '' on success and a short machine-testable code on ordinary recoverable failure. Draft APIs may use module-specific fields when the successful value needs a clearer name, such as HttpResult.body or ProcessResult.stdout. Allocation failure, invalid compiler state, and unrecoverable backend/runtime failures may still runtime-stop. Do not describe recoverable result data as exceptions, thrown errors, or hidden control flow.",
     "level": 3
   },
   {
@@ -923,7 +932,7 @@
     "group": "Language",
     "url": "docs/STDLIB.html#draft-io",
     "summary": "Use draft io output functions with do: because they are effects. Draft io read functions are expressions because they return result values.",
-    "text": "WalkLang v1.9 Standard Library Draft io Use draft io output functions with do: because they are effects. Draft io read functions are expressions because they return result values. walk imp: io do: io.write 'Loading' do: io.write line 'done' do: io.error line 'warning' Recoverable draft reads return: walk struct: IOReadResult ok bool value string error string ok is true when value contains text. error is '' on success. Immediate EOF from io.read line returns ok false, value '', and error 'eof'. Stdin read failure returns error 'stdin read failed'. Allocation failure still runtime-stops because the program cannot reliably recover without memory.",
+    "text": "WalkLang v1.9 Standard Library Draft io Use draft io output functions with do: because they are effects. Draft io read functions are expressions because they return result values. walk imp: io do: io.write 'Loading' do: io.write line 'done' do: io.error line 'warning' Recoverable draft reads return: walk struct: IOReadResult ok bool value string error string ok is true when value contains text. error is '' on success. Immediate EOF from io.read line returns ok false, value '', and error 'eof'. Stdin read failure returns error 'stdin read failed'. Allocation failure still runtime-stops because the program cannot reliably recover without memory. Failure policy: - io.write, io.write line, and io.error line: fail-stop runtime failure only for unrecoverable runtime/backend failure. - io.read line and io.read all: recoverable result data for ordinary EOF or stdin read failure; allocation failure remains fail-stop.",
     "level": 2
   },
   {
@@ -931,8 +940,8 @@
     "section": "io.write(string) -\u003e effect",
     "group": "Language",
     "url": "docs/STDLIB.html#io-write-string-effect",
-    "summary": "Writes the string to stdout without adding a newline and flushes stdout.",
-    "text": "WalkLang v1.9 Standard Library io.write string -\u003e effect Writes the string to stdout without adding a newline and flushes stdout.",
+    "summary": "Failure policy: fail-stop runtime failure. Writes the string to stdout without adding a newline and flushes stdout.",
+    "text": "WalkLang v1.9 Standard Library io.write string -\u003e effect Failure policy: fail-stop runtime failure. Writes the string to stdout without adding a newline and flushes stdout.",
     "level": 3
   },
   {
@@ -940,8 +949,8 @@
     "section": "io.write_line(string) -\u003e effect",
     "group": "Language",
     "url": "docs/STDLIB.html#io-write-line-string-effect",
-    "summary": "Writes the string and a trailing newline to stdout and flushes stdout.",
-    "text": "WalkLang v1.9 Standard Library io.write line string -\u003e effect Writes the string and a trailing newline to stdout and flushes stdout.",
+    "summary": "Failure policy: fail-stop runtime failure. Writes the string and a trailing newline to stdout and flushes stdout.",
+    "text": "WalkLang v1.9 Standard Library io.write line string -\u003e effect Failure policy: fail-stop runtime failure. Writes the string and a trailing newline to stdout and flushes stdout.",
     "level": 3
   },
   {
@@ -949,8 +958,8 @@
     "section": "io.error_line(string) -\u003e effect",
     "group": "Language",
     "url": "docs/STDLIB.html#io-error-line-string-effect",
-    "summary": "Writes the string and a trailing newline to stderr and flushes stderr.",
-    "text": "WalkLang v1.9 Standard Library io.error line string -\u003e effect Writes the string and a trailing newline to stderr and flushes stderr.",
+    "summary": "Failure policy: fail-stop runtime failure. Writes the string and a trailing newline to stderr and flushes stderr.",
+    "text": "WalkLang v1.9 Standard Library io.error line string -\u003e effect Failure policy: fail-stop runtime failure. Writes the string and a trailing newline to stderr and flushes stderr.",
     "level": 3
   },
   {
@@ -958,8 +967,8 @@
     "section": "io.read_line() -\u003e IOReadResult",
     "group": "Language",
     "url": "docs/STDLIB.html#io-read-line-ioreadresult",
-    "summary": "Reads one line from stdin. A trailing LF or CRLF line ending is stripped. A final unterminated line succeeds. Immediate EOF is returned as data with",
-    "text": "WalkLang v1.9 Standard Library io.read line -\u003e IOReadResult Reads one line from stdin. A trailing LF or CRLF line ending is stripped. A final unterminated line succeeds. Immediate EOF is returned as data with error 'eof'.",
+    "summary": "Failure policy: recoverable result data. Reads one line from stdin. A trailing LF or CRLF line ending is stripped. A final",
+    "text": "WalkLang v1.9 Standard Library io.read line -\u003e IOReadResult Failure policy: recoverable result data. Reads one line from stdin. A trailing LF or CRLF line ending is stripped. A final unterminated line succeeds. Immediate EOF is returned as data with error 'eof'.",
     "level": 3
   },
   {
@@ -967,8 +976,8 @@
     "section": "io.read_all() -\u003e IOReadResult",
     "group": "Language",
     "url": "docs/STDLIB.html#io-read-all-ioreadresult",
-    "summary": "Reads the remaining stdin as one runtime-owned string. EOF is a successful empty or completed read. Stdin read failure is returned as data.",
-    "text": "WalkLang v1.9 Standard Library io.read all -\u003e IOReadResult Reads the remaining stdin as one runtime-owned string. EOF is a successful empty or completed read. Stdin read failure is returned as data. ---",
+    "summary": "Failure policy: recoverable result data. Reads the remaining stdin as one runtime-owned string. EOF is a successful empty",
+    "text": "WalkLang v1.9 Standard Library io.read all -\u003e IOReadResult Failure policy: recoverable result data. Reads the remaining stdin as one runtime-owned string. EOF is a successful empty or completed read. Stdin read failure is returned as data. ---",
     "level": 3
   },
   {
@@ -985,8 +994,8 @@
     "section": "parse.int(string) -\u003e ParseIntResult",
     "group": "Language",
     "url": "docs/STDLIB.html#parse-int-string-parseintresult",
-    "summary": "Parses a base-10 integer with an optional leading sign. Invalid input returns error 'invalid int'; overflow returns error 'int out of range'.",
-    "text": "WalkLang v1.9 Standard Library parse.int string -\u003e ParseIntResult Parses a base-10 integer with an optional leading sign. Invalid input returns error 'invalid int'; overflow returns error 'int out of range'.",
+    "summary": "Failure policy: recoverable result data. Parses a base-10 integer with an optional leading sign. Invalid input returns",
+    "text": "WalkLang v1.9 Standard Library parse.int string -\u003e ParseIntResult Failure policy: recoverable result data. Parses a base-10 integer with an optional leading sign. Invalid input returns error 'invalid int'; overflow returns error 'int out of range'.",
     "level": 3
   },
   {
@@ -994,8 +1003,8 @@
     "section": "parse.float(string) -\u003e ParseFloatResult",
     "group": "Language",
     "url": "docs/STDLIB.html#parse-float-string-parsefloatresult",
-    "summary": "Parses a finite floating-point number. Invalid input returns error 'invalid float'; range errors return error 'float out of range'.",
-    "text": "WalkLang v1.9 Standard Library parse.float string -\u003e ParseFloatResult Parses a finite floating-point number. Invalid input returns error 'invalid float'; range errors return error 'float out of range'.",
+    "summary": "Failure policy: recoverable result data. Parses a finite floating-point number. Invalid input returns",
+    "text": "WalkLang v1.9 Standard Library parse.float string -\u003e ParseFloatResult Failure policy: recoverable result data. Parses a finite floating-point number. Invalid input returns error 'invalid float'; range errors return error 'float out of range'.",
     "level": 3
   },
   {
@@ -1003,8 +1012,8 @@
     "section": "parse.bool(string) -\u003e ParseBoolResult",
     "group": "Language",
     "url": "docs/STDLIB.html#parse-bool-string-parseboolresult",
-    "summary": "Parses exactly true or false. Other text returns error 'invalid bool'.",
-    "text": "WalkLang v1.9 Standard Library parse.bool string -\u003e ParseBoolResult Parses exactly true or false. Other text returns error 'invalid bool'. ---",
+    "summary": "Failure policy: recoverable result data. Parses exactly true or false. Other text returns error 'invalid bool'.",
+    "text": "WalkLang v1.9 Standard Library parse.bool string -\u003e ParseBoolResult Failure policy: recoverable result data. Parses exactly true or false. Other text returns error 'invalid bool'. ---",
     "level": 3
   },
   {
@@ -1013,7 +1022,7 @@
     "group": "Language",
     "url": "docs/STDLIB.html#draft-file",
     "summary": "Draft file APIs are UTF-8 text helpers. They use native process paths: relative paths resolve against the current working directory, absolute paths",
-    "text": "WalkLang v1.9 Standard Library Draft file Draft file APIs are UTF-8 text helpers. They use native process paths: relative paths resolve against the current working directory, absolute paths are passed to the host OS, and this draft slice does not normalize paths or expand ~. Empty paths runtime-stop for fail-stop file effects and reads. file.read, file.write, and file.append are fail-stop helpers. Missing files, permission errors, invalid UTF-8, embedded null bytes on read, and write failures stop the native program with a walk runtime error. Recoverable file helpers return draft result structs: walk struct: FileReadResult ok bool value string error string struct: FileActionResult ok bool value bool error string error is '' on success. FileActionResult.value is true on success and false on failure.",
+    "text": "WalkLang v1.9 Standard Library Draft file Draft file APIs are UTF-8 text helpers. They use native process paths: relative paths resolve against the current working directory, absolute paths are passed to the host OS, and this draft slice does not normalize paths or expand ~. Empty paths runtime-stop for fail-stop file effects and reads. file.read, file.write, and file.append are fail-stop helpers. Missing files, permission errors, invalid UTF-8, embedded null bytes on read, and write failures stop the native program with a walk runtime error. Recoverable file helpers return draft result structs: walk struct: FileReadResult ok bool value string error string struct: FileActionResult ok bool value bool error string error is '' on success. FileActionResult.value is true on success and false on failure. Failure policy: - file.read, file.write, and file.append: fail-stop runtime failure for ordinary file/path/read/write failures. - file.try read, file.try write, and file.try append: recoverable result data for ordinary file/path/read/write failures. - file.exists: boolean data for path existence and no runtime failure for an empty path.",
     "level": 2
   },
   {
@@ -1021,8 +1030,8 @@
     "section": "file.read(string) -\u003e string",
     "group": "Language",
     "url": "docs/STDLIB.html#file-read-string-string",
-    "summary": "Reads the whole UTF-8 text file into a runtime-owned string.",
-    "text": "WalkLang v1.9 Standard Library file.read string -\u003e string Reads the whole UTF-8 text file into a runtime-owned string.",
+    "summary": "Failure policy: fail-stop runtime failure. Reads the whole UTF-8 text file into a runtime-owned string.",
+    "text": "WalkLang v1.9 Standard Library file.read string -\u003e string Failure policy: fail-stop runtime failure. Reads the whole UTF-8 text file into a runtime-owned string.",
     "level": 3
   },
   {
@@ -1030,8 +1039,8 @@
     "section": "file.try_read(string) -\u003e FileReadResult",
     "group": "Language",
     "url": "docs/STDLIB.html#file-try-read-string-filereadresult",
-    "summary": "Reads a UTF-8 text file without runtime-stopping for ordinary file failures. Missing files return ok false, value '', and error 'file read failed'.",
-    "text": "WalkLang v1.9 Standard Library file.try read string -\u003e FileReadResult Reads a UTF-8 text file without runtime-stopping for ordinary file failures. Missing files return ok false, value '', and error 'file read failed'. Invalid UTF-8 and embedded null bytes are reported as file errors. Allocation failure still runtime-stops.",
+    "summary": "Failure policy: recoverable result data. Reads a UTF-8 text file without runtime-stopping for ordinary file failures.",
+    "text": "WalkLang v1.9 Standard Library file.try read string -\u003e FileReadResult Failure policy: recoverable result data. Reads a UTF-8 text file without runtime-stopping for ordinary file failures. Missing files return ok false, value '', and error 'file read failed'. Invalid UTF-8 and embedded null bytes are reported as file errors. Allocation failure still runtime-stops.",
     "level": 3
   },
   {
@@ -1039,8 +1048,8 @@
     "section": "file.write(string, string) -\u003e effect",
     "group": "Language",
     "url": "docs/STDLIB.html#file-write-string-string-effect",
-    "summary": "Overwrites the target path with UTF-8 text. Create parent directories first; this helper does not create them.",
-    "text": "WalkLang v1.9 Standard Library file.write string, string -\u003e effect Overwrites the target path with UTF-8 text. Create parent directories first; this helper does not create them.",
+    "summary": "Failure policy: fail-stop runtime failure. Overwrites the target path with UTF-8 text. Create parent directories first;",
+    "text": "WalkLang v1.9 Standard Library file.write string, string -\u003e effect Failure policy: fail-stop runtime failure. Overwrites the target path with UTF-8 text. Create parent directories first; this helper does not create them.",
     "level": 3
   },
   {
@@ -1048,8 +1057,8 @@
     "section": "file.try_write(string, string) -\u003e FileActionResult",
     "group": "Language",
     "url": "docs/STDLIB.html#file-try-write-string-string-fileactionresult",
-    "summary": "Attempts the same overwrite behavior as file.write and returns failures as data instead of runtime-stopping for ordinary file/path/write errors.",
-    "text": "WalkLang v1.9 Standard Library file.try write string, string -\u003e FileActionResult Attempts the same overwrite behavior as file.write and returns failures as data instead of runtime-stopping for ordinary file/path/write errors.",
+    "summary": "Failure policy: recoverable result data. Attempts the same overwrite behavior as file.write and returns failures as",
+    "text": "WalkLang v1.9 Standard Library file.try write string, string -\u003e FileActionResult Failure policy: recoverable result data. Attempts the same overwrite behavior as file.write and returns failures as data instead of runtime-stopping for ordinary file/path/write errors.",
     "level": 3
   },
   {
@@ -1057,8 +1066,8 @@
     "section": "file.append(string, string) -\u003e effect",
     "group": "Language",
     "url": "docs/STDLIB.html#file-append-string-string-effect",
-    "summary": "Appends UTF-8 text to the target file, creating the file if needed. Create parent directories first; this helper does not create them.",
-    "text": "WalkLang v1.9 Standard Library file.append string, string -\u003e effect Appends UTF-8 text to the target file, creating the file if needed. Create parent directories first; this helper does not create them.",
+    "summary": "Failure policy: fail-stop runtime failure. Appends UTF-8 text to the target file, creating the file if needed. Create",
+    "text": "WalkLang v1.9 Standard Library file.append string, string -\u003e effect Failure policy: fail-stop runtime failure. Appends UTF-8 text to the target file, creating the file if needed. Create parent directories first; this helper does not create them.",
     "level": 3
   },
   {
@@ -1066,8 +1075,8 @@
     "section": "file.try_append(string, string) -\u003e FileActionResult",
     "group": "Language",
     "url": "docs/STDLIB.html#file-try-append-string-string-fileactionresult",
-    "summary": "Attempts the same append behavior as file.append and returns failures as data instead of runtime-stopping for ordinary file/path/write errors.",
-    "text": "WalkLang v1.9 Standard Library file.try append string, string -\u003e FileActionResult Attempts the same append behavior as file.append and returns failures as data instead of runtime-stopping for ordinary file/path/write errors. walk imp: file do: file.write 'note.txt', 'hello' do: file.append 'note.txt', ' world' out: file.read 'note.txt'",
+    "summary": "Failure policy: recoverable result data. Attempts the same append behavior as file.append and returns failures as data",
+    "text": "WalkLang v1.9 Standard Library file.try append string, string -\u003e FileActionResult Failure policy: recoverable result data. Attempts the same append behavior as file.append and returns failures as data instead of runtime-stopping for ordinary file/path/write errors. walk imp: file do: file.write 'note.txt', 'hello' do: file.append 'note.txt', ' world' out: file.read 'note.txt'",
     "level": 3
   },
   {
@@ -1075,8 +1084,8 @@
     "section": "file.exists(string) -\u003e bool",
     "group": "Language",
     "url": "docs/STDLIB.html#file-exists-string-bool",
-    "summary": "Returns true when the path currently exists according to the host OS and false when it does not. Empty paths return false.",
-    "text": "WalkLang v1.9 Standard Library file.exists string -\u003e bool Returns true when the path currently exists according to the host OS and false when it does not. Empty paths return false. ---",
+    "summary": "Failure policy: returns false for ordinary missing or empty paths. Returns true when the path currently exists according to the host OS and",
+    "text": "WalkLang v1.9 Standard Library file.exists string -\u003e bool Failure policy: returns false for ordinary missing or empty paths. Returns true when the path currently exists according to the host OS and false when it does not. Empty paths return false. ---",
     "level": 3
   },
   {
@@ -1093,8 +1102,8 @@
     "section": "dir.list(string) -\u003e array[string]",
     "group": "Language",
     "url": "docs/STDLIB.html#dir-list-string-array-string",
-    "summary": "Lists names directly inside a directory, excluding . and ... Results are sorted by bytewise string order for deterministic output. Returned names are",
-    "text": "WalkLang v1.9 Standard Library dir.list string -\u003e arraystring Lists names directly inside a directory, excluding . and ... Results are sorted by bytewise string order for deterministic output. Returned names are not joined to the input path.",
+    "summary": "Failure policy: fail-stop runtime failure. Lists names directly inside a directory, excluding . and ... Results are",
+    "text": "WalkLang v1.9 Standard Library dir.list string -\u003e arraystring Failure policy: fail-stop runtime failure. Lists names directly inside a directory, excluding . and ... Results are sorted by bytewise string order for deterministic output. Returned names are not joined to the input path.",
     "level": 3
   },
   {
@@ -1102,8 +1111,8 @@
     "section": "dir.make(string) -\u003e effect",
     "group": "Language",
     "url": "docs/STDLIB.html#dir-make-string-effect",
-    "summary": "Creates one directory. It fails if the parent directory is missing or the path already exists.",
-    "text": "WalkLang v1.9 Standard Library dir.make string -\u003e effect Creates one directory. It fails if the parent directory is missing or the path already exists.",
+    "summary": "Failure policy: fail-stop runtime failure. Creates one directory. It fails if the parent directory is missing or the path",
+    "text": "WalkLang v1.9 Standard Library dir.make string -\u003e effect Failure policy: fail-stop runtime failure. Creates one directory. It fails if the parent directory is missing or the path already exists.",
     "level": 3
   },
   {
@@ -1111,8 +1120,8 @@
     "section": "dir.delete(string) -\u003e effect",
     "group": "Language",
     "url": "docs/STDLIB.html#dir-delete-string-effect",
-    "summary": "Deletes one empty directory. It fails for non-empty directories.",
-    "text": "WalkLang v1.9 Standard Library dir.delete string -\u003e effect Deletes one empty directory. It fails for non-empty directories. walk imp: dir imp: path do: dir.make 'data' do: dir.make path.join 'data', 'empty' var: files = dir.list 'data' do: dir.delete path.join 'data', 'empty' ---",
+    "summary": "Failure policy: fail-stop runtime failure. Deletes one empty directory. It fails for non-empty directories.",
+    "text": "WalkLang v1.9 Standard Library dir.delete string -\u003e effect Failure policy: fail-stop runtime failure. Deletes one empty directory. It fails for non-empty directories. walk imp: dir imp: path do: dir.make 'data' do: dir.make path.join 'data', 'empty' var: files = dir.list 'data' do: dir.delete path.join 'data', 'empty' ---",
     "level": 3
   },
   {
@@ -1129,8 +1138,8 @@
     "section": "path.join(string, string) -\u003e string",
     "group": "Language",
     "url": "docs/STDLIB.html#path-join-string-string-string",
-    "summary": "Joins two path segments with the host separator when neither side already has a separator at the join point.",
-    "text": "WalkLang v1.9 Standard Library path.join string, string -\u003e string Joins two path segments with the host separator when neither side already has a separator at the join point.",
+    "summary": "Failure policy: fail-stop runtime failure only for unrecoverable allocation failure. Joins two path segments with the host separator when neither side already has a",
+    "text": "WalkLang v1.9 Standard Library path.join string, string -\u003e string Failure policy: fail-stop runtime failure only for unrecoverable allocation failure. Joins two path segments with the host separator when neither side already has a separator at the join point.",
     "level": 3
   },
   {
@@ -1138,8 +1147,8 @@
     "section": "path.base(string) -\u003e string",
     "group": "Language",
     "url": "docs/STDLIB.html#path-base-string-string",
-    "summary": "Returns the substring after the final / or path separator. A path ending with a separator returns ''.",
-    "text": "WalkLang v1.9 Standard Library path.base string -\u003e string Returns the substring after the final / or path separator. A path ending with a separator returns ''.",
+    "summary": "Failure policy: fail-stop runtime failure only for unrecoverable allocation failure. Returns the substring after the final / or path separator. A path ending",
+    "text": "WalkLang v1.9 Standard Library path.base string -\u003e string Failure policy: fail-stop runtime failure only for unrecoverable allocation failure. Returns the substring after the final / or path separator. A path ending with a separator returns ''.",
     "level": 3
   },
   {
@@ -1147,8 +1156,8 @@
     "section": "path.ext(string) -\u003e string",
     "group": "Language",
     "url": "docs/STDLIB.html#path-ext-string-string",
-    "summary": "Returns the final extension in the last path segment, including the dot. Paths with no dot in the final segment return ''.",
-    "text": "WalkLang v1.9 Standard Library path.ext string -\u003e string Returns the final extension in the last path segment, including the dot. Paths with no dot in the final segment return ''. ---",
+    "summary": "Failure policy: fail-stop runtime failure only for unrecoverable allocation failure. Returns the final extension in the last path segment, including the dot. Paths",
+    "text": "WalkLang v1.9 Standard Library path.ext string -\u003e string Failure policy: fail-stop runtime failure only for unrecoverable allocation failure. Returns the final extension in the last path segment, including the dot. Paths with no dot in the final segment return ''. ---",
     "level": 3
   },
   {
@@ -1165,8 +1174,8 @@
     "section": "process.args() -\u003e array[string]",
     "group": "Language",
     "url": "docs/STDLIB.html#process-args-array-string",
-    "summary": "Returns command-line arguments passed after the executable path.",
-    "text": "WalkLang v1.9 Standard Library process.args -\u003e arraystring Returns command-line arguments passed after the executable path.",
+    "summary": "Failure policy: fail-stop runtime failure only for unrecoverable allocation failure. Returns command-line arguments passed after the executable path.",
+    "text": "WalkLang v1.9 Standard Library process.args -\u003e arraystring Failure policy: fail-stop runtime failure only for unrecoverable allocation failure. Returns command-line arguments passed after the executable path.",
     "level": 3
   },
   {
@@ -1174,8 +1183,8 @@
     "section": "process.arg_count() -\u003e int",
     "group": "Language",
     "url": "docs/STDLIB.html#process-arg-count-int",
-    "summary": "Returns the number of command-line arguments passed after the executable path.",
-    "text": "WalkLang v1.9 Standard Library process.arg count -\u003e int Returns the number of command-line arguments passed after the executable path.",
+    "summary": "Failure policy: no ordinary runtime failure. Returns the number of command-line arguments passed after the executable path.",
+    "text": "WalkLang v1.9 Standard Library process.arg count -\u003e int Failure policy: no ordinary runtime failure. Returns the number of command-line arguments passed after the executable path.",
     "level": 3
   },
   {
@@ -1183,8 +1192,8 @@
     "section": "process.env(string) -\u003e string?",
     "group": "Language",
     "url": "docs/STDLIB.html#process-env-string-string",
-    "summary": "Returns an environment variable value, or null when the variable is not set.",
-    "text": "WalkLang v1.9 Standard Library process.env string -\u003e string? Returns an environment variable value, or null when the variable is not set.",
+    "summary": "Failure policy: returns null when the variable is not set. Returns an environment variable value, or null when the variable is not set.",
+    "text": "WalkLang v1.9 Standard Library process.env string -\u003e string? Failure policy: returns null when the variable is not set. Returns an environment variable value, or null when the variable is not set.",
     "level": 3
   },
   {
@@ -1192,8 +1201,8 @@
     "section": "process.cwd() -\u003e string",
     "group": "Language",
     "url": "docs/STDLIB.html#process-cwd-string",
-    "summary": "Returns the current working directory as a runtime-owned string.",
-    "text": "WalkLang v1.9 Standard Library process.cwd -\u003e string Returns the current working directory as a runtime-owned string.",
+    "summary": "Failure policy: fail-stop runtime failure. Returns the current working directory as a runtime-owned string.",
+    "text": "WalkLang v1.9 Standard Library process.cwd -\u003e string Failure policy: fail-stop runtime failure. Returns the current working directory as a runtime-owned string.",
     "level": 3
   },
   {
@@ -1201,8 +1210,8 @@
     "section": "process.chdir(string) -\u003e effect",
     "group": "Language",
     "url": "docs/STDLIB.html#process-chdir-string-effect",
-    "summary": "Changes the native process current working directory. This is process-global state; tests and programs that use it should change back when needed. Empty",
-    "text": "WalkLang v1.9 Standard Library process.chdir string -\u003e effect Changes the native process current working directory. This is process-global state; tests and programs that use it should change back when needed. Empty paths and failed changes runtime-stop.",
+    "summary": "Failure policy: fail-stop runtime failure. Changes the native process current working directory. This is process-global",
+    "text": "WalkLang v1.9 Standard Library process.chdir string -\u003e effect Failure policy: fail-stop runtime failure. Changes the native process current working directory. This is process-global state; tests and programs that use it should change back when needed. Empty paths and failed changes runtime-stop.",
     "level": 3
   },
   {
@@ -1210,8 +1219,8 @@
     "section": "process.run(string, array[string]) -\u003e ProcessResult",
     "group": "Language",
     "url": "docs/STDLIB.html#process-run-string-array-string-processresult",
-    "summary": "Runs a command without invoking a shell. The first argument is the executable path or command name and the second argument is the argv array passed after the",
-    "text": "WalkLang v1.9 Standard Library process.run string, arraystring -\u003e ProcessResult Runs a command without invoking a shell. The first argument is the executable path or command name and the second argument is the argv array passed after the command. Captured stdout and stderr are UTF-8 text. A zero status returns ok true; a non-zero status returns ok false, keeps stdout, stderr, and status as data, and sets error 'process exited non-zero'. Spawn or wait failures return ok false, status -1, and a process error. Allocation failure still runtime-stops.",
+    "summary": "Failure policy: recoverable result data. Runs a command without invoking a shell. The first argument is the executable",
+    "text": "WalkLang v1.9 Standard Library process.run string, arraystring -\u003e ProcessResult Failure policy: recoverable result data. Runs a command without invoking a shell. The first argument is the executable path or command name and the second argument is the argv array passed after the command. Captured stdout and stderr are UTF-8 text. A zero status returns ok true; a non-zero status returns ok false, keeps stdout, stderr, and status as data, and sets error 'process exited non-zero'. Spawn or wait failures return ok false, status -1, and a process error. Allocation failure still runtime-stops.",
     "level": 3
   },
   {
@@ -1219,8 +1228,8 @@
     "section": "process.output(string, array[string]) -\u003e ProcessOutputResult",
     "group": "Language",
     "url": "docs/STDLIB.html#process-output-string-array-string-processoutputresult",
-    "summary": "Runs a command without invoking a shell and returns stdout in value. It is a convenience wrapper around process.run; non-zero status is still returned as",
-    "text": "WalkLang v1.9 Standard Library process.output string, arraystring -\u003e ProcessOutputResult Runs a command without invoking a shell and returns stdout in value. It is a convenience wrapper around process.run; non-zero status is still returned as data.",
+    "summary": "Failure policy: recoverable result data. Runs a command without invoking a shell and returns stdout in value. It is a",
+    "text": "WalkLang v1.9 Standard Library process.output string, arraystring -\u003e ProcessOutputResult Failure policy: recoverable result data. Runs a command without invoking a shell and returns stdout in value. It is a convenience wrapper around process.run; non-zero status is still returned as data.",
     "level": 3
   },
   {
@@ -1228,8 +1237,8 @@
     "section": "process.run_shell(string) -\u003e ProcessResult",
     "group": "Language",
     "url": "docs/STDLIB.html#process-run-shell-string-processresult",
-    "summary": "Runs a command through the host shell /bin/sh -c on POSIX hosts and cmd.exe /C on Windows hosts . This helper exists for explicit shell-dependent",
-    "text": "WalkLang v1.9 Standard Library process.run shell string -\u003e ProcessResult Runs a command through the host shell /bin/sh -c on POSIX hosts and cmd.exe /C on Windows hosts . This helper exists for explicit shell-dependent programs only; prefer process.run when arguments are known.",
+    "summary": "Failure policy: recoverable result data. Runs a command through the host shell /bin/sh -c on POSIX hosts and",
+    "text": "WalkLang v1.9 Standard Library process.run shell string -\u003e ProcessResult Failure policy: recoverable result data. Runs a command through the host shell /bin/sh -c on POSIX hosts and cmd.exe /C on Windows hosts . This helper exists for explicit shell-dependent programs only; prefer process.run when arguments are known.",
     "level": 3
   },
   {
@@ -1237,8 +1246,8 @@
     "section": "process.exit(int) -\u003e effect",
     "group": "Language",
     "url": "docs/STDLIB.html#process-exit-int-effect",
-    "summary": "Exits the native process with the given status code.",
-    "text": "WalkLang v1.9 Standard Library process.exit int -\u003e effect Exits the native process with the given status code. ---",
+    "summary": "Failure policy: intentional fail-stop process termination. Exits the native process with the given status code.",
+    "text": "WalkLang v1.9 Standard Library process.exit int -\u003e effect Failure policy: intentional fail-stop process termination. Exits the native process with the given status code. ---",
     "level": 3
   },
   {
@@ -1255,8 +1264,8 @@
     "section": "json.parse(string) -\u003e JsonResult",
     "group": "Language",
     "url": "docs/STDLIB.html#json-parse-string-jsonresult",
-    "summary": "Validates JSON text and returns compact JSON text with insignificant whitespace removed. Supported JSON text includes objects, arrays, strings, finite JSON",
-    "text": "WalkLang v1.9 Standard Library json.parse string -\u003e JsonResult Validates JSON text and returns compact JSON text with insignificant whitespace removed. Supported JSON text includes objects, arrays, strings, finite JSON number syntax, true, false, and null.",
+    "summary": "Failure policy: recoverable result data. Validates JSON text and returns compact JSON text with insignificant whitespace",
+    "text": "WalkLang v1.9 Standard Library json.parse string -\u003e JsonResult Failure policy: recoverable result data. Validates JSON text and returns compact JSON text with insignificant whitespace removed. Supported JSON text includes objects, arrays, strings, finite JSON number syntax, true, false, and null.",
     "level": 3
   },
   {
@@ -1264,8 +1273,8 @@
     "section": "json.stringify(string) -\u003e string",
     "group": "Language",
     "url": "docs/STDLIB.html#json-stringify-string-string",
-    "summary": "Escapes one WalkLang string as a JSON string literal.",
-    "text": "WalkLang v1.9 Standard Library json.stringify string -\u003e string Escapes one WalkLang string as a JSON string literal.",
+    "summary": "Failure policy: fail-stop runtime failure only for unrecoverable allocation failure. Escapes one WalkLang string as a JSON string literal.",
+    "text": "WalkLang v1.9 Standard Library json.stringify string -\u003e string Failure policy: fail-stop runtime failure only for unrecoverable allocation failure. Escapes one WalkLang string as a JSON string literal.",
     "level": 3
   },
   {
@@ -1273,8 +1282,8 @@
     "section": "json.read(string) -\u003e JsonResult",
     "group": "Language",
     "url": "docs/STDLIB.html#json-read-string-jsonresult",
-    "summary": "Reads a UTF-8 text file with the same file path policy as file.read, then parses it as JSON. File read failures and invalid JSON are returned as data.",
-    "text": "WalkLang v1.9 Standard Library json.read string -\u003e JsonResult Reads a UTF-8 text file with the same file path policy as file.read, then parses it as JSON. File read failures and invalid JSON are returned as data.",
+    "summary": "Failure policy: recoverable result data. Reads a UTF-8 text file with the same file path policy as file.read, then",
+    "text": "WalkLang v1.9 Standard Library json.read string -\u003e JsonResult Failure policy: recoverable result data. Reads a UTF-8 text file with the same file path policy as file.read, then parses it as JSON. File read failures and invalid JSON are returned as data.",
     "level": 3
   },
   {
@@ -1282,8 +1291,8 @@
     "section": "json.write(string, string) -\u003e effect",
     "group": "Language",
     "url": "docs/STDLIB.html#json-write-string-string-effect",
-    "summary": "Validates and compacts JSON text, then overwrites the target file. Invalid JSON or file write failures runtime-stop with walk runtime error.",
-    "text": "WalkLang v1.9 Standard Library json.write string, string -\u003e effect Validates and compacts JSON text, then overwrites the target file. Invalid JSON or file write failures runtime-stop with walk runtime error. ---",
+    "summary": "Failure policy: fail-stop runtime failure. Validates and compacts JSON text, then overwrites the target file. Invalid JSON",
+    "text": "WalkLang v1.9 Standard Library json.write string, string -\u003e effect Failure policy: fail-stop runtime failure. Validates and compacts JSON text, then overwrites the target file. Invalid JSON or file write failures runtime-stop with walk runtime error. ---",
     "level": 3
   },
   {
@@ -1300,8 +1309,8 @@
     "section": "term.is_tty() -\u003e bool",
     "group": "Language",
     "url": "docs/STDLIB.html#term-is-tty-bool",
-    "summary": "Returns true when stdout is an interactive terminal.",
-    "text": "WalkLang v1.9 Standard Library term.is tty -\u003e bool Returns true when stdout is an interactive terminal.",
+    "summary": "Failure policy: no ordinary runtime failure. Returns true when stdout is an interactive terminal.",
+    "text": "WalkLang v1.9 Standard Library term.is tty -\u003e bool Failure policy: no ordinary runtime failure. Returns true when stdout is an interactive terminal.",
     "level": 3
   },
   {
@@ -1309,8 +1318,8 @@
     "section": "term.color(string) -\u003e effect",
     "group": "Language",
     "url": "docs/STDLIB.html#term-color-string-effect",
-    "summary": "Sets the foreground color by supported color name when ANSI output is enabled.",
-    "text": "WalkLang v1.9 Standard Library term.color string -\u003e effect Sets the foreground color by supported color name when ANSI output is enabled.",
+    "summary": "Failure policy: fail-stop runtime failure. Sets the foreground color by supported color name when ANSI output is enabled.",
+    "text": "WalkLang v1.9 Standard Library term.color string -\u003e effect Failure policy: fail-stop runtime failure. Sets the foreground color by supported color name when ANSI output is enabled.",
     "level": 3
   },
   {
@@ -1318,8 +1327,8 @@
     "section": "term.background(string) -\u003e effect",
     "group": "Language",
     "url": "docs/STDLIB.html#term-background-string-effect",
-    "summary": "Sets the background color by supported color name when ANSI output is enabled.",
-    "text": "WalkLang v1.9 Standard Library term.background string -\u003e effect Sets the background color by supported color name when ANSI output is enabled.",
+    "summary": "Failure policy: fail-stop runtime failure. Sets the background color by supported color name when ANSI output is enabled.",
+    "text": "WalkLang v1.9 Standard Library term.background string -\u003e effect Failure policy: fail-stop runtime failure. Sets the background color by supported color name when ANSI output is enabled.",
     "level": 3
   },
   {
@@ -1327,8 +1336,8 @@
     "section": "term.style(string) -\u003e effect",
     "group": "Language",
     "url": "docs/STDLIB.html#term-style-string-effect",
-    "summary": "Sets a supported terminal style when ANSI output is enabled.",
-    "text": "WalkLang v1.9 Standard Library term.style string -\u003e effect Sets a supported terminal style when ANSI output is enabled.",
+    "summary": "Failure policy: fail-stop runtime failure. Sets a supported terminal style when ANSI output is enabled.",
+    "text": "WalkLang v1.9 Standard Library term.style string -\u003e effect Failure policy: fail-stop runtime failure. Sets a supported terminal style when ANSI output is enabled.",
     "level": 3
   },
   {
@@ -1336,8 +1345,8 @@
     "section": "term.reset() -\u003e effect",
     "group": "Language",
     "url": "docs/STDLIB.html#term-reset-effect",
-    "summary": "Resets terminal styling when ANSI output is enabled.",
-    "text": "WalkLang v1.9 Standard Library term.reset -\u003e effect Resets terminal styling when ANSI output is enabled.",
+    "summary": "Failure policy: no ordinary runtime failure. Resets terminal styling when ANSI output is enabled.",
+    "text": "WalkLang v1.9 Standard Library term.reset -\u003e effect Failure policy: no ordinary runtime failure. Resets terminal styling when ANSI output is enabled.",
     "level": 3
   },
   {
@@ -1345,8 +1354,8 @@
     "section": "term.clear() -\u003e effect",
     "group": "Language",
     "url": "docs/STDLIB.html#term-clear-effect",
-    "summary": "Clears the terminal screen and moves the cursor home when ANSI output is enabled.",
-    "text": "WalkLang v1.9 Standard Library term.clear -\u003e effect Clears the terminal screen and moves the cursor home when ANSI output is enabled.",
+    "summary": "Failure policy: no ordinary runtime failure. Clears the terminal screen and moves the cursor home when ANSI output is",
+    "text": "WalkLang v1.9 Standard Library term.clear -\u003e effect Failure policy: no ordinary runtime failure. Clears the terminal screen and moves the cursor home when ANSI output is enabled.",
     "level": 3
   },
   {
@@ -1354,8 +1363,8 @@
     "section": "term.move(int, int) -\u003e effect",
     "group": "Language",
     "url": "docs/STDLIB.html#term-move-int-int-effect",
-    "summary": "Moves the cursor to one-based column and row coordinates when ANSI output is enabled. Columns and rows less than 1 runtime-stop.",
-    "text": "WalkLang v1.9 Standard Library term.move int, int -\u003e effect Moves the cursor to one-based column and row coordinates when ANSI output is enabled. Columns and rows less than 1 runtime-stop.",
+    "summary": "Failure policy: fail-stop runtime failure. Moves the cursor to one-based column and row coordinates when ANSI output is",
+    "text": "WalkLang v1.9 Standard Library term.move int, int -\u003e effect Failure policy: fail-stop runtime failure. Moves the cursor to one-based column and row coordinates when ANSI output is enabled. Columns and rows less than 1 runtime-stop.",
     "level": 3
   },
   {
@@ -1363,8 +1372,8 @@
     "section": "term.width() -\u003e int",
     "group": "Language",
     "url": "docs/STDLIB.html#term-width-int",
-    "summary": "Returns the current terminal width when available, then COLUMNS when it is a positive integer, then 80.",
-    "text": "WalkLang v1.9 Standard Library term.width -\u003e int Returns the current terminal width when available, then COLUMNS when it is a positive integer, then 80.",
+    "summary": "Failure policy: no ordinary runtime failure. Returns the current terminal width when available, then COLUMNS when it is a",
+    "text": "WalkLang v1.9 Standard Library term.width -\u003e int Failure policy: no ordinary runtime failure. Returns the current terminal width when available, then COLUMNS when it is a positive integer, then 80.",
     "level": 3
   },
   {
@@ -1372,8 +1381,8 @@
     "section": "term.height() -\u003e int",
     "group": "Language",
     "url": "docs/STDLIB.html#term-height-int",
-    "summary": "Returns the current terminal height when available, then LINES when it is a positive integer, then 24.",
-    "text": "WalkLang v1.9 Standard Library term.height -\u003e int Returns the current terminal height when available, then LINES when it is a positive integer, then 24.",
+    "summary": "Failure policy: no ordinary runtime failure. Returns the current terminal height when available, then LINES when it is a",
+    "text": "WalkLang v1.9 Standard Library term.height -\u003e int Failure policy: no ordinary runtime failure. Returns the current terminal height when available, then LINES when it is a positive integer, then 24.",
     "level": 3
   },
   {
@@ -1381,8 +1390,8 @@
     "section": "term.read_key() -\u003e IOReadResult",
     "group": "Language",
     "url": "docs/STDLIB.html#term-read-key-ioreadresult",
-    "summary": "Reads one key from an interactive stdin terminal. On POSIX hosts this enters raw mode for a single key read and restores the terminal before returning.",
-    "text": "WalkLang v1.9 Standard Library term.read key -\u003e IOReadResult Reads one key from an interactive stdin terminal. On POSIX hosts this enters raw mode for a single key read and restores the terminal before returning. ---",
+    "summary": "Failure policy: recoverable result data. Reads one key from an interactive stdin terminal. On POSIX hosts this enters raw",
+    "text": "WalkLang v1.9 Standard Library term.read key -\u003e IOReadResult Failure policy: recoverable result data. Reads one key from an interactive stdin terminal. On POSIX hosts this enters raw mode for a single key read and restores the terminal before returning. ---",
     "level": 3
   },
   {
@@ -1399,8 +1408,8 @@
     "section": "http.get(string) -\u003e HttpResult",
     "group": "Language",
     "url": "docs/STDLIB.html#http-get-string-httpresult",
-    "summary": "Sends a GET request to the URL.",
-    "text": "WalkLang v1.9 Standard Library http.get string -\u003e HttpResult Sends a GET request to the URL.",
+    "summary": "Failure policy: recoverable result data. Sends a GET request to the URL.",
+    "text": "WalkLang v1.9 Standard Library http.get string -\u003e HttpResult Failure policy: recoverable result data. Sends a GET request to the URL.",
     "level": 3
   },
   {
@@ -1408,8 +1417,8 @@
     "section": "http.post(string, string) -\u003e HttpResult",
     "group": "Language",
     "url": "docs/STDLIB.html#http-post-string-string-httpresult",
-    "summary": "Sends a POST request with the string body.",
-    "text": "WalkLang v1.9 Standard Library http.post string, string -\u003e HttpResult Sends a POST request with the string body.",
+    "summary": "Failure policy: recoverable result data. Sends a POST request with the string body.",
+    "text": "WalkLang v1.9 Standard Library http.post string, string -\u003e HttpResult Failure policy: recoverable result data. Sends a POST request with the string body.",
     "level": 3
   },
   {
@@ -1417,8 +1426,8 @@
     "section": "http.request(string, string, string) -\u003e HttpResult",
     "group": "Language",
     "url": "docs/STDLIB.html#http-request-string-string-string-httpresult",
-    "summary": "Sends a request with method, url, and body. Empty method or URL returns a recoverable error before any runtime backend is started.",
-    "text": "WalkLang v1.9 Standard Library http.request string, string, string -\u003e HttpResult Sends a request with method, url, and body. Empty method or URL returns a recoverable error before any runtime backend is started. ---",
+    "summary": "Failure policy: recoverable result data. Sends a request with method, url, and body. Empty method or URL returns a",
+    "text": "WalkLang v1.9 Standard Library http.request string, string, string -\u003e HttpResult Failure policy: recoverable result data. Sends a request with method, url, and body. Empty method or URL returns a recoverable error before any runtime backend is started. ---",
     "level": 3
   },
   {
@@ -1435,8 +1444,8 @@
     "section": "html.escape(string) -\u003e string",
     "group": "Language",
     "url": "docs/STDLIB.html#html-escape-string-string",
-    "summary": "Escapes \u0026, \u003c, \u003e, \", and ' for HTML text contexts.",
-    "text": "WalkLang v1.9 Standard Library html.escape string -\u003e string Escapes \u0026, \u003c, \u003e, \", and ' for HTML text contexts.",
+    "summary": "Failure policy: fail-stop runtime failure only for unrecoverable allocation failure. Escapes \u0026, \u003c, \u003e, \", and ' for HTML text contexts.",
+    "text": "WalkLang v1.9 Standard Library html.escape string -\u003e string Failure policy: fail-stop runtime failure only for unrecoverable allocation failure. Escapes \u0026, \u003c, \u003e, \", and ' for HTML text contexts.",
     "level": 3
   },
   {
@@ -1444,8 +1453,8 @@
     "section": "html.h1(string) -\u003e string",
     "group": "Language",
     "url": "docs/STDLIB.html#html-h1-string-string",
-    "summary": "Returns an escaped \u003ch1\u003e...\u003c/h1\u003e string.",
-    "text": "WalkLang v1.9 Standard Library html.h1 string -\u003e string Returns an escaped \u003ch1\u003e...\u003c/h1\u003e string.",
+    "summary": "Failure policy: fail-stop runtime failure only for unrecoverable allocation failure. Returns an escaped \u003ch1\u003e...\u003c/h1\u003e string.",
+    "text": "WalkLang v1.9 Standard Library html.h1 string -\u003e string Failure policy: fail-stop runtime failure only for unrecoverable allocation failure. Returns an escaped \u003ch1\u003e...\u003c/h1\u003e string.",
     "level": 3
   },
   {
@@ -1453,8 +1462,8 @@
     "section": "html.p(string) -\u003e string",
     "group": "Language",
     "url": "docs/STDLIB.html#html-p-string-string",
-    "summary": "Returns an escaped \u003cp\u003e...\u003c/p\u003e string.",
-    "text": "WalkLang v1.9 Standard Library html.p string -\u003e string Returns an escaped \u003cp\u003e...\u003c/p\u003e string.",
+    "summary": "Failure policy: fail-stop runtime failure only for unrecoverable allocation failure. Returns an escaped \u003cp\u003e...\u003c/p\u003e string.",
+    "text": "WalkLang v1.9 Standard Library html.p string -\u003e string Failure policy: fail-stop runtime failure only for unrecoverable allocation failure. Returns an escaped \u003cp\u003e...\u003c/p\u003e string.",
     "level": 3
   },
   {
@@ -1462,8 +1471,8 @@
     "section": "html.button(string) -\u003e string",
     "group": "Language",
     "url": "docs/STDLIB.html#html-button-string-string",
-    "summary": "Returns an escaped \u003cbutton\u003e...\u003c/button\u003e string.",
-    "text": "WalkLang v1.9 Standard Library html.button string -\u003e string Returns an escaped \u003cbutton\u003e...\u003c/button\u003e string. ---",
+    "summary": "Failure policy: fail-stop runtime failure only for unrecoverable allocation failure. Returns an escaped \u003cbutton\u003e...\u003c/button\u003e string.",
+    "text": "WalkLang v1.9 Standard Library html.button string -\u003e string Failure policy: fail-stop runtime failure only for unrecoverable allocation failure. Returns an escaped \u003cbutton\u003e...\u003c/button\u003e string. ---",
     "level": 3
   },
   {
@@ -1490,7 +1499,7 @@
     "group": "Language",
     "url": "docs/ERRORS.html#walklang-v1-diagnostics",
     "summary": "WalkLang diagnostics are compiler-reported errors and warnings. They are intended to be deterministic enough for conformance tests.",
-    "text": "WalkLang v1 Diagnostics WalkLang v1 Diagnostics WalkLang diagnostics are compiler-reported errors and warnings. They are intended to be deterministic enough for conformance tests. Use runtime failure for native program failures after compilation. Use failed assertion for walk test assertion failures. Use recoverable result data for draft APIs that return ok, value, and error fields instead of stopping the native program.",
+    "text": "WalkLang v1 Diagnostics WalkLang v1 Diagnostics WalkLang diagnostics are compiler-reported errors and warnings. They are intended to be deterministic enough for conformance tests. Use runtime failure for native program failures after compilation. Use failed assertion for walk test assertion failures. Use recoverable result data for draft APIs that return ok, value, and error fields instead of stopping the native program. Recoverable result data is runtime data, not a diagnostic, failed assertion, or runtime failure. It is the preferred shape for ordinary documented failures in draft APIs that are intended to let the program continue.",
     "level": 1
   },
   {
@@ -2030,7 +2039,7 @@
     "group": "Releases",
     "url": "docs/V3.html#create-a-package",
     "summary": "Create a package project: Generated layout:",
-    "text": "WalkLang v3 Package Ecosystem Create A Package Create a package project: bash walk package init geometry cd geometry Generated layout: text geometry/ README.md walk.toml src/ main.walk geometry/ core.walk tests/ main test.walk build/ Package names must contain only letters, numbers, and , and must start with a letter or . This keeps package names usable as import namespaces.",
+    "text": "WalkLang v3 Package Ecosystem Create A Package Create a package project: bash walk package init geometry cd geometry Generated layout: text geometry/ README.md walk.toml src/ main.walk geometry/ core.walk tests/ main test.walk build/ Package names must contain only letters, numbers, and , and must start with a letter or . This keeps package names usable as import namespaces. std is reserved as a future first-party collection root. Publishing also rejects package names reserved for current or future built-in roots, including current built-in module names such as math, string, array, io, file, process, json, term, http, and html.",
     "level": 2
   },
   {
@@ -2038,8 +2047,8 @@
     "section": "Package Modules",
     "group": "Releases",
     "url": "docs/V3.html#package-modules",
-    "summary": "Package modules are imported with dotted names: The import maps to:",
-    "text": "WalkLang v3 Package Ecosystem Package Modules Package modules are imported with dotted names: walk imp: geometry.core out: geometry.core.double 3 The import maps to: text src/geometry/core.walk Exports still use exp: inside the module. walk func: double x int int return: x 2 exp: double",
+    "summary": "Package modules are imported with dotted names: The first segment is the collection root. In imp: geometry.core, the",
+    "text": "WalkLang v3 Package Ecosystem Package Modules Package modules are imported with dotted names: walk imp: geometry.core out: geometry.core.double 3 The first segment is the collection root. In imp: geometry.core, the collection root is geometry, the module path is geometry/core.walk, and the generated C prefix is geometry core . The import maps to: text src/geometry/core.walk Exports still use exp: inside the module. walk func: double x int int return: x 2 exp: double",
     "level": 2
   },
   {
@@ -2048,7 +2057,7 @@
     "group": "Releases",
     "url": "docs/V3.html#pin-dependencies",
     "summary": "Project dependencies live in walk.toml. Dependency versions must use MAJOR.MINOR.PATCH.",
-    "text": "WalkLang v3 Package Ecosystem Pin Dependencies Project dependencies live in walk.toml. toml name = \"shape app\" version = \"0.1.0\" entry = \"src/main.walk\" build output = \"build/shape app\" release = false dependencies geometry = \"0.1.0\" Dependency versions must use MAJOR.MINOR.PATCH.",
+    "text": "WalkLang v3 Package Ecosystem Pin Dependencies Project dependencies live in walk.toml. toml name = \"shape app\" version = \"0.1.0\" entry = \"src/main.walk\" build output = \"build/shape app\" mode = \"debug\" dependencies geometry = \"0.1.0\" Dependency versions must use MAJOR.MINOR.PATCH.",
     "level": 2
   },
   {
@@ -2066,7 +2075,7 @@
     "group": "Releases",
     "url": "docs/V3.html#publish-a-package",
     "summary": "Publish to a local registry directory: Publish rules:",
-    "text": "WalkLang v3 Package Ecosystem Publish A Package Publish to a local registry directory: bash walk package publish ../registry Publish rules: text README.md is required and must be non-empty package name must be import-safe package version must be MAJOR.MINOR.PATCH walk check --warnings=error must pass walk test --warnings=error must pass existing registry versions are not overwritten build/, .walk/, .git/, and walk.lock are not published The published package lands at: text \u003cregistry\u003e/\u003cname\u003e/\u003cversion\u003e/",
+    "text": "WalkLang v3 Package Ecosystem Publish A Package Publish to a local registry directory: bash walk package publish ../registry Publish rules: text README.md is required and must be non-empty package name must be import-safe package name must not be a reserved built-in collection root package version must be MAJOR.MINOR.PATCH walk check --warnings=error must pass walk test --warnings=error must pass existing registry versions are not overwritten build/, .walk/, .git/, and walk.lock are not published The published package lands at: text \u003cregistry\u003e/\u003cname\u003e/\u003cversion\u003e/",
     "level": 2
   },
   {
@@ -2188,11 +2197,11 @@
   },
   {
     "title": "WalkLang v5 Runtime and Backend Maturity",
-    "section": "Release Builds",
+    "section": "Build Modes",
     "group": "Tools",
-    "url": "docs/V5.html#release-builds",
-    "summary": "Release builds use the native C compiler with optimization enabled: --release adds:",
-    "text": "WalkLang v5 Runtime and Backend Maturity Release Builds Release builds use the native C compiler with optimization enabled: bash walk build main.walk -o build/main --release --release adds: text -O3 -DNDEBUG Custom compiler flags still work and are appended after the release defaults: bash walk build main.walk -o build/main --release --cflag -DWALK TRACE=0 Use --cc or WALK CC to choose the native compiler.",
+    "url": "docs/V5.html#build-modes",
+    "summary": "Builds have an explicit mode. Debug is the default and emits native compiler flags suitable for inspection:",
+    "text": "WalkLang v5 Runtime and Backend Maturity Build Modes Builds have an explicit mode. Debug is the default and emits native compiler flags suitable for inspection: bash walk build main.walk -o build/main --mode debug walk run main.walk --debug Debug mode adds: text -g -O0 Release mode keeps optimized native builds: bash walk build main.walk -o build/main --mode release walk run main.walk --release Release mode adds: text -O3 -DNDEBUG --release remains a compatibility alias for --mode release; --debug is an alias for --mode debug. Custom compiler flags still work and are appended after the selected mode flags: bash walk build main.walk -o build/main --mode release --cflag -DWALK TRACE=0 Use --cc or WALK CC to choose the native compiler.",
     "level": 2
   },
   {
@@ -2480,7 +2489,7 @@
     "group": "Project",
     "url": "docs/ARCHITECTURE.html#walklang-architecture",
     "summary": "WalkLang is a compiled, general-purpose language for readable native programs on any OS. Example:",
-    "text": "ARCHITECTURE.md WalkLang Architecture WalkLang is a compiled, general-purpose language for readable native programs on any OS. text main.walk -\u003e lexer -\u003e parser -\u003e typed IR -\u003e C -\u003e native executable Example: walk main.walk out: 'hello' Build shape: text main.walk -\u003e main.c -\u003e main / main.exe ---",
+    "text": "ARCHITECTURE.md WalkLang Architecture WalkLang is a compiled, general-purpose language for readable native programs on any OS. text main.walk -\u003e lexer -\u003e parser -\u003e typed IR -\u003e C -\u003e native executable Example: walk main.walk out: 'hello' Build shape: text main.walk -\u003e main.c -\u003e main / main.exe Build mode is explicit at the tool boundary. Debug mode is the default and uses inspectable native flags -g -O0 ; release mode uses optimized native flags -O3 -DNDEBUG . --release remains a compatibility alias for --mode release. ---",
     "level": 2
   },
   {
@@ -2489,7 +2498,7 @@
     "group": "Project",
     "url": "docs/ARCHITECTURE.html#1-identity",
     "summary": "Purpose: Example:",
-    "text": "ARCHITECTURE.md 1. Identity text Name: WalkLang Ext: .walk Kind: compiled Target: C Output: native executable VM: no GC: no public v1.1 promise Purpose: text Readable source. Native output. Small rules. No syntax ideology maze. Example: walk var: a = 5 var: b = 10 out: + a b Means: text create a create b print a + b Core text IO stays small: walk var: name = in: 'Name? ' out: name in: reads one required stdin line. Larger IO surfaces belong in explicit modules. Draft side-effect module calls go through do: so effects remain visible: walk imp: io do: io.write 'Loading' do: io.write line 'done' ---",
+    "text": "ARCHITECTURE.md 1. Identity text Name: WalkLang Ext: .walk Kind: compiled Target: C Output: native executable VM: no GC: no public v1.1 promise Purpose: text Readable source. Native output. Small rules. No syntax ideology maze. Example: walk var: a = 5 var: b = 10 out: + a b Means: text create a create b print a + b Core text IO stays small: walk var: name = in: 'Name? ' out: name in: reads one required stdin line. Larger IO surfaces belong in explicit modules. Draft side-effect module calls go through do: so effects remain visible: walk imp: io do: io.write 'Loading' do: io.write line 'done' Draft scope cleanup uses defer: with the same visible effect boundary: walk imp: term do: term.color 'red' defer: do term.reset ---",
     "level": 2
   },
   {
@@ -2642,7 +2651,7 @@
     "group": "Project",
     "url": "docs/DESIGN_RULES.html#io-effect-policy",
     "summary": "Side-effect module calls use one draft statement form: Do not add one-off command keywords for each IO action. out: and in: stay",
-    "text": "WalkLang v1 Design Rules IO Effect Policy Side-effect module calls use one draft statement form: walk do: module.effect args Do not add one-off command keywords for each IO action. out: and in: stay as the small stable console primitives; broader IO belongs in explicit modules. Draft IO APIs must say whether they are fail-stop or recoverable. Until a recoverable result shape is stable, broad IO such as files, processes, JSON, and networking must remain draft or gated. Draft recoverable IO uses concrete result structs instead of nullable-only returns. The first accepted draft shape is: text ok bool value T error string ok is true only when value is meaningful. error is '' on success and a short machine-testable code on failure, such as eof, invalid int, or stdin read failed. This shape is intentionally concrete until generic result structs are stable. Runtime-created strings live for the native process lifetime. This is acceptable for CLI-oriented IO and not sufficient justification for long-running servers. Early IO is UTF-8 text IO. Binary IO, streaming handles, and path normalization need separate design before stabilization. The current draft file slice uses native process paths without normalization, ~ expansion, or binary mode. Relative paths resolve against the process current working directory. Draft file.read, file.write, and file.append are fail-stop helpers; file.try read, file.try write, and file.try append return draft recoverable result structs for ordinary file/path/read/write failures; file.exists returns a boolean path-existence check. New built-in IO APIs must be registered in the built-in API registry with their module, function name, parameter types, return type, effect flag, draft/stable status, and C runtime helper.",
+    "text": "WalkLang v1 Design Rules IO Effect Policy Side-effect module calls use one draft statement form: walk do: module.effect args Do not add one-off command keywords for each IO action. out: and in: stay as the small stable console primitives; broader IO belongs in explicit modules. Draft IO APIs must say whether they are fail-stop or recoverable. Until a recoverable result shape is stable, broad IO such as files, processes, JSON, and networking must remain draft or gated. Recoverable result values are the preferred policy for ordinary documented failures. Use fail-stop runtime failures only when the program cannot reliably continue, when the API is intentionally an effect helper with no recovery surface, or when a separate recoverable helper already exists. Draft recoverable IO uses concrete result structs instead of nullable-only returns. The first accepted draft shape is: text ok bool value T error string ok is true only when value is meaningful. error is '' on success and a short machine-testable code on failure, such as eof, invalid int, or stdin read failed. This shape is intentionally concrete until generic result structs are stable. Runtime-created strings live for the native process lifetime. This is acceptable for CLI-oriented IO and not sufficient justification for long-running servers. Early IO is UTF-8 text IO. Binary IO, streaming handles, and path normalization need separate design before stabilization. The current draft file slice uses native process paths without normalization, ~ expansion, or binary mode. Relative paths resolve against the process current working directory. Draft file.read, file.write, and file.append are fail-stop helpers; file.try read, file.try write, and file.try append return draft recoverable result structs for ordinary file/path/read/write failures; file.exists returns a boolean path-existence check. New built-in IO APIs must be registered in the built-in API registry with their module, function name, parameter types, return type, effect flag, draft/stable status, and C runtime helper.",
     "level": 2
   },
   {
@@ -2687,7 +2696,7 @@
     "group": "Project",
     "url": "docs/EXPLICIT_SYSTEMS_TRACK.html#walklang-explicit-systems-track",
     "summary": "Date opened: 2026-05-25. This document is the persistent tracker for one explicit-language implementation",
-    "text": "WalkLang Explicit Systems Track WalkLang Explicit Systems Track Status: planned. Date opened: 2026-05-25. This document is the persistent tracker for one explicit-language implementation slice. It covers four related improvements inspired by Odin-style language discipline: 1. Scope cleanup with defer:. 2. Result values instead of exception-like control flow. 3. Package collections as explicit import roots. 4. First-class build modes. This is one implementation track, not multiple phases. Implement all four items in one release slice, or stop and record the blocker here before changing the scope.",
+    "text": "WalkLang Explicit Systems Track WalkLang Explicit Systems Track Status: implemented in v5.13.0. Date opened: 2026-05-25. This document is the persistent tracker for one explicit-language implementation slice. It covers four related improvements inspired by Odin-style language discipline: 1. Scope cleanup with defer:. 2. Result values instead of exception-like control flow. 3. Package collections as explicit import roots. 4. First-class build modes. This is one implementation track, not multiple phases. Implement all four items in one release slice, or stop and record the blocker here before changing the scope.",
     "level": 1
   },
   {
@@ -2705,7 +2714,7 @@
     "group": "Project",
     "url": "docs/EXPLICIT_SYSTEMS_TRACK.html#status",
     "summary": "| Item | Status | Notes | | --- | --- | --- |",
-    "text": "WalkLang Explicit Systems Track Status | Item | Status | Notes | | --- | --- | --- | | defer: scope cleanup | Planned | New draft statement form. | | Result-value policy | Planned | Standardize recoverable result behavior before adding broader APIs. | | Package collections | Planned | Formalize explicit import roots without changing existing import syntax. | | Build modes | Planned | Make debug/release mode selection explicit and testable. |",
+    "text": "WalkLang Explicit Systems Track Status | Item | Status | Notes | | --- | --- | --- | | defer: scope cleanup | Implemented | New draft statement form. | | Result-value policy | Implemented | Recoverable result behavior standardized in docs and conformance tests. | | Package collections | Implemented | Explicit import roots documented; reserved roots enforced. | | Build modes | Implemented | Debug/release mode selection is explicit and testable. |",
     "level": 2
   },
   {
@@ -2777,7 +2786,7 @@
     "group": "Project",
     "url": "docs/EXPLICIT_SYSTEMS_TRACK.html#status-log",
     "summary": "2026-05-25: Track opened from design discussion. No implementation has started. Current decision: keep WalkLang explicit and implement these four items as one",
-    "text": "WalkLang Explicit Systems Track Status Log - 2026-05-25: Track opened from design discussion. No implementation has started. Current decision: keep WalkLang explicit and implement these four items as one future release slice.",
+    "text": "WalkLang Explicit Systems Track Status Log - 2026-05-25: Track opened from design discussion. No implementation has started. Current decision: keep WalkLang explicit and implement these four items as one future release slice. - 2026-05-25: Track implemented for v5.13.0. Draft defer: cleanup, recoverable-result policy docs, package collection-root enforcement, and first-class build modes are covered by focused tests and the release verification gate recorded in docs/STATUS.md.",
     "level": 2
   },
   {
@@ -2867,7 +2876,7 @@
     "group": "Project",
     "url": "docs/ROADMAP.html#walklang-roadmap",
     "summary": "Build the smallest useful language first. WalkLang should become real in layers:",
-    "text": "ROADMAP.md WalkLang Roadmap Build the smallest useful language first. text v0: compile real programs v0.1: test and explore v1: harden and grow v1.1: stabilize the language contract v1.2: make projects and releases real v1.3: grow the standard library carefully v1.6: local function type inference v1.7: required-line stdin input v1.8: terminal game helpers v1.9: string interpolation v2: data modeling v2.1: methods and stronger composition v2.2: simple generic functions v3: ecosystem v4: professional tooling v5: runtime/backend maturity v5.12: draft network and rich-runtime boundary v5.12.1: docs search v5.12.2: docs search result previews v5.12.3: docs sidebar navigation cleanup later: package/runtime tracks and advanced language work WalkLang should become real in layers: text first: programs compile second: behavior is specified third: tools are reliable fourth: users can build projects fifth: ecosystem grows around stable rules ---",
+    "text": "ROADMAP.md WalkLang Roadmap Build the smallest useful language first. text v0: compile real programs v0.1: test and explore v1: harden and grow v1.1: stabilize the language contract v1.2: make projects and releases real v1.3: grow the standard library carefully v1.6: local function type inference v1.7: required-line stdin input v1.8: terminal game helpers v1.9: string interpolation v2: data modeling v2.1: methods and stronger composition v2.2: simple generic functions v3: ecosystem v4: professional tooling v5: runtime/backend maturity v5.12: draft network and rich-runtime boundary v5.12.1: docs search v5.12.2: docs search result previews v5.12.3: docs sidebar navigation cleanup v5.13.0: explicit systems track later: package/runtime tracks and advanced language work WalkLang should become real in layers: text first: programs compile second: behavior is specified third: tools are reliable fourth: users can build projects fifth: ecosystem grows around stable rules ---",
     "level": 2
   },
   {
@@ -3181,8 +3190,8 @@
     "section": "WalkLang Status",
     "group": "Project",
     "url": "docs/STATUS.html#walklang-status",
-    "summary": "Stable language contract: v1.9. Current compiler/tooling/docs release: v5.12.3 docs sidebar navigation cleanup",
-    "text": "WalkLang Status WalkLang Status Stable language contract: v1.9. Current compiler/tooling/docs release: v5.12.3 docs sidebar navigation cleanup over the v5.12.2 generated search result previews and the v5.12.0 draft network and rich-runtime IO completion. Experimental implemented language surface: v2.2. Planning status on 2026-05-25: docs/EXPLICIT SYSTEMS TRACK.md now tracks the future one-pass explicit-systems implementation slice: draft defer:, a recoverable result-value policy, package collections, and first-class build modes. No compiler behavior changed in this planning update. State: v5.12.3 cleans up the generated docs sidebar so public navigation is organized by reader task and document role instead of exposed release milestones. Sidebar labels now use topic names such as Syntax, Specification, Standard Library, API Reference, Architecture, Purpose, and Version History. Historical V1, V2, and V3 milestone pages remain generated and linkable, but they no longer appear as top-level sidebar entries. The stable language contract remains v1.9, and the draft runtime API surface remains unchanged from v5.12.0. v5.12.3 verification on 2026-05-24: focused site-generator tests passed with go test ./scripts -run TestSidebarUsesTopicNavigationInsteadOfVersionMilestones -count=1; full site-generator tests passed with go test ./scripts -count=1; full go test -count=1 ./... passed; go build -trimpath -ldflags \"-X main.version=v5.12.3\" -o build/walk ./cmd/walk passed; ./build/walk version reported v5.12.3; ./build/walk check --warnings=error tests/pass/walk tests.walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.9 stress ok; scripts/build-docs-site.sh passed; scripts/check-docs-site.sh passed after staging generated docs; a generated HTML check confirmed public/docs/SPEC.html contains topic sidebar labels for Syntax, Specification, API Reference, Architecture, Purpose, and Version History without top-level V1, V2, or V3 entries; a local Chrome headless smoke against python3 -m http.server captured /tmp/walklang-sidebar-v5123.png; scripts/release.sh v5.12.3 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; the host release binary reported v5.12.3 from walk version; and scoped git diff --check passed for the release files changed in this slice. State: v5.12.2 improves generated docs search result quality. The site generator now emits section-level search entries with parent doc/group context, section anchors, clean prose summaries, and cleaned full text. The client-side search UI now renders a section title, context line, and readable preview instead of a raw sliced Markdown snippet, with ranking boosts for section, summary, and API-shaped matches such as array.push. The stable language contract remains v1.9, and the draft runtime API surface remains unchanged from v5.12.0. v5.12.2 verification on 2026-05-24: focused site-generator tests passed with go test ./scripts -run 'TestLayoutUsesRootFaviconAndCompactSidebarIcon|TestSearchIndexUsesSectionsAndCleanSummaries|TestSiteCSSUsesDarkWalkLangBlueTheme' -count=1; full go test -count=1 ./... passed; go build -trimpath -ldflags \"-X main.version=v5.12.2\" -o build/walk ./cmd/walk passed; ./build/walk version reported v5.12.2; ./build/walk check --warnings=error tests/pass/walk tests.walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.9 stress ok; scripts/build-docs-site.sh passed; scripts/check-docs-site.sh passed after staging generated docs; a local Chrome headless smoke against python3 -m http.server typed function and push into the docs search box, captured /tmp/walklang-docs-search-function.png and /tmp/walklang-docs-search-push.png, verified clean section/context/summary cards, and confirmed push ranks array.push arrayT, T -\u003e arrayT first; and scripts/release.sh v5.12.2 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS, with the host release binary reporting v5.12.2 from walk version. State: v5.12.1 adds a generated static docs search box to every hosted docs page. The site generator now emits docs/search.json from repo Markdown docs, loads a small client-side search script, and ranks API-heading matches such as array.push above broad roadmap/status mentions. The stable language contract remains v1.9, and the draft runtime API surface remains unchanged from v5.12.0. v5.12.1 verification on 2026-05-24: focused site-generator tests passed with go test ./scripts -run 'TestLayoutUsesRootFaviconAndCompactSidebarIcon|TestSearchIndexIncludesRawDocText|TestSiteCSSUsesDarkWalkLangBlueTheme' -count=1; full go test -count=1 ./... passed; go build -trimpath -ldflags \"-X main.version=v5.12.1\" -o build/walk ./cmd/walk passed; ./build/walk version reported v5.12.1; ./build/walk check --warnings=error tests/pass/walk tests.walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.9 stress ok; scripts/build-docs-site.sh passed; scripts/check-docs-site.sh passed after staging generated docs; a local Chrome headless smoke against python3 -m http.server typed push into the docs search box and verified the first result linked to ../docs/STDLIB.html with the array.push snippet; and scripts/release.sh v5.12.1 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS, with the host release binary reporting v5.12.1 from walk version; git diff --check --cached and git diff --check passed. State: v5.12.0 completes IO PLAN.md Roadmap Phase 5, Network And Rich Runtimes, as draft compiler APIs and design docs. Draft HTTP helpers now cover http.get, http.post, and http.request through recoverable HttpResult values. Draft HTTP uses the system curl executable as its runtime backend, does not invoke a shell, follows redirects, uses a 10 second timeout, caps response bodies at 1 MiB, treats response bodies as UTF-8 text, and returns ordinary network, TLS, backend, timeout, size, and HTTP status failures as data. Draft HTML helpers now cover html.escape, html.h1, html.p, and html.button as escaped text helpers only. Rich runtime tracks for web server, native graphics, WASM/browser, and playground/compiler explorer integration remain future package/backend work documented in docs/RICH RUNTIMES.md. Stable language contract remains v1.9. v5.12.0 verification on 2026-05-23: focused Phase 5 tests first failed because http and html were not built-in modules, then go test ./cmd/walk -run 'TestDraftNetworkPhase5|TestV13GeneratedCSnapshots|TestV13FailFixturesHaveExpectedDiagnostics|TestV19ReleaseDocsArePresent' -count=1 passed after implementation and generated C snapshot refresh; full go test -count=1 ./... passed; go build -trimpath -ldflags \"-X main.version=v5.12.0\" -o build/walk ./cmd/walk passed; ./build/walk version reported v5.12.0; ./build/walk check --warnings=error tests/pass/do effects.walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.9 stress ok; scripts/build-docs-site.sh passed; scripts/check-docs-site.sh passed after staging generated docs; scripts/release.sh v5.12.0 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; the host release binary reported v5.12.0 from walk version; and scripts/install-local.sh v5.12.0 refreshed the local walk install. Language documentation standard update on 2026-05-23: added docs/LANGUAGE CONCEPTS.md as the canonical language vocabulary and documentation-governance standard. It defines firm concepts, stability words, the target SPEC.md spine, documentation roles, and the TDD-synchronous proof matrix for future language docs. AGENTS.md now points agents at that standard before creating or reshaping language docs, and the docs front door, docs style guide, static-site page list, and generated public docs include the new page. Language documentation standard verification on 2026-05-23: go test -count=1 ./... passed; git diff --check passed; scripts/build-docs-site.sh passed; and scripts/check-docs-site.sh passed after staging generated docs artifacts under docs/reference and public. Docs alignment cleanup on 2026-05-24: docs/SPEC.md now follows the docs/LANGUAGE CONCEPTS.md required spine for lexical structure, types, values, expressions, statements, declarations, functions, modules, errors, and standard library. docs/SYNTAX.md keeps the readable-guide role instead of a second spec. docs/STDLIB.md now calls out stable API effect status, runtime failure behavior, and proof surface; the v1 compatibility fixture proves random.int max \u003c min returning min, and conformance tests prove stable runtime failures for out-of-range string indexing and empty random.choice. docs/ERRORS.md, compatibility, deprecation, design, roadmap, and IO planning docs now use the LANGUAGE CONCEPTS.md terminology more directly and remove stale draft/future contradictions. Docs alignment verification on 2026-05-24: focused go test ./cmd/walk -run 'TestV19CompatibilitySuite|TestStableRuntimeFailuresAreClear|TestV13FailFixturesHaveExpectedDiagnostics|TestDoEffectConsoleAndProcessFoundation|TestRuntimeOwnedTextInputAndParseResults|TestReadLineReportsImmediateEOFAsData|TestDraftFileTextIOReadsWritesAndChecksExistence|TestDraftLocalFilesystemPhase2CompletesFileDirPathAndCwd|TestDraftRecoverableFileResults|TestDraftProcessPhase3RunsCommandsAndCapturesOutput|TestDraftJSONPhase3ParsesStringifiesReadsAndWritesText|TestDraftTerminalPhase4StylesAreOptInAndDimensionsFallback|TestDraftTerminalReadKeyReportsNonInteractiveTTYAsData|TestDraftNetworkPhase5UsesLocalHTTPAndHTMLHelpers' -count=1 passed; full go test -count=1 ./... passed; git diff --check passed; scripts/build-docs-site.sh passed; and scripts/check-docs-site.sh passed after staging generated docs artifacts under docs/reference and public. State: v5.11.0 completes IO PLAN.md Roadmap Phase 4, Terminal UX, as draft compiler APIs. Draft terminal helpers now cover term.is tty, foreground and background color, style, reset, clear, cursor movement, terminal dimensions, and recoverable one-key reads. ANSI terminal mutation is explicit through do: effect calls, disabled for redirected stdout by default, disabled by NO COLOR, and forceable for deterministic tests with CLICOLOR FORCE. term.width and term.height use TTY dimensions when available, then COLUMNS/LINES, then 80/24 fallbacks. term.read key returns IOReadResult; non-interactive stdin returns error 'terminal not interactive' instead of blocking, and raw mode is restored after a single key read. Stable language contract remains v1.9. HTTP, browser targets, graphics, and rich runtimes remain gated by later IO PLAN.md phases. v5.11.0 verification on 2026-05-23: focused Phase 4 tests first failed because term was not a built-in module, then go test ./cmd/walk -run 'TestDraftTerminal|TestV13GeneratedCSnapshots|TestV13FailFixturesHaveExpectedDiagnostics|TestV19ReleaseDocsArePresent' -count=1 passed after implementation and generated C snapshot refresh; full go test -count=1 ./... passed; go build -trimpath -ldflags \"-X main.version=v5.11.0\" -o build/walk ./cmd/walk passed; ./build/walk version reported v5.11.0; ./build/walk check --warnings=error tests/pass/do effects.walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.9 stress ok; scripts/build-docs-site.sh passed; scripts/check-docs-site.sh passed after staging generated docs; scripts/release.sh v5.11.0 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; the host release binary reported v5.11.0 from walk version; and scripts/install-local.sh v5.11.0 refreshed the local walk install. State: v5.10.0 completes IO PLAN.md Roadmap Phase 3, Process And Data Interop, as draft compiler APIs. Draft process helpers now cover argv-style process.run, stdout convenience process.output, and explicit shell process.run shell, with command status, stdout, stderr, and error data exposed through ProcessResult and ProcessOutputResult. Draft JSON helpers now cover json.parse, json.stringify, json.read, and json.write through a conservative text boundary: JsonResult.value is compact validated JSON text until WalkLang has maps, dynamic values, or recursive generic JSON structs. Stable language contract remains v1.9. Terminal raw mode, HTTP, and browser targets remain gated by later IO PLAN.md phases. v5.10.0 verification on 2026-05-23: focused Phase 3 tests first failed because process.run was unknown and json was not a built-in module, then go test ./cmd/walk -run 'TestDraftProcessPhase3|TestDraftJSONPhase3|TestV13GeneratedCSnapshots|TestV13FailFixturesHaveExpectedDiagnostics|TestV19ReleaseDocsArePresent' -count=1 passed after implementation and generated C snapshot refresh; full go test -count=1 ./... passed; go build -trimpath -ldflags \"-X main.version=v5.10.0\" -o build/walk ./cmd/walk passed; ./build/walk version reported v5.10.0; ./build/walk check --warnings=error tests/pass/do effects.walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.9 stress ok; scripts/build-docs-site.sh passed; scripts/check-docs-site.sh passed after staging generated docs; scripts/release.sh v5.10.0 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; and the host release binary reported v5.10.0 from walk version. State: v5.9.0 completes IO PLAN.md Roadmap Phase 2, Local Filesystem IO, as draft compiler APIs. Draft text file helpers now cover fail-stop file.read, file.write, file.append, and file.exists, plus recoverable file.try read, file.try write, and file.try append results through FileReadResult and FileActionResult. Draft directory/path helpers now cover dir.list, dir.make, dir.delete, path.join, path.base, and path.ext. Draft process.chdir is available as an explicit do: effect and is covered by isolated cwd tests. Relative and absolute paths remain native host paths without normalization or ~ expansion; directory listings return direct child names sorted for deterministic output; directory creation/deletion is single-directory only; and fail-stop file/directory/cwd helpers report clear runtime errors. Stable language contract remains v1.9. JSON, process spawning, terminal raw mode, HTTP, and browser targets remain gated by later IO PLAN.md phases. v5.9.0 verification on 2026-05-23: focused Phase 2 tests first failed because dir, path, file.append, file.try , and process.chdir were not implemented, then go test ./cmd/walk -run 'TestDraftLocalFilesystemPhase2CompletesFileDirPathAndCwd|TestDraftRecoverableFileResults|TestDraftFileTextIOReadsWritesAndChecksExistence|TestDraftFileReadMissingFileFailsClearly|TestDraftFileReadInvalidUTF8FailsClearly|TestV13FailFixturesHaveExpectedDiagnostics' -count=1 passed after implementation; generated C snapshots were refreshed and go test ./cmd/walk -run 'TestDraftLocalFilesystemPhase2CompletesFileDirPathAndCwd|TestDraftRecoverableFileResults|TestV13GeneratedCSnapshots|TestV13FailFixturesHaveExpectedDiagnostics|TestV19ReleaseDocsArePresent' -count=1 passed; full go test -count=1 ./... passed; go build -trimpath -ldflags \"-X main.version=v5.9.0\" -o build/walk ./cmd/walk passed; ./build/walk version reported v5.9.0; ./build/walk check --warnings=error tests/pass/do effects.walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.9 stress ok; scripts/build-docs-site.sh passed; scripts/check-docs-site.sh passed after staging generated docs; scripts/release.sh v5.9.0 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; and the host release binary reported v5.9.0 from walk version. State: v5.8.0 starts IO PLAN.md Roadmap Phase 2, Local Filesystem IO, with a draft UTF-8 text-file slice. Draft file.read, file.write, and file.exists are now importable compiler APIs. file.read returns a runtime-owned string, file.write is an explicit do: effect that overwrites the target path, and file.exists returns host path existence as bool. Relative and absolute paths are passed to the host OS without normalization or ~ expansion; relative paths resolve against the native process current working directory. This first file slice is fail-stop: missing files, permission errors, empty read/write paths, invalid UTF-8 reads, embedded null bytes on read, and write failures stop the native program with a clear runtime error. Stable language contract remains v1.9. file.append, directory/path helpers, process.chdir, recoverable file result structs, JSON, process spawning, terminal raw mode, HTTP, and browser targets remain gated by IO PLAN.md. v5.8.0 verification on 2026-05-23: focused file IO tests first failed because imp: file was not implemented, then go test ./cmd/walk -run 'TestDraftFileTextIOReadsWritesAndChecksExistence|TestDraftFileReadMissingFileFailsClearly|TestDraftFileReadInvalidUTF8FailsClearly|TestDoEffectConsoleAndProcessFoundation|TestRuntimeOwnedTextInputAndParseResults|TestReadLineReportsImmediateEOFAsData|TestV13GeneratedCSnapshots|TestV13FailFixturesHaveExpectedDiagnostics|TestV19ReleaseDocsArePresent' -count=1 passed after implementation and generated C snapshot refresh; full go test -count=1 ./... passed; go build -trimpath -ldflags \"-X main.version=v5.8.0\" -o build/walk ./cmd/walk passed; ./build/walk version reported v5.8.0; ./build/walk check --warnings=error tests/pass/do effects.walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.9 stress ok; scripts/build-docs-site.sh passed; scripts/check-docs-site.sh passed after staging generated docs; scripts/release.sh v5.8.0 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; and the host release binary reported v5.8.0 from walk version. State: v5.7.0 completes the IO PLAN.md Phase 2 runtime-owned text input/parse slice as draft compiler APIs. The stable language contract remains v1.9. Draft IOReadResult, ParseIntResult, ParseFloatResult, and ParseBoolResult structs now expose the concrete recoverable result shape ok, value, and error. Draft io.read line and io.read all read runtime-owned stdin text, with immediate io.read line EOF returned as error 'eof'; draft parse.int, parse.float, and parse.bool return invalid conversion as data instead of nullable-only values or runtime stops. time.sleep remains a separate candidate time helper. File IO, directory/path helpers, process spawning, terminal raw mode, JSON, HTTP, and web/graphics targets remain gated by IO PLAN.md. v5.7.0 verification on 2026-05-23: focused IO/parse tests failed before implementation because parse was not a built-in module and io.read line was unknown; after implementation, go test ./cmd/walk -run 'TestRuntimeOwnedTextInputAndParseResults|TestReadLineReportsImmediateEOFAsData|TestV13GeneratedCSnapshots|TestV13FailFixturesHaveExpectedDiagnostics|TestV19ReleaseDocsArePresent' -count=1 passed; full go test -count=1 ./... passed; go build -trimpath -ldflags \"-X main.version=v5.7.0\" -o build/walk ./cmd/walk passed; ./build/walk version reported v5.7.0; ./build/walk check --warnings=error tests/pass/do effects.walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.9 stress ok; scripts/build-docs-site.sh passed; scripts/check-docs-site.sh passed after staging generated docs; scripts/release.sh v5.7.0 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; and the host release binary reported v5.7.0 from walk version. IO planning update on 2026-05-23: IO PLAN.md now uses a five-phase implementation roadmap for future planning and handoffs: CLI text IO, local filesystem IO, process and data interop, terminal UX, and network/rich runtimes. The older Phase 0-10 notes remain as detailed dependency notes, not the primary roadmap. Roadmap Phase 1 is done as draft compiler APIs in v5.7.0; the next implementation milestone is Roadmap Phase 2, Local Filesystem IO. Its first gates are path policy, UTF-8 file policy, fail-stop versus recoverable file API shape, temp-directory tests, and cwd mutation policy for process.chdir. State: v5.6.0 completes IO PLAN.md Phase 0 and the implementable Phase 1 console/process foundation as draft compiler APIs. The stable language contract remains v1.9. Draft do: effect statements now accept registered effect calls; draft io.write, io.write line, and io.error line cover stdout/stderr line helpers; draft process.args, process.arg count, process.env, process.cwd, and process.exit cover the first process helpers; and new IO functions are recorded in a built-in API registry with draft/effect/runtime metadata. Later IO phases remain gated on their documented prerequisites, especially recoverable error results, text/path policy, richer data modeling, and networking security policy. v5.6.0 verification on 2026-05-22: the focused IO/process tests failed before implementation because do: was unsupported and io was not a built-in module; after implementation, go test ./cmd/walk ./internal/format -run 'TestDoEffectConsoleAndProcessFoundation|TestProcessExitEffectExitsWithCode|TestV13PassFixturesBuildAndRun|TestV13FailFixturesHaveExpectedDiagnostics|TestV19ReleaseDocsArePresent|TestFormatterNormalizesDoEffectStatement' -count=1 passed; full go test -count=1 ./... passed after refreshing the generated C snapshots for the new runtime helper block; go build -trimpath -ldflags \"-X main.version=v5.6.0\" -o build/walk ./cmd/walk passed; ./build/walk version reported v5.6.0; ./build/walk check --warnings=error tests/pass/do effects.walk passed; ./build/walk tests/pass/do effects.walk printed loading and done; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.9 stress ok; scripts/build-docs-site.sh passed; scripts/check-docs-site.sh passed after staging generated docs; scripts/release.sh v5.6.0 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; and the host release binary reported v5.6.0 from walk version. State: v5.5.0 adds the v1.9 stable string interpolation surface. Single-quoted strings can include expression display values, interpolation supports int, float, bool, string, and nullable string values, and doubled braces such as word print literal braces. v5.5.0 verification on 2026-05-22: focused interpolation conformance failed before implementation because strings printed literally and bad interpolation values were accepted; after the fix, go test ./cmd/walk -run 'TestV13PassFixturesBuildAndRun|TestV13FailFixturesHaveExpectedDiagnostics' -count=1 passed; go test ./cmd/walk -run 'TestV13PassFixturesBuildAndRun|TestV19CompatibilitySuite' -count=1 passed; full go test -count=1 ./... passed; go build -trimpath -ldflags \"-X main.version=v5.5.0\" -o build/walk ./cmd/walk passed; ./build/walk version reported v5.5.0; ./build/walk check --warnings=error tests/pass/interpolation.walk passed; ./build/walk tests/pass/interpolation.walk printed the expected interpolated lines; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.9 stress ok; scripts/release.sh v5.5.0 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; the host release binary reported v5.5.0 from walk version; scripts/build-docs-site.sh passed; scripts/check-docs-site.sh passed; and git diff --check --cached passed for the staged release diff. Full worktree git diff --check is still blocked by the pre-existing unstaged playground/hangman-v2.walk trailing whitespace. Docs brand polish update on 2026-05-22: the generated docs site is now dark-mode only, uses a blue WalkLang accent family instead of the previous green tokens, publishes the compact WalkLang icon as /favicon.svg, uses that compact mark in the docs sidebar, and declares the same mark as the VS Code walk language icon for compatible file icon themes. Docs brand polish verification on 2026-05-22: focused site-generator tests cover the root favicon link, compact sidebar icon, dark blue accent tokens, removed green tokens, and existing VS Code language icon asset path; go test ./scripts -count=1 passed; scripts/build-docs-site.sh passed; and scripts/check-docs-site.sh passed after regenerating public/. Live docs TLS recovery on 2026-05-22: root cause was GitHub Pages serving the custom domain over HTTP while no Pages TLS certificate existed for walklang.wlkrlabs.com; DNS was already valid as the DNS-only walklang -\u003e scwlkr.github.io CNAME and the Pages health check reported the domain as valid and HTTPS-eligible. Removed and re-added the Pages custom domain to restart certificate provisioning, confirmed the new Let's Encrypt certificate includes walklang.wlkrlabs.com, enabled HTTPS enforcement, and triggered a fresh Pages deployment to clear the cached HTTP homepage. Live verification passed with http://walklang.wlkrlabs.com returning 301 to https://walklang.wlkrlabs.com/, https://walklang.wlkrlabs.com returning 200, GitHub Pages API reporting https enforced: true, and Pages health reporting responds to https: true plus enforces https: true. State: v5.4.1 fixes random.choice and random.int to use a runtime-owned PRNG seeded once per native process instead of the C runtime's unseeded default rand state. v5.4.1 verification on 2026-05-22: added TestRandomChoiceSeedsFreshProcesses and confirmed it failed before the runtime fix because fresh native processes all produced the same first random.choice value; after the fix, full go test -count=1 ./... passed; go build -trimpath -ldflags \"-X main.version=v5.4.1\" -o build/walk ./cmd/walk passed and ./build/walk version reported v5.4.1; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.8 stress ok; scripts/release.sh v5.4.1 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; the host release binary reported v5.4.1 from walk version; scripts/install-local.sh v5.4.1 installed /Users/shanewalker/.local/bin/walk; and twelve fresh installed walk hangman-v2.walk runs from playground/ produced multiple choices. State: v5.4 is complete against the new v1.8 terminal-game helper surface. Stable v1.8 adds string.at, string indexing with word0, string.contains, string.concat, array.contains, array.push, explicitly typed empty arrays such as var: guessed arraystring = , and random.choice for non-empty stable native arrays. The helpers keep the existing expression/module model: array.push returns a new array and string building uses string.concat instead of changing numeric +. Hangman readiness update on 2026-05-22: playground/hangman.walk is now a compiling terminal Hangman example using in:, out:, if:, while:, functions, string indexing, contains checks, functional array push, and random choice. v5.4 verification on 2026-05-22: full go test -count=1 ./... passed; go build -o build/walk ./cmd/walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.8 stress ok; ./build/walk check --warnings=error playground/hangman.walk passed; ./build/walk build playground/hangman.walk -o build/hangman plus a piped wrong-guess smoke run passed; scripts/build-docs-site.sh passed; scripts/release.sh v5.4.0 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; the host release binary reported v5.4.0 from walk version; and git diff --check passed. State: v5.3 is complete against the new v1.7 stable in: input rule. in: is a core expression that returns string, can be used anywhere an expression is valid, reads exactly one required line from stdin, supports an optional string prompt expression written to stdout without a newline, flushes stdout before reading, strips only the final line ending, preserves all other characters, returns '' for an empty line, accepts a final unterminated line, and runtime-stops on immediate EOF, stdin read failure, or allocation failure. v5.3 verification on 2026-05-22: focused go test ./cmd/walk ./internal/format -run 'TestInExpression|TestInPrompt|TestV17Formatter' -count=1 passed; full go test -count=1 ./... passed; go build -o build/walk ./cmd/walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.7 stress ok; scripts/check-docs-site.sh passed after generated site artifacts were staged; scripts/release.sh v5.3.0 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; the host release binary reported v5.3.0 from walk version; and git diff --check passed. IO planning update on 2026-05-22: IO PLAN.md now records stable out: and in: as the current baseline, the proposed module-first IO direction for most future IO, the recommended do: effect-call decision point, runtime-owned string and recoverable-error prerequisites, feature-by-feature implementation costs, and a phased order for files, directories, JSON, networking, web, and graphics. IO planning verification on 2026-05-22: scripts/build-docs-site.sh passed; full go test -count=1 ./... passed; go build -o build/walk ./cmd/walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.6 stress ok; scripts/release.sh v5.2.0 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; and the host release binary reported v5.2.0 from walk version. State: v5.2 is complete against the new v1.6 local function type inference rule. Ordinary functions may omit parameter and return types when the local body proves the types; ambiguous omitted parameter types now fail with a direct annotation diagnostic; normal typed signatures remain valid; inference does not use later call sites; and C remains the primary backend. v5.2 verification on 2026-05-22: focused go test ./cmd/walk -run 'TestFunctionTypeInference|TestV15ReleasePrepDocsArePresent' -count=1 passed; full go test -count=1 ./... passed; go build -o build/walk ./cmd/walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.6 stress ok; scripts/check-docs-site.sh passed after generated site artifacts were staged; scripts/release.sh v5.2.0 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; the host release binary reported v5.2.0 from walk version; and git diff --check passed. Live docs verification on 2026-05-22: walklang.wlkrlabs.com resolves through the DNS-only walklang -\u003e scwlkr.github.io CNAME to GitHub Pages addresses; http://walklang.wlkrlabs.com/docs/ returns 200 OK from GitHub Pages and includes the v5.1 docs content; http://walklang.wlkrlabs.com/docs/reference/api.json returns repo-relative source paths. HTTPS is not enforced yet because GitHub Pages still reports The certificate does not exist yet when enabling HTTPS and https://walklang.wlkrlabs.com/docs/ still fails certificate hostname validation. Public positioning update on 2026-05-22: README and docs front-door wording now distinguish the stable v1.5 language contract, the current v5.1.0 compiler/tooling/docs release, and the experimental v2.2 language surface. README now includes a tiny WalkLang function example, a \"What works today\" section, and less inflated repository-scope wording. HTTPS remediation checked the live DNS CNAME, CAA records, Pages API state, and Pages HTTP response; DNS points at scwlkr.github.io, CAA allows Let's Encrypt, HTTP still returns 200 OK, but GitHub still rejects HTTPS enforcement with The certificate does not exist yet. After the Pages deployment for commit 335c877 completed successfully, a second HTTPS enforcement attempt failed with the same certificate message and https://walklang.wlkrlabs.com/docs/ still failed hostname validation. No DNS or repo-side blocker is visible; the remaining action is to retry once GitHub has issued the Pages certificate. Public positioning verification on 2026-05-22: scripts/build-docs-site.sh passed; scripts/check-docs-site.sh passed after generated site artifacts were staged; git diff --check passed; full go test -count=1 ./... passed; go build -o build/walk ./cmd/walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed; scripts/release.sh v5.1.0 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; and the host release binary reported v5.1.0 from walk version. Docs setup on 2026-05-22: the root README now follows a Rust-style repository landing-page shape, docs/README.md is the canonical docs front door and source for the https://walklang.wlkrlabs.com/docs hosted path, CONTRIBUTING.md documents the local contribution and verification path, and docs/DOCS STYLE GUIDE.md records the source-grounded docs rules plus generated-reference expectations. Docs setup verification on 2026-05-22: curl -I --max-time 10 https://walklang.wlkrlabs.com/docs failed with Could not resolve host, so the hosted docs URL remains a planned publish target; changed-doc local Markdown links passed; git diff --check passed; go test -count=1 ./... passed; go build -o build/walk ./cmd/walk passed; ./build/walk docs --strict -o build/docs-check-api.md examples/v1.walk passed; ./build/walk docs --strict --format json -o build/docs-check-api.json examples/v1.walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed; and scripts/release.sh v5.0.0 \u003ctemp\u003e/release produced 5 platform artifacts plus 5 checksum lines. v5 verification on 2026-05-22: baseline go test -count=1 ./... passed before implementation; focused go test ./cmd/walk -run 'TestV5|TestV13GeneratedCSnapshots' -count=1 passed; full go test -count=1 ./... passed after the final code/test changes; go build -o build/walk ./cmd/walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed; scripts/release.sh v5.0.0 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; the host release binary reported v5.0.0 from walk version; and git diff --check passed. Previous v4.1 verification on 2026-05-22: focused go test ./cmd/walk -run 'TestV4DocsAndDebugMapCommands|TestV4LSPDiagnosticsFormattingAndCompletion' -count=1, lexer/parser go test ./internal/lexer ./internal/parser -count=1, focused go test ./cmd/walk -run TestV4 -count=1, full go test -count=1 ./..., go build -o build/walk ./cmd/walk, ./build/walk docs --strict -o build/v4.1-api.md examples/v1.walk, ./build/walk docs --strict --format json -o build/v4.1-api.json examples/v1.walk, WALK BIN=$PWD/build/walk scripts/stress-v1.sh, scripts/release.sh v4.1.0 \u003ctemp\u003e/release, SHA256SUMS line count check, and git diff --check all passed. Release CI maintenance on 2026-05-22: GitHub Actions workflow uses Node 24 first-party actions, disables unnecessary Go dependency caching for this no-go.sum module, runs scripts/check-docs-site.sh, and now publishes v5.4.1-labeled release artifacts. Playground example update on 2026-05-22: playground/route ranker.walk now demonstrates a compact route-ranking program with structs, arrays, loops, typed helper functions, prefix math, and scalar output. Verification passed with ./build/walk check --warnings=error playground/route ranker.walk, ./build/walk build playground/route ranker.walk -o build/route ranker, and ./build/route ranker, which printed Library Lane with score 46; broader verification passed with go test -count=1 ./..., scripts/check-docs-site.sh, WALK BIN=$PWD/build/walk scripts/stress-v1.sh, scripts/release.sh v5.1.0 \u003ctemp\u003e/release, a 5-line SHA256SUMS check, host release binary walk version reporting v5.1.0, and git diff --check. CLI run shortcut update on 2026-05-22: walk run \u003csource.walk\u003e now compiles a single file to a temporary native executable, runs it, streams program input and output, and removes the temporary build directory; walk \u003csource.walk\u003e is a direct shorthand for the same flow. Verification passed with focused go test ./cmd/walk -run TestRunCommandRunsSingleFileAndDirectFileAlias -count=1, go build -o build/walk ./cmd/walk, ./build/walk run playground/route ranker.walk, ./build/walk playground/route ranker.walk, full go test -count=1 ./..., scripts/check-docs-site.sh, WALK BIN=$PWD/build/walk scripts/stress-v1.sh, scripts/release.sh v5.1.0 \u003ctemp\u003e/release, a 5-line SHA256SUMS check, host release binary walk version reporting v5.1.0, and git diff --check. Next: continue IO PLAN.md Roadmap Phase 3 process/data interop only after the accepted filesystem result shape, command result type, deterministic process tests, and JSON data-model decisions are ready.",
+    "summary": "Stable language contract: v1.9. Current compiler/tooling/docs release: v5.13.0 explicit systems track over the",
+    "text": "WalkLang Status WalkLang Status Stable language contract: v1.9. Current compiler/tooling/docs release: v5.13.0 explicit systems track over the v5.12.3 docs sidebar navigation cleanup and the v5.12.0 draft network and rich-runtime IO completion. Experimental implemented language surface: v2.2. State: v5.13.0 implements the one-pass explicit systems track. Draft defer: scope cleanup is available inside entry, function, loop, conditional, and test blocks, with lexical LIFO execution, early-return cleanup, loop-iteration cleanup, and argument capture at the point of defer:. Recoverable result data is now the documented policy for ordinary failures that should not stop a program; fail-stop APIs remain labeled in the standard library docs. Package collection roots are documented and reserved roots such as std are rejected for user package init/publish. Build modes are first-class through --mode debug, --mode release, --debug, --release, and build.mode, with build.release retained as a compatibility field. The stable language contract remains v1.9, and this new behavior remains draft until a later compatibility decision promotes it. v5.13.0 verification on 2026-05-25: focused explicit-systems tests passed with go test ./internal/format ./cmd/walk -run 'TestFormatterNormalizesDeferEffectStatement|TestExplicitSystems|TestV13FailFixturesHaveExpectedDiagnostics|TestV13PassFixturesBuildAndRun|TestV13GeneratedCSnapshots' -count=1; full go test -count=1 ./... passed; go build -trimpath -ldflags \"-X main.version=v5.13.0\" -o build/walk ./cmd/walk passed; ./build/walk version reported v5.13.0; ./build/walk check --warnings=error tests/pass/walk tests.walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.9 stress ok; scripts/build-docs-site.sh passed; scripts/check-docs-site.sh passed after staging generated docs; scripts/release.sh v5.13.0 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; scripts/install-local.sh v5.13.0 refreshed /Users/shanewalker/.local/bin/walk; walk version reported v5.13.0; and git diff --cached --check passed for staged release files. Full git diff --check remained blocked by pre-existing trailing whitespace in playground/hangman-v2.walk, which was left untouched; the release slice passed git diff --check -- . ': exclude playground/hangman.walk' ': exclude playground/hangman-v2.walk'. State: v5.12.3 cleans up the generated docs sidebar so public navigation is organized by reader task and document role instead of exposed release milestones. Sidebar labels now use topic names such as Syntax, Specification, Standard Library, API Reference, Architecture, Purpose, and Version History. Historical V1, V2, and V3 milestone pages remain generated and linkable, but they no longer appear as top-level sidebar entries. The stable language contract remains v1.9, and the draft runtime API surface remains unchanged from v5.12.0. v5.12.3 verification on 2026-05-24: focused site-generator tests passed with go test ./scripts -run TestSidebarUsesTopicNavigationInsteadOfVersionMilestones -count=1; full site-generator tests passed with go test ./scripts -count=1; full go test -count=1 ./... passed; go build -trimpath -ldflags \"-X main.version=v5.12.3\" -o build/walk ./cmd/walk passed; ./build/walk version reported v5.12.3; ./build/walk check --warnings=error tests/pass/walk tests.walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.9 stress ok; scripts/build-docs-site.sh passed; scripts/check-docs-site.sh passed after staging generated docs; a generated HTML check confirmed public/docs/SPEC.html contains topic sidebar labels for Syntax, Specification, API Reference, Architecture, Purpose, and Version History without top-level V1, V2, or V3 entries; a local Chrome headless smoke against python3 -m http.server captured /tmp/walklang-sidebar-v5123.png; scripts/release.sh v5.12.3 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; the host release binary reported v5.12.3 from walk version; and scoped git diff --check passed for the release files changed in this slice. State: v5.12.2 improves generated docs search result quality. The site generator now emits section-level search entries with parent doc/group context, section anchors, clean prose summaries, and cleaned full text. The client-side search UI now renders a section title, context line, and readable preview instead of a raw sliced Markdown snippet, with ranking boosts for section, summary, and API-shaped matches such as array.push. The stable language contract remains v1.9, and the draft runtime API surface remains unchanged from v5.12.0. v5.12.2 verification on 2026-05-24: focused site-generator tests passed with go test ./scripts -run 'TestLayoutUsesRootFaviconAndCompactSidebarIcon|TestSearchIndexUsesSectionsAndCleanSummaries|TestSiteCSSUsesDarkWalkLangBlueTheme' -count=1; full go test -count=1 ./... passed; go build -trimpath -ldflags \"-X main.version=v5.12.2\" -o build/walk ./cmd/walk passed; ./build/walk version reported v5.12.2; ./build/walk check --warnings=error tests/pass/walk tests.walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.9 stress ok; scripts/build-docs-site.sh passed; scripts/check-docs-site.sh passed after staging generated docs; a local Chrome headless smoke against python3 -m http.server typed function and push into the docs search box, captured /tmp/walklang-docs-search-function.png and /tmp/walklang-docs-search-push.png, verified clean section/context/summary cards, and confirmed push ranks array.push arrayT, T -\u003e arrayT first; and scripts/release.sh v5.12.2 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS, with the host release binary reporting v5.12.2 from walk version. State: v5.12.1 adds a generated static docs search box to every hosted docs page. The site generator now emits docs/search.json from repo Markdown docs, loads a small client-side search script, and ranks API-heading matches such as array.push above broad roadmap/status mentions. The stable language contract remains v1.9, and the draft runtime API surface remains unchanged from v5.12.0. v5.12.1 verification on 2026-05-24: focused site-generator tests passed with go test ./scripts -run 'TestLayoutUsesRootFaviconAndCompactSidebarIcon|TestSearchIndexIncludesRawDocText|TestSiteCSSUsesDarkWalkLangBlueTheme' -count=1; full go test -count=1 ./... passed; go build -trimpath -ldflags \"-X main.version=v5.12.1\" -o build/walk ./cmd/walk passed; ./build/walk version reported v5.12.1; ./build/walk check --warnings=error tests/pass/walk tests.walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.9 stress ok; scripts/build-docs-site.sh passed; scripts/check-docs-site.sh passed after staging generated docs; a local Chrome headless smoke against python3 -m http.server typed push into the docs search box and verified the first result linked to ../docs/STDLIB.html with the array.push snippet; and scripts/release.sh v5.12.1 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS, with the host release binary reporting v5.12.1 from walk version; git diff --check --cached and git diff --check passed. State: v5.12.0 completes IO PLAN.md Roadmap Phase 5, Network And Rich Runtimes, as draft compiler APIs and design docs. Draft HTTP helpers now cover http.get, http.post, and http.request through recoverable HttpResult values. Draft HTTP uses the system curl executable as its runtime backend, does not invoke a shell, follows redirects, uses a 10 second timeout, caps response bodies at 1 MiB, treats response bodies as UTF-8 text, and returns ordinary network, TLS, backend, timeout, size, and HTTP status failures as data. Draft HTML helpers now cover html.escape, html.h1, html.p, and html.button as escaped text helpers only. Rich runtime tracks for web server, native graphics, WASM/browser, and playground/compiler explorer integration remain future package/backend work documented in docs/RICH RUNTIMES.md. Stable language contract remains v1.9. v5.12.0 verification on 2026-05-23: focused Phase 5 tests first failed because http and html were not built-in modules, then go test ./cmd/walk -run 'TestDraftNetworkPhase5|TestV13GeneratedCSnapshots|TestV13FailFixturesHaveExpectedDiagnostics|TestV19ReleaseDocsArePresent' -count=1 passed after implementation and generated C snapshot refresh; full go test -count=1 ./... passed; go build -trimpath -ldflags \"-X main.version=v5.12.0\" -o build/walk ./cmd/walk passed; ./build/walk version reported v5.12.0; ./build/walk check --warnings=error tests/pass/do effects.walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.9 stress ok; scripts/build-docs-site.sh passed; scripts/check-docs-site.sh passed after staging generated docs; scripts/release.sh v5.12.0 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; the host release binary reported v5.12.0 from walk version; and scripts/install-local.sh v5.12.0 refreshed the local walk install. Language documentation standard update on 2026-05-23: added docs/LANGUAGE CONCEPTS.md as the canonical language vocabulary and documentation-governance standard. It defines firm concepts, stability words, the target SPEC.md spine, documentation roles, and the TDD-synchronous proof matrix for future language docs. AGENTS.md now points agents at that standard before creating or reshaping language docs, and the docs front door, docs style guide, static-site page list, and generated public docs include the new page. Language documentation standard verification on 2026-05-23: go test -count=1 ./... passed; git diff --check passed; scripts/build-docs-site.sh passed; and scripts/check-docs-site.sh passed after staging generated docs artifacts under docs/reference and public. Docs alignment cleanup on 2026-05-24: docs/SPEC.md now follows the docs/LANGUAGE CONCEPTS.md required spine for lexical structure, types, values, expressions, statements, declarations, functions, modules, errors, and standard library. docs/SYNTAX.md keeps the readable-guide role instead of a second spec. docs/STDLIB.md now calls out stable API effect status, runtime failure behavior, and proof surface; the v1 compatibility fixture proves random.int max \u003c min returning min, and conformance tests prove stable runtime failures for out-of-range string indexing and empty random.choice. docs/ERRORS.md, compatibility, deprecation, design, roadmap, and IO planning docs now use the LANGUAGE CONCEPTS.md terminology more directly and remove stale draft/future contradictions. Docs alignment verification on 2026-05-24: focused go test ./cmd/walk -run 'TestV19CompatibilitySuite|TestStableRuntimeFailuresAreClear|TestV13FailFixturesHaveExpectedDiagnostics|TestDoEffectConsoleAndProcessFoundation|TestRuntimeOwnedTextInputAndParseResults|TestReadLineReportsImmediateEOFAsData|TestDraftFileTextIOReadsWritesAndChecksExistence|TestDraftLocalFilesystemPhase2CompletesFileDirPathAndCwd|TestDraftRecoverableFileResults|TestDraftProcessPhase3RunsCommandsAndCapturesOutput|TestDraftJSONPhase3ParsesStringifiesReadsAndWritesText|TestDraftTerminalPhase4StylesAreOptInAndDimensionsFallback|TestDraftTerminalReadKeyReportsNonInteractiveTTYAsData|TestDraftNetworkPhase5UsesLocalHTTPAndHTMLHelpers' -count=1 passed; full go test -count=1 ./... passed; git diff --check passed; scripts/build-docs-site.sh passed; and scripts/check-docs-site.sh passed after staging generated docs artifacts under docs/reference and public. State: v5.11.0 completes IO PLAN.md Roadmap Phase 4, Terminal UX, as draft compiler APIs. Draft terminal helpers now cover term.is tty, foreground and background color, style, reset, clear, cursor movement, terminal dimensions, and recoverable one-key reads. ANSI terminal mutation is explicit through do: effect calls, disabled for redirected stdout by default, disabled by NO COLOR, and forceable for deterministic tests with CLICOLOR FORCE. term.width and term.height use TTY dimensions when available, then COLUMNS/LINES, then 80/24 fallbacks. term.read key returns IOReadResult; non-interactive stdin returns error 'terminal not interactive' instead of blocking, and raw mode is restored after a single key read. Stable language contract remains v1.9. HTTP, browser targets, graphics, and rich runtimes remain gated by later IO PLAN.md phases. v5.11.0 verification on 2026-05-23: focused Phase 4 tests first failed because term was not a built-in module, then go test ./cmd/walk -run 'TestDraftTerminal|TestV13GeneratedCSnapshots|TestV13FailFixturesHaveExpectedDiagnostics|TestV19ReleaseDocsArePresent' -count=1 passed after implementation and generated C snapshot refresh; full go test -count=1 ./... passed; go build -trimpath -ldflags \"-X main.version=v5.11.0\" -o build/walk ./cmd/walk passed; ./build/walk version reported v5.11.0; ./build/walk check --warnings=error tests/pass/do effects.walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.9 stress ok; scripts/build-docs-site.sh passed; scripts/check-docs-site.sh passed after staging generated docs; scripts/release.sh v5.11.0 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; the host release binary reported v5.11.0 from walk version; and scripts/install-local.sh v5.11.0 refreshed the local walk install. State: v5.10.0 completes IO PLAN.md Roadmap Phase 3, Process And Data Interop, as draft compiler APIs. Draft process helpers now cover argv-style process.run, stdout convenience process.output, and explicit shell process.run shell, with command status, stdout, stderr, and error data exposed through ProcessResult and ProcessOutputResult. Draft JSON helpers now cover json.parse, json.stringify, json.read, and json.write through a conservative text boundary: JsonResult.value is compact validated JSON text until WalkLang has maps, dynamic values, or recursive generic JSON structs. Stable language contract remains v1.9. Terminal raw mode, HTTP, and browser targets remain gated by later IO PLAN.md phases. v5.10.0 verification on 2026-05-23: focused Phase 3 tests first failed because process.run was unknown and json was not a built-in module, then go test ./cmd/walk -run 'TestDraftProcessPhase3|TestDraftJSONPhase3|TestV13GeneratedCSnapshots|TestV13FailFixturesHaveExpectedDiagnostics|TestV19ReleaseDocsArePresent' -count=1 passed after implementation and generated C snapshot refresh; full go test -count=1 ./... passed; go build -trimpath -ldflags \"-X main.version=v5.10.0\" -o build/walk ./cmd/walk passed; ./build/walk version reported v5.10.0; ./build/walk check --warnings=error tests/pass/do effects.walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.9 stress ok; scripts/build-docs-site.sh passed; scripts/check-docs-site.sh passed after staging generated docs; scripts/release.sh v5.10.0 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; and the host release binary reported v5.10.0 from walk version. State: v5.9.0 completes IO PLAN.md Roadmap Phase 2, Local Filesystem IO, as draft compiler APIs. Draft text file helpers now cover fail-stop file.read, file.write, file.append, and file.exists, plus recoverable file.try read, file.try write, and file.try append results through FileReadResult and FileActionResult. Draft directory/path helpers now cover dir.list, dir.make, dir.delete, path.join, path.base, and path.ext. Draft process.chdir is available as an explicit do: effect and is covered by isolated cwd tests. Relative and absolute paths remain native host paths without normalization or ~ expansion; directory listings return direct child names sorted for deterministic output; directory creation/deletion is single-directory only; and fail-stop file/directory/cwd helpers report clear runtime errors. Stable language contract remains v1.9. JSON, process spawning, terminal raw mode, HTTP, and browser targets remain gated by later IO PLAN.md phases. v5.9.0 verification on 2026-05-23: focused Phase 2 tests first failed because dir, path, file.append, file.try , and process.chdir were not implemented, then go test ./cmd/walk -run 'TestDraftLocalFilesystemPhase2CompletesFileDirPathAndCwd|TestDraftRecoverableFileResults|TestDraftFileTextIOReadsWritesAndChecksExistence|TestDraftFileReadMissingFileFailsClearly|TestDraftFileReadInvalidUTF8FailsClearly|TestV13FailFixturesHaveExpectedDiagnostics' -count=1 passed after implementation; generated C snapshots were refreshed and go test ./cmd/walk -run 'TestDraftLocalFilesystemPhase2CompletesFileDirPathAndCwd|TestDraftRecoverableFileResults|TestV13GeneratedCSnapshots|TestV13FailFixturesHaveExpectedDiagnostics|TestV19ReleaseDocsArePresent' -count=1 passed; full go test -count=1 ./... passed; go build -trimpath -ldflags \"-X main.version=v5.9.0\" -o build/walk ./cmd/walk passed; ./build/walk version reported v5.9.0; ./build/walk check --warnings=error tests/pass/do effects.walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.9 stress ok; scripts/build-docs-site.sh passed; scripts/check-docs-site.sh passed after staging generated docs; scripts/release.sh v5.9.0 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; and the host release binary reported v5.9.0 from walk version. State: v5.8.0 starts IO PLAN.md Roadmap Phase 2, Local Filesystem IO, with a draft UTF-8 text-file slice. Draft file.read, file.write, and file.exists are now importable compiler APIs. file.read returns a runtime-owned string, file.write is an explicit do: effect that overwrites the target path, and file.exists returns host path existence as bool. Relative and absolute paths are passed to the host OS without normalization or ~ expansion; relative paths resolve against the native process current working directory. This first file slice is fail-stop: missing files, permission errors, empty read/write paths, invalid UTF-8 reads, embedded null bytes on read, and write failures stop the native program with a clear runtime error. Stable language contract remains v1.9. file.append, directory/path helpers, process.chdir, recoverable file result structs, JSON, process spawning, terminal raw mode, HTTP, and browser targets remain gated by IO PLAN.md. v5.8.0 verification on 2026-05-23: focused file IO tests first failed because imp: file was not implemented, then go test ./cmd/walk -run 'TestDraftFileTextIOReadsWritesAndChecksExistence|TestDraftFileReadMissingFileFailsClearly|TestDraftFileReadInvalidUTF8FailsClearly|TestDoEffectConsoleAndProcessFoundation|TestRuntimeOwnedTextInputAndParseResults|TestReadLineReportsImmediateEOFAsData|TestV13GeneratedCSnapshots|TestV13FailFixturesHaveExpectedDiagnostics|TestV19ReleaseDocsArePresent' -count=1 passed after implementation and generated C snapshot refresh; full go test -count=1 ./... passed; go build -trimpath -ldflags \"-X main.version=v5.8.0\" -o build/walk ./cmd/walk passed; ./build/walk version reported v5.8.0; ./build/walk check --warnings=error tests/pass/do effects.walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.9 stress ok; scripts/build-docs-site.sh passed; scripts/check-docs-site.sh passed after staging generated docs; scripts/release.sh v5.8.0 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; and the host release binary reported v5.8.0 from walk version. State: v5.7.0 completes the IO PLAN.md Phase 2 runtime-owned text input/parse slice as draft compiler APIs. The stable language contract remains v1.9. Draft IOReadResult, ParseIntResult, ParseFloatResult, and ParseBoolResult structs now expose the concrete recoverable result shape ok, value, and error. Draft io.read line and io.read all read runtime-owned stdin text, with immediate io.read line EOF returned as error 'eof'; draft parse.int, parse.float, and parse.bool return invalid conversion as data instead of nullable-only values or runtime stops. time.sleep remains a separate candidate time helper. File IO, directory/path helpers, process spawning, terminal raw mode, JSON, HTTP, and web/graphics targets remain gated by IO PLAN.md. v5.7.0 verification on 2026-05-23: focused IO/parse tests failed before implementation because parse was not a built-in module and io.read line was unknown; after implementation, go test ./cmd/walk -run 'TestRuntimeOwnedTextInputAndParseResults|TestReadLineReportsImmediateEOFAsData|TestV13GeneratedCSnapshots|TestV13FailFixturesHaveExpectedDiagnostics|TestV19ReleaseDocsArePresent' -count=1 passed; full go test -count=1 ./... passed; go build -trimpath -ldflags \"-X main.version=v5.7.0\" -o build/walk ./cmd/walk passed; ./build/walk version reported v5.7.0; ./build/walk check --warnings=error tests/pass/do effects.walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.9 stress ok; scripts/build-docs-site.sh passed; scripts/check-docs-site.sh passed after staging generated docs; scripts/release.sh v5.7.0 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; and the host release binary reported v5.7.0 from walk version. IO planning update on 2026-05-23: IO PLAN.md now uses a five-phase implementation roadmap for future planning and handoffs: CLI text IO, local filesystem IO, process and data interop, terminal UX, and network/rich runtimes. The older Phase 0-10 notes remain as detailed dependency notes, not the primary roadmap. Roadmap Phase 1 is done as draft compiler APIs in v5.7.0; the next implementation milestone is Roadmap Phase 2, Local Filesystem IO. Its first gates are path policy, UTF-8 file policy, fail-stop versus recoverable file API shape, temp-directory tests, and cwd mutation policy for process.chdir. State: v5.6.0 completes IO PLAN.md Phase 0 and the implementable Phase 1 console/process foundation as draft compiler APIs. The stable language contract remains v1.9. Draft do: effect statements now accept registered effect calls; draft io.write, io.write line, and io.error line cover stdout/stderr line helpers; draft process.args, process.arg count, process.env, process.cwd, and process.exit cover the first process helpers; and new IO functions are recorded in a built-in API registry with draft/effect/runtime metadata. Later IO phases remain gated on their documented prerequisites, especially recoverable error results, text/path policy, richer data modeling, and networking security policy. v5.6.0 verification on 2026-05-22: the focused IO/process tests failed before implementation because do: was unsupported and io was not a built-in module; after implementation, go test ./cmd/walk ./internal/format -run 'TestDoEffectConsoleAndProcessFoundation|TestProcessExitEffectExitsWithCode|TestV13PassFixturesBuildAndRun|TestV13FailFixturesHaveExpectedDiagnostics|TestV19ReleaseDocsArePresent|TestFormatterNormalizesDoEffectStatement' -count=1 passed; full go test -count=1 ./... passed after refreshing the generated C snapshots for the new runtime helper block; go build -trimpath -ldflags \"-X main.version=v5.6.0\" -o build/walk ./cmd/walk passed; ./build/walk version reported v5.6.0; ./build/walk check --warnings=error tests/pass/do effects.walk passed; ./build/walk tests/pass/do effects.walk printed loading and done; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.9 stress ok; scripts/build-docs-site.sh passed; scripts/check-docs-site.sh passed after staging generated docs; scripts/release.sh v5.6.0 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; and the host release binary reported v5.6.0 from walk version. State: v5.5.0 adds the v1.9 stable string interpolation surface. Single-quoted strings can include expression display values, interpolation supports int, float, bool, string, and nullable string values, and doubled braces such as word print literal braces. v5.5.0 verification on 2026-05-22: focused interpolation conformance failed before implementation because strings printed literally and bad interpolation values were accepted; after the fix, go test ./cmd/walk -run 'TestV13PassFixturesBuildAndRun|TestV13FailFixturesHaveExpectedDiagnostics' -count=1 passed; go test ./cmd/walk -run 'TestV13PassFixturesBuildAndRun|TestV19CompatibilitySuite' -count=1 passed; full go test -count=1 ./... passed; go build -trimpath -ldflags \"-X main.version=v5.5.0\" -o build/walk ./cmd/walk passed; ./build/walk version reported v5.5.0; ./build/walk check --warnings=error tests/pass/interpolation.walk passed; ./build/walk tests/pass/interpolation.walk printed the expected interpolated lines; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.9 stress ok; scripts/release.sh v5.5.0 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; the host release binary reported v5.5.0 from walk version; scripts/build-docs-site.sh passed; scripts/check-docs-site.sh passed; and git diff --check --cached passed for the staged release diff. Full worktree git diff --check is still blocked by the pre-existing unstaged playground/hangman-v2.walk trailing whitespace. Docs brand polish update on 2026-05-22: the generated docs site is now dark-mode only, uses a blue WalkLang accent family instead of the previous green tokens, publishes the compact WalkLang icon as /favicon.svg, uses that compact mark in the docs sidebar, and declares the same mark as the VS Code walk language icon for compatible file icon themes. Docs brand polish verification on 2026-05-22: focused site-generator tests cover the root favicon link, compact sidebar icon, dark blue accent tokens, removed green tokens, and existing VS Code language icon asset path; go test ./scripts -count=1 passed; scripts/build-docs-site.sh passed; and scripts/check-docs-site.sh passed after regenerating public/. Live docs TLS recovery on 2026-05-22: root cause was GitHub Pages serving the custom domain over HTTP while no Pages TLS certificate existed for walklang.wlkrlabs.com; DNS was already valid as the DNS-only walklang -\u003e scwlkr.github.io CNAME and the Pages health check reported the domain as valid and HTTPS-eligible. Removed and re-added the Pages custom domain to restart certificate provisioning, confirmed the new Let's Encrypt certificate includes walklang.wlkrlabs.com, enabled HTTPS enforcement, and triggered a fresh Pages deployment to clear the cached HTTP homepage. Live verification passed with http://walklang.wlkrlabs.com returning 301 to https://walklang.wlkrlabs.com/, https://walklang.wlkrlabs.com returning 200, GitHub Pages API reporting https enforced: true, and Pages health reporting responds to https: true plus enforces https: true. State: v5.4.1 fixes random.choice and random.int to use a runtime-owned PRNG seeded once per native process instead of the C runtime's unseeded default rand state. v5.4.1 verification on 2026-05-22: added TestRandomChoiceSeedsFreshProcesses and confirmed it failed before the runtime fix because fresh native processes all produced the same first random.choice value; after the fix, full go test -count=1 ./... passed; go build -trimpath -ldflags \"-X main.version=v5.4.1\" -o build/walk ./cmd/walk passed and ./build/walk version reported v5.4.1; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.8 stress ok; scripts/release.sh v5.4.1 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; the host release binary reported v5.4.1 from walk version; scripts/install-local.sh v5.4.1 installed /Users/shanewalker/.local/bin/walk; and twelve fresh installed walk hangman-v2.walk runs from playground/ produced multiple choices. State: v5.4 is complete against the new v1.8 terminal-game helper surface. Stable v1.8 adds string.at, string indexing with word0, string.contains, string.concat, array.contains, array.push, explicitly typed empty arrays such as var: guessed arraystring = , and random.choice for non-empty stable native arrays. The helpers keep the existing expression/module model: array.push returns a new array and string building uses string.concat instead of changing numeric +. Hangman readiness update on 2026-05-22: playground/hangman.walk is now a compiling terminal Hangman example using in:, out:, if:, while:, functions, string indexing, contains checks, functional array push, and random choice. v5.4 verification on 2026-05-22: full go test -count=1 ./... passed; go build -o build/walk ./cmd/walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.8 stress ok; ./build/walk check --warnings=error playground/hangman.walk passed; ./build/walk build playground/hangman.walk -o build/hangman plus a piped wrong-guess smoke run passed; scripts/build-docs-site.sh passed; scripts/release.sh v5.4.0 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; the host release binary reported v5.4.0 from walk version; and git diff --check passed. State: v5.3 is complete against the new v1.7 stable in: input rule. in: is a core expression that returns string, can be used anywhere an expression is valid, reads exactly one required line from stdin, supports an optional string prompt expression written to stdout without a newline, flushes stdout before reading, strips only the final line ending, preserves all other characters, returns '' for an empty line, accepts a final unterminated line, and runtime-stops on immediate EOF, stdin read failure, or allocation failure. v5.3 verification on 2026-05-22: focused go test ./cmd/walk ./internal/format -run 'TestInExpression|TestInPrompt|TestV17Formatter' -count=1 passed; full go test -count=1 ./... passed; go build -o build/walk ./cmd/walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.7 stress ok; scripts/check-docs-site.sh passed after generated site artifacts were staged; scripts/release.sh v5.3.0 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; the host release binary reported v5.3.0 from walk version; and git diff --check passed. IO planning update on 2026-05-22: IO PLAN.md now records stable out: and in: as the current baseline, the proposed module-first IO direction for most future IO, the recommended do: effect-call decision point, runtime-owned string and recoverable-error prerequisites, feature-by-feature implementation costs, and a phased order for files, directories, JSON, networking, web, and graphics. IO planning verification on 2026-05-22: scripts/build-docs-site.sh passed; full go test -count=1 ./... passed; go build -o build/walk ./cmd/walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.6 stress ok; scripts/release.sh v5.2.0 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; and the host release binary reported v5.2.0 from walk version. State: v5.2 is complete against the new v1.6 local function type inference rule. Ordinary functions may omit parameter and return types when the local body proves the types; ambiguous omitted parameter types now fail with a direct annotation diagnostic; normal typed signatures remain valid; inference does not use later call sites; and C remains the primary backend. v5.2 verification on 2026-05-22: focused go test ./cmd/walk -run 'TestFunctionTypeInference|TestV15ReleasePrepDocsArePresent' -count=1 passed; full go test -count=1 ./... passed; go build -o build/walk ./cmd/walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed and reported v1.6 stress ok; scripts/check-docs-site.sh passed after generated site artifacts were staged; scripts/release.sh v5.2.0 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; the host release binary reported v5.2.0 from walk version; and git diff --check passed. Live docs verification on 2026-05-22: walklang.wlkrlabs.com resolves through the DNS-only walklang -\u003e scwlkr.github.io CNAME to GitHub Pages addresses; http://walklang.wlkrlabs.com/docs/ returns 200 OK from GitHub Pages and includes the v5.1 docs content; http://walklang.wlkrlabs.com/docs/reference/api.json returns repo-relative source paths. HTTPS is not enforced yet because GitHub Pages still reports The certificate does not exist yet when enabling HTTPS and https://walklang.wlkrlabs.com/docs/ still fails certificate hostname validation. Public positioning update on 2026-05-22: README and docs front-door wording now distinguish the stable v1.5 language contract, the current v5.1.0 compiler/tooling/docs release, and the experimental v2.2 language surface. README now includes a tiny WalkLang function example, a \"What works today\" section, and less inflated repository-scope wording. HTTPS remediation checked the live DNS CNAME, CAA records, Pages API state, and Pages HTTP response; DNS points at scwlkr.github.io, CAA allows Let's Encrypt, HTTP still returns 200 OK, but GitHub still rejects HTTPS enforcement with The certificate does not exist yet. After the Pages deployment for commit 335c877 completed successfully, a second HTTPS enforcement attempt failed with the same certificate message and https://walklang.wlkrlabs.com/docs/ still failed hostname validation. No DNS or repo-side blocker is visible; the remaining action is to retry once GitHub has issued the Pages certificate. Public positioning verification on 2026-05-22: scripts/build-docs-site.sh passed; scripts/check-docs-site.sh passed after generated site artifacts were staged; git diff --check passed; full go test -count=1 ./... passed; go build -o build/walk ./cmd/walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed; scripts/release.sh v5.1.0 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; and the host release binary reported v5.1.0 from walk version. Docs setup on 2026-05-22: the root README now follows a Rust-style repository landing-page shape, docs/README.md is the canonical docs front door and source for the https://walklang.wlkrlabs.com/docs hosted path, CONTRIBUTING.md documents the local contribution and verification path, and docs/DOCS STYLE GUIDE.md records the source-grounded docs rules plus generated-reference expectations. Docs setup verification on 2026-05-22: curl -I --max-time 10 https://walklang.wlkrlabs.com/docs failed with Could not resolve host, so the hosted docs URL remains a planned publish target; changed-doc local Markdown links passed; git diff --check passed; go test -count=1 ./... passed; go build -o build/walk ./cmd/walk passed; ./build/walk docs --strict -o build/docs-check-api.md examples/v1.walk passed; ./build/walk docs --strict --format json -o build/docs-check-api.json examples/v1.walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed; and scripts/release.sh v5.0.0 \u003ctemp\u003e/release produced 5 platform artifacts plus 5 checksum lines. v5 verification on 2026-05-22: baseline go test -count=1 ./... passed before implementation; focused go test ./cmd/walk -run 'TestV5|TestV13GeneratedCSnapshots' -count=1 passed; full go test -count=1 ./... passed after the final code/test changes; go build -o build/walk ./cmd/walk passed; WALK BIN=$PWD/build/walk scripts/stress-v1.sh passed; scripts/release.sh v5.0.0 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS; wc -l \u003ctemp\u003e/release/SHA256SUMS reported 5 checksum lines; the host release binary reported v5.0.0 from walk version; and git diff --check passed. Previous v4.1 verification on 2026-05-22: focused go test ./cmd/walk -run 'TestV4DocsAndDebugMapCommands|TestV4LSPDiagnosticsFormattingAndCompletion' -count=1, lexer/parser go test ./internal/lexer ./internal/parser -count=1, focused go test ./cmd/walk -run TestV4 -count=1, full go test -count=1 ./..., go build -o build/walk ./cmd/walk, ./build/walk docs --strict -o build/v4.1-api.md examples/v1.walk, ./build/walk docs --strict --format json -o build/v4.1-api.json examples/v1.walk, WALK BIN=$PWD/build/walk scripts/stress-v1.sh, scripts/release.sh v4.1.0 \u003ctemp\u003e/release, SHA256SUMS line count check, and git diff --check all passed. Release CI maintenance on 2026-05-22: GitHub Actions workflow uses Node 24 first-party actions, disables unnecessary Go dependency caching for this no-go.sum module, runs scripts/check-docs-site.sh, and now publishes v5.4.1-labeled release artifacts. Playground example update on 2026-05-22: playground/route ranker.walk now demonstrates a compact route-ranking program with structs, arrays, loops, typed helper functions, prefix math, and scalar output. Verification passed with ./build/walk check --warnings=error playground/route ranker.walk, ./build/walk build playground/route ranker.walk -o build/route ranker, and ./build/route ranker, which printed Library Lane with score 46; broader verification passed with go test -count=1 ./..., scripts/check-docs-site.sh, WALK BIN=$PWD/build/walk scripts/stress-v1.sh, scripts/release.sh v5.1.0 \u003ctemp\u003e/release, a 5-line SHA256SUMS check, host release binary walk version reporting v5.1.0, and git diff --check. CLI run shortcut update on 2026-05-22: walk run \u003csource.walk\u003e now compiles a single file to a temporary native executable, runs it, streams program input and output, and removes the temporary build directory; walk \u003csource.walk\u003e is a direct shorthand for the same flow. Verification passed with focused go test ./cmd/walk -run TestRunCommandRunsSingleFileAndDirectFileAlias -count=1, go build -o build/walk ./cmd/walk, ./build/walk run playground/route ranker.walk, ./build/walk playground/route ranker.walk, full go test -count=1 ./..., scripts/check-docs-site.sh, WALK BIN=$PWD/build/walk scripts/stress-v1.sh, scripts/release.sh v5.1.0 \u003ctemp\u003e/release, a 5-line SHA256SUMS check, host release binary walk version reporting v5.1.0, and git diff --check. Next: continue IO PLAN.md Roadmap Phase 3 process/data interop only after the accepted filesystem result shape, command result type, deterministic process tests, and JSON data-model decisions are ready.",
     "level": 1
   },
   {
@@ -3199,8 +3208,17 @@
     "section": "Unreleased",
     "group": "Releases",
     "url": "docs/RELEASE_NOTES.html#unreleased",
-    "summary": "Open this section in the WalkLang docs.",
-    "text": "WalkLang Release Notes Unreleased",
+    "summary": "No unreleased changes yet.",
+    "text": "WalkLang Release Notes Unreleased No unreleased changes yet.",
+    "level": 2
+  },
+  {
+    "title": "WalkLang Release Notes",
+    "section": "v5.13.0 - Explicit Systems Track",
+    "group": "Releases",
+    "url": "docs/RELEASE_NOTES.html#v5-13-0-explicit-systems-track",
+    "summary": "v5.13.0 implements the explicit-systems release slice while keeping the stable language contract at v1.9. The new language behavior is draft unless promoted by",
+    "text": "WalkLang Release Notes v5.13.0 - Explicit Systems Track Date: 2026-05-25 v5.13.0 implements the explicit-systems release slice while keeping the stable language contract at v1.9. The new language behavior is draft unless promoted by a later compatibility decision.",
     "level": 2
   },
   {
@@ -3208,8 +3226,35 @@
     "section": "Added",
     "group": "Releases",
     "url": "docs/RELEASE_NOTES.html#added",
-    "summary": "docs/EXPLICIT SYSTEMS TRACK.md records the one-pass implementation contract for draft defer:, result-value policy, package collections, and first-class build modes.",
-    "text": "WalkLang Release Notes Added - docs/EXPLICIT SYSTEMS TRACK.md records the one-pass implementation contract for draft defer:, result-value policy, package collections, and first-class build modes.",
+    "summary": "Draft defer: scope cleanup for explicit effect cleanup at lexical block exit. Deferred cleanups run in last-in, first-out order, run before early",
+    "text": "WalkLang Release Notes Added - Draft defer: scope cleanup for explicit effect cleanup at lexical block exit. Deferred cleanups run in last-in, first-out order, run before early return:, and loop-body defers run once per iteration. - Recoverable-result documentation policy that keeps ordinary failures as explicit data through concrete result structs with ok, value, and error fields. - Package collection-root docs and enforcement. std is reserved for a future first-party root, and package publishing rejects names reserved for current or future built-in roots. - First-class build modes for walk build and walk run: --mode debug, --mode release, --debug, and --release. - Project config support for build.mode = \"debug\" or \"release\", with build.release retained as a compatibility field.",
+    "level": 3
+  },
+  {
+    "title": "WalkLang Release Notes",
+    "section": "Notes",
+    "group": "Releases",
+    "url": "docs/RELEASE_NOTES.html#notes",
+    "summary": "--release remains a supported alias for --mode release. Debug mode is the default and passes -g -O0 to the native compiler.",
+    "text": "WalkLang Release Notes Notes - --release remains a supported alias for --mode release. - Debug mode is the default and passes -g -O0 to the native compiler. - Release mode continues to pass -O3 -DNDEBUG; user --cflag values still append after mode flags. - When build.mode and build.release both appear, mode wins and a warning is emitted. - The stable language contract remains v1.9.",
+    "level": 3
+  },
+  {
+    "title": "WalkLang Release Notes",
+    "section": "Breaking Changes",
+    "group": "Releases",
+    "url": "docs/RELEASE_NOTES.html#breaking-changes",
+    "summary": "None.",
+    "text": "WalkLang Release Notes Breaking Changes None.",
+    "level": 3
+  },
+  {
+    "title": "WalkLang Release Notes",
+    "section": "Upgrade",
+    "group": "Releases",
+    "url": "docs/RELEASE_NOTES.html#upgrade",
+    "summary": "Regenerate docs and release artifacts with:",
+    "text": "WalkLang Release Notes Upgrade Regenerate docs and release artifacts with: bash scripts/build-docs-site.sh scripts/check-docs-site.sh scripts/release.sh v5.13.0 dist",
     "level": 3
   },
   {

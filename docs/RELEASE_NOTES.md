@@ -2,9 +2,55 @@
 
 ## Unreleased
 
+No unreleased changes yet.
+
+## v5.13.0 - Explicit Systems Track
+
+Date: 2026-05-25
+
+v5.13.0 implements the explicit-systems release slice while keeping the stable
+language contract at v1.9. The new language behavior is draft unless promoted by
+a later compatibility decision.
+
 ### Added
 
-- `docs/EXPLICIT_SYSTEMS_TRACK.md` records the one-pass implementation contract for draft `defer:`, result-value policy, package collections, and first-class build modes.
+- Draft `defer:` scope cleanup for explicit effect cleanup at lexical block
+  exit. Deferred cleanups run in last-in, first-out order, run before early
+  `return:`, and loop-body defers run once per iteration.
+- Recoverable-result documentation policy that keeps ordinary failures as
+  explicit data through concrete result structs with `ok`, value, and `error`
+  fields.
+- Package collection-root docs and enforcement. `std` is reserved for a future
+  first-party root, and package publishing rejects names reserved for current or
+  future built-in roots.
+- First-class build modes for `walk build` and `walk run`: `--mode debug`,
+  `--mode release`, `--debug`, and `--release`.
+- Project config support for `[build].mode = "debug"` or `"release"`, with
+  `[build].release` retained as a compatibility field.
+
+### Notes
+
+- `--release` remains a supported alias for `--mode release`.
+- Debug mode is the default and passes `-g -O0` to the native compiler.
+- Release mode continues to pass `-O3 -DNDEBUG`; user `--cflag` values still
+  append after mode flags.
+- When `[build].mode` and `[build].release` both appear, `mode` wins and a
+  warning is emitted.
+- The stable language contract remains v1.9.
+
+### Breaking Changes
+
+None.
+
+### Upgrade
+
+Regenerate docs and release artifacts with:
+
+```bash
+scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.13.0 dist
+```
 
 ## v5.12.3 - Sidebar Navigation Cleanup
 

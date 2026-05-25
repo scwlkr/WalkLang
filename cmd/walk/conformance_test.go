@@ -24,6 +24,7 @@ func TestV13PassFixturesBuildAndRun(t *testing.T) {
 		{"stdlib.walk", "3\n8\n4\na\nl\ntrue\nfalse\nwalklang\n3\n2\ntrue\nfalse\ntrue\n7\nfixed\ntrue\n"},
 		{"interpolation.walk", "the secret word is 6 characters long\nsecret: paddle\nscore 3 ok true\nplural paddles\n{word}\n{\n}\n"},
 		{"do_effects.walk", "loading\ndone\n"},
+		{"explicit_systems_defer.walk", "inner\nouter\n9\n"},
 		{"modules.walk", "25\n10\n"},
 	}
 
@@ -197,6 +198,11 @@ func TestV13FailFixturesHaveExpectedDiagnostics(t *testing.T) {
 		{"bad_term_clear_as_expression.walk", "tests/fail/bad_term_clear_as_expression.walk:3:6: type error: term.clear is an effect; use do: term.clear(...)"},
 		{"bad_http_post_arg.walk", "tests/fail/bad_http_post_arg.walk:3:48: type error: arg 2 to http.post is string, got int"},
 		{"bad_html_h1_arg.walk", "tests/fail/bad_html_h1_arg.walk:3:14: type error: arg 1 to html.h1 is string, got int"},
+		{"bad_defer_pure_call.walk", "tests/fail/bad_defer_pure_call.walk:3:1: type error: defer requires do: effect call"},
+		{"bad_defer_out.walk", "tests/fail/bad_defer_out.walk:1:1: type error: defer requires do: effect call"},
+		{"bad_defer_return.walk", "tests/fail/bad_defer_return.walk:2:5: type error: defer requires do: effect call"},
+		{"bad_defer_var.walk", "tests/fail/bad_defer_var.walk:1:1: type error: defer requires do: effect call"},
+		{"bad_defer_nested.walk", "tests/fail/bad_defer_nested.walk:3:1: type error: defer requires do: effect call"},
 		{"unknown_library.walk", "tests/fail/unknown_library.walk:2:6: name error: unknown library function math.nope"},
 		{"top_break.walk", "tests/fail/top_break.walk:1:1: syntax error: break outside loop"},
 	}
@@ -216,7 +222,7 @@ func TestV13FailFixturesHaveExpectedDiagnostics(t *testing.T) {
 
 func TestV13GeneratedCSnapshots(t *testing.T) {
 	root := repoRoot(t)
-	for _, name := range []string{"hello", "functions"} {
+	for _, name := range []string{"hello", "functions", "explicit_systems_defer"} {
 		t.Run(name, func(t *testing.T) {
 			sourcePath := filepath.Join(root, "tests", "pass", name+".walk")
 			got, warnings, err := compileFileToCWithOptions(sourcePath, false)

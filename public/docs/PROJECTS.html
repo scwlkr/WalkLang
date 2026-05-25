@@ -78,13 +78,16 @@ entry = &#34;src/main.walk&#34;
 
 [build]
 output = &#34;build/hello&#34;
-release = false</code></pre>
+mode = &#34;debug&#34;</code></pre>
 <p>Rules:</p>
 <ul>
 <li><code>name</code> is required and may contain letters, numbers, <code>_</code>, and <code>-</code>.</li>
 <li><code>version</code> defaults to <code>0.1.0</code>.</li>
 <li><code>entry</code> defaults to <code>src/main.walk</code>.</li>
 <li><code>build.output</code> defaults to <code>build/&lt;name&gt;</code>.</li>
+<li><code>build.mode</code> may be <code>debug</code> or <code>release</code>; the default is <code>debug</code>.</li>
+<li><code>build.release = true|false</code> is still accepted for compatibility. When both</li>
+<p><code>build.mode</code> and <code>build.release</code> are present, <code>build.mode</code> wins and the compiler emits a warning.</p>
 <li>project paths must be relative and stay inside the project root.</li>
 <li><code>[dependencies]</code> pins package dependencies by exact <code>MAJOR.MINOR.PATCH</code> version.</li>
 </ul>
@@ -124,6 +127,7 @@ test: &#39;cube works&#39;
 <pre><code class="language-walk">imp: geometry.core
 
 out: geometry.core.double(3)</code></pre>
+<p>The first segment of a dotted package import is the package collection root. For <code>imp: geometry.core</code>, the collection root is <code>geometry</code>, the module path is <code>geometry/core.walk</code>, and generated C names use the prefix <code>geometry__core__</code>.</p>
 <p>This import resolves from:</p>
 <pre><code class="language-text">.walk/packages/geometry/0.1.0/src/geometry/core.walk</code></pre>
 <h2 id="packages">Packages</h2>
@@ -138,6 +142,9 @@ walk package resolve ../registry</code></pre>
 <p>Package behavior:</p>
 <ul>
 <li><code>walk package publish</code> requires non-empty <code>README.md</code>.</li>
+<li><code>std</code> is reserved as a future first-party collection root.</li>
+<li><code>walk package publish</code> rejects package names reserved for current or future</li>
+<p>built-in roots, including <code>std</code> and current built-in module roots.</p>
 <li>Publish runs <code>walk check --warnings=error</code> and <code>walk test --warnings=error</code>.</li>
 <li>Published packages are copied to <code>&lt;registry&gt;/&lt;name&gt;/&lt;version&gt;/</code>.</li>
 <li><code>walk package resolve</code> copies packages into <code>.walk/packages/</code> and writes <code>walk.lock</code>.</li>

@@ -59,6 +59,7 @@
 <h1 id="walklang-v1-diagnostics">WalkLang v1 Diagnostics</h1>
 <p>WalkLang diagnostics are compiler-reported errors and warnings. They are intended to be deterministic enough for conformance tests.</p>
 <p>Use <code>runtime failure</code> for native program failures after compilation. Use <code>failed assertion</code> for <code>walk test</code> assertion failures. Use <code>recoverable result data</code> for draft APIs that return <code>ok</code>, <code>value</code>, and <code>error</code> fields instead of stopping the native program.</p>
+<p>Recoverable result data is runtime data, not a diagnostic, failed assertion, or runtime failure. It is the preferred shape for ordinary documented failures in draft APIs that are intended to let the program continue.</p>
 <h2 id="shape">Shape</h2>
 <p>Compiler diagnostics keep this stable first line:</p>
 <pre><code class="language-text">file.walk:line:column: category: message</code></pre>

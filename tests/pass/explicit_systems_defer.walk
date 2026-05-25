@@ -1,0 +1,10 @@
+imp: io
+
+func: pick(flag bool) int
+    defer: do io.write_line('outer')
+    if: flag
+        defer: do io.write_line('inner')
+        return: 9
+    return: 4
+
+out: pick(true)

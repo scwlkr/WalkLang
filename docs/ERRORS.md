@@ -8,6 +8,10 @@ Use `runtime failure` for native program failures after compilation. Use
 data` for draft APIs that return `ok`, `value`, and `error` fields instead of
 stopping the native program.
 
+Recoverable result data is runtime data, not a diagnostic, failed assertion, or runtime failure.
+It is the preferred shape for ordinary documented failures in draft APIs that
+are intended to let the program continue.
+
 ## Shape
 
 Compiler diagnostics keep this stable first line:

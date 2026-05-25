@@ -32,7 +32,7 @@ var reservedWords = map[string]bool{
 	"while": true, "for": true, "repeat": true, "break": true, "continue": true,
 	"func": true, "return": true, "imp": true, "exp": true, "true": true,
 	"false": true, "null": true, "and": true, "or": true, "not": true,
-	"in": true, "test": true, "assert": true, "struct": true,
+	"in": true, "test": true, "assert": true, "struct": true, "defer": true,
 }
 
 type lineNode struct {
@@ -133,6 +133,9 @@ func parseStatementAt(nodes []lineNode, index int) (ast.Statement, int, error) {
 		case "do":
 			value, err := parseCommandExpression(payload, node.children, first.Location)
 			return &ast.Do{Location: first.Location, Value: value}, index + 1, err
+		case "defer":
+			statement, err := parseDefer(payload, node.children, first.Location)
+			return statement, index + 1, err
 		case "test":
 			statement, err := parseTestDecl(payload, node.children, first.Location)
 			return statement, index + 1, err
@@ -264,6 +267,20 @@ func parseImportName(tokens []lexer.Token, location ast.Location) (string, error
 		return "", errorAt(location, "syntax error: expected import name")
 	}
 	return strings.Join(parts, "."), nil
+}
+
+func parseDefer(tokens []lexer.Token, children []lineNode, location ast.Location) (ast.Statement, error) {
+	if err := rejectUnexpectedChildren(children); err != nil {
+		return nil, err
+	}
+	if len(tokens) < 2 || tokens[0].Kind != lexer.TokenName || tokens[0].Value != "do" {
+		return &ast.Defer{Location: location}, nil
+	}
+	value, err := parseExpressionTokens(tokens[1:], location)
+	if err != nil {
+		return nil, err
+	}
+	return &ast.Defer{Location: location, Value: value}, nil
 }
 
 func parseVarDecl(tokens []lexer.Token, children []lineNode, location ast.Location, mutable bool) (ast.Statement, error) {

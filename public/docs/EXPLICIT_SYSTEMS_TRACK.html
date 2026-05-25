@@ -57,7 +57,7 @@
 <div class="page">
 <article class="doc">
 <h1 id="walklang-explicit-systems-track">WalkLang Explicit Systems Track</h1>
-<p>Status: planned.</p>
+<p>Status: implemented in v5.13.0.</p>
 <p>Date opened: 2026-05-25.</p>
 <p>This document is the persistent tracker for one explicit-language implementation slice. It covers four related improvements inspired by Odin-style language discipline:</p>
 <p>1. Scope cleanup with <code>defer:</code>. 2. Result values instead of exception-like control flow. 3. Package collections as explicit import roots. 4. First-class build modes.</p>
@@ -74,7 +74,7 @@
 <p>generated docs, native execution, status, release notes, and release artifacts prove it.</p>
 </ul>
 <h2 id="status">Status</h2>
-<p>| Item | Status | Notes | | --- | --- | --- | | <code>defer:</code> scope cleanup | Planned | New draft statement form. | | Result-value policy | Planned | Standardize recoverable result behavior before adding broader APIs. | | Package collections | Planned | Formalize explicit import roots without changing existing import syntax. | | Build modes | Planned | Make debug/release mode selection explicit and testable. |</p>
+<p>| Item | Status | Notes | | --- | --- | --- | | <code>defer:</code> scope cleanup | Implemented | New draft statement form. | | Result-value policy | Implemented | Recoverable result behavior standardized in docs and conformance tests. | | Package collections | Implemented | Explicit import roots documented; reserved roots enforced. | | Build modes | Implemented | Debug/release mode selection is explicit and testable. |</p>
 <h2 id="one-pass-scope">One-Pass Scope</h2>
 <h3 id="1-defer-scope-cleanup">1. <code>defer:</code> Scope Cleanup</h3>
 <p>Goal: add explicit cleanup that runs at scope exit without hidden destructors.</p>
@@ -270,6 +270,8 @@ git diff --check</code></pre>
 <ul>
 <li>2026-05-25: Track opened from design discussion. No implementation has started.</li>
 <p>Current decision: keep WalkLang explicit and implement these four items as one future release slice.</p>
+<li>2026-05-25: Track implemented for v5.13.0. Draft <code>defer:</code> cleanup,</li>
+<p>recoverable-result policy docs, package collection-root enforcement, and first-class build modes are covered by focused tests and the release verification gate recorded in <code>docs/STATUS.md</code>.</p>
 </ul>
 </article>
 <footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>

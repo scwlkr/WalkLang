@@ -167,6 +167,14 @@ type Do struct {
 func (s *Do) Loc() Location  { return s.Location }
 func (s *Do) statementNode() {}
 
+type Defer struct {
+	Location Location
+	Value    Expression
+}
+
+func (s *Defer) Loc() Location  { return s.Location }
+func (s *Defer) statementNode() {}
+
 type TestDecl struct {
 	Location Location
 	Name     string

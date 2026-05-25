@@ -33,7 +33,7 @@ entry = "src/main.walk"
 
 [build]
 output = "build/hello"
-release = false
+mode = "debug"
 ```
 
 Rules:
@@ -42,6 +42,10 @@ Rules:
 - `version` defaults to `0.1.0`.
 - `entry` defaults to `src/main.walk`.
 - `build.output` defaults to `build/<name>`.
+- `build.mode` may be `debug` or `release`; the default is `debug`.
+- `build.release = true|false` is still accepted for compatibility. When both
+  `build.mode` and `build.release` are present, `build.mode` wins and the
+  compiler emits a warning.
 - project paths must be relative and stay inside the project root.
 - `[dependencies]` pins package dependencies by exact `MAJOR.MINOR.PATCH` version.
 
@@ -107,6 +111,11 @@ imp: geometry.core
 out: geometry.core.double(3)
 ```
 
+The first segment of a dotted package import is the package collection root.
+For `imp: geometry.core`, the collection root is `geometry`, the module path is
+`geometry/core.walk`, and generated C names use the prefix
+`geometry__core__`.
+
 This import resolves from:
 
 ```text
@@ -138,6 +147,9 @@ walk package resolve ../registry
 Package behavior:
 
 - `walk package publish` requires non-empty `README.md`.
+- `std` is reserved as a future first-party collection root.
+- `walk package publish` rejects package names reserved for current or future
+  built-in roots, including `std` and current built-in module roots.
 - Publish runs `walk check --warnings=error` and `walk test --warnings=error`.
 - Published packages are copied to `<registry>/<name>/<version>/`.
 - `walk package resolve` copies packages into `.walk/packages/` and writes `walk.lock`.

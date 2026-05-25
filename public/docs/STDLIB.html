@@ -175,15 +175,27 @@ do: io.error_line(&#39;warning&#39;)</code></pre>
     value string
     error string</code></pre>
 <p><code>ok</code> is true when <code>value</code> contains text. <code>error</code> is <code>&#39;&#39;</code> on success. Immediate EOF from <code>io.read_line()</code> returns <code>ok false</code>, <code>value &#39;&#39;</code>, and <code>error &#39;eof&#39;</code>. Stdin read failure returns <code>error &#39;stdin read failed&#39;</code>. Allocation failure still runtime-stops because the program cannot reliably recover without memory.</p>
+<p>Failure policy:</p>
+<ul>
+<li><code>io.write</code>, <code>io.write_line</code>, and <code>io.error_line</code>: fail-stop runtime failure</li>
+<p>only for unrecoverable runtime/backend failure.</p>
+<li><code>io.read_line</code> and <code>io.read_all</code>: recoverable result data for ordinary EOF or</li>
+<p>stdin read failure; allocation failure remains fail-stop.</p>
+</ul>
 <h3 id="io-write-string-effect">io.write(string) -&gt; effect</h3>
+<p>Failure policy: fail-stop runtime failure.</p>
 <p>Writes the string to stdout without adding a newline and flushes stdout.</p>
 <h3 id="io-write-line-string-effect">io.write_line(string) -&gt; effect</h3>
+<p>Failure policy: fail-stop runtime failure.</p>
 <p>Writes the string and a trailing newline to stdout and flushes stdout.</p>
 <h3 id="io-error-line-string-effect">io.error_line(string) -&gt; effect</h3>
+<p>Failure policy: fail-stop runtime failure.</p>
 <p>Writes the string and a trailing newline to stderr and flushes stderr.</p>
 <h3 id="io-read-line-ioreadresult">io.read_line() -&gt; IOReadResult</h3>
+<p>Failure policy: recoverable result data.</p>
 <p>Reads one line from stdin. A trailing LF or CRLF line ending is stripped. A final unterminated line succeeds. Immediate EOF is returned as data with <code>error &#39;eof&#39;</code>.</p>
 <h3 id="io-read-all-ioreadresult">io.read_all() -&gt; IOReadResult</h3>
+<p>Failure policy: recoverable result data.</p>
 <p>Reads the remaining stdin as one runtime-owned string. EOF is a successful empty or completed read. Stdin read failure is returned as data.</p>
 <p>---</p>
 <h2 id="draft-parse">Draft parse</h2>
@@ -209,10 +221,13 @@ struct: ParseBoolResult
     error string</code></pre>
 <p>The helpers parse the whole input string. Extra characters and leading or trailing whitespace make the result fail instead of being ignored.</p>
 <h3 id="parse-int-string-parseintresult">parse.int(string) -&gt; ParseIntResult</h3>
+<p>Failure policy: recoverable result data.</p>
 <p>Parses a base-10 integer with an optional leading sign. Invalid input returns <code>error &#39;invalid int&#39;</code>; overflow returns <code>error &#39;int out of range&#39;</code>.</p>
 <h3 id="parse-float-string-parsefloatresult">parse.float(string) -&gt; ParseFloatResult</h3>
+<p>Failure policy: recoverable result data.</p>
 <p>Parses a finite floating-point number. Invalid input returns <code>error &#39;invalid float&#39;</code>; range errors return <code>error &#39;float out of range&#39;</code>.</p>
 <h3 id="parse-bool-string-parseboolresult">parse.bool(string) -&gt; ParseBoolResult</h3>
+<p>Failure policy: recoverable result data.</p>
 <p>Parses exactly <code>true</code> or <code>false</code>. Other text returns <code>error &#39;invalid bool&#39;</code>.</p>
 <p>---</p>
 <h2 id="draft-file">Draft file</h2>
@@ -229,17 +244,32 @@ struct: FileActionResult
     value bool
     error string</code></pre>
 <p><code>error</code> is <code>&#39;&#39;</code> on success. <code>FileActionResult.value</code> is <code>true</code> on success and <code>false</code> on failure.</p>
+<p>Failure policy:</p>
+<ul>
+<li><code>file.read</code>, <code>file.write</code>, and <code>file.append</code>: fail-stop runtime failure for</li>
+<p>ordinary file/path/read/write failures.</p>
+<li><code>file.try_read</code>, <code>file.try_write</code>, and <code>file.try_append</code>: recoverable result</li>
+<p>data for ordinary file/path/read/write failures.</p>
+<li><code>file.exists</code>: boolean data for path existence and no runtime failure for an</li>
+<p>empty path.</p>
+</ul>
 <h3 id="file-read-string-string">file.read(string) -&gt; string</h3>
+<p>Failure policy: fail-stop runtime failure.</p>
 <p>Reads the whole UTF-8 text file into a runtime-owned string.</p>
 <h3 id="file-try-read-string-filereadresult">file.try_read(string) -&gt; FileReadResult</h3>
+<p>Failure policy: recoverable result data.</p>
 <p>Reads a UTF-8 text file without runtime-stopping for ordinary file failures. Missing files return <code>ok false</code>, <code>value &#39;&#39;</code>, and <code>error &#39;file read failed&#39;</code>. Invalid UTF-8 and embedded null bytes are reported as file errors. Allocation failure still runtime-stops.</p>
 <h3 id="file-write-string-string-effect">file.write(string, string) -&gt; effect</h3>
+<p>Failure policy: fail-stop runtime failure.</p>
 <p>Overwrites the target path with UTF-8 text. Create parent directories first; this helper does not create them.</p>
 <h3 id="file-try-write-string-string-fileactionresult">file.try_write(string, string) -&gt; FileActionResult</h3>
+<p>Failure policy: recoverable result data.</p>
 <p>Attempts the same overwrite behavior as <code>file.write</code> and returns failures as data instead of runtime-stopping for ordinary file/path/write errors.</p>
 <h3 id="file-append-string-string-effect">file.append(string, string) -&gt; effect</h3>
+<p>Failure policy: fail-stop runtime failure.</p>
 <p>Appends UTF-8 text to the target file, creating the file if needed. Create parent directories first; this helper does not create them.</p>
 <h3 id="file-try-append-string-string-fileactionresult">file.try_append(string, string) -&gt; FileActionResult</h3>
+<p>Failure policy: recoverable result data.</p>
 <p>Attempts the same append behavior as <code>file.append</code> and returns failures as data instead of runtime-stopping for ordinary file/path/write errors.</p>
 <pre><code class="language-walk">imp: file
 
@@ -247,15 +277,19 @@ do: file.write(&#39;note.txt&#39;, &#39;hello&#39;)
 do: file.append(&#39;note.txt&#39;, &#39; world&#39;)
 out: file.read(&#39;note.txt&#39;)</code></pre>
 <h3 id="file-exists-string-bool">file.exists(string) -&gt; bool</h3>
+<p>Failure policy: returns <code>false</code> for ordinary missing or empty paths.</p>
 <p>Returns <code>true</code> when the path currently exists according to the host OS and <code>false</code> when it does not. Empty paths return <code>false</code>.</p>
 <p>---</p>
 <h2 id="draft-dir">Draft dir</h2>
 <p>Draft <code>dir</code> APIs operate on native process paths. They do not normalize paths, expand <code>~</code>, or create missing parents. Directory failures are fail-stop in this draft slice.</p>
 <h3 id="dir-list-string-array-string">dir.list(string) -&gt; array[string]</h3>
+<p>Failure policy: fail-stop runtime failure.</p>
 <p>Lists names directly inside a directory, excluding <code>.</code> and <code>..</code>. Results are sorted by bytewise string order for deterministic output. Returned names are not joined to the input path.</p>
 <h3 id="dir-make-string-effect">dir.make(string) -&gt; effect</h3>
+<p>Failure policy: fail-stop runtime failure.</p>
 <p>Creates one directory. It fails if the parent directory is missing or the path already exists.</p>
 <h3 id="dir-delete-string-effect">dir.delete(string) -&gt; effect</h3>
+<p>Failure policy: fail-stop runtime failure.</p>
 <p>Deletes one empty directory. It fails for non-empty directories.</p>
 <pre><code class="language-walk">imp: dir
 imp: path
@@ -268,10 +302,13 @@ do: dir.delete(path.join(&#39;data&#39;, &#39;empty&#39;))</code></pre>
 <h2 id="draft-path">Draft path</h2>
 <p>Draft <code>path</code> APIs are small host-path string helpers. They do not normalize paths, resolve <code>..</code>, check whether a path exists, or expand <code>~</code>.</p>
 <h3 id="path-join-string-string-string">path.join(string, string) -&gt; string</h3>
+<p>Failure policy: fail-stop runtime failure only for unrecoverable allocation failure.</p>
 <p>Joins two path segments with the host separator when neither side already has a separator at the join point.</p>
 <h3 id="path-base-string-string">path.base(string) -&gt; string</h3>
+<p>Failure policy: fail-stop runtime failure only for unrecoverable allocation failure.</p>
 <p>Returns the substring after the final <code>/</code> or <code>\</code> path separator. A path ending with a separator returns <code>&#39;&#39;</code>.</p>
 <h3 id="path-ext-string-string">path.ext(string) -&gt; string</h3>
+<p>Failure policy: fail-stop runtime failure only for unrecoverable allocation failure.</p>
 <p>Returns the final extension in the last path segment, including the dot. Paths with no dot in the final segment return <code>&#39;&#39;</code>.</p>
 <p>---</p>
 <h2 id="draft-process">Draft process</h2>
@@ -296,23 +333,32 @@ struct: ProcessOutputResult
     error string</code></pre>
 <p><code>process.run</code> and <code>process.output</code> use argv-style execution. <code>process.run_shell</code> is explicit shell execution and should not be used with interpolated untrusted input.</p>
 <h3 id="process-args-array-string">process.args() -&gt; array[string]</h3>
+<p>Failure policy: fail-stop runtime failure only for unrecoverable allocation failure.</p>
 <p>Returns command-line arguments passed after the executable path.</p>
 <h3 id="process-arg-count-int">process.arg_count() -&gt; int</h3>
+<p>Failure policy: no ordinary runtime failure.</p>
 <p>Returns the number of command-line arguments passed after the executable path.</p>
 <h3 id="process-env-string-string">process.env(string) -&gt; string?</h3>
+<p>Failure policy: returns <code>null</code> when the variable is not set.</p>
 <p>Returns an environment variable value, or <code>null</code> when the variable is not set.</p>
 <h3 id="process-cwd-string">process.cwd() -&gt; string</h3>
+<p>Failure policy: fail-stop runtime failure.</p>
 <p>Returns the current working directory as a runtime-owned string.</p>
 <h3 id="process-chdir-string-effect">process.chdir(string) -&gt; effect</h3>
+<p>Failure policy: fail-stop runtime failure.</p>
 <p>Changes the native process current working directory. This is process-global state; tests and programs that use it should change back when needed. Empty paths and failed changes runtime-stop.</p>
 <h3 id="process-run-string-array-string-processresult">process.run(string, array[string]) -&gt; ProcessResult</h3>
+<p>Failure policy: recoverable result data.</p>
 <p>Runs a command without invoking a shell. The first argument is the executable path or command name and the second argument is the argv array passed after the command. Captured stdout and stderr are UTF-8 text. A zero status returns <code>ok true</code>; a non-zero status returns <code>ok false</code>, keeps <code>stdout</code>, <code>stderr</code>, and <code>status</code> as data, and sets <code>error &#39;process exited non-zero&#39;</code>.</p>
 <p>Spawn or wait failures return <code>ok false</code>, <code>status -1</code>, and a process error. Allocation failure still runtime-stops.</p>
 <h3 id="process-output-string-array-string-processoutputresult">process.output(string, array[string]) -&gt; ProcessOutputResult</h3>
+<p>Failure policy: recoverable result data.</p>
 <p>Runs a command without invoking a shell and returns stdout in <code>value</code>. It is a convenience wrapper around <code>process.run</code>; non-zero status is still returned as data.</p>
 <h3 id="process-run-shell-string-processresult">process.run_shell(string) -&gt; ProcessResult</h3>
+<p>Failure policy: recoverable result data.</p>
 <p>Runs a command through the host shell (<code>/bin/sh -c</code> on POSIX hosts and <code>cmd.exe /C</code> on Windows hosts). This helper exists for explicit shell-dependent programs only; prefer <code>process.run</code> when arguments are known.</p>
 <h3 id="process-exit-int-effect">process.exit(int) -&gt; effect</h3>
+<p>Failure policy: intentional fail-stop process termination.</p>
 <p>Exits the native process with the given status code.</p>
 <p>---</p>
 <h2 id="draft-json">Draft json</h2>
@@ -329,12 +375,16 @@ if: parsed.ok
     error string</code></pre>
 <p><code>value</code> contains compact validated JSON text on success. Invalid JSON returns <code>ok false</code>, <code>value &#39;&#39;</code>, and <code>error &#39;invalid json&#39;</code>.</p>
 <h3 id="json-parse-string-jsonresult">json.parse(string) -&gt; JsonResult</h3>
+<p>Failure policy: recoverable result data.</p>
 <p>Validates JSON text and returns compact JSON text with insignificant whitespace removed. Supported JSON text includes objects, arrays, strings, finite JSON number syntax, <code>true</code>, <code>false</code>, and <code>null</code>.</p>
 <h3 id="json-stringify-string-string">json.stringify(string) -&gt; string</h3>
+<p>Failure policy: fail-stop runtime failure only for unrecoverable allocation failure.</p>
 <p>Escapes one WalkLang string as a JSON string literal.</p>
 <h3 id="json-read-string-jsonresult">json.read(string) -&gt; JsonResult</h3>
+<p>Failure policy: recoverable result data.</p>
 <p>Reads a UTF-8 text file with the same file path policy as <code>file.read</code>, then parses it as JSON. File read failures and invalid JSON are returned as data.</p>
 <h3 id="json-write-string-string-effect">json.write(string, string) -&gt; effect</h3>
+<p>Failure policy: fail-stop runtime failure.</p>
 <p>Validates and compacts JSON text, then overwrites the target file. Invalid JSON or file write failures runtime-stop with <code>walk runtime error</code>.</p>
 <p>---</p>
 <h2 id="draft-term">Draft term</h2>
@@ -359,24 +409,34 @@ if: term.is_tty()
 <p>Supported colors are <code>default</code>, <code>black</code>, <code>red</code>, <code>green</code>, <code>yellow</code>, <code>blue</code>, <code>magenta</code>, <code>cyan</code>, and <code>white</code>. Supported styles are <code>bold</code>, <code>dim</code>, <code>italic</code>, <code>underline</code>, <code>reverse</code>, <code>normal</code>, and <code>reset</code>. Unknown color, background, or style names runtime-stop with a <code>walk runtime error</code>.</p>
 <p><code>term.read_key()</code> returns <code>IOReadResult</code>. Non-interactive stdin returns <code>ok false</code>, <code>value &#39;&#39;</code>, and <code>error &#39;terminal not interactive&#39;</code> instead of blocking. Allocation failure still runtime-stops.</p>
 <h3 id="term-is-tty-bool">term.is_tty() -&gt; bool</h3>
+<p>Failure policy: no ordinary runtime failure.</p>
 <p>Returns <code>true</code> when stdout is an interactive terminal.</p>
 <h3 id="term-color-string-effect">term.color(string) -&gt; effect</h3>
+<p>Failure policy: fail-stop runtime failure.</p>
 <p>Sets the foreground color by supported color name when ANSI output is enabled.</p>
 <h3 id="term-background-string-effect">term.background(string) -&gt; effect</h3>
+<p>Failure policy: fail-stop runtime failure.</p>
 <p>Sets the background color by supported color name when ANSI output is enabled.</p>
 <h3 id="term-style-string-effect">term.style(string) -&gt; effect</h3>
+<p>Failure policy: fail-stop runtime failure.</p>
 <p>Sets a supported terminal style when ANSI output is enabled.</p>
 <h3 id="term-reset-effect">term.reset() -&gt; effect</h3>
+<p>Failure policy: no ordinary runtime failure.</p>
 <p>Resets terminal styling when ANSI output is enabled.</p>
 <h3 id="term-clear-effect">term.clear() -&gt; effect</h3>
+<p>Failure policy: no ordinary runtime failure.</p>
 <p>Clears the terminal screen and moves the cursor home when ANSI output is enabled.</p>
 <h3 id="term-move-int-int-effect">term.move(int, int) -&gt; effect</h3>
+<p>Failure policy: fail-stop runtime failure.</p>
 <p>Moves the cursor to one-based column and row coordinates when ANSI output is enabled. Columns and rows less than <code>1</code> runtime-stop.</p>
 <h3 id="term-width-int">term.width() -&gt; int</h3>
+<p>Failure policy: no ordinary runtime failure.</p>
 <p>Returns the current terminal width when available, then <code>COLUMNS</code> when it is a positive integer, then <code>80</code>.</p>
 <h3 id="term-height-int">term.height() -&gt; int</h3>
+<p>Failure policy: no ordinary runtime failure.</p>
 <p>Returns the current terminal height when available, then <code>LINES</code> when it is a positive integer, then <code>24</code>.</p>
 <h3 id="term-read-key-ioreadresult">term.read_key() -&gt; IOReadResult</h3>
+<p>Failure policy: recoverable result data.</p>
 <p>Reads one key from an interactive stdin terminal. On POSIX hosts this enters raw mode for a single key read and restores the terminal before returning.</p>
 <p>---</p>
 <h2 id="draft-http">Draft http</h2>
@@ -397,10 +457,13 @@ out: response.error</code></pre>
 <p><code>ok</code> is true for status codes <code>200</code> through <code>399</code>. Other status codes return <code>ok false</code>, preserve <code>body</code>, and set <code>error &#39;http status&#39;</code>. Runtime backend failures such as missing <code>curl</code>, DNS failure, TLS failure, connection failure, timeout, response-size failure, or invalid output return <code>ok false</code> with <code>status</code> from the backend when available, otherwise <code>-1</code>.</p>
 <p>Draft HTTP uses the system <code>curl</code> executable through argv-style process execution. It does not invoke a shell. Redirects are followed, the timeout is 10 seconds, response bodies are capped at 1 MiB, and response bodies are UTF-8 text only. See <a href="NETWORKING.html">Draft networking</a> for the security and backend policy.</p>
 <h3 id="http-get-string-httpresult">http.get(string) -&gt; HttpResult</h3>
+<p>Failure policy: recoverable result data.</p>
 <p>Sends a <code>GET</code> request to the URL.</p>
 <h3 id="http-post-string-string-httpresult">http.post(string, string) -&gt; HttpResult</h3>
+<p>Failure policy: recoverable result data.</p>
 <p>Sends a <code>POST</code> request with the string body.</p>
 <h3 id="http-request-string-string-string-httpresult">http.request(string, string, string) -&gt; HttpResult</h3>
+<p>Failure policy: recoverable result data.</p>
 <p>Sends a request with <code>method</code>, <code>url</code>, and <code>body</code>. Empty method or URL returns a recoverable error before any runtime backend is started.</p>
 <p>---</p>
 <h2 id="draft-html">Draft html</h2>
@@ -410,12 +473,16 @@ out: response.error</code></pre>
 out: html.h1(&#39;Walk &lt;Lang&gt;&#39;)
 out: html.p(&#39;copy &amp; text&#39;)</code></pre>
 <h3 id="html-escape-string-string">html.escape(string) -&gt; string</h3>
+<p>Failure policy: fail-stop runtime failure only for unrecoverable allocation failure.</p>
 <p>Escapes <code>&amp;</code>, <code>&lt;</code>, <code>&gt;</code>, <code>&#34;</code>, and <code>&#39;</code> for HTML text contexts.</p>
 <h3 id="html-h1-string-string">html.h1(string) -&gt; string</h3>
+<p>Failure policy: fail-stop runtime failure only for unrecoverable allocation failure.</p>
 <p>Returns an escaped <code>&lt;h1&gt;...&lt;/h1&gt;</code> string.</p>
 <h3 id="html-p-string-string">html.p(string) -&gt; string</h3>
+<p>Failure policy: fail-stop runtime failure only for unrecoverable allocation failure.</p>
 <p>Returns an escaped <code>&lt;p&gt;...&lt;/p&gt;</code> string.</p>
 <h3 id="html-button-string-string">html.button(string) -&gt; string</h3>
+<p>Failure policy: fail-stop runtime failure only for unrecoverable allocation failure.</p>
 <p>Returns an escaped <code>&lt;button&gt;...&lt;/button&gt;</code> string.</p>
 <p>---</p>
 <h2 id="test-syntax">Test Syntax</h2>

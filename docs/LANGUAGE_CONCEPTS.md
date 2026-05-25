@@ -226,6 +226,29 @@ Use diagnostic for compiler-reported errors and warnings. Use runtime failure
 for native program failures after compilation. Do not use error loosely when the
 doc means warning, failed assertion, recoverable result data, or runtime stop.
 
+### Recoverable Result Data
+
+Recoverable result data is an ordinary runtime value that reports an ordinary
+documented failure without stopping the native program. It is not a compiler
+diagnostic, not a failed assertion, and not a runtime failure.
+
+The current draft result shape is concrete per API:
+
+```text
+ok bool
+value T
+error string
+```
+
+`ok` is true only when `value` is meaningful. `error` is `''` on success and a
+short machine-testable code on ordinary recoverable failure. Draft APIs may use
+module-specific fields when the successful value needs a clearer name, such as
+`HttpResult.body` or `ProcessResult.stdout`.
+
+Allocation failure, invalid compiler state, and unrecoverable backend/runtime
+failures may still runtime-stop. Do not describe recoverable result data as
+exceptions, thrown errors, or hidden control flow.
+
 ### Standard Library API
 
 A standard library API is a built-in module function or built-in result type

@@ -58,10 +58,40 @@
 <article class="doc">
 <h1 id="walklang-release-notes">WalkLang Release Notes</h1>
 <h2 id="unreleased">Unreleased</h2>
+<p>No unreleased changes yet.</p>
+<h2 id="v5-13-0-explicit-systems-track">v5.13.0 - Explicit Systems Track</h2>
+<p>Date: 2026-05-25</p>
+<p>v5.13.0 implements the explicit-systems release slice while keeping the stable language contract at v1.9. The new language behavior is draft unless promoted by a later compatibility decision.</p>
 <h3 id="added">Added</h3>
 <ul>
-<li><code>docs/EXPLICIT_SYSTEMS_TRACK.md</code> records the one-pass implementation contract for draft <code>defer:</code>, result-value policy, package collections, and first-class build modes.</li>
+<li>Draft <code>defer:</code> scope cleanup for explicit effect cleanup at lexical block</li>
+<p>exit. Deferred cleanups run in last-in, first-out order, run before early <code>return:</code>, and loop-body defers run once per iteration.</p>
+<li>Recoverable-result documentation policy that keeps ordinary failures as</li>
+<p>explicit data through concrete result structs with <code>ok</code>, value, and <code>error</code> fields.</p>
+<li>Package collection-root docs and enforcement. <code>std</code> is reserved for a future</li>
+<p>first-party root, and package publishing rejects names reserved for current or future built-in roots.</p>
+<li>First-class build modes for <code>walk build</code> and <code>walk run</code>: <code>--mode debug</code>,</li>
+<p><code>--mode release</code>, <code>--debug</code>, and <code>--release</code>.</p>
+<li>Project config support for <code>[build].mode = &#34;debug&#34;</code> or <code>&#34;release&#34;</code>, with</li>
+<p><code>[build].release</code> retained as a compatibility field.</p>
 </ul>
+<h3 id="notes">Notes</h3>
+<ul>
+<li><code>--release</code> remains a supported alias for <code>--mode release</code>.</li>
+<li>Debug mode is the default and passes <code>-g -O0</code> to the native compiler.</li>
+<li>Release mode continues to pass <code>-O3 -DNDEBUG</code>; user <code>--cflag</code> values still</li>
+<p>append after mode flags.</p>
+<li>When <code>[build].mode</code> and <code>[build].release</code> both appear, <code>mode</code> wins and a</li>
+<p>warning is emitted.</p>
+<li>The stable language contract remains v1.9.</li>
+</ul>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<p>None.</p>
+<h3 id="upgrade">Upgrade</h3>
+<p>Regenerate docs and release artifacts with:</p>
+<pre><code class="language-bash">scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.13.0 dist</code></pre>
 <h2 id="v5-12-3-sidebar-navigation-cleanup">v5.12.3 - Sidebar Navigation Cleanup</h2>
 <p>Date: 2026-05-24</p>
 <p>v5.12.3 cleans up the generated docs sidebar so the public navigation is organized by reader task and document role instead of exposed release milestones. The stable language contract remains v1.9 and the draft runtime API surface is unchanged from v5.12.0.</p>

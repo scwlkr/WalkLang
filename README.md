@@ -42,9 +42,10 @@ WalkLang currently has three version layers:
 
 - **Stable language contract:** `v1.9`, defined by `docs/SPEC.md`,
   `docs/COMPATIBILITY.md`, and the v1 compatibility tests.
-- **Current compiler/tooling/docs release:** `v5.12.3`, focused on a cleaner
-  topic-based docs sidebar over the v5.12.2 search result preview work and the
-  v5.12.0 draft network/rich-runtime IO surface while keeping v1.9 stable.
+- **Current compiler/tooling/docs release:** `v5.13.0`, focused on the explicit
+  systems track: draft `defer:` cleanup, recoverable-result policy docs,
+  package collection roots, and first-class build modes while keeping v1.9
+  stable.
 - **Experimental implemented language surface:** v2 through v2.2 features such
   as structs, methods, and simple generic functions are implemented, but are not
   part of the stable v1 compatibility promise.
@@ -54,14 +55,14 @@ WalkLang currently has three version layers:
 - `.walk` files compile through generated C into native executables.
 - Stable v1.9 syntax, diagnostics, modules, tests, and standard-library helpers
   are documented and compatibility-tested.
-- Draft `do:`, `io`, `parse`, `process`, `file`, `dir`, `path`, `json`,
-  `term`, `http`, and `html` helpers are implemented for current compiler
-  experiments, but they are not part of the stable v1.9 contract.
+- Draft `do:`, `defer:`, `io`, `parse`, `process`, `file`, `dir`, `path`,
+  `json`, `term`, `http`, and `html` helpers are implemented for current
+  compiler experiments, but they are not part of the stable v1.9 contract.
 - `walk run`, direct `walk file.walk`, `walk build`, `walk check`, `walk test`,
   `walk fmt`, `walk clean`, `walk package`, `walk docs`, `walk debug-map`,
   `walk lsp`, `walk repl`, and `walk version` are implemented.
 - Project mode supports `walk init`, `walk.toml`, source/test layout, builds,
-  checks, tests, formatting, and cleanup.
+  checks, tests, formatting, explicit debug/release build modes, and cleanup.
 - Static docs and generated API reference output are repo-owned and deployed
   through GitHub Pages; live custom-domain HTTPS readiness is tracked in
   [STATUS.md](docs/STATUS.md).

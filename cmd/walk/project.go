@@ -24,11 +24,15 @@ type projectConfig struct {
 	entry        string
 	build        projectBuildConfig
 	dependencies []projectDependency
+	warnings     []string
 }
 
 type projectBuildConfig struct {
-	output  string
-	release bool
+	output     string
+	release    bool
+	releaseSet bool
+	mode       buildMode
+	modeSet    bool
 }
 
 type projectBuildArgs struct {
@@ -85,9 +89,11 @@ func useProjectBuild(args []string) bool {
 	for i := 0; i < len(args); i++ {
 		arg := args[i]
 		switch {
-		case arg == "--release":
+		case arg == "--release" || arg == "--debug":
 			continue
-		case arg == "--cc" || arg == "--cflag" || arg == "--warnings":
+		case strings.HasPrefix(arg, "--mode="):
+			continue
+		case arg == "--cc" || arg == "--cflag" || arg == "--warnings" || arg == "--mode":
 			i++
 			if i >= len(args) {
 				return false
@@ -110,6 +116,9 @@ func projectBuildCommand(args []string) error {
 	if err != nil {
 		return err
 	}
+	for _, warning := range config.warnings {
+		fmt.Fprintln(os.Stderr, warning)
+	}
 	entryPath, err := projectPath(config, config.entry)
 	if err != nil {
 		return err
@@ -118,7 +127,9 @@ func projectBuildCommand(args []string) error {
 	if err != nil {
 		return err
 	}
-	parsed.native.release = config.build.release || parsed.native.release
+	if !parsed.native.modeSet {
+		parsed.native.release = config.build.release
+	}
 	searchDirs, err := projectSearchDirs(config, entryPath)
 	if err != nil {
 		return err
@@ -314,7 +325,25 @@ func parseProjectBuildArgs(args []string) (projectBuildArgs, error) {
 	for i := 0; i < len(args); i++ {
 		switch args[i] {
 		case "--release":
-			config.native.release = true
+			if err := config.native.setBuildMode(buildModeRelease); err != nil {
+				return projectBuildArgs{}, err
+			}
+		case "--debug":
+			if err := config.native.setBuildMode(buildModeDebug); err != nil {
+				return projectBuildArgs{}, err
+			}
+		case "--mode":
+			i++
+			if i >= len(args) {
+				return projectBuildArgs{}, fmt.Errorf("build requires a value after --mode")
+			}
+			mode, err := parseBuildMode(args[i])
+			if err != nil {
+				return projectBuildArgs{}, err
+			}
+			if err := config.native.setBuildMode(mode); err != nil {
+				return projectBuildArgs{}, err
+			}
 		case "--cc":
 			i++
 			if i >= len(args) {
@@ -328,6 +357,16 @@ func parseProjectBuildArgs(args []string) (projectBuildArgs, error) {
 			}
 			config.native.cFlags = append(config.native.cFlags, args[i])
 		default:
+			if strings.HasPrefix(args[i], "--mode=") {
+				mode, err := parseBuildMode(strings.TrimPrefix(args[i], "--mode="))
+				if err != nil {
+					return projectBuildArgs{}, err
+				}
+				if err := config.native.setBuildMode(mode); err != nil {
+					return projectBuildArgs{}, err
+				}
+				continue
+			}
 			if mode, ok, err := parseWarningArg(args, &i); ok || err != nil {
 				if err != nil {
 					return projectBuildArgs{}, err
@@ -479,6 +518,26 @@ func assignProjectConfigValue(config *projectConfig, section string, key string,
 				return err
 			}
 			config.build.release = parsed
+			config.build.releaseSet = true
+			if config.build.modeSet {
+				config.warnings = append(config.warnings, fmt.Sprintf("%s:%d: warning: [build].mode overrides [build].release", filename, line))
+				config.build.release = config.build.mode == buildModeRelease
+			}
+		case "mode":
+			parsed, err := parseTomlString(value, filename, line)
+			if err != nil {
+				return err
+			}
+			mode, err := parseBuildMode(parsed)
+			if err != nil {
+				return fmt.Errorf("%s:%d: [build].mode: %w", filename, line, err)
+			}
+			config.build.mode = mode
+			config.build.modeSet = true
+			config.build.release = mode == buildModeRelease
+			if config.build.releaseSet {
+				config.warnings = append(config.warnings, fmt.Sprintf("%s:%d: warning: [build].mode overrides [build].release", filename, line))
+			}
 		default:
 			return fmt.Errorf("%s:%d: unknown build key %q", filename, line, key)
 		}
@@ -629,7 +688,7 @@ func validProjectName(name string) bool {
 }
 
 func initialProjectConfig(name string) string {
-	return fmt.Sprintf("name = %q\nversion = \"0.1.0\"\nentry = \"src/main.walk\"\n\n[build]\noutput = %q\nrelease = false\n", name, filepath.ToSlash(filepath.Join("build", name)))
+	return fmt.Sprintf("name = %q\nversion = \"0.1.0\"\nentry = \"src/main.walk\"\n\n[build]\noutput = %q\nmode = \"debug\"\n", name, filepath.ToSlash(filepath.Join("build", name)))
 }
 
 func initialMainSource() string {

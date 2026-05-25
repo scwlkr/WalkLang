@@ -66,14 +66,21 @@ debuggable
 readable enough to inspect</code></pre>
 <p>WalkLang source still follows the same pipeline:</p>
 <pre><code class="language-text">.walk -&gt; generated C -&gt; native executable</code></pre>
-<h2 id="release-builds">Release Builds</h2>
-<p>Release builds use the native C compiler with optimization enabled:</p>
-<pre><code class="language-bash">walk build main.walk -o build/main --release</code></pre>
-<p><code>--release</code> adds:</p>
+<h2 id="build-modes">Build Modes</h2>
+<p>Builds have an explicit mode. Debug is the default and emits native compiler flags suitable for inspection:</p>
+<pre><code class="language-bash">walk build main.walk -o build/main --mode debug
+walk run main.walk --debug</code></pre>
+<p>Debug mode adds:</p>
+<pre><code class="language-text">-g
+-O0</code></pre>
+<p>Release mode keeps optimized native builds:</p>
+<pre><code class="language-bash">walk build main.walk -o build/main --mode release
+walk run main.walk --release</code></pre>
+<p>Release mode adds:</p>
 <pre><code class="language-text">-O3
 -DNDEBUG</code></pre>
-<p>Custom compiler flags still work and are appended after the release defaults:</p>
-<pre><code class="language-bash">walk build main.walk -o build/main --release --cflag -DWALK_TRACE=0</code></pre>
+<p><code>--release</code> remains a compatibility alias for <code>--mode release</code>; <code>--debug</code> is an alias for <code>--mode debug</code>. Custom compiler flags still work and are appended after the selected mode flags:</p>
+<pre><code class="language-bash">walk build main.walk -o build/main --mode release --cflag -DWALK_TRACE=0</code></pre>
 <p>Use <code>--cc</code> or <code>WALK_CC</code> to choose the native compiler.</p>
 <h2 id="runtime-layer">Runtime Layer</h2>
 <p>Generated C includes a small <code>walk runtime</code> section before user code. It defines:</p>

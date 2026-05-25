@@ -29,6 +29,11 @@ Build shape:
 main.walk -> main.c -> main / main.exe
 ```
 
+Build mode is explicit at the tool boundary. Debug mode is the default and uses
+inspectable native flags (`-g -O0`); release mode uses optimized native flags
+(`-O3 -DNDEBUG`). `--release` remains a compatibility alias for
+`--mode release`.
+
 ---
 
 ## 1. Identity
@@ -83,6 +88,15 @@ imp: io
 
 do: io.write('Loading')
 do: io.write_line('done')
+```
+
+Draft scope cleanup uses `defer:` with the same visible effect boundary:
+
+```walk
+imp: term
+
+do: term.color('red')
+defer: do term.reset()
 ```
 
 ---

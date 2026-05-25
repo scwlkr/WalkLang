@@ -262,25 +262,42 @@ EOF from `io.read_line()` returns `ok false`, `value ''`, and `error 'eof'`.
 Stdin read failure returns `error 'stdin read failed'`. Allocation failure still
 runtime-stops because the program cannot reliably recover without memory.
 
+Failure policy:
+
+- `io.write`, `io.write_line`, and `io.error_line`: fail-stop runtime failure
+  only for unrecoverable runtime/backend failure.
+- `io.read_line` and `io.read_all`: recoverable result data for ordinary EOF or
+  stdin read failure; allocation failure remains fail-stop.
+
 ### io.write(string) -> effect
+
+Failure policy: fail-stop runtime failure.
 
 Writes the string to stdout without adding a newline and flushes stdout.
 
 ### io.write_line(string) -> effect
 
+Failure policy: fail-stop runtime failure.
+
 Writes the string and a trailing newline to stdout and flushes stdout.
 
 ### io.error_line(string) -> effect
 
+Failure policy: fail-stop runtime failure.
+
 Writes the string and a trailing newline to stderr and flushes stderr.
 
 ### io.read_line() -> IOReadResult
+
+Failure policy: recoverable result data.
 
 Reads one line from stdin. A trailing LF or CRLF line ending is stripped. A final
 unterminated line succeeds. Immediate EOF is returned as data with
 `error 'eof'`.
 
 ### io.read_all() -> IOReadResult
+
+Failure policy: recoverable result data.
 
 Reads the remaining stdin as one runtime-owned string. EOF is a successful empty
 or completed read. Stdin read failure is returned as data.
@@ -321,15 +338,21 @@ trailing whitespace make the result fail instead of being ignored.
 
 ### parse.int(string) -> ParseIntResult
 
+Failure policy: recoverable result data.
+
 Parses a base-10 integer with an optional leading sign. Invalid input returns
 `error 'invalid int'`; overflow returns `error 'int out of range'`.
 
 ### parse.float(string) -> ParseFloatResult
 
+Failure policy: recoverable result data.
+
 Parses a finite floating-point number. Invalid input returns
 `error 'invalid float'`; range errors return `error 'float out of range'`.
 
 ### parse.bool(string) -> ParseBoolResult
+
+Failure policy: recoverable result data.
 
 Parses exactly `true` or `false`. Other text returns `error 'invalid bool'`.
 
@@ -363,11 +386,24 @@ struct: FileActionResult
 `error` is `''` on success. `FileActionResult.value` is `true` on success and
 `false` on failure.
 
+Failure policy:
+
+- `file.read`, `file.write`, and `file.append`: fail-stop runtime failure for
+  ordinary file/path/read/write failures.
+- `file.try_read`, `file.try_write`, and `file.try_append`: recoverable result
+  data for ordinary file/path/read/write failures.
+- `file.exists`: boolean data for path existence and no runtime failure for an
+  empty path.
+
 ### file.read(string) -> string
+
+Failure policy: fail-stop runtime failure.
 
 Reads the whole UTF-8 text file into a runtime-owned string.
 
 ### file.try_read(string) -> FileReadResult
+
+Failure policy: recoverable result data.
 
 Reads a UTF-8 text file without runtime-stopping for ordinary file failures.
 Missing files return `ok false`, `value ''`, and `error 'file read failed'`.
@@ -376,20 +412,28 @@ failure still runtime-stops.
 
 ### file.write(string, string) -> effect
 
+Failure policy: fail-stop runtime failure.
+
 Overwrites the target path with UTF-8 text. Create parent directories first;
 this helper does not create them.
 
 ### file.try_write(string, string) -> FileActionResult
+
+Failure policy: recoverable result data.
 
 Attempts the same overwrite behavior as `file.write` and returns failures as
 data instead of runtime-stopping for ordinary file/path/write errors.
 
 ### file.append(string, string) -> effect
 
+Failure policy: fail-stop runtime failure.
+
 Appends UTF-8 text to the target file, creating the file if needed. Create
 parent directories first; this helper does not create them.
 
 ### file.try_append(string, string) -> FileActionResult
+
+Failure policy: recoverable result data.
 
 Attempts the same append behavior as `file.append` and returns failures as data
 instead of runtime-stopping for ordinary file/path/write errors.
@@ -404,6 +448,8 @@ out: file.read('note.txt')
 
 ### file.exists(string) -> bool
 
+Failure policy: returns `false` for ordinary missing or empty paths.
+
 Returns `true` when the path currently exists according to the host OS and
 `false` when it does not. Empty paths return `false`.
 
@@ -417,16 +463,22 @@ draft slice.
 
 ### dir.list(string) -> array[string]
 
+Failure policy: fail-stop runtime failure.
+
 Lists names directly inside a directory, excluding `.` and `..`. Results are
 sorted by bytewise string order for deterministic output. Returned names are
 not joined to the input path.
 
 ### dir.make(string) -> effect
 
+Failure policy: fail-stop runtime failure.
+
 Creates one directory. It fails if the parent directory is missing or the path
 already exists.
 
 ### dir.delete(string) -> effect
+
+Failure policy: fail-stop runtime failure.
 
 Deletes one empty directory. It fails for non-empty directories.
 
@@ -449,15 +501,21 @@ paths, resolve `..`, check whether a path exists, or expand `~`.
 
 ### path.join(string, string) -> string
 
+Failure policy: fail-stop runtime failure only for unrecoverable allocation failure.
+
 Joins two path segments with the host separator when neither side already has a
 separator at the join point.
 
 ### path.base(string) -> string
 
+Failure policy: fail-stop runtime failure only for unrecoverable allocation failure.
+
 Returns the substring after the final `/` or `\` path separator. A path ending
 with a separator returns `''`.
 
 ### path.ext(string) -> string
+
+Failure policy: fail-stop runtime failure only for unrecoverable allocation failure.
 
 Returns the final extension in the last path segment, including the dot. Paths
 with no dot in the final segment return `''`.
@@ -498,27 +556,39 @@ input.
 
 ### process.args() -> array[string]
 
+Failure policy: fail-stop runtime failure only for unrecoverable allocation failure.
+
 Returns command-line arguments passed after the executable path.
 
 ### process.arg_count() -> int
+
+Failure policy: no ordinary runtime failure.
 
 Returns the number of command-line arguments passed after the executable path.
 
 ### process.env(string) -> string?
 
+Failure policy: returns `null` when the variable is not set.
+
 Returns an environment variable value, or `null` when the variable is not set.
 
 ### process.cwd() -> string
 
+Failure policy: fail-stop runtime failure.
+
 Returns the current working directory as a runtime-owned string.
 
 ### process.chdir(string) -> effect
+
+Failure policy: fail-stop runtime failure.
 
 Changes the native process current working directory. This is process-global
 state; tests and programs that use it should change back when needed. Empty
 paths and failed changes runtime-stop.
 
 ### process.run(string, array[string]) -> ProcessResult
+
+Failure policy: recoverable result data.
 
 Runs a command without invoking a shell. The first argument is the executable
 path or command name and the second argument is the argv array passed after the
@@ -531,17 +601,23 @@ Allocation failure still runtime-stops.
 
 ### process.output(string, array[string]) -> ProcessOutputResult
 
+Failure policy: recoverable result data.
+
 Runs a command without invoking a shell and returns stdout in `value`. It is a
 convenience wrapper around `process.run`; non-zero status is still returned as
 data.
 
 ### process.run_shell(string) -> ProcessResult
 
+Failure policy: recoverable result data.
+
 Runs a command through the host shell (`/bin/sh -c` on POSIX hosts and
 `cmd.exe /C` on Windows hosts). This helper exists for explicit shell-dependent
 programs only; prefer `process.run` when arguments are known.
 
 ### process.exit(int) -> effect
+
+Failure policy: intentional fail-stop process termination.
 
 Exits the native process with the given status code.
 
@@ -576,20 +652,28 @@ struct: JsonResult
 
 ### json.parse(string) -> JsonResult
 
+Failure policy: recoverable result data.
+
 Validates JSON text and returns compact JSON text with insignificant whitespace
 removed. Supported JSON text includes objects, arrays, strings, finite JSON
 number syntax, `true`, `false`, and `null`.
 
 ### json.stringify(string) -> string
 
+Failure policy: fail-stop runtime failure only for unrecoverable allocation failure.
+
 Escapes one WalkLang string as a JSON string literal.
 
 ### json.read(string) -> JsonResult
+
+Failure policy: recoverable result data.
 
 Reads a UTF-8 text file with the same file path policy as `file.read`, then
 parses it as JSON. File read failures and invalid JSON are returned as data.
 
 ### json.write(string, string) -> effect
+
+Failure policy: fail-stop runtime failure.
 
 Validates and compacts JSON text, then overwrites the target file. Invalid JSON
 or file write failures runtime-stop with `walk runtime error`.
@@ -633,45 +717,65 @@ blocking. Allocation failure still runtime-stops.
 
 ### term.is_tty() -> bool
 
+Failure policy: no ordinary runtime failure.
+
 Returns `true` when stdout is an interactive terminal.
 
 ### term.color(string) -> effect
+
+Failure policy: fail-stop runtime failure.
 
 Sets the foreground color by supported color name when ANSI output is enabled.
 
 ### term.background(string) -> effect
 
+Failure policy: fail-stop runtime failure.
+
 Sets the background color by supported color name when ANSI output is enabled.
 
 ### term.style(string) -> effect
+
+Failure policy: fail-stop runtime failure.
 
 Sets a supported terminal style when ANSI output is enabled.
 
 ### term.reset() -> effect
 
+Failure policy: no ordinary runtime failure.
+
 Resets terminal styling when ANSI output is enabled.
 
 ### term.clear() -> effect
+
+Failure policy: no ordinary runtime failure.
 
 Clears the terminal screen and moves the cursor home when ANSI output is
 enabled.
 
 ### term.move(int, int) -> effect
 
+Failure policy: fail-stop runtime failure.
+
 Moves the cursor to one-based column and row coordinates when ANSI output is
 enabled. Columns and rows less than `1` runtime-stop.
 
 ### term.width() -> int
+
+Failure policy: no ordinary runtime failure.
 
 Returns the current terminal width when available, then `COLUMNS` when it is a
 positive integer, then `80`.
 
 ### term.height() -> int
 
+Failure policy: no ordinary runtime failure.
+
 Returns the current terminal height when available, then `LINES` when it is a
 positive integer, then `24`.
 
 ### term.read_key() -> IOReadResult
+
+Failure policy: recoverable result data.
 
 Reads one key from an interactive stdin terminal. On POSIX hosts this enters raw
 mode for a single key read and restores the terminal before returning.
@@ -718,13 +822,19 @@ policy.
 
 ### http.get(string) -> HttpResult
 
+Failure policy: recoverable result data.
+
 Sends a `GET` request to the URL.
 
 ### http.post(string, string) -> HttpResult
 
+Failure policy: recoverable result data.
+
 Sends a `POST` request with the string body.
 
 ### http.request(string, string, string) -> HttpResult
+
+Failure policy: recoverable result data.
 
 Sends a request with `method`, `url`, and `body`. Empty method or URL returns a
 recoverable error before any runtime backend is started.
@@ -745,17 +855,25 @@ out: html.p('copy & text')
 
 ### html.escape(string) -> string
 
+Failure policy: fail-stop runtime failure only for unrecoverable allocation failure.
+
 Escapes `&`, `<`, `>`, `"`, and `'` for HTML text contexts.
 
 ### html.h1(string) -> string
+
+Failure policy: fail-stop runtime failure only for unrecoverable allocation failure.
 
 Returns an escaped `<h1>...</h1>` string.
 
 ### html.p(string) -> string
 
+Failure policy: fail-stop runtime failure only for unrecoverable allocation failure.
+
 Returns an escaped `<p>...</p>` string.
 
 ### html.button(string) -> string
+
+Failure policy: fail-stop runtime failure only for unrecoverable allocation failure.
 
 Returns an escaped `<button>...</button>` string.
 

@@ -275,8 +275,9 @@ for: n in nums
 expression. Failed assertions make the generated test executable exit non-zero.
 Normal `walk build` ignores `test:` blocks.
 
-The current compiler also implements the draft `do:` statement for effect
-calls. `do:` is not part of the stable v1.9 compatibility contract.
+The current compiler also implements draft `do:` effect calls and draft
+`defer:` scope cleanup. They are not part of the stable v1.9 compatibility
+contract.
 
 ---
 
@@ -496,6 +497,7 @@ Draft statement/API surface:
 
 ```text
 do:
+defer:
 io
 parse
 process

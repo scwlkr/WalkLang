@@ -2,16 +2,43 @@
 
 Stable language contract: v1.9.
 
-Current compiler/tooling/docs release: v5.12.3 docs sidebar navigation cleanup
-over the v5.12.2 generated search result previews and the v5.12.0 draft
-network and rich-runtime IO completion.
+Current compiler/tooling/docs release: v5.13.0 explicit systems track over the
+v5.12.3 docs sidebar navigation cleanup and the v5.12.0 draft network and
+rich-runtime IO completion.
 
 Experimental implemented language surface: v2.2.
 
-Planning status on 2026-05-25: `docs/EXPLICIT_SYSTEMS_TRACK.md` now tracks the
-future one-pass explicit-systems implementation slice: draft `defer:`, a
-recoverable result-value policy, package collections, and first-class build
-modes. No compiler behavior changed in this planning update.
+State: v5.13.0 implements the one-pass explicit systems track. Draft `defer:`
+scope cleanup is available inside entry, function, loop, conditional, and test
+blocks, with lexical LIFO execution, early-return cleanup, loop-iteration
+cleanup, and argument capture at the point of `defer:`. Recoverable result data
+is now the documented policy for ordinary failures that should not stop a
+program; fail-stop APIs remain labeled in the standard library docs. Package
+collection roots are documented and reserved roots such as `std` are rejected
+for user package init/publish. Build modes are first-class through `--mode
+debug`, `--mode release`, `--debug`, `--release`, and `[build].mode`, with
+`[build].release` retained as a compatibility field. The stable language
+contract remains v1.9, and this new behavior remains draft until a later
+compatibility decision promotes it.
+
+v5.13.0 verification on 2026-05-25: focused explicit-systems tests passed with
+`go test ./internal/format ./cmd/walk -run
+'TestFormatterNormalizesDeferEffectStatement|TestExplicitSystems|TestV13FailFixturesHaveExpectedDiagnostics|TestV13PassFixturesBuildAndRun|TestV13GeneratedCSnapshots'
+-count=1`; full `go test -count=1 ./...` passed; `go build -trimpath -ldflags
+"-X main.version=v5.13.0" -o build/walk ./cmd/walk` passed; `./build/walk
+version` reported `v5.13.0`; `./build/walk check --warnings=error
+tests/pass/walk_tests.walk` passed; `WALK_BIN=$PWD/build/walk
+scripts/stress-v1.sh` passed and reported `v1.9 stress ok`;
+`scripts/build-docs-site.sh` passed; `scripts/check-docs-site.sh` passed after
+staging generated docs; `scripts/release.sh v5.13.0 <temp>/release` produced 5
+platform artifacts plus `SHA256SUMS`; `wc -l <temp>/release/SHA256SUMS`
+reported 5 checksum lines; `scripts/install-local.sh v5.13.0` refreshed
+`/Users/shanewalker/.local/bin/walk`; `walk version` reported `v5.13.0`; and
+`git diff --cached --check` passed for staged release files. Full `git diff
+--check` remained blocked by pre-existing trailing whitespace in
+`playground/hangman-v2.walk`, which was left untouched; the release slice passed
+`git diff --check -- . ':(exclude)playground/hangman.walk'
+':(exclude)playground/hangman-v2.walk'`.
 
 State: v5.12.3 cleans up the generated docs sidebar so public navigation is
 organized by reader task and document role instead of exposed release
