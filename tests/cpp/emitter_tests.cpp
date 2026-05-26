@@ -112,7 +112,7 @@ void test_ir_lowering_keeps_typed_program() {
 
 void test_emit_c_for_variables_and_output() {
     const std::string c_code = emit_source("var: x = + 1 2\nconst: ok = true\nout: x\nout: ok\n");
-    for (const std::string& want : {
+    for (const char* want : {
              "#include \"walk_runtime.h\"",
              "/* source: main.walk:1:1 */",
              "WalkInt x = (1 + 2);",
@@ -120,7 +120,7 @@ void test_emit_c_for_variables_and_output() {
              "walk_rt_print_int((WalkInt)(x));",
              "walk_rt_print_bool((WalkBool)(ok));",
          }) {
-        expect_true("generated C contains " + want, c_code.find(want) != std::string::npos, "missing snippet\n" + c_code);
+        expect_true(std::string("generated C contains ") + want, c_code.find(want) != std::string::npos, "missing snippet\n" + c_code);
     }
 }
 

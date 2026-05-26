@@ -48,8 +48,8 @@ void test_help_command_lists_phase_commands() {
     const walk::cli::CommandResult result = walk::cli::dispatch({"help"});
     expect_eq_int("help exit", result.exit_code, 0);
     expect_true("help header", result.stdout_text.find("WalkLang C++ compiler") != std::string::npos, "missing compiler header");
-    for (const std::string& command : {"version", "help", "check", "emit-c", "run", "build", "test", "fmt", "clean", "init", "package", "docs", "debug-map", "lsp", "repl"}) {
-        expect_true("help command " + command, result.stdout_text.find(command) != std::string::npos, "missing command");
+    for (const char* command : {"version", "help", "check", "emit-c", "run", "build", "test", "fmt", "clean", "init", "package", "docs", "debug-map", "lsp", "repl"}) {
+        expect_true(std::string("help command ") + command, result.stdout_text.find(command) != std::string::npos, "missing command");
     }
     expect_eq("help stderr", result.stderr_text, "");
 }

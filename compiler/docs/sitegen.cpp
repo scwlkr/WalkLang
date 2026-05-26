@@ -215,9 +215,9 @@ std::string rel_url(const std::string& from, const std::string& to) {
 }
 
 std::string short_title(std::string title) {
-    for (const std::string& prefix : {"WalkLang ", "Official "}) {
+    for (const char* prefix : {"WalkLang ", "Official "}) {
         if (starts_with(title, prefix)) {
-            title = title.substr(prefix.size());
+            title = title.substr(std::string(prefix).size());
         }
     }
     return title;

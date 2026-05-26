@@ -517,7 +517,7 @@ Result<std::string> render_index(const DocsIndex& index, const std::string& form
     out << "Source: `" << index.source << "`\n\n";
     for (const std::string& path : index_paths(index)) {
         out << "## " << path << "\n\n";
-        for (const std::string& kind : {"struct", "function", "export"}) {
+        for (const char* kind : {"struct", "function", "export"}) {
             const std::vector<DocsSymbol> symbols = symbols_for_path_and_kind(index, path, kind);
             if (symbols.empty()) {
                 continue;
