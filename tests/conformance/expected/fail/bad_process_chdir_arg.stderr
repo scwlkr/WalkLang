@@ -1,0 +1,4 @@
+tests/fail/bad_process_chdir_arg.walk:3:19: type error: arg 1 to process.chdir is string, got int
+
+do: process.chdir(3)
+                  ^ int cannot initialize string

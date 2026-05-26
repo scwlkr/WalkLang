@@ -2,7 +2,13 @@
 
 ## Unreleased
 
-No unreleased changes yet.
+### Added
+
+- Phase 1 systems compiler port conformance oracle under `tests/conformance/`, with a manifest, recorded reference outputs, generated-C snapshot oracle artifacts, and a shell runner that supports `WALK_REF` plus future `WALK_CANDIDATE` comparison.
+
+### Changed
+
+- `scripts/stress-compatibility.sh` now verifies the recorded conformance oracle before running the older compatibility stress checks.
 
 ## v5.14.1 - Systems Compiler Port Contract
 

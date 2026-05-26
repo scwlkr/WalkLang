@@ -1,0 +1,4 @@
+tests/fail/generic_function_value.walk:4:10: type error: generic function id must be called directly
+
+var: f = id
+         ^

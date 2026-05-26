@@ -1,0 +1,4 @@
+tests/fail/bad_json_parse_arg.walk:3:26: type error: arg 1 to json.parse is string, got int
+
+var: result = json.parse(1)
+                         ^ int cannot initialize string

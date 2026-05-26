@@ -1,0 +1,4 @@
+tests/fail/bad_io_write_arg.walk:3:14: type error: arg 1 to io.write is string, got int
+
+do: io.write(1)
+             ^ int cannot initialize string

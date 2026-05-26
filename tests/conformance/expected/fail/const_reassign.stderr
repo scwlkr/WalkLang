@@ -1,0 +1,4 @@
+tests/fail/const_reassign.walk:2:1: type error: limit is const and cannot be reassigned
+
+limit = 11
+^

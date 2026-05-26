@@ -6,8 +6,8 @@ Current architecture direction on 2026-05-26: `docs/SYSTEMS_COMPILER_PORT_PLAN.m
 is now the accepted execution contract for porting WalkLang from the current
 reference compiler to the permanent systems architecture: C++ compiler core, C
 runtime and platform layer, C backend, optional assembly leaf routines, and no
-final Go or JavaScript implementation footprint. The next porting step is Phase
-1, the conformance oracle.
+final Go or JavaScript implementation footprint. Phase 1, the conformance
+oracle, is complete. The next porting step is Phase 2, runtime extraction.
 
 `v5.14.1` is the single project version for the compiler, tooling, docs,
 release artifacts, and implemented language surface. Feature maturity is
@@ -38,6 +38,28 @@ in `docs/SYSTEMS_COMPILER_PORT_PLAN.md` and keeps `walktop` under
 deterministic fixture mode for tests, renders a compact color-forward dashboard
 through `term` APIs, and is installed by the normal local install flow beside
 `walk`.
+
+Systems compiler port state on 2026-05-26: Phase 1 now records the current
+reference compiler as an executable conformance oracle under
+`tests/conformance/`. The manifest covers 20 pass fixtures, 52 fail fixtures, 4
+compatibility fixtures, 3 generated-C snapshot fixtures, and 4 `walktop` fixture
+groups. The runner records expected behavior with `WALK_REF=... --record`,
+verifies it with `--verify`, and can compare a future `WALK_CANDIDATE` against
+the same expected artifacts. `scripts/stress-compatibility.sh` now invokes the
+conformance verifier before the older compatibility stress checks.
+
+Phase 1 conformance oracle verification on 2026-05-26:
+
+```text
+go build -trimpath -ldflags "-X main.version=v5.14.1" -o build/walk-ref ./cmd/walk passed
+WALK_REF=$PWD/build/walk-ref tests/conformance/run.sh --record passed
+WALK_REF=$PWD/build/walk-ref tests/conformance/run.sh --verify passed
+WALK_BIN=$PWD/build/walk-ref scripts/stress-compatibility.sh passed and reported compatibility stress ok
+scripts/build-docs-site.sh passed
+scripts/check-docs-site.sh passed after staging generated docs
+go test -count=1 ./... passed
+conformance summary: 20 pass, 52 fail, 25 native executions, 4 compat, 3 snapshot, and 4 walktop fixture groups
+```
 
 Last release verification on 2026-05-26:
 
@@ -169,5 +191,6 @@ WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported com
 git diff --check -- . ':(exclude)playground/hangman.walk' ':(exclude)playground/hangman-v2.walk' passed
 ```
 
-Next: continue standard-platform expansion after the CLI proof app, with future
-areas gated by the same proof parity rules.
+Next: begin Phase 2 in `docs/SYSTEMS_COMPILER_PORT_PLAN.md` by extracting the
+runtime helper layer into `runtime/walk_runtime.c` and platform C files while
+keeping current generated C behavior covered by the conformance oracle.

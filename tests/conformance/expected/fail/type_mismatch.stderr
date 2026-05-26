@@ -1,0 +1,4 @@
+tests/fail/type_mismatch.walk:2:1: type error: x is int, got string
+
+x = 'one'
+^ string cannot initialize int

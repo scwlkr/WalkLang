@@ -1,0 +1,4 @@
+tests/fail/bad_do_pure_call.walk:3:1: type error: do needs effect call, got float
+
+do: math.sqrt(4)
+^

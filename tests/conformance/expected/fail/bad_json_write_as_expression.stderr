@@ -1,0 +1,4 @@
+tests/fail/bad_json_write_as_expression.walk:3:6: type error: json.write is an effect; use do: json.write(...)
+
+out: json.write('data.json', '{{}}')
+     ^

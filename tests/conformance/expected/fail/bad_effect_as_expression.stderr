@@ -1,0 +1,4 @@
+tests/fail/bad_effect_as_expression.walk:3:14: type error: io.write is an effect; use do: io.write(...)
+
+var: value = io.write('x')
+             ^

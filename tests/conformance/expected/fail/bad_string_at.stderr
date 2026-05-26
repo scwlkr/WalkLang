@@ -1,0 +1,4 @@
+tests/fail/bad_string_at.walk:2:23: type error: string.at index must be int, got string
+
+out: string.at('dog', '0')
+                      ^

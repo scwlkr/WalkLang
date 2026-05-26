@@ -1,0 +1,4 @@
+tests/fail/const_struct_field.walk:6:5: type error: user is const and cannot be reassigned
+
+user.age = 26
+    ^

@@ -1,0 +1,4 @@
+tests/fail/unknown_struct_field.walk:6:10: type error: User has no field height
+
+out: user.height
+         ^

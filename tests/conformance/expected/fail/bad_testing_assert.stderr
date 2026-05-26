@@ -1,0 +1,4 @@
+tests/fail/bad_testing_assert.walk:4:28: type error: testing.assert needs bool arg, got int
+
+    assert: testing.assert(1)
+                           ^ assert a bool expression

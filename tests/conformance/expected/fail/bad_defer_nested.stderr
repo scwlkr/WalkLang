@@ -1,0 +1,4 @@
+tests/fail/bad_defer_nested.walk:3:1: type error: defer requires do: effect call
+
+defer: defer: do io.write_line('x')
+^

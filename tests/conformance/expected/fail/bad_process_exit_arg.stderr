@@ -1,0 +1,4 @@
+tests/fail/bad_process_exit_arg.walk:3:18: type error: arg 1 to process.exit is int, got string
+
+do: process.exit('x')
+                 ^ string cannot initialize int

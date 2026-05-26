@@ -1,0 +1,4 @@
+tests/fail/bad_assert.walk:2:13: type error: assert needs bool, got int
+
+    assert: 1
+            ^ assert a bool expression

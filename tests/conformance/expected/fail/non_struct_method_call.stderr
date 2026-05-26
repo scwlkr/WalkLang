@@ -1,0 +1,4 @@
+tests/fail/non_struct_method_call.walk:2:14: type error: method call needs struct receiver, got int
+
+var: adult = age.is_adult()
+             ^

@@ -1,0 +1,4 @@
+tests/fail/bad_process_run_arg.walk:3:35: type error: arg 2 to process.run is array[string], got string
+
+var: result = process.run('walk', 'version')
+                                  ^ string cannot initialize array[string]

@@ -1,0 +1,4 @@
+tests/fail/bad_input_prompt.walk:1:13: type error: in prompt must be string, got int
+
+var: name = in: 123
+            ^

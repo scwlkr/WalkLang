@@ -403,7 +403,7 @@ Update this table at the end of every porting phase.
 | Phase | Status | Required exit proof |
 | --- | --- | --- |
 | 0. Port Contract | Complete | This document exists, is linked, and generated docs build |
-| 1. Conformance Oracle | Not started | Dual-compiler harness records current behavior from the reference compiler |
+| 1. Conformance Oracle | Complete | Dual-compiler harness records current behavior from the reference compiler |
 | 2. Runtime Extraction | Not started | Generated C links against `runtime/walk_runtime.c` with current tests passing |
 | 3. C++ Skeleton | Not started | `make walk` builds a C++ `walk` that supports version/help and test harness entrypoints |
 | 4. Lexer, Parser, AST | Not started | C++ frontend parses current pass fixtures and rejects fail syntax fixtures |
@@ -557,7 +557,7 @@ docs: add systems compiler port plan
 
 ## Phase 1: Conformance Oracle
 
-Status: Not started
+Status: Complete
 
 Goal: turn the current reference compiler behavior into an executable oracle so
 the C++ port is measured against real language behavior instead of memory.
@@ -612,6 +612,25 @@ conformance: ok
 7. Keep the runner shell-based or C++-based. Do not add Python, Node, or Go.
 8. Add docs explaining how to refresh expected output from the reference
    compiler.
+
+Completed result:
+
+- `tests/conformance/manifest.tsv` covers the current pass fixtures, fail fixtures, compatibility fixtures, generated-C snapshots, and `walktop` fixture groups.
+- `tests/conformance/run.sh` records the reference compiler oracle with `--record`, verifies it with `--verify`, and can compare a future `WALK_CANDIDATE` against the same expected artifacts.
+- `tests/conformance/expected/` stores expected stdout, stderr, success/failure status, and generated C where generated C is the contract.
+- `scripts/stress-compatibility.sh` now runs the conformance verifier before the older compatibility stress checks.
+
+Recorded oracle summary:
+
+```text
+conformance: 20 pass fixtures ok
+conformance: 52 fail fixtures ok
+conformance: 25 native executions ok
+conformance: 4 compat fixtures ok
+conformance: 3 snapshot fixtures ok
+conformance: 4 walktop fixtures ok
+conformance: ok
+```
 
 Exit proof:
 

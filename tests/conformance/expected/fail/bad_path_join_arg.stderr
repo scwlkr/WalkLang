@@ -1,0 +1,4 @@
+tests/fail/bad_path_join_arg.walk:3:24: type error: arg 2 to path.join is string, got int
+
+out: path.join('data', 3)
+                       ^ int cannot initialize string

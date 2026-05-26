@@ -1,0 +1,4 @@
+tests/fail/bad_io_read_line_arg.walk:3:13: type error: io.read_line expects 0 args, got 1
+
+var: line = io.read_line('extra')
+            ^

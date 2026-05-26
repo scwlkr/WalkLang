@@ -1,0 +1,4 @@
+tests/fail/bad_array.walk:1:15: type error: arrays must be homogeneous, got int and string
+
+var: xs = [1, 'one']
+              ^

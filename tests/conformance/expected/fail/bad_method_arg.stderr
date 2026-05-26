@@ -1,0 +1,4 @@
+tests/fail/bad_method_arg.walk:10:24: type error: arg 1 to User.rename is string, got int
+
+var: bad = user.rename(10)
+                       ^ int cannot initialize string

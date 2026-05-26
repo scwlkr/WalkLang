@@ -60,7 +60,7 @@
 <article class="doc">
 <h1 id="walklang-status">WalkLang Status</h1>
 <p>Current WalkLang version: <code>v5.14.1</code>.</p>
-<p>Current architecture direction on 2026-05-26: <code>docs/SYSTEMS_COMPILER_PORT_PLAN.md</code> is now the accepted execution contract for porting WalkLang from the current reference compiler to the permanent systems architecture: C++ compiler core, C runtime and platform layer, C backend, optional assembly leaf routines, and no final Go or JavaScript implementation footprint. The next porting step is Phase 1, the conformance oracle.</p>
+<p>Current architecture direction on 2026-05-26: <code>docs/SYSTEMS_COMPILER_PORT_PLAN.md</code> is now the accepted execution contract for porting WalkLang from the current reference compiler to the permanent systems architecture: C++ compiler core, C runtime and platform layer, C backend, optional assembly leaf routines, and no final Go or JavaScript implementation footprint. Phase 1, the conformance oracle, is complete. The next porting step is Phase 2, runtime extraction.</p>
 <p><code>v5.14.1</code> is the single project version for the compiler, tooling, docs, release artifacts, and implemented language surface. Feature maturity is described with status labels instead of separate version lines.</p>
 <p>Current feature status:</p>
 <pre><code class="language-text">stable
@@ -76,6 +76,16 @@ standard platform
   CLI standard-platform slice with `walktop` as the first official standalone
   WalkLang-built tool</code></pre>
 <p>Current release state: <code>v5.14.1</code> publishes the systems compiler port contract in <code>docs/SYSTEMS_COMPILER_PORT_PLAN.md</code> and keeps <code>walktop</code> under <code>tools/walktop/</code> as a real WalkLang project and standalone native command. <code>walktop</code> supports <code>--once</code>, <code>--frames 5</code>, and <code>--fixture tools/walktop/testdata/basic</code>, uses OS commands for live data, uses deterministic fixture mode for tests, renders a compact color-forward dashboard through <code>term</code> APIs, and is installed by the normal local install flow beside <code>walk</code>.</p>
+<p>Systems compiler port state on 2026-05-26: Phase 1 now records the current reference compiler as an executable conformance oracle under <code>tests/conformance/</code>. The manifest covers 20 pass fixtures, 52 fail fixtures, 4 compatibility fixtures, 3 generated-C snapshot fixtures, and 4 <code>walktop</code> fixture groups. The runner records expected behavior with <code>WALK_REF=... --record</code>, verifies it with <code>--verify</code>, and can compare a future <code>WALK_CANDIDATE</code> against the same expected artifacts. <code>scripts/stress-compatibility.sh</code> now invokes the conformance verifier before the older compatibility stress checks.</p>
+<p>Phase 1 conformance oracle verification on 2026-05-26:</p>
+<pre><code class="language-text">go build -trimpath -ldflags &#34;-X main.version=v5.14.1&#34; -o build/walk-ref ./cmd/walk passed
+WALK_REF=$PWD/build/walk-ref tests/conformance/run.sh --record passed
+WALK_REF=$PWD/build/walk-ref tests/conformance/run.sh --verify passed
+WALK_BIN=$PWD/build/walk-ref scripts/stress-compatibility.sh passed and reported compatibility stress ok
+scripts/build-docs-site.sh passed
+scripts/check-docs-site.sh passed after staging generated docs
+go test -count=1 ./... passed
+conformance summary: 20 pass, 52 fail, 25 native executions, 4 compat, 3 snapshot, and 4 walktop fixture groups</code></pre>
 <p>Last release verification on 2026-05-26:</p>
 <pre><code class="language-text">scripts/build-docs-site.sh passed
 scripts/check-docs-site.sh passed
@@ -155,7 +165,7 @@ scripts/check-docs-site.sh passed
 go test -count=1 ./... passed
 WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported compatibility stress ok
 git diff --check -- . &#39;:(exclude)playground/hangman.walk&#39; &#39;:(exclude)playground/hangman-v2.walk&#39; passed</code></pre>
-<p>Next: continue standard-platform expansion after the CLI proof app, with future areas gated by the same proof parity rules.</p>
+<p>Next: begin Phase 2 in <code>docs/SYSTEMS_COMPILER_PORT_PLAN.md</code> by extracting the runtime helper layer into <code>runtime/walk_runtime.c</code> and platform C files while keeping current generated C behavior covered by the conformance oracle.</p>
 </article>
 <footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
 </div>

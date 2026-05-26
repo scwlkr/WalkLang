@@ -60,7 +60,14 @@
 <article class="doc">
 <h1 id="walklang-release-notes">WalkLang Release Notes</h1>
 <h2 id="unreleased">Unreleased</h2>
-<p>No unreleased changes yet.</p>
+<h3 id="added">Added</h3>
+<ul>
+<li>Phase 1 systems compiler port conformance oracle under <code>tests/conformance/</code>, with a manifest, recorded reference outputs, generated-C snapshot oracle artifacts, and a shell runner that supports <code>WALK_REF</code> plus future <code>WALK_CANDIDATE</code> comparison.</li>
+</ul>
+<h3 id="changed">Changed</h3>
+<ul>
+<li><code>scripts/stress-compatibility.sh</code> now verifies the recorded conformance oracle before running the older compatibility stress checks.</li>
+</ul>
 <h2 id="v5-14-1-systems-compiler-port-contract">v5.14.1 - Systems Compiler Port Contract</h2>
 <p>Date: 2026-05-26</p>
 <p>v5.14.1 publishes the accepted systems compiler port contract for moving WalkLang to a permanent C++ compiler core, C runtime, C backend, and optional assembly architecture.</p>

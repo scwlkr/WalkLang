@@ -1,0 +1,4 @@
+tests/fail/bad_dir_make_as_expression.walk:3:6: type error: dir.make is an effect; use do: dir.make(...)
+
+out: dir.make('data')
+     ^

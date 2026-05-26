@@ -1,0 +1,4 @@
+tests/fail/bad_string_index.walk:1:12: type error: index must be int, got string
+
+out: 'dog'['0']
+           ^

@@ -1,0 +1,4 @@
+tests/fail/bad_random_choice.walk:2:20: type error: random.choice needs array arg, got string
+
+out: random.choice('dog')
+                   ^

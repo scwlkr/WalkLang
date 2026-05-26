@@ -1,0 +1,4 @@
+tests/fail/bad_generic_arg.walk:4:16: type error: arg 2 to choose needs T as int, got string
+
+out: choose(1, 'one')
+               ^

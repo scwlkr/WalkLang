@@ -1,0 +1,8 @@
+WalkTop  v0.1.0
+OS       Darwin fixture
+Load     [##########----------] 50%
+Memory   [##############------] 70%
+Disk     [#########-----------] 45%
+Procs    128
+Frame    1/1
+Status   ok

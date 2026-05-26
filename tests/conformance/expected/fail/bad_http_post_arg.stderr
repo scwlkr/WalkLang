@@ -1,0 +1,4 @@
+tests/fail/bad_http_post_arg.walk:3:48: type error: arg 2 to http.post is string, got int
+
+var: result = http.post('https://example.com', 1)
+                                               ^ int cannot initialize string

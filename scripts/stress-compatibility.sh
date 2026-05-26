@@ -17,6 +17,8 @@ if ! command -v "$walk_bin" >/dev/null 2>&1; then
     exit 1
 fi
 
+WALK_REF="$walk_bin" tests/conformance/run.sh --verify
+
 expect_output() {
     command="$1"
     want="$2"

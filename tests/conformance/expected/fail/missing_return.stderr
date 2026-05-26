@@ -1,0 +1,4 @@
+tests/fail/missing_return.walk:1:1: type error: function bad may not return on all paths
+
+func: bad(x int) int
+^

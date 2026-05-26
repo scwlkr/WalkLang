@@ -1,0 +1,4 @@
+tests/fail/bad_html_h1_arg.walk:3:14: type error: arg 1 to html.h1 is string, got int
+
+out: html.h1(1)
+             ^ int cannot initialize string

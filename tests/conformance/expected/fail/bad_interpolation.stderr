@@ -1,0 +1,4 @@
+tests/fail/bad_interpolation.walk:2:13: type error: interpolation needs int, float, bool, or string, got array[int]
+
+out: 'nums {nums}'
+            ^

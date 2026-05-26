@@ -1,0 +1,4 @@
+tests/fail/non_bool_if.walk:1:5: type error: if condition must be bool, got int
+
+if: 1
+    ^ use a bool expression for the condition

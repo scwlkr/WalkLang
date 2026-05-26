@@ -1,0 +1,4 @@
+tests/fail/bad_file_append_arg.walk:3:29: type error: arg 2 to file.append is string, got int
+
+do: file.append('note.txt', 3)
+                            ^ int cannot initialize string

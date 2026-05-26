@@ -268,7 +268,7 @@ windows/amd64</code></pre>
 <p>No phase can mark complete while it regresses a row already ported.</p>
 <h2 id="status-board">Status Board</h2>
 <p>Update this table at the end of every porting phase.</p>
-<p>| Phase | Status | Required exit proof | | --- | --- | --- | | 0. Port Contract | Complete | This document exists, is linked, and generated docs build | | 1. Conformance Oracle | Not started | Dual-compiler harness records current behavior from the reference compiler | | 2. Runtime Extraction | Not started | Generated C links against <code>runtime/walk_runtime.c</code> with current tests passing | | 3. C++ Skeleton | Not started | <code>make walk</code> builds a C++ <code>walk</code> that supports version/help and test harness entrypoints | | 4. Lexer, Parser, AST | Not started | C++ frontend parses current pass fixtures and rejects fail syntax fixtures | | 5. Semantic Checker | Not started | C++ checker matches current type, name, module, and warning diagnostics | | 6. C Backend | Not started | C++ compiler emits C that passes native behavior and snapshot checks | | 7. CLI, Project, Package | Not started | C++ <code>walk</code> supports current command surface and project/package tests | | 8. Runtime Module Parity | Not started | Draft runtime modules pass native tests through the C runtime | | 9. Tooling Parity | Not started | Formatter, docs generator, debug map, LSP, and REPL pass parity checks | | 10. Standard Platform Parity | Not started | <code>walktop</code> builds, tests, runs, installs, and releases through C++ <code>walk</code> | | 11. Remove Go And JavaScript | Not started | No Go or JavaScript source remains; docs/site still build | | 12. Final Release Gate | Not started | C++/C release artifacts, checksums, install, docs, and language breakdown are verified |</p>
+<p>| Phase | Status | Required exit proof | | --- | --- | --- | | 0. Port Contract | Complete | This document exists, is linked, and generated docs build | | 1. Conformance Oracle | Complete | Dual-compiler harness records current behavior from the reference compiler | | 2. Runtime Extraction | Not started | Generated C links against <code>runtime/walk_runtime.c</code> with current tests passing | | 3. C++ Skeleton | Not started | <code>make walk</code> builds a C++ <code>walk</code> that supports version/help and test harness entrypoints | | 4. Lexer, Parser, AST | Not started | C++ frontend parses current pass fixtures and rejects fail syntax fixtures | | 5. Semantic Checker | Not started | C++ checker matches current type, name, module, and warning diagnostics | | 6. C Backend | Not started | C++ compiler emits C that passes native behavior and snapshot checks | | 7. CLI, Project, Package | Not started | C++ <code>walk</code> supports current command surface and project/package tests | | 8. Runtime Module Parity | Not started | Draft runtime modules pass native tests through the C runtime | | 9. Tooling Parity | Not started | Formatter, docs generator, debug map, LSP, and REPL pass parity checks | | 10. Standard Platform Parity | Not started | <code>walktop</code> builds, tests, runs, installs, and releases through C++ <code>walk</code> | | 11. Remove Go And JavaScript | Not started | No Go or JavaScript source remains; docs/site still build | | 12. Final Release Gate | Not started | C++/C release artifacts, checksums, install, docs, and language breakdown are verified |</p>
 <p>Status values:</p>
 <pre><code class="language-text">Not started
 In progress
@@ -331,7 +331,7 @@ git diff --check -- . &#39;:(exclude)playground/hangman.walk&#39; &#39;:(exclude
 <p>Commit message:</p>
 <pre><code class="language-text">docs: add systems compiler port plan</code></pre>
 <h2 id="phase-1-conformance-oracle">Phase 1: Conformance Oracle</h2>
-<p>Status: Not started</p>
+<p>Status: Complete</p>
 <p>Goal: turn the current reference compiler behavior into an executable oracle so the C++ port is measured against real language behavior instead of memory.</p>
 <p>Files to create:</p>
 <pre><code class="language-text">tests/conformance/README.md
@@ -367,6 +367,21 @@ conformance: N fail fixtures ok
 conformance: N native executions ok
 conformance: ok</code></pre>
 <p>7. Keep the runner shell-based or C++-based. Do not add Python, Node, or Go. 8. Add docs explaining how to refresh expected output from the reference compiler.</p>
+<p>Completed result:</p>
+<ul>
+<li><code>tests/conformance/manifest.tsv</code> covers the current pass fixtures, fail fixtures, compatibility fixtures, generated-C snapshots, and <code>walktop</code> fixture groups.</li>
+<li><code>tests/conformance/run.sh</code> records the reference compiler oracle with <code>--record</code>, verifies it with <code>--verify</code>, and can compare a future <code>WALK_CANDIDATE</code> against the same expected artifacts.</li>
+<li><code>tests/conformance/expected/</code> stores expected stdout, stderr, success/failure status, and generated C where generated C is the contract.</li>
+<li><code>scripts/stress-compatibility.sh</code> now runs the conformance verifier before the older compatibility stress checks.</li>
+</ul>
+<p>Recorded oracle summary:</p>
+<pre><code class="language-text">conformance: 20 pass fixtures ok
+conformance: 52 fail fixtures ok
+conformance: 25 native executions ok
+conformance: 4 compat fixtures ok
+conformance: 3 snapshot fixtures ok
+conformance: 4 walktop fixtures ok
+conformance: ok</code></pre>
 <p>Exit proof:</p>
 <pre><code class="language-bash">go build -trimpath -ldflags &#34;-X main.version=v5.14.1&#34; -o build/walk-ref ./cmd/walk
 WALK_REF=$PWD/build/walk-ref tests/conformance/run.sh --record

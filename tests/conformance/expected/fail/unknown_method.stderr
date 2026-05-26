@@ -1,0 +1,4 @@
+tests/fail/unknown_method.walk:6:14: type error: User has no method is_minor
+
+var: adult = user.is_minor()
+             ^

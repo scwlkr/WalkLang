@@ -1,0 +1,4 @@
+tests/fail/missing_struct_field.walk:5:13: type error: User expects 2 field values, got 1
+
+var: user = User('Walker')
+            ^

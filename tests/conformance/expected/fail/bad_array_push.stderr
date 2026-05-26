@@ -1,0 +1,4 @@
+tests/fail/bad_array_push.walk:3:25: type error: arg 2 to array.push is int, got string
+
+nums = array.push(nums, 'three')
+                        ^ string cannot initialize int

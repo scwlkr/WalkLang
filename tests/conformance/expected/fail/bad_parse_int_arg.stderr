@@ -1,0 +1,4 @@
+tests/fail/bad_parse_int_arg.walk:3:24: type error: arg 1 to parse.int is string, got int
+
+var: value = parse.int(1)
+                       ^ int cannot initialize string

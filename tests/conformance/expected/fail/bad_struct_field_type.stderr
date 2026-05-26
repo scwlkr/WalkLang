@@ -1,0 +1,4 @@
+tests/fail/bad_struct_field_type.walk:5:28: type error: field age is int, got string
+
+var: user = User('Walker', 'old')
+                           ^ string cannot initialize int

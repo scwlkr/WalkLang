@@ -1,0 +1,4 @@
+tests/fail/bad_method_receiver.walk:5:1: type error: method User.is_adult receiver param must be User, got int
+
+func: User.is_adult(self int) bool
+^

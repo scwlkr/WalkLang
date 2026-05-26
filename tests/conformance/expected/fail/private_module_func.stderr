@@ -1,0 +1,4 @@
+tests/fail/private_module_func.walk:2:6: name error: module private_math does not export hidden
+
+out: private_math.hidden(3)
+     ^

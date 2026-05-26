@@ -1,0 +1,3 @@
+test: arithmetic works
+test: stdlib works
+ok 2 tests

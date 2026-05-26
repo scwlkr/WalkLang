@@ -1,0 +1,5 @@
+test: fixture parser renders deterministic dashboard
+test: malformed fixture reports warning row
+test: frame arguments validate deterministically
+test: bars are stable width
+ok 4 tests

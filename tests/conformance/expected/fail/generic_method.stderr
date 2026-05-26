@@ -1,0 +1,4 @@
+tests/fail/generic_method.walk:4:1: type error: generic methods are not supported yet
+
+func: User.wrap[T](self User, value T) T
+^
