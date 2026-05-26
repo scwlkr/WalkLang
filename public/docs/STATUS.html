@@ -198,13 +198,15 @@ go test -count=1 ./... passed
 go build -trimpath -ldflags &#34;-X main.version=v5.14.1&#34; -o build/walk ./cmd/walk passed
 ./build/walk version reported v5.14.1
 WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported compatibility stress ok
-scripts/release.sh v5.14.1 &lt;temp&gt;/release produced 5 walk artifacts, 1 runtime source archive, 1 current-host walktop artifact, and SHA256SUMS
-wc -l &lt;temp&gt;/release/SHA256SUMS reported 7
-shasum -a 256 -c SHA256SUMS passed for all 7 artifacts
+scripts/release.sh v5.14.1 &lt;temp&gt;/release produced 5 walk artifacts, 1 runtime source archive, 1 current-host walk-cpp artifact, 1 current-host walktop artifact, and SHA256SUMS
+shasum -a 256 -c SHA256SUMS passed for all 8 artifacts
 the Darwin arm64 walk release artifact reported v5.14.1
+the Darwin arm64 walk-cpp release artifact reported v5.14.1
 the Darwin arm64 walktop release artifact passed --once --fixture tools/walktop/testdata/basic
-scripts/install-local.sh v5.14.1 refreshed the local walk and walktop install
+scripts/install-local.sh v5.14.1 refreshed the local walk, walk-cpp, runtime source, and walktop install
 walk version reported v5.14.1
+walk-cpp version reported v5.14.1
+WALK_REF=~/.local/bin/walk WALK_CANDIDATE=~/.local/bin/walk-cpp WALK_RUNTIME_DIR=~/.local/lib/walk/runtime tests/conformance/run.sh --runtime-modules passed with 11 runtime module fixtures
 command -v walktop reported ~/.local/bin/walktop
 NO_COLOR=1 walktop --once --fixture tools/walktop/testdata/basic matched the deterministic dashboard
 NO_COLOR=1 walktop --once passed live OS-command mode on the local Darwin host
