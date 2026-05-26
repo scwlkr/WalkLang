@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>WalkLang v1 Diagnostics - WalkLang</title>
+<title>WalkLang Diagnostics - WalkLang</title>
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <link rel="stylesheet" href="../assets/site.css">
 <script defer src="../assets/site.js"></script>
@@ -33,11 +33,11 @@
 <a href="DEPRECATION.html">Deprecation</a>
 <h2>Reference</h2>
 <a href="reference/api.html">API Reference</a>
-<a href="V5_1.html">Docs Site</a>
+<a href="DOCS_SITE.html">Docs Site</a>
 <a href="reference/index.html">Reference Index</a>
 <h2>Tools</h2>
-<a href="V4.html">Editor And Docs Tools</a>
-<a href="V5.html">Runtime And Backend</a>
+<a href="TOOLING.html">Editor And Docs Tools</a>
+<a href="RUNTIME_BACKEND.html">Runtime And Backend</a>
 <a href="NETWORKING.html">Draft Networking</a>
 <a href="RICH_RUNTIMES.html">Rich Runtimes</a>
 <h2>Project</h2>
@@ -56,7 +56,7 @@
 <div class="topbar"><a href="index.html">Docs</a><a href="reference/api.html">Reference</a><a href="https://github.com/scwlkr/WalkLang">GitHub</a></div>
 <div class="page">
 <article class="doc">
-<h1 id="walklang-v1-diagnostics">WalkLang v1 Diagnostics</h1>
+<h1 id="walklang-diagnostics">WalkLang Diagnostics</h1>
 <p>WalkLang diagnostics are compiler-reported errors and warnings. They are intended to be deterministic enough for conformance tests.</p>
 <p>Use <code>runtime failure</code> for native program failures after compilation. Use <code>failed assertion</code> for <code>walk test</code> assertion failures. Use <code>recoverable result data</code> for draft APIs that return <code>ok</code>, <code>value</code>, and <code>error</code> fields instead of stopping the native program.</p>
 <p>Recoverable result data is runtime data, not a diagnostic, failed assertion, or runtime failure. It is the preferred shape for ordinary documented failures in draft APIs that are intended to let the program continue.</p>
@@ -87,17 +87,17 @@ internal error</code></pre>
 <p>Type errors come from incompatible assignments, bad conditions, bad operators, bad calls, invalid output types, unsupported array use, or invalid struct field use.</p>
 <pre><code class="language-walk">var: x = 1
 x = &#39;one&#39;</code></pre>
-<p>v1.6 function inference diagnostics also use <code>type error</code>:</p>
+<p>Local function inference diagnostics also use <code>type error</code>:</p>
 <pre><code class="language-walk">func: identity(value)
     return: value # type error: cannot infer type for parameter value</code></pre>
-<p>v2 struct diagnostics also use <code>type error</code>:</p>
+<p>Struct diagnostics also use <code>type error</code>:</p>
 <pre><code class="language-walk">struct: User
     name string
     age int
 
 var: user = User(&#39;Walker&#39;, 25)
 out: user.height # type error: User has no field height</code></pre>
-<p>v2.2 generic diagnostics also use <code>type error</code>:</p>
+<p>Generic function diagnostics also use <code>type error</code>:</p>
 <pre><code class="language-walk">func: choose[T](left T, right T) T
     return: left
 
@@ -120,7 +120,7 @@ walk check --warnings=default main.walk
 walk check --warnings=error main.walk</code></pre>
 <h2 id="runtime-failures">Runtime Failures</h2>
 <p><code>walk test</code> builds and runs a native executable. Failed assertions print failure lines and make the executable exit non-zero. A failed assertion is not a compiler diagnostic.</p>
-<p>Stable v1.9 runtime failure messages include:</p>
+<p>Stable runtime failure messages include:</p>
 <pre><code class="language-text">walk runtime error: input reached EOF
 walk runtime error: stdin read failed
 walk runtime error: out of memory

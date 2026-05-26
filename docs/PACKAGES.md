@@ -1,6 +1,7 @@
-# WalkLang v3 Package Ecosystem
+# WalkLang Package Ecosystem
 
-v3 adds a local package workflow on top of project mode and user modules.
+WalkLang includes a local package workflow on top of project mode and user
+modules.
 
 Packages are ordinary WalkLang projects with:
 
@@ -11,7 +12,8 @@ src/<package>/<module>.walk
 tests/*_test.walk
 ```
 
-The package manager is intentionally local and file-backed in v3. It does not add a remote public registry protocol yet.
+The package manager is intentionally local and file-backed. It does not add a
+remote public registry protocol yet.
 
 ## Create A Package
 
@@ -138,7 +140,7 @@ The published package lands at:
 
 ## Reproducibility
 
-v3 reproducibility comes from:
+Package reproducibility comes from:
 
 ```text
 explicit dependency versions in walk.toml
@@ -150,7 +152,7 @@ publish-time check and test gates
 
 ## Non-Goals
 
-v3 does not add:
+The package ecosystem does not add:
 
 ```text
 remote registry protocol

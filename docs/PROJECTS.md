@@ -82,7 +82,7 @@ Single-file commands still work:
 walk run examples/hello.walk
 walk examples/hello.walk
 walk build examples/hello.walk -o build/hello
-walk test examples/v0_1_tests.walk
+walk test examples/compiler_tests.walk
 walk fmt examples/hello.walk
 ```
 

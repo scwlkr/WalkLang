@@ -81,7 +81,7 @@ func TestGeneratedCBuildsAndRuns(t *testing.T) {
 	}
 }
 
-func TestV0RoadmapRepresentativeProgramBuildsAndRuns(t *testing.T) {
+func TestRepresentativeProgramBuildsAndRuns(t *testing.T) {
 	if _, err := exec.LookPath("cc"); err != nil {
 		t.Skip("cc is not available")
 	}
@@ -114,8 +114,8 @@ func TestV0RoadmapRepresentativeProgramBuildsAndRuns(t *testing.T) {
 	}, "\n"))
 
 	dir := t.TempDir()
-	cPath := filepath.Join(dir, "v0.c")
-	exePath := filepath.Join(dir, "v0")
+	cPath := filepath.Join(dir, "representative.c")
+	exePath := filepath.Join(dir, "representative")
 	if err := os.WriteFile(cPath, []byte(cCode), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -131,7 +131,7 @@ func TestV0RoadmapRepresentativeProgramBuildsAndRuns(t *testing.T) {
 	}
 }
 
-func TestV0ControlFlowNullArraysAndFunctionValues(t *testing.T) {
+func TestControlFlowNullArraysAndFunctionValues(t *testing.T) {
 	if _, err := exec.LookPath("cc"); err != nil {
 		t.Skip("cc is not available")
 	}
@@ -187,7 +187,7 @@ func TestV0ControlFlowNullArraysAndFunctionValues(t *testing.T) {
 	}
 }
 
-func TestV01TestRunnerProgramBuildsAndRuns(t *testing.T) {
+func TestTestRunnerProgramBuildsAndRuns(t *testing.T) {
 	if _, err := exec.LookPath("cc"); err != nil {
 		t.Skip("cc is not available")
 	}
@@ -241,7 +241,7 @@ func TestV01TestRunnerProgramBuildsAndRuns(t *testing.T) {
 	}
 }
 
-func TestV01DiagnosticsIncludeLineAndColumn(t *testing.T) {
+func TestDiagnosticsIncludeLineAndColumn(t *testing.T) {
 	program, err := parser.ParseSource("var: x = 1\nx = 'one'\n", "main.walk")
 	if err != nil {
 		t.Fatal(err)

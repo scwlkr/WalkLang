@@ -1,6 +1,7 @@
-# WalkLang v5 Runtime and Backend Maturity
+# WalkLang Runtime and Backend Maturity
 
-v5 keeps C as the primary backend and tightens the runtime model around generated output that can be built, inspected, and shipped.
+WalkLang keeps C as the primary backend and tightens the runtime model around
+generated output that can be built, inspected, and shipped.
 
 ## Backend Contract
 
@@ -81,7 +82,7 @@ The helper layer keeps compiler-emitted code predictable without exposing pointe
 
 ## Memory Model
 
-WalkLang v5 still has no source-level memory management.
+WalkLang still has no source-level memory management.
 
 ```text
 no malloc syntax
@@ -117,8 +118,8 @@ These comments do not change runtime behavior. They make emitted functions and `
 
 ## Draft Runtime Backends
 
-Draft IO helpers grow the generated runtime without changing the stable v1.9
-language contract.
+Draft IO helpers grow the generated runtime without changing the stable feature
+set.
 
 Current draft runtime families include:
 
@@ -152,7 +153,7 @@ See [Draft networking](NETWORKING.md) and [Rich runtime tracks](RICH_RUNTIMES.md
 
 ## Non-Goals
 
-v5 does not add:
+Runtime and backend maturity does not add:
 
 ```text
 LLVM backend

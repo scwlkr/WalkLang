@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>WalkLang v5 Runtime and Backend Maturity - WalkLang</title>
+<title>WalkLang Runtime and Backend Maturity - WalkLang</title>
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <link rel="stylesheet" href="../assets/site.css">
 <script defer src="../assets/site.js"></script>
@@ -33,11 +33,11 @@
 <a href="DEPRECATION.html">Deprecation</a>
 <h2>Reference</h2>
 <a href="reference/api.html">API Reference</a>
-<a href="V5_1.html">Docs Site</a>
+<a href="DOCS_SITE.html">Docs Site</a>
 <a href="reference/index.html">Reference Index</a>
 <h2>Tools</h2>
-<a href="V4.html">Editor And Docs Tools</a>
-<a href="V5.html" aria-current="page">Runtime And Backend</a>
+<a href="TOOLING.html">Editor And Docs Tools</a>
+<a href="RUNTIME_BACKEND.html" aria-current="page">Runtime And Backend</a>
 <a href="NETWORKING.html">Draft Networking</a>
 <a href="RICH_RUNTIMES.html">Rich Runtimes</a>
 <h2>Project</h2>
@@ -56,8 +56,8 @@
 <div class="topbar"><a href="index.html">Docs</a><a href="reference/api.html">Reference</a><a href="https://github.com/scwlkr/WalkLang">GitHub</a></div>
 <div class="page">
 <article class="doc">
-<h1 id="walklang-v5-runtime-and-backend-maturity">WalkLang v5 Runtime and Backend Maturity</h1>
-<p>v5 keeps C as the primary backend and tightens the runtime model around generated output that can be built, inspected, and shipped.</p>
+<h1 id="walklang-runtime-and-backend-maturity">WalkLang Runtime and Backend Maturity</h1>
+<p>WalkLang keeps C as the primary backend and tightens the runtime model around generated output that can be built, inspected, and shipped.</p>
 <h2 id="backend-contract">Backend Contract</h2>
 <p>Generated C must stay:</p>
 <pre><code class="language-text">predictable
@@ -96,7 +96,7 @@ runtime random helper
 runtime array allocation helper</code></pre>
 <p>The helper layer keeps compiler-emitted code predictable without exposing pointers, allocation calls, or runtime ownership to WalkLang source.</p>
 <h2 id="memory-model">Memory Model</h2>
-<p>WalkLang v5 still has no source-level memory management.</p>
+<p>WalkLang still has no source-level memory management.</p>
 <pre><code class="language-text">no malloc syntax
 no free syntax
 no pointer syntax
@@ -115,7 +115,7 @@ out: got[0]</code></pre>
 <pre><code class="language-c">/* source: main.walk:6:1 */</code></pre>
 <p>These comments do not change runtime behavior. They make emitted functions and <code>main</code> easier to inspect while preserving predictable C output and snapshot coverage.</p>
 <h2 id="draft-runtime-backends">Draft Runtime Backends</h2>
-<p>Draft IO helpers grow the generated runtime without changing the stable v1.9 language contract.</p>
+<p>Draft IO helpers grow the generated runtime without changing the stable feature set.</p>
 <p>Current draft runtime families include:</p>
 <pre><code class="language-text">console and stdin helpers
 local files, directories, and paths
@@ -132,7 +132,7 @@ WASM/browser backend
 compiler explorer/playground integration</code></pre>
 <p>Those tracks require separate package or backend designs before implementation. See <a href="NETWORKING.html">Draft networking</a> and <a href="RICH_RUNTIMES.html">Rich runtime tracks</a>.</p>
 <h2 id="non-goals">Non-Goals</h2>
-<p>v5 does not add:</p>
+<p>Runtime and backend maturity does not add:</p>
 <pre><code class="language-text">LLVM backend
 WASM backend
 manual memory management syntax

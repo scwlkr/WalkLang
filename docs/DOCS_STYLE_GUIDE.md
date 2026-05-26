@@ -75,7 +75,7 @@ Required comment format:
 /// ```walk
 /// ...
 /// ```
-/// Since: 0.1.0
+/// Since: current
 ```
 
 Required JSON fields:
@@ -114,8 +114,8 @@ a real source file:
 
 ```bash
 go build -o build/walk ./cmd/walk
-./build/walk docs --strict -o build/api.md examples/v1.walk
-./build/walk docs --strict --format json -o build/api.json examples/v1.walk
+./build/walk docs --strict -o build/api.md examples/stable.walk
+./build/walk docs --strict --format json -o build/api.json examples/stable.walk
 scripts/check-docs-site.sh
 ```
 

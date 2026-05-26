@@ -45,7 +45,7 @@ Kind: compiled
 Target: C
 Output: native executable
 VM: no
-GC: no public v1.1 promise
+GC: no public promise
 ```
 
 Purpose:
@@ -131,7 +131,7 @@ WalkLang chooses visible structure over clever syntax.
 
 ## 3. Language Shape
 
-WalkLang v1.1 is:
+WalkLang is:
 
 ```text
 procedural first
@@ -150,13 +150,14 @@ func: add(a int, b int) int
 out: add(2, 3)
 ```
 
-Not v1.1:
+Not stable syntax:
 
 ```walk
-class: Person       # error in v1.1
+class: Person       # error
 ```
 
-v2 adds structs, methods, and simple generic functions for composition without classes or inheritance.
+Structs, methods, and simple generic functions are experimental composition
+features without classes or inheritance.
 
 ---
 
@@ -193,7 +194,7 @@ if: > score 90 { out: 'A'; }   # error
 
 ## 5. Type Model
 
-WalkLang v1.1 is statically typed.
+WalkLang is statically typed.
 
 Types are inferred unless written.
 
@@ -224,7 +225,7 @@ string
 array
 null
 function
-struct (experimental in v2)
+struct (experimental)
 ```
 
 Example:
@@ -274,7 +275,7 @@ out: names[0]
 
 The user writes array logic, not allocation logic.
 
-v5 makes array storage explicit inside generated C:
+The current runtime model makes array storage explicit inside generated C:
 
 ```text
 array literals allocate item storage through the generated walk runtime helper
@@ -314,14 +315,15 @@ imp: calc
 out: calc.square(4)
 ```
 
-v1 module loading is file-local:
+User module loading is file-local:
 
 ```text
 main.walk imp: calc -> calc.walk
 calc.square -> generated C symbol calc__square
 ```
 
-v3 package imports are still module imports, but the module name is dotted and resolved through the package cache:
+Package imports are still module imports, but the module name is dotted and
+resolved through the package cache:
 
 ```walk
 imp: geometry.core
@@ -343,7 +345,7 @@ geometry.core.double -> generated C symbol geometry__core__double
 
 ## 9. Standard Library
 
-v1.3 stable libraries:
+Stable libraries:
 
 ```text
 math
@@ -378,7 +380,7 @@ matrix
 
 ## 10. Error Model
 
-v1.1 has compiler errors, warnings, and native runtime stops.
+WalkLang has compiler errors, warnings, and native runtime stops.
 
 Compile error:
 
@@ -406,10 +408,10 @@ Diagnostic:
 runtime error: divide by zero
 ```
 
-No v1.1 recovery:
+No exception-style recovery:
 
 ```walk
-try:          # error in v1.1
+try:          # error
 catch:
 ```
 
@@ -417,7 +419,7 @@ catch:
 
 ## 11. Tooling Architecture
 
-v0:
+Initial compiler:
 
 ```text
 compiler
@@ -425,14 +427,14 @@ formatter
 clear errors
 ```
 
-v0.1:
+Exploration tooling:
 
 ```text
 test runner
 basic REPL
 ```
 
-v1:
+Project tooling:
 
 ```text
 module loader
@@ -441,7 +443,7 @@ release build flags
 cross-platform CLI release script
 ```
 
-v1.1:
+Specification and conformance:
 
 ```text
 stable contract docs
@@ -450,7 +452,7 @@ generated C snapshots
 current status doc
 ```
 
-v4:
+Professional tooling:
 
 ```text
 language server
@@ -459,7 +461,7 @@ docs generator
 debug map
 ```
 
-v5:
+Runtime and backend maturity:
 
 ```text
 small generated C runtime layer

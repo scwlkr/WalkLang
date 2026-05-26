@@ -43,7 +43,7 @@ strips the final line ending, preserves other whitespace, returns `''` for an
 empty line, accepts final unterminated input, and runtime-stops on immediate EOF
 stdin failure, or allocation failure.
 
-Stable v1.9 built-in modules:
+Stable built-in modules:
 
 ```text
 math
@@ -279,7 +279,7 @@ Recommended first ownership rule:
 runtime-created strings live for the process lifetime
 ```
 
-That matches the current v5 array storage direction and keeps source-level
+That matches the current array storage direction and keeps source-level
 memory management out of WalkLang. It is acceptable for short CLI programs. It
 is not enough for long-running servers, so server/network work should stay later
 until ownership is revisited.
@@ -885,7 +885,7 @@ Recommended direction:
 
 ```text
 first-party package or alternate backend
-not v1/v2 core stdlib
+not core stdlib
 not required for CLI or file IO
 ```
 
@@ -954,7 +954,7 @@ roadmap.
 
 ### Roadmap Phase 1: CLI Text IO
 
-Status: done as draft compiler APIs in `v5.7.0`.
+Status: done as draft compiler APIs.
 
 Scope:
 
@@ -977,11 +977,11 @@ parse.bool
 
 This phase proves explicit effect calls, process basics, runtime-owned text,
 stdin tests, EOF-as-data, and the first concrete recoverable result structs.
-The stable language contract remains v1.9.
+The stable feature set is unchanged.
 
 ### Roadmap Phase 2: Local Filesystem IO
 
-Status: done as draft compiler APIs in `v5.9.0`.
+Status: done as draft compiler APIs.
 
 Scope:
 
@@ -1034,7 +1034,7 @@ Done when:
 
 ### Roadmap Phase 3: Process And Data Interop
 
-Status: done as draft compiler APIs in `v5.10.0`.
+Status: done as draft compiler APIs.
 
 Scope:
 
@@ -1091,7 +1091,7 @@ Done when:
 
 ### Roadmap Phase 4: Terminal UX
 
-Status: done as draft compiler APIs in `v5.11.0`.
+Status: done as draft compiler APIs.
 
 Scope:
 
@@ -1143,7 +1143,7 @@ Done when:
 
 ### Roadmap Phase 5: Network And Rich Runtimes
 
-Status: done as draft compiler APIs and design docs in `v5.12.0`.
+Status: done as draft compiler APIs and design docs.
 
 Implemented draft API scope:
 
@@ -1470,7 +1470,7 @@ Done when:
 
 Goal: add network client IO after the language has the safety rails to own it.
 
-Status: done as draft compiler APIs in `v5.12.0`.
+Status: done as draft compiler APIs.
 
 Candidate APIs:
 
@@ -1498,7 +1498,7 @@ Done when:
 
 Goal: explore richer runtimes without bloating core IO.
 
-Status: draft HTML text helpers implemented in `v5.12.0`; web server, native
+Status: draft HTML text helpers implemented; web server, native
 graphics, WASM/browser, and playground/compiler explorer tracks documented as
 future runtime/backend work.
 

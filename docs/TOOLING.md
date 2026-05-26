@@ -1,6 +1,7 @@
-# WalkLang v4 Professional Tooling
+# WalkLang Professional Tooling
 
-v4 makes WalkLang usable from normal editor workflows without changing the language surface.
+WalkLang includes first-party tooling for normal editor and documentation
+workflows without changing the language surface.
 
 ## Language Server
 
@@ -143,7 +144,7 @@ The map records source files, symbol names, symbol kinds, and line/column locati
 
 ## Non-Goals
 
-v4 does not add:
+Professional tooling does not add:
 
 ```text
 JetBrains plugin implementation

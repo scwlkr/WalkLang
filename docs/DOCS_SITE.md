@@ -1,6 +1,6 @@
-# WalkLang v5.1 Public Docs And Reference Site
+# WalkLang Public Docs And Reference Site
 
-v5.1 makes the documentation publishable as a static site without changing the
+WalkLang documentation is publishable as a static site without changing the
 language surface.
 
 ## Site Surface
@@ -38,7 +38,7 @@ domain. `docs/STATUS.md` records the current live HTTPS state.
 The reference source remains real WalkLang code with structured comments:
 
 ```text
-examples/v1.walk
+examples/stable.walk
 examples/math_extra.walk
 ```
 
@@ -59,7 +59,7 @@ scripts/check-docs-site.sh
 Generated reference docs use repository-relative source paths such as:
 
 ```text
-examples/v1.walk
+examples/stable.walk
 examples/math_extra.walk
 ```
 
@@ -72,7 +72,7 @@ builds `public/` and uploads it as a GitHub Pages artifact from `main`.
 
 ## Non-Goals
 
-v5.1 does not add:
+The public docs and reference site do not add:
 
 ```text
 networking

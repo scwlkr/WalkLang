@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>WalkLang v1 / v1.9 - WalkLang</title>
+<title>WalkLang Stable Feature Notes - WalkLang</title>
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <link rel="stylesheet" href="../assets/site.css">
 <script defer src="../assets/site.js"></script>
@@ -33,11 +33,11 @@
 <a href="DEPRECATION.html">Deprecation</a>
 <h2>Reference</h2>
 <a href="reference/api.html">API Reference</a>
-<a href="V5_1.html">Docs Site</a>
+<a href="DOCS_SITE.html">Docs Site</a>
 <a href="reference/index.html">Reference Index</a>
 <h2>Tools</h2>
-<a href="V4.html">Editor And Docs Tools</a>
-<a href="V5.html">Runtime And Backend</a>
+<a href="TOOLING.html">Editor And Docs Tools</a>
+<a href="RUNTIME_BACKEND.html">Runtime And Backend</a>
 <a href="NETWORKING.html">Draft Networking</a>
 <a href="RICH_RUNTIMES.html">Rich Runtimes</a>
 <h2>Project</h2>
@@ -56,17 +56,8 @@
 <div class="topbar"><a href="index.html">Docs</a><a href="reference/api.html">Reference</a><a href="https://github.com/scwlkr/WalkLang">GitHub</a></div>
 <div class="page">
 <article class="doc">
-<h1 id="walklang-v1-v1-9">WalkLang v1 / v1.9</h1>
-<p>v1 makes the current compiler path feel stable.</p>
-<p>v1.1 makes the stable surface explicit through contract docs and conformance fixtures. It does not add project mode or data modeling.</p>
-<p>v1.2 adds project mode without changing the v1.1 core syntax surface.</p>
-<p>v1.3 grows the stable standard library foundation without adding file/json/matrix yet.</p>
-<p>v1.4 makes diagnostics and <code>walk check</code> more useful without changing the v1 core syntax.</p>
-<p>v1.5 prepares the v1.x compatibility line with release notes, migration guidance, deprecation policy, official install instructions, and focused compatibility fixtures.</p>
-<p>v1.6 adds local function type inference for obvious helper functions without inferring public meaning from call sites.</p>
-<p>v1.7 adds the stable <code>in:</code> expression for required-line stdin input.</p>
-<p>v1.8 adds small terminal-game helpers on top of the existing string, array, and random modules.</p>
-<p>v1.9 adds string interpolation for display text without changing numeric <code>+</code>.</p>
+<h1 id="walklang-stable-feature-notes">WalkLang Stable Feature Notes</h1>
+<p>These notes summarize the stable WalkLang feature set that current docs, fixtures, and release checks protect.</p>
 <p>Contract docs:</p>
 <pre><code class="language-text">docs/SPEC.md
 docs/SYNTAX.md
@@ -157,24 +148,24 @@ testing.assert(bool) -&gt; bool</code></pre>
 <h2 id="diagnostics-and-warnings">Diagnostics And Warnings</h2>
 <p>The CLI prints the stable diagnostic first line, followed by source snippets, caret locations, and focused suggestions when obvious.</p>
 <p>The checker emits warnings for shadowing outer names and unreachable statements.</p>
-<pre><code class="language-bash">go run ./cmd/walk check examples/v1.walk
-go run ./cmd/walk check --warnings=off examples/v1.walk
-go run ./cmd/walk check --warnings=error examples/v1.walk</code></pre>
+<pre><code class="language-bash">go run ./cmd/walk check examples/stable.walk
+go run ./cmd/walk check --warnings=off examples/stable.walk
+go run ./cmd/walk check --warnings=error examples/stable.walk</code></pre>
 <h2 id="build-flow">Build Flow</h2>
 <p>Native builds still go through generated C and <code>cc</code>.</p>
 <p>Install the local CLI first:</p>
-<pre><code class="language-bash">scripts/install-local.sh v5.7-local
+<pre><code class="language-bash">scripts/install-local.sh local
 walk version</code></pre>
-<pre><code class="language-bash">walk build examples/v1.walk -o build/v1 --release
-./build/v1</code></pre>
+<pre><code class="language-bash">walk build examples/stable.walk -o build/stable --release
+./build/stable</code></pre>
 <p>Use a different C compiler or flags when needed:</p>
-<pre><code class="language-bash">walk build examples/v1.walk -o build/v1 --cc clang --cflag -Wall</code></pre>
-<p>Run the v1 stress path:</p>
-<pre><code class="language-bash">scripts/stress-v1.sh</code></pre>
-<p>Run the focused v1 compatibility suite:</p>
-<pre><code class="language-bash">go test ./cmd/walk -run TestV19CompatibilitySuite</code></pre>
+<pre><code class="language-bash">walk build examples/stable.walk -o build/stable --cc clang --cflag -Wall</code></pre>
+<p>Run the compatibility stress path:</p>
+<pre><code class="language-bash">scripts/stress-compatibility.sh</code></pre>
+<p>Run the focused stable compatibility suite:</p>
+<pre><code class="language-bash">go test ./cmd/walk -run TestStableCompatibilitySuite</code></pre>
 <p>Build release CLI artifacts:</p>
-<pre><code class="language-bash">scripts/release.sh v5.7.0</code></pre>
+<pre><code class="language-bash">scripts/release.sh v5.13.1</code></pre>
 <h2 id="project-mode">Project Mode</h2>
 <pre><code class="language-bash">walk init hello
 cd hello
@@ -184,7 +175,7 @@ walk test
 walk fmt
 walk clean</code></pre>
 <p>Project mode is defined in <code>docs/PROJECTS.md</code>.</p>
-<p>Run v1 conformance:</p>
+<p>Run conformance:</p>
 <pre><code class="language-bash">go test ./...</code></pre>
 </article>
 <footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>

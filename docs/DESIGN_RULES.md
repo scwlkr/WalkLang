@@ -1,4 +1,4 @@
-# WalkLang v1 Design Rules
+# WalkLang Design Rules
 
 These rules keep the stable language small and predictable.
 

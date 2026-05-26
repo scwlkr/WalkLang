@@ -2,7 +2,7 @@ package format
 
 import "testing"
 
-func TestV1FormatterNormalizesIndentationToFourSpaces(t *testing.T) {
+func TestFormatterNormalizesIndentationToFourSpaces(t *testing.T) {
 	formatted, err := Format("if:true\n  out:'inside'\nout:'outside'\n", "main.walk")
 	if err != nil {
 		t.Fatal(err)
@@ -13,7 +13,7 @@ func TestV1FormatterNormalizesIndentationToFourSpaces(t *testing.T) {
 	}
 }
 
-func TestV1FormatterKeepsCallCalleeTight(t *testing.T) {
+func TestFormatterKeepsCallCalleeTight(t *testing.T) {
 	formatted, err := Format("out:math_extra.cube(3)\nout:> time.now() 0\n", "main.walk")
 	if err != nil {
 		t.Fatal(err)
@@ -24,7 +24,7 @@ func TestV1FormatterKeepsCallCalleeTight(t *testing.T) {
 	}
 }
 
-func TestV2FormatterNormalizesStructs(t *testing.T) {
+func TestFormatterNormalizesStructs(t *testing.T) {
 	formatted, err := Format("struct:User\n  name string\n  age int\nvar:user=User('Walker',25)\nout:user.name\n", "main.walk")
 	if err != nil {
 		t.Fatal(err)
@@ -35,7 +35,7 @@ func TestV2FormatterNormalizesStructs(t *testing.T) {
 	}
 }
 
-func TestV17FormatterNormalizesInputExpression(t *testing.T) {
+func TestFormatterNormalizesInputExpression(t *testing.T) {
 	formatted, err := Format("var:name=in:'Name? '\nout:in:\n", "main.walk")
 	if err != nil {
 		t.Fatal(err)
@@ -79,7 +79,7 @@ func TestFormatterPreservesStringInterpolation(t *testing.T) {
 	}
 }
 
-func TestV21FormatterKeepsMethodSyntaxTight(t *testing.T) {
+func TestFormatterKeepsMethodSyntaxTight(t *testing.T) {
 	formatted, err := Format("func:User.is_adult(self User)bool\n  return:>= self.age 18\nout:user.is_adult()\n", "main.walk")
 	if err != nil {
 		t.Fatal(err)

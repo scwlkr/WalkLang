@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>WalkLang v1.9 Standard Library - WalkLang</title>
+<title>WalkLang Standard Library - WalkLang</title>
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <link rel="stylesheet" href="../assets/site.css">
 <script defer src="../assets/site.js"></script>
@@ -33,11 +33,11 @@
 <a href="DEPRECATION.html">Deprecation</a>
 <h2>Reference</h2>
 <a href="reference/api.html">API Reference</a>
-<a href="V5_1.html">Docs Site</a>
+<a href="DOCS_SITE.html">Docs Site</a>
 <a href="reference/index.html">Reference Index</a>
 <h2>Tools</h2>
-<a href="V4.html">Editor And Docs Tools</a>
-<a href="V5.html">Runtime And Backend</a>
+<a href="TOOLING.html">Editor And Docs Tools</a>
+<a href="RUNTIME_BACKEND.html">Runtime And Backend</a>
 <a href="NETWORKING.html">Draft Networking</a>
 <a href="RICH_RUNTIMES.html">Rich Runtimes</a>
 <h2>Project</h2>
@@ -56,8 +56,8 @@
 <div class="topbar"><a href="index.html">Docs</a><a href="reference/api.html">Reference</a><a href="https://github.com/scwlkr/WalkLang">GitHub</a></div>
 <div class="page">
 <article class="doc">
-<h1 id="walklang-v1-9-standard-library">WalkLang v1.9 Standard Library</h1>
-<p>This document lists the stable built-in modules and functions for the v1 line. These APIs are compatibility-protected in v1.9.</p>
+<h1 id="walklang-standard-library">WalkLang Standard Library</h1>
+<p>This document lists the stable built-in modules and functions for the current project version. These APIs are compatibility-protected as stable features.</p>
 <p>Import built-ins with <code>imp:</code> and call functions through their module namespace.</p>
 <pre><code class="language-walk">imp: math
 out: math.sqrt(9)</code></pre>
@@ -69,11 +69,11 @@ array
 time
 random
 testing</code></pre>
-<p>No other built-in module is stable in v1.9.</p>
-<p>The current compiler also includes draft <code>io</code>, <code>parse</code>, <code>process</code>, <code>file</code>, <code>dir</code>, <code>path</code>, <code>json</code>, <code>term</code>, <code>http</code>, and <code>html</code> modules. They are importable and tested, but they are not compatibility-protected in v1.9.</p>
-<p>Draft APIs may expose draft result structs. They are documented here so current compiler behavior is visible, but they are not part of the stable v1.9 compatibility contract.</p>
+<p>No other built-in module is stable.</p>
+<p>The current compiler also includes draft <code>io</code>, <code>parse</code>, <code>process</code>, <code>file</code>, <code>dir</code>, <code>path</code>, <code>json</code>, <code>term</code>, <code>http</code>, and <code>html</code> modules. They are importable and tested, but they are not compatibility-protected as stable features.</p>
+<p>Draft APIs may expose draft result structs. They are documented here so current compiler behavior is visible, but they are not part of the stable feature set.</p>
 <p>Stable APIs in this document are pure expression calls unless an entry says otherwise. Invalid argument counts, argument types, or effect placement are compiler diagnostics. Runtime failures named below are part of the documented behavior for valid programs at runtime.</p>
-<p>Proof surface: stable APIs are covered by <code>tests/pass/stdlib.walk</code>, <code>tests/pass/walk_tests.walk</code>, <code>tests/compat/v1/stable.walk</code>, <code>tests/compat/v1/tests.walk</code>, <code>cmd/walk/compatibility_test.go</code>, and <code>cmd/walk/conformance_test.go</code>.</p>
+<p>Proof surface: stable APIs are covered by <code>tests/pass/stdlib.walk</code>, <code>tests/pass/walk_tests.walk</code>, compatibility fixtures, <code>cmd/walk/compatibility_test.go</code>, and <code>cmd/walk/conformance_test.go</code>.</p>
 <p>---</p>
 <h2 id="math">math</h2>
 <h3 id="math-sqrt-number-float">math.sqrt(number) -&gt; float</h3>
@@ -114,7 +114,7 @@ out: string.concat(&#39;walk&#39;, &#39;lang&#39;)</code></pre>
 <h2 id="array">array</h2>
 <h3 id="array-len-array-t-int">array.len(array[T]) -&gt; int</h3>
 <p>Stability: stable. Effect status: pure expression.</p>
-<p>Returns the length stored with a stable v1 array.</p>
+<p>Returns the length stored with a stable array.</p>
 <pre><code class="language-walk">imp: array
 var: nums = [1, 2, 3]
 out: array.len(nums)</code></pre>
@@ -141,8 +141,8 @@ out: &gt; time.now() 0</code></pre>
 <h2 id="random">random</h2>
 <h3 id="random-int-int-int-int">random.int(int, int) -&gt; int</h3>
 <p>Stability: stable. Effect status: pure expression.</p>
-<p>Returns an integer in the inclusive range. If <code>max &lt; min</code>, v1 returns <code>min</code>.</p>
-<p><code>random.int</code> and <code>random.choice</code> use a runtime-owned PRNG seeded once per native process. v1 does not expose manual seeding.</p>
+<p>Returns an integer in the inclusive range. If <code>max &lt; min</code>, WalkLang returns <code>min</code>.</p>
+<p><code>random.int</code> and <code>random.choice</code> use a runtime-owned PRNG seeded once per native process. WalkLang does not expose manual seeding.</p>
 <pre><code class="language-walk">imp: random
 out: random.int(1, 10)</code></pre>
 <h3 id="random-choice-array-t-t">random.choice(array[T]) -&gt; T</h3>
@@ -388,7 +388,7 @@ if: parsed.ok
 <p>Validates and compacts JSON text, then overwrites the target file. Invalid JSON or file write failures runtime-stop with <code>walk runtime error</code>.</p>
 <p>---</p>
 <h2 id="draft-term">Draft term</h2>
-<p>Draft <code>term</code> APIs support terminal-oriented CLI output without changing the stable v1.9 language contract. Terminal mutation helpers are effects and must use <code>do:</code>.</p>
+<p>Draft <code>term</code> APIs support terminal-oriented CLI output without changing the stable feature set. Terminal mutation helpers are effects and must use <code>do:</code>.</p>
 <pre><code class="language-walk">imp: io
 imp: term
 
@@ -493,7 +493,7 @@ out: html.p(&#39;copy &amp; text&#39;)</code></pre>
 <pre><code class="language-bash">walk test tests.walk</code></pre>
 <p>---</p>
 <h2 id="planned-api-names">Planned API Names</h2>
-<p>These names are planned only. They are documented here so naming can stay consistent, but they are not stable, not draft-implemented, not importable, and not compatibility-protected in v1.9.</p>
+<p>These names are planned only. They are documented here so naming can stay consistent, but they are not stable, not draft-implemented, not importable, and not compatibility-protected as stable features.</p>
 <pre><code class="language-text">matrix.rows
 matrix.cols
 matrix.get</code></pre>

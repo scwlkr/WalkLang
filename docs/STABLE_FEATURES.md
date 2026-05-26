@@ -1,24 +1,7 @@
-# WalkLang v1 / v1.9
+# WalkLang Stable Feature Notes
 
-v1 makes the current compiler path feel stable.
-
-v1.1 makes the stable surface explicit through contract docs and conformance fixtures. It does not add project mode or data modeling.
-
-v1.2 adds project mode without changing the v1.1 core syntax surface.
-
-v1.3 grows the stable standard library foundation without adding file/json/matrix yet.
-
-v1.4 makes diagnostics and `walk check` more useful without changing the v1 core syntax.
-
-v1.5 prepares the v1.x compatibility line with release notes, migration guidance, deprecation policy, official install instructions, and focused compatibility fixtures.
-
-v1.6 adds local function type inference for obvious helper functions without inferring public meaning from call sites.
-
-v1.7 adds the stable `in:` expression for required-line stdin input.
-
-v1.8 adds small terminal-game helpers on top of the existing string, array, and random modules.
-
-v1.9 adds string interpolation for display text without changing numeric `+`.
+These notes summarize the stable WalkLang feature set that current docs,
+fixtures, and release checks protect.
 
 Contract docs:
 
@@ -173,9 +156,9 @@ The CLI prints the stable diagnostic first line, followed by source snippets, ca
 The checker emits warnings for shadowing outer names and unreachable statements.
 
 ```bash
-go run ./cmd/walk check examples/v1.walk
-go run ./cmd/walk check --warnings=off examples/v1.walk
-go run ./cmd/walk check --warnings=error examples/v1.walk
+go run ./cmd/walk check examples/stable.walk
+go run ./cmd/walk check --warnings=off examples/stable.walk
+go run ./cmd/walk check --warnings=error examples/stable.walk
 ```
 
 ## Build Flow
@@ -185,37 +168,37 @@ Native builds still go through generated C and `cc`.
 Install the local CLI first:
 
 ```bash
-scripts/install-local.sh v5.7-local
+scripts/install-local.sh local
 walk version
 ```
 
 ```bash
-walk build examples/v1.walk -o build/v1 --release
-./build/v1
+walk build examples/stable.walk -o build/stable --release
+./build/stable
 ```
 
 Use a different C compiler or flags when needed:
 
 ```bash
-walk build examples/v1.walk -o build/v1 --cc clang --cflag -Wall
+walk build examples/stable.walk -o build/stable --cc clang --cflag -Wall
 ```
 
-Run the v1 stress path:
+Run the compatibility stress path:
 
 ```bash
-scripts/stress-v1.sh
+scripts/stress-compatibility.sh
 ```
 
-Run the focused v1 compatibility suite:
+Run the focused stable compatibility suite:
 
 ```bash
-go test ./cmd/walk -run TestV19CompatibilitySuite
+go test ./cmd/walk -run TestStableCompatibilitySuite
 ```
 
 Build release CLI artifacts:
 
 ```bash
-scripts/release.sh v5.7.0
+scripts/release.sh v5.13.1
 ```
 
 ## Project Mode
@@ -232,7 +215,7 @@ walk clean
 
 Project mode is defined in `docs/PROJECTS.md`.
 
-Run v1 conformance:
+Run conformance:
 
 ```bash
 go test ./...

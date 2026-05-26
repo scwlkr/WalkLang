@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>WalkLang v4 Professional Tooling - WalkLang</title>
+<title>WalkLang Professional Tooling - WalkLang</title>
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <link rel="stylesheet" href="../assets/site.css">
 <script defer src="../assets/site.js"></script>
@@ -33,11 +33,11 @@
 <a href="DEPRECATION.html">Deprecation</a>
 <h2>Reference</h2>
 <a href="reference/api.html">API Reference</a>
-<a href="V5_1.html">Docs Site</a>
+<a href="DOCS_SITE.html">Docs Site</a>
 <a href="reference/index.html">Reference Index</a>
 <h2>Tools</h2>
-<a href="V4.html" aria-current="page">Editor And Docs Tools</a>
-<a href="V5.html">Runtime And Backend</a>
+<a href="TOOLING.html" aria-current="page">Editor And Docs Tools</a>
+<a href="RUNTIME_BACKEND.html">Runtime And Backend</a>
 <a href="NETWORKING.html">Draft Networking</a>
 <a href="RICH_RUNTIMES.html">Rich Runtimes</a>
 <h2>Project</h2>
@@ -56,8 +56,8 @@
 <div class="topbar"><a href="index.html">Docs</a><a href="reference/api.html">Reference</a><a href="https://github.com/scwlkr/WalkLang">GitHub</a></div>
 <div class="page">
 <article class="doc">
-<h1 id="walklang-v4-professional-tooling">WalkLang v4 Professional Tooling</h1>
-<p>v4 makes WalkLang usable from normal editor workflows without changing the language surface.</p>
+<h1 id="walklang-professional-tooling">WalkLang Professional Tooling</h1>
+<p>WalkLang includes first-party tooling for normal editor and documentation workflows without changing the language surface.</p>
 <h2 id="language-server">Language Server</h2>
 <p>Start the language server:</p>
 <pre><code class="language-bash">walk lsp</code></pre>
@@ -122,7 +122,7 @@ walk docs --strict --format json -o docs/api.json src/main.walk</code></pre>
 walk debug-map -o build/debug-map.json src/main.walk</code></pre>
 <p>The map records source files, symbol names, symbol kinds, and line/column locations. It is a foundation for debugger adapters and generated-C source mapping in later backend work.</p>
 <h2 id="non-goals">Non-Goals</h2>
-<p>v4 does not add:</p>
+<p>Professional tooling does not add:</p>
 <pre><code class="language-text">JetBrains plugin implementation
 step-through debugger adapter
 generated C source maps

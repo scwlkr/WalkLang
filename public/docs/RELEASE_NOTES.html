@@ -33,11 +33,11 @@
 <a href="DEPRECATION.html">Deprecation</a>
 <h2>Reference</h2>
 <a href="reference/api.html">API Reference</a>
-<a href="V5_1.html">Docs Site</a>
+<a href="DOCS_SITE.html">Docs Site</a>
 <a href="reference/index.html">Reference Index</a>
 <h2>Tools</h2>
-<a href="V4.html">Editor And Docs Tools</a>
-<a href="V5.html">Runtime And Backend</a>
+<a href="TOOLING.html">Editor And Docs Tools</a>
+<a href="RUNTIME_BACKEND.html">Runtime And Backend</a>
 <a href="NETWORKING.html">Draft Networking</a>
 <a href="RICH_RUNTIMES.html">Rich Runtimes</a>
 <h2>Project</h2>
@@ -59,6 +59,39 @@
 <h1 id="walklang-release-notes">WalkLang Release Notes</h1>
 <h2 id="unreleased">Unreleased</h2>
 <p>No unreleased changes yet.</p>
+<h2 id="v5-13-1-single-version-and-developer-path-cleanup">v5.13.1 - Single Version And Developer Path Cleanup</h2>
+<p>Date: 2026-05-26</p>
+<p>v5.13.1 aligns the current-facing project version around one number and removes old milestone labels from developer-facing paths that appear during normal CI, docs, examples, script, fixture, and test work.</p>
+<h3 id="changed">Changed</h3>
+<ul>
+<li>Current-facing README, docs index, status, compatibility, spec, roadmap, and</li>
+<p>generated docs wording now describe one Project Version instead of separate language/compiler/stable-version lines.</p>
+<li>Active docs source pages and generated docs routes use purpose-based names</li>
+<p>such as <code>STABLE_FEATURES</code>, <code>TOOLING</code>, and <code>RUNTIME_BACKEND</code> instead of milestone page names.</p>
+<li>Active example and compatibility fixture paths use purpose-based names:</li>
+<p><code>examples/stable.walk</code>, <code>examples/compiler_tests.walk</code>, <code>examples/compiler_tracer.walk</code>, and <code>tests/compat/stable/</code>.</p>
+<li>The compatibility stress script is now <code>scripts/stress-compatibility.sh</code>, and</li>
+<p>CI uses the renamed script plus <code>v5.13.1</code> release artifacts.</p>
+<li>Generated API reference examples now use non-versioned <code>Since: current</code></li>
+<p>metadata, keeping old version numbers out of current-facing generated docs.</p>
+</ul>
+<h3 id="notes">Notes</h3>
+<ul>
+<li>Historical release notes and migration history intentionally keep their old</li>
+<p>version references.</p>
+<li>This release changes docs, generated docs, examples, CI, scripts, and fixture</li>
+<p>paths. It does not change the language grammar or runtime behavior.</p>
+</ul>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<ul>
+<li>Developer workflows that call <code>scripts/stress-v1.sh</code>, read <code>examples/v1.walk</code>,</li>
+<p>or reference <code>tests/compat/v1/</code> need to update to the purpose-based path names listed above.</p>
+</ul>
+<h3 id="upgrade">Upgrade</h3>
+<p>Regenerate docs and release artifacts with:</p>
+<pre><code class="language-bash">scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.13.1 dist</code></pre>
 <h2 id="v5-13-0-explicit-systems-track">v5.13.0 - Explicit Systems Track</h2>
 <p>Date: 2026-05-25</p>
 <p>v5.13.0 implements the explicit-systems release slice while keeping the stable language contract at v1.9. The new language behavior is draft unless promoted by a later compatibility decision.</p>

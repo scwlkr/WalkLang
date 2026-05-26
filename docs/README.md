@@ -10,8 +10,8 @@ these docs explain how to install, learn, use, verify, and evolve WalkLang.
 
 - [Install WalkLang](INSTALL.md)
 - [Build projects](PROJECTS.md)
-- [Learn the v1 syntax](SYNTAX.md)
-- [Read the v1 language contract](SPEC.md)
+- [Learn the syntax](SYNTAX.md)
+- [Read the language specification](SPEC.md)
 
 ## Use The Language
 
@@ -25,28 +25,28 @@ these docs explain how to install, learn, use, verify, and evolve WalkLang.
 ## Use The Tools
 
 - [Project mode and packages](PROJECTS.md)
-- [Editor tooling, LSP, docs generation, and debug maps](V4.md)
-- [Runtime and backend model](V5.md)
+- [Editor tooling, LSP, docs generation, and debug maps](TOOLING.md)
+- [Runtime and backend model](RUNTIME_BACKEND.md)
 - [Draft networking](NETWORKING.md)
 - [Rich runtime tracks](RICH_RUNTIMES.md)
 - [Architecture](ARCHITECTURE.md)
 
-## Track Versions
+## Current Version
 
-WalkLang version names use separate stability layers. The stable language
-contract is `v1.9`. The current compiler, tooling, backend, release, and docs
-milestone is `v5.13.0`. Experimental v2 through v2.2 language features are
-implemented, but they are not part of the stable v1 compatibility promise.
-Draft `do:`, `defer:`, `io`, `parse`, `process`, `file`, `dir`, `path`,
-`json`, `term`, `http`, and `html` helpers are implemented for current compiler
-experiments and are not part of the stable v1.9 contract yet.
+WalkLang is currently `v5.13.1`. That single project version covers the
+compiler, tooling, backend, release artifacts, docs, and implemented language
+surface.
 
-- [v1 / v1.9 stable contract](V1.md)
-- [v2 data modeling, methods, and generics](V2.md)
-- [v3 package ecosystem](V3.md)
-- [v4 professional tooling](V4.md)
-- [v5 runtime and backend maturity](V5.md)
-- [v5.1 public docs and reference site](V5_1.md)
+Features inside `v5.13.1` use maturity labels:
+
+- stable: core syntax, diagnostics, modules, tests, and standard-library helpers
+- draft: `do:`, `defer:`, `io`, `parse`, `process`, `file`, `dir`, `path`,
+  `json`, `term`, `http`, and `html`
+- experimental: structs, methods, and simple generic functions
+
+- [Stable feature specification](SPEC.md)
+- [Standard library](STDLIB.md)
+- [Compatibility promise](COMPATIBILITY.md)
 - [Release notes](RELEASE_NOTES.md)
 - [Current status](STATUS.md)
 

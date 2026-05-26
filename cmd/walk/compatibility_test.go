@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestV19CompatibilitySuitePassPrograms(t *testing.T) {
+func TestStableCompatibilitySuitePassPrograms(t *testing.T) {
 	requireCC(t)
 	root := repoRoot(t)
 	cases := []struct {
@@ -17,8 +17,8 @@ func TestV19CompatibilitySuitePassPrograms(t *testing.T) {
 		want      string
 	}{
 		{
-			name:   "stable v1 program",
-			source: filepath.Join(root, "tests", "compat", "v1", "stable.walk"),
+			name:   "stable program",
+			source: filepath.Join(root, "tests", "compat", "stable", "stable.walk"),
 			want: strings.Join([]string{
 				"27",
 				"5",
@@ -52,8 +52,8 @@ func TestV19CompatibilitySuitePassPrograms(t *testing.T) {
 			}, "\n"),
 		},
 		{
-			name:      "stable v1 test program",
-			source:    filepath.Join(root, "tests", "compat", "v1", "tests.walk"),
+			name:      "stable test program",
+			source:    filepath.Join(root, "tests", "compat", "stable", "tests.walk"),
 			testsOnly: true,
 			want:      "test: stdlib assert stays compatible\ntest: module export stays compatible\nok 2 tests\n",
 		},
@@ -75,7 +75,7 @@ func TestV19CompatibilitySuitePassPrograms(t *testing.T) {
 	}
 }
 
-func TestV19CompatibilitySuiteStableFailures(t *testing.T) {
+func TestStableCompatibilitySuiteStableFailures(t *testing.T) {
 	root := repoRoot(t)
 	cases := []struct {
 		file string
@@ -99,17 +99,17 @@ func TestV19CompatibilitySuiteStableFailures(t *testing.T) {
 	}
 }
 
-func TestV19ReleaseDocsArePresent(t *testing.T) {
+func TestCurrentReleaseDocsArePresent(t *testing.T) {
 	root := repoRoot(t)
 	cases := []struct {
 		file string
 		want string
 	}{
-		{"docs/COMPATIBILITY.md", "Stable v1 code should continue to compile through the v1.x line"},
+		{"docs/COMPATIBILITY.md", "Stable features should continue to compile and behave as documented"},
 		{"docs/INSTALL.md", "Official Install Instructions"},
-		{"docs/RELEASE_NOTES.md", "v5.12.0"},
-		{"docs/MIGRATING.md", "v1.8 to v1.9"},
-		{"docs/DEPRECATION.md", "Current v1.9 Deprecated Surface"},
+		{"docs/RELEASE_NOTES.md", "Single Version And Developer Path Cleanup"},
+		{"docs/MIGRATING.md", "WalkLang Migration Guide"},
+		{"docs/DEPRECATION.md", "Current Deprecated Surface"},
 	}
 
 	for _, tc := range cases {

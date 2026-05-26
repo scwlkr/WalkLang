@@ -11,7 +11,7 @@ If a doc claims behavior, the same change must include proof.
 If there is no proof, the doc must say future, planned, experimental, or draft.
 ```
 
-`docs/SPEC.md` remains the stable language contract. This document is the
+`docs/SPEC.md` remains the stable feature specification. This document is the
 terminology and documentation standard that keeps the rest of the docs coherent.
 
 ---
@@ -37,7 +37,7 @@ Use these words exactly.
 
 ```text
 stable
-  Part of the v1 compatibility promise. Stable behavior must be in the stable
+  Part of the current compatibility promise. Stable behavior must be in the stable
   docs and must have compatibility proof.
 
 draft
@@ -45,7 +45,8 @@ draft
   Draft behavior must be labeled draft wherever it appears.
 
 experimental
-  Implemented outside the stable v1 contract. It may change or be removed.
+  Implemented for exploration outside the stable feature set. It may change or
+  be removed.
 
 planned
   Designed or intended, but not implemented. Planned behavior must not be
@@ -131,8 +132,8 @@ func(T...) R
 ```
 
 `void` is an internal function return marker, not a value type. Struct and
-generic types exist in the experimental v2 surface unless promoted by a later
-stable contract change.
+generic types exist as experimental features unless promoted by a later stable
+feature decision.
 
 ### Expression
 
@@ -216,9 +217,9 @@ package module
 
 ### Collection
 
-A collection is a value that contains other values. Stable v1 collections are
-arrays. Struct values are experimental data-modeling values in v2. Maps, sets,
-and tuples are not current WalkLang concepts.
+A collection is a value that contains other values. Stable collections are
+arrays. Struct values are experimental data-modeling values. Maps, sets, and
+tuples are not current WalkLang concepts.
 
 ### Error
 

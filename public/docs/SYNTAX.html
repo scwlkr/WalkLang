@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>WalkLang v1 Syntax Guide - WalkLang</title>
+<title>WalkLang Syntax Guide - WalkLang</title>
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <link rel="stylesheet" href="../assets/site.css">
 <script defer src="../assets/site.js"></script>
@@ -33,11 +33,11 @@
 <a href="DEPRECATION.html">Deprecation</a>
 <h2>Reference</h2>
 <a href="reference/api.html">API Reference</a>
-<a href="V5_1.html">Docs Site</a>
+<a href="DOCS_SITE.html">Docs Site</a>
 <a href="reference/index.html">Reference Index</a>
 <h2>Tools</h2>
-<a href="V4.html">Editor And Docs Tools</a>
-<a href="V5.html">Runtime And Backend</a>
+<a href="TOOLING.html">Editor And Docs Tools</a>
+<a href="RUNTIME_BACKEND.html">Runtime And Backend</a>
 <a href="NETWORKING.html">Draft Networking</a>
 <a href="RICH_RUNTIMES.html">Rich Runtimes</a>
 <h2>Project</h2>
@@ -56,7 +56,7 @@
 <div class="topbar"><a href="index.html">Docs</a><a href="reference/api.html">Reference</a><a href="https://github.com/scwlkr/WalkLang">GitHub</a></div>
 <div class="page">
 <article class="doc">
-<h1 id="walklang-v1-syntax-guide">WalkLang v1 Syntax Guide</h1>
+<h1 id="walklang-syntax-guide">WalkLang Syntax Guide</h1>
 <p>This guide is the readable syntax companion to <code>docs/SPEC.md</code>. <code>SPEC.md</code> is the contract when the two disagree.</p>
 <p>---</p>
 <h2 id="files">Files</h2>
@@ -263,7 +263,7 @@ func: apply(f func(int) int, x int) int
     return: f(x)
 
 out: apply(inc, 4)</code></pre>
-<p>Anonymous functions and closures are not stable v1 syntax.</p>
+<p>Anonymous functions and closures are not stable syntax.</p>
 <p>---</p>
 <h2 id="arrays">Arrays</h2>
 <p>Arrays use brackets and commas.</p>
@@ -309,7 +309,7 @@ out: calc.square(5)</code></pre>
 <p>Package module example:</p>
 <pre><code class="language-walk">imp: geometry.core
 out: geometry.core.double(3)</code></pre>
-<p>Draft process, IO, filesystem, JSON, terminal, HTTP, and HTML helpers are available in the current compiler, but they are not part of the stable v1.9 syntax contract yet.</p>
+<p>Draft process, IO, filesystem, JSON, terminal, HTTP, and HTML helpers are available in the current compiler, but they are draft features.</p>
 <pre><code class="language-walk">imp: process
 
 out: process.arg_count()

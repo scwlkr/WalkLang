@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>WalkLang v1.9 Specification - WalkLang</title>
+<title>WalkLang Specification - WalkLang</title>
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <link rel="stylesheet" href="../assets/site.css">
 <script defer src="../assets/site.js"></script>
@@ -33,11 +33,11 @@
 <a href="DEPRECATION.html">Deprecation</a>
 <h2>Reference</h2>
 <a href="reference/api.html">API Reference</a>
-<a href="V5_1.html">Docs Site</a>
+<a href="DOCS_SITE.html">Docs Site</a>
 <a href="reference/index.html">Reference Index</a>
 <h2>Tools</h2>
-<a href="V4.html">Editor And Docs Tools</a>
-<a href="V5.html">Runtime And Backend</a>
+<a href="TOOLING.html">Editor And Docs Tools</a>
+<a href="RUNTIME_BACKEND.html">Runtime And Backend</a>
 <a href="NETWORKING.html">Draft Networking</a>
 <a href="RICH_RUNTIMES.html">Rich Runtimes</a>
 <h2>Project</h2>
@@ -56,8 +56,8 @@
 <div class="topbar"><a href="index.html">Docs</a><a href="reference/api.html">Reference</a><a href="https://github.com/scwlkr/WalkLang">GitHub</a></div>
 <div class="page">
 <article class="doc">
-<h1 id="walklang-v1-9-specification">WalkLang v1.9 Specification</h1>
-<p>This document is the stable WalkLang language contract for the v1 line. It is normative and intentionally concise. <code>docs/SYNTAX.md</code>, <code>docs/STDLIB.md</code>, <code>docs/ERRORS.md</code>, and <code>docs/COMPATIBILITY.md</code> provide readable examples and longer explanations.</p>
+<h1 id="walklang-specification">WalkLang Specification</h1>
+<p>This document is the stable WalkLang feature specification for the current project version. It is normative and intentionally concise. <code>docs/SYNTAX.md</code>, <code>docs/STDLIB.md</code>, <code>docs/ERRORS.md</code>, and <code>docs/COMPATIBILITY.md</code> provide readable examples and longer explanations.</p>
 <p>Core rule:</p>
 <pre><code class="language-text">If it is not in SPEC.md, it is not stable WalkLang.
 If the compiler disagrees with SPEC.md, either the compiler or the spec must change.</code></pre>
@@ -101,7 +101,7 @@ func(T...) R</code></pre>
 float
 bool
 string</code></pre>
-<p>Struct and generic types are implemented in the experimental v2 surface. They are not part of the stable v1.9 compatibility contract.</p>
+<p>Struct and generic types are implemented as experimental features. They are not part of the stable feature set.</p>
 <p>---</p>
 <h2 id="3-values">3. Values</h2>
 <p>Stable literals create values of these types:</p>
@@ -112,7 +112,7 @@ string
 null</code></pre>
 <p><code>null</code> is stable for nullable strings:</p>
 <pre><code class="language-walk">var: name string? = null</code></pre>
-<p>Other nullable scalar forms are not part of the stable v1.9 native contract.</p>
+<p>Other nullable scalar forms are not part of the stable native feature set.</p>
 <p>Array literals are homogeneous. Empty arrays need an explicit array annotation.</p>
 <pre><code class="language-walk">var: nums = [1, 2, 3]
 var: guessed array[string] = []</code></pre>
@@ -154,7 +154,7 @@ out: &#39;walk&#39;[1]</code></pre>
 <pre><code class="language-text">and  2 or more bool args
 or   2 or more bool args
 not  exactly 1 bool arg</code></pre>
-<p>Negative numeric literals are stable. Unary negation of names is not stable v1 syntax; use subtraction from zero.</p>
+<p>Negative numeric literals are stable. Unary negation of names is not stable syntax; use subtraction from zero.</p>
 <pre><code class="language-walk">var: x = -4
 var: y = - 0 x</code></pre>
 <p>Typed input is not part of <code>in:</code>. Read text first, then parse explicitly with draft parse APIs when using the current compiler&#39;s draft surface.</p>
@@ -189,7 +189,7 @@ const: limit = 10</code></pre>
 <pre><code class="language-walk">for: n in nums
     out: n</code></pre>
 <p><code>test:</code> defines a test block for <code>walk test</code>. <code>assert:</code> requires a bool expression. Failed assertions make the generated test executable exit non-zero. Normal <code>walk build</code> ignores <code>test:</code> blocks.</p>
-<p>The current compiler also implements draft <code>do:</code> effect calls and draft <code>defer:</code> scope cleanup. They are not part of the stable v1.9 compatibility contract.</p>
+<p>The current compiler also implements draft <code>do:</code> effect calls and draft <code>defer:</code> scope cleanup. They are not part of the stable feature set.</p>
 <p>---</p>
 <h2 id="6-declarations">6. Declarations</h2>
 <p>Stable declarations introduce or expose named surface:</p>
@@ -206,7 +206,7 @@ test:</code></pre>
 only functions listed with exp: are callable from another file
 module files may contain only imp:, struct:, func:, and exp: at top level
 import cycles are errors</code></pre>
-<p><code>struct:</code> declarations are implemented in the experimental v2 surface and are allowed in module files by the current compiler, but structs are not part of the stable v1.9 contract.</p>
+<p><code>struct:</code> declarations are implemented as an experimental feature and are allowed in module files by the current compiler, but structs are not part of the stable feature set.</p>
 <p>---</p>
 <h2 id="7-functions">7. Functions</h2>
 <p>Stable functions are named reusable blocks declared with <code>func:</code>.</p>
@@ -224,7 +224,7 @@ import cycles are errors</code></pre>
 
 func: apply(f func(int) int, x int) int
     return: f(x)</code></pre>
-<p>Anonymous functions and closures are not stable v1 syntax.</p>
+<p>Anonymous functions and closures are not stable syntax.</p>
 <p>---</p>
 <h2 id="8-modules">8. Modules</h2>
 <p>Stable built-in modules:</p>
@@ -260,7 +260,7 @@ json
 term
 http
 html</code></pre>
-<p>Draft modules are importable for experimentation, but they are not compatibility-protected by the v1.9 stable contract. See <code>docs/STDLIB.md</code> for their signatures, effect status, result structs, runtime behavior, and failure behavior.</p>
+<p>Draft modules are importable for experimentation, but they are not compatibility-protected by the stable feature set. See <code>docs/STDLIB.md</code> for their signatures, effect status, result structs, runtime behavior, and failure behavior.</p>
 <p>---</p>
 <h2 id="9-errors">9. Errors</h2>
 <p>Use <code>diagnostic</code> for compiler-reported errors and warnings. Compiler diagnostics use this stable first-line shape:</p>
@@ -274,7 +274,7 @@ module error
 warning
 internal error</code></pre>
 <p>Warnings do not fail by default. <code>--warnings=error</code> promotes warnings to errors. Stable warnings cover shadowing an outer name and unreachable statements after <code>return:</code>, <code>break:</code>, or <code>continue</code>.</p>
-<p>Stable v1.9 runtime failures include:</p>
+<p>Stable runtime failures include:</p>
 <pre><code class="language-text">walk runtime error: input reached EOF
 walk runtime error: stdin read failed
 walk runtime error: out of memory
@@ -293,10 +293,10 @@ return type
 effect status
 runtime behavior
 failure behavior</code></pre>
-<p>No other built-in module is stable in v1.9.</p>
+<p>No other built-in module is stable.</p>
 <p>---</p>
 <h2 id="non-stable-current-compiler-surface">Non-Stable Current Compiler Surface</h2>
-<p>The current compiler accepts experimental v2 data-modeling features and draft IO/runtime APIs that are not stable v1.9 behavior.</p>
+<p>The current compiler accepts experimental data-modeling features and draft IO/runtime APIs that are not stable behavior.</p>
 <p>Experimental language surface:</p>
 <pre><code class="language-text">structs
 methods
@@ -314,7 +314,7 @@ json
 term
 http
 html</code></pre>
-<p>Planned or not-current stable v1 features include:</p>
+<p>Planned or not-current stable features include:</p>
 <pre><code class="language-text">classes
 inheritance
 interfaces

@@ -30,34 +30,34 @@ out: add(2, 3)
 ## Why WalkLang?
 
 - **Predictability:** indentation-based syntax, explicit module boundaries, and
-  a stable v1 language contract keep programs easy to read and reason about.
+  a stable feature specification keep programs easy to read and reason about.
 - **Native output:** WalkLang emits understandable C, then uses the system C
   compiler to build native executables.
 - **Tooling:** project mode, tests, formatting, diagnostics, package workflows,
   editor support, API docs generation, and release scripts are part of the repo.
 
-## Version Map
+## Current Version
 
-WalkLang currently has three version layers:
+WalkLang is currently `v5.13.1`.
 
-- **Stable language contract:** `v1.9`, defined by `docs/SPEC.md`,
-  `docs/COMPATIBILITY.md`, and the v1 compatibility tests.
-- **Current compiler/tooling/docs release:** `v5.13.0`, focused on the explicit
-  systems track: draft `defer:` cleanup, recoverable-result policy docs,
-  package collection roots, and first-class build modes while keeping v1.9
-  stable.
-- **Experimental implemented language surface:** v2 through v2.2 features such
-  as structs, methods, and simple generic functions are implemented, but are not
-  part of the stable v1 compatibility promise.
+`v5.13.1` covers the compiler, tooling, docs, release artifacts, and
+implemented language surface. Features inside a release are labeled `stable`,
+`draft`, `experimental`, or `planned` when their maturity matters.
+
+This release includes the explicit systems track: draft `defer:` cleanup,
+recoverable-result policy docs, package collection roots, and first-class build
+modes.
 
 ## What Works Today
 
 - `.walk` files compile through generated C into native executables.
-- Stable v1.9 syntax, diagnostics, modules, tests, and standard-library helpers
-  are documented and compatibility-tested.
+- Stable syntax, diagnostics, modules, tests, and standard-library helpers are
+  documented and compatibility-tested.
 - Draft `do:`, `defer:`, `io`, `parse`, `process`, `file`, `dir`, `path`,
   `json`, `term`, `http`, and `html` helpers are implemented for current
-  compiler experiments, but they are not part of the stable v1.9 contract.
+  compiler experiments.
+- Experimental structs, methods, and simple generic functions are implemented
+  for current compiler experiments.
 - `walk run`, direct `walk file.walk`, `walk build`, `walk check`, `walk test`,
   `walk fmt`, `walk clean`, `walk package`, `walk docs`, `walk debug-map`,
   `walk lsp`, `walk repl`, and `walk version` are implemented.
@@ -72,7 +72,7 @@ WalkLang currently has three version layers:
 Read [the install guide][Getting started], then run a `.walk` file directly:
 
 ```bash
-scripts/install-local.sh v5-local
+scripts/install-local.sh local
 walk run playground/route_ranker.walk
 walk playground/route_ranker.walk
 ```

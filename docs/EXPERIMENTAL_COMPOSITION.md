@@ -1,8 +1,12 @@
-# WalkLang v2 Data Modeling, Methods, And Simple Generics
+# WalkLang Experimental Data Modeling, Methods, And Simple Generics
 
-v2 adds experimental structs after the v1 compatibility line. v2.1 adds experimental methods as explicit receiver functions. v2.2 adds simple generic functions for composition without inheritance or magic dispatch.
+WalkLang includes experimental structs, methods as explicit receiver functions,
+and simple generic functions for composition without inheritance or magic
+dispatch.
 
-`docs/SPEC.md` still defines stable v1. Structs are implemented in v2, but they are not part of the v1 compatibility promise.
+`docs/SPEC.md` defines the stable feature set. Structs, methods, and simple
+generic functions are implemented, but they are not part of the stable feature
+set.
 
 ## Structs
 
@@ -32,7 +36,8 @@ extra constructor values are compile errors
 unknown fields are compile errors
 ```
 
-Named-field constructors remain a future design candidate. v2.0 uses positional constructors only.
+Named-field constructors remain a future design candidate. Current
+constructors are positional only.
 
 ## Field Access And Assignment
 
@@ -151,7 +156,8 @@ out: same(1)
 out: same('walk')
 ```
 
-Type arguments are inferred from the ordinary call arguments. There is no explicit type-argument call syntax in v2.2.
+Type arguments are inferred from the ordinary call arguments. There is no
+explicit type-argument call syntax.
 
 Generic functions can compose with arrays and structs.
 
@@ -198,7 +204,7 @@ generic methods are not supported yet
 
 ## Non-Goals
 
-v2.2 does not add:
+Experimental composition does not add:
 
 ```text
 inheritance
@@ -211,4 +217,6 @@ named-field constructors
 magic dispatch
 ```
 
-Structs, methods, and generic functions remain experimental. Traits, interfaces, generic structs, generic methods, named-field constructors, inheritance, and magic dispatch remain outside the implemented v2.2 surface.
+Structs, methods, and generic functions remain experimental. Traits,
+interfaces, generic structs, generic methods, named-field constructors,
+inheritance, and magic dispatch remain outside the implemented surface.

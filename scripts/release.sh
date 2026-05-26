@@ -1,7 +1,12 @@
 #!/usr/bin/env sh
 set -eu
 
-version="${1:-v1}"
+if [ "${1:-}" = "" ]; then
+    echo "usage: scripts/release.sh <version> [out-dir]" >&2
+    exit 2
+fi
+
+version="$1"
 out_dir="${2:-dist}"
 
 mkdir -p "$out_dir"

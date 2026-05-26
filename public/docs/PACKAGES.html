@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>WalkLang v3 Package Ecosystem - WalkLang</title>
+<title>WalkLang Package Ecosystem - WalkLang</title>
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <link rel="stylesheet" href="../assets/site.css">
 <script defer src="../assets/site.js"></script>
@@ -33,11 +33,11 @@
 <a href="DEPRECATION.html">Deprecation</a>
 <h2>Reference</h2>
 <a href="reference/api.html">API Reference</a>
-<a href="V5_1.html">Docs Site</a>
+<a href="DOCS_SITE.html">Docs Site</a>
 <a href="reference/index.html">Reference Index</a>
 <h2>Tools</h2>
-<a href="V4.html">Editor And Docs Tools</a>
-<a href="V5.html">Runtime And Backend</a>
+<a href="TOOLING.html">Editor And Docs Tools</a>
+<a href="RUNTIME_BACKEND.html">Runtime And Backend</a>
 <a href="NETWORKING.html">Draft Networking</a>
 <a href="RICH_RUNTIMES.html">Rich Runtimes</a>
 <h2>Project</h2>
@@ -56,14 +56,14 @@
 <div class="topbar"><a href="index.html">Docs</a><a href="reference/api.html">Reference</a><a href="https://github.com/scwlkr/WalkLang">GitHub</a></div>
 <div class="page">
 <article class="doc">
-<h1 id="walklang-v3-package-ecosystem">WalkLang v3 Package Ecosystem</h1>
-<p>v3 adds a local package workflow on top of project mode and user modules.</p>
+<h1 id="walklang-package-ecosystem">WalkLang Package Ecosystem</h1>
+<p>WalkLang includes a local package workflow on top of project mode and user modules.</p>
 <p>Packages are ordinary WalkLang projects with:</p>
 <pre><code class="language-text">walk.toml
 README.md
 src/&lt;package&gt;/&lt;module&gt;.walk
 tests/*_test.walk</code></pre>
-<p>The package manager is intentionally local and file-backed in v3. It does not add a remote public registry protocol yet.</p>
+<p>The package manager is intentionally local and file-backed. It does not add a remote public registry protocol yet.</p>
 <h2 id="create-a-package">Create A Package</h2>
 <p>Create a package project:</p>
 <pre><code class="language-bash">walk package init geometry
@@ -128,14 +128,14 @@ build/, .walk/, .git/, and walk.lock are not published</code></pre>
 <p>The published package lands at:</p>
 <pre><code class="language-text">&lt;registry&gt;/&lt;name&gt;/&lt;version&gt;/</code></pre>
 <h2 id="reproducibility">Reproducibility</h2>
-<p>v3 reproducibility comes from:</p>
+<p>Package reproducibility comes from:</p>
 <pre><code class="language-text">explicit dependency versions in walk.toml
 locked package checksums in walk.lock
 local package cache verification before build/check/test
 deterministic package source lookup
 publish-time check and test gates</code></pre>
 <h2 id="non-goals">Non-Goals</h2>
-<p>v3 does not add:</p>
+<p>The package ecosystem does not add:</p>
 <pre><code class="language-text">remote registry protocol
 package account authentication
 version range solving

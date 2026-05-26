@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>WalkLang v2 Data Modeling, Methods, And Simple Generics - WalkLang</title>
+<title>WalkLang Experimental Data Modeling, Methods, And Simple Generics - WalkLang</title>
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <link rel="stylesheet" href="../assets/site.css">
 <script defer src="../assets/site.js"></script>
@@ -33,11 +33,11 @@
 <a href="DEPRECATION.html">Deprecation</a>
 <h2>Reference</h2>
 <a href="reference/api.html">API Reference</a>
-<a href="V5_1.html">Docs Site</a>
+<a href="DOCS_SITE.html">Docs Site</a>
 <a href="reference/index.html">Reference Index</a>
 <h2>Tools</h2>
-<a href="V4.html">Editor And Docs Tools</a>
-<a href="V5.html">Runtime And Backend</a>
+<a href="TOOLING.html">Editor And Docs Tools</a>
+<a href="RUNTIME_BACKEND.html">Runtime And Backend</a>
 <a href="NETWORKING.html">Draft Networking</a>
 <a href="RICH_RUNTIMES.html">Rich Runtimes</a>
 <h2>Project</h2>
@@ -56,9 +56,9 @@
 <div class="topbar"><a href="index.html">Docs</a><a href="reference/api.html">Reference</a><a href="https://github.com/scwlkr/WalkLang">GitHub</a></div>
 <div class="page">
 <article class="doc">
-<h1 id="walklang-v2-data-modeling-methods-and-simple-generics">WalkLang v2 Data Modeling, Methods, And Simple Generics</h1>
-<p>v2 adds experimental structs after the v1 compatibility line. v2.1 adds experimental methods as explicit receiver functions. v2.2 adds simple generic functions for composition without inheritance or magic dispatch.</p>
-<p><code>docs/SPEC.md</code> still defines stable v1. Structs are implemented in v2, but they are not part of the v1 compatibility promise.</p>
+<h1 id="walklang-experimental-data-modeling-methods-and-simple-generics">WalkLang Experimental Data Modeling, Methods, And Simple Generics</h1>
+<p>WalkLang includes experimental structs, methods as explicit receiver functions, and simple generic functions for composition without inheritance or magic dispatch.</p>
+<p><code>docs/SPEC.md</code> defines the stable feature set. Structs, methods, and simple generic functions are implemented, but they are not part of the stable feature set.</p>
 <h2 id="structs">Structs</h2>
 <p>Declare a struct with fixed fields:</p>
 <pre><code class="language-walk">struct: User
@@ -74,7 +74,7 @@ constructor values are checked against field order
 missing constructor values are compile errors
 extra constructor values are compile errors
 unknown fields are compile errors</code></pre>
-<p>Named-field constructors remain a future design candidate. v2.0 uses positional constructors only.</p>
+<p>Named-field constructors remain a future design candidate. Current constructors are positional only.</p>
 <h2 id="field-access-and-assignment">Field Access And Assignment</h2>
 <p>Read fields with dot syntax:</p>
 <pre><code class="language-walk">out: user.name
@@ -143,7 +143,7 @@ out: user.name</code></pre>
 
 out: same(1)
 out: same(&#39;walk&#39;)</code></pre>
-<p>Type arguments are inferred from the ordinary call arguments. There is no explicit type-argument call syntax in v2.2.</p>
+<p>Type arguments are inferred from the ordinary call arguments. There is no explicit type-argument call syntax.</p>
 <p>Generic functions can compose with arrays and structs.</p>
 <pre><code class="language-walk">struct: User
     name string
@@ -173,7 +173,7 @@ generic functions are emitted as predictable specialized C functions
 generic functions must be called directly and cannot be passed as values
 generic methods are not supported yet</code></pre>
 <h2 id="non-goals">Non-Goals</h2>
-<p>v2.2 does not add:</p>
+<p>Experimental composition does not add:</p>
 <pre><code class="language-text">inheritance
 traits
 interfaces
@@ -182,7 +182,7 @@ generic methods
 explicit type-argument calls
 named-field constructors
 magic dispatch</code></pre>
-<p>Structs, methods, and generic functions remain experimental. Traits, interfaces, generic structs, generic methods, named-field constructors, inheritance, and magic dispatch remain outside the implemented v2.2 surface.</p>
+<p>Structs, methods, and generic functions remain experimental. Traits, interfaces, generic structs, generic methods, named-field constructors, inheritance, and magic dispatch remain outside the implemented surface.</p>
 </article>
 <footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
 </div>

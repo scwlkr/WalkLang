@@ -33,11 +33,11 @@
 <a href="DEPRECATION.html">Deprecation</a>
 <h2>Reference</h2>
 <a href="reference/api.html">API Reference</a>
-<a href="V5_1.html">Docs Site</a>
+<a href="DOCS_SITE.html">Docs Site</a>
 <a href="reference/index.html">Reference Index</a>
 <h2>Tools</h2>
-<a href="V4.html">Editor And Docs Tools</a>
-<a href="V5.html">Runtime And Backend</a>
+<a href="TOOLING.html">Editor And Docs Tools</a>
+<a href="RUNTIME_BACKEND.html">Runtime And Backend</a>
 <a href="NETWORKING.html">Draft Networking</a>
 <a href="RICH_RUNTIMES.html">Rich Runtimes</a>
 <h2>Project</h2>
@@ -107,7 +107,7 @@
 /// ```walk
 /// ...
 /// ```
-/// Since: 0.1.0</code></pre>
+/// Since: current</code></pre>
 <p>Required JSON fields:</p>
 <pre><code class="language-text">kind, name, path, signature, summary, params, returns, examples, since</code></pre>
 <h2 id="current-commands">Current Commands</h2>
@@ -128,8 +128,8 @@ scripts/check-docs-site.sh</code></pre>
 go test -count=1 ./...</code></pre>
 <p>For docs that mention generated API output, also prove the command works against a real source file:</p>
 <pre><code class="language-bash">go build -o build/walk ./cmd/walk
-./build/walk docs --strict -o build/api.md examples/v1.walk
-./build/walk docs --strict --format json -o build/api.json examples/v1.walk
+./build/walk docs --strict -o build/api.md examples/stable.walk
+./build/walk docs --strict --format json -o build/api.json examples/stable.walk
 scripts/check-docs-site.sh</code></pre>
 <p>For hosted docs changes, verify local Markdown links and keep links relative inside <code>docs/</code> unless the target is intentionally external.</p>
 </article>

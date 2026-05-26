@@ -12,7 +12,7 @@ draft
   intended shape, but still not compatibility-protected
 
 stable
-  part of the v1 compatibility promise
+  part of the compatibility promise
 
 deprecated
   still works, but has a documented replacement
@@ -23,7 +23,8 @@ removed
 
 ## Policy
 
-Stable v1 features should not be removed during the v1.x line.
+Stable features should not be removed without an explicit release-note and
+migration entry.
 
 A stable feature can become deprecated only when release notes and docs name:
 
@@ -35,9 +36,11 @@ the earliest version where removal is allowed
 the migration steps
 ```
 
-Removal of stable behavior normally waits for `v2.0.0`. A v1.x release may break stable behavior only for a documented safety or correctness fix.
+Removal of stable behavior normally waits for a clearly named future project
+version. A release may break stable behavior only for a documented safety or
+correctness fix.
 
-## Current v1.9 Deprecated Surface
+## Current Deprecated Surface
 
 None.
 

@@ -33,11 +33,11 @@
 <a href="DEPRECATION.html">Deprecation</a>
 <h2>Reference</h2>
 <a href="reference/api.html">API Reference</a>
-<a href="V5_1.html">Docs Site</a>
+<a href="DOCS_SITE.html">Docs Site</a>
 <a href="reference/index.html">Reference Index</a>
 <h2>Tools</h2>
-<a href="V4.html">Editor And Docs Tools</a>
-<a href="V5.html">Runtime And Backend</a>
+<a href="TOOLING.html">Editor And Docs Tools</a>
+<a href="RUNTIME_BACKEND.html">Runtime And Backend</a>
 <a href="NETWORKING.html">Draft Networking</a>
 <a href="RICH_RUNTIMES.html">Rich Runtimes</a>
 <h2>Project</h2>
@@ -62,7 +62,7 @@
 <pre><code class="language-text">If a language doc needs a new concept word, define it here first.
 If a doc claims behavior, the same change must include proof.
 If there is no proof, the doc must say future, planned, experimental, or draft.</code></pre>
-<p><code>docs/SPEC.md</code> remains the stable language contract. This document is the terminology and documentation standard that keeps the rest of the docs coherent.</p>
+<p><code>docs/SPEC.md</code> remains the stable feature specification. This document is the terminology and documentation standard that keeps the rest of the docs coherent.</p>
 <p>---</p>
 <h2 id="purpose">Purpose</h2>
 <p>WalkLang docs have three jobs:</p>
@@ -72,7 +72,7 @@ If there is no proof, the doc must say future, planned, experimental, or draft.<
 <h2 id="stability-words">Stability Words</h2>
 <p>Use these words exactly.</p>
 <pre><code class="language-text">stable
-  Part of the v1 compatibility promise. Stable behavior must be in the stable
+  Part of the current compatibility promise. Stable behavior must be in the stable
   docs and must have compatibility proof.
 
 draft
@@ -80,7 +80,8 @@ draft
   Draft behavior must be labeled draft wherever it appears.
 
 experimental
-  Implemented outside the stable v1 contract. It may change or be removed.
+  Implemented for exploration outside the stable feature set. It may change or
+  be removed.
 
 planned
   Designed or intended, but not implemented. Planned behavior must not be
@@ -122,7 +123,7 @@ string
 string?
 array[T]
 func(T...) R</code></pre>
-<p><code>void</code> is an internal function return marker, not a value type. Struct and generic types exist in the experimental v2 surface unless promoted by a later stable contract change.</p>
+<p><code>void</code> is an internal function return marker, not a value type. Struct and generic types exist as experimental features unless promoted by a later stable feature decision.</p>
 <h3 id="expression">Expression</h3>
 <p>An expression is syntax that the checker assigns a type to. Most expressions produce values. Effect calls are typed too, but effect calls may only be used where the language allows them, such as under the draft <code>do:</code> statement.</p>
 <p>Examples:</p>
@@ -162,7 +163,7 @@ draft built-in module
 user module
 package module</code></pre>
 <h3 id="collection">Collection</h3>
-<p>A collection is a value that contains other values. Stable v1 collections are arrays. Struct values are experimental data-modeling values in v2. Maps, sets, and tuples are not current WalkLang concepts.</p>
+<p>A collection is a value that contains other values. Stable collections are arrays. Struct values are experimental data-modeling values. Maps, sets, and tuples are not current WalkLang concepts.</p>
 <h3 id="error">Error</h3>
 <p>Use diagnostic for compiler-reported errors and warnings. Use runtime failure for native program failures after compilation. Do not use error loosely when the doc means warning, failed assertion, recoverable result data, or runtime stop.</p>
 <h3 id="recoverable-result-data">Recoverable Result Data</h3>

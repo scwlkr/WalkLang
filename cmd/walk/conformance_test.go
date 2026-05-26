@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestV13PassFixturesBuildAndRun(t *testing.T) {
+func TestPassFixturesBuildAndRun(t *testing.T) {
 	requireCC(t)
 	root := repoRoot(t)
 	cases := []struct {
@@ -46,7 +46,7 @@ func TestV13PassFixturesBuildAndRun(t *testing.T) {
 	}
 }
 
-func TestV13TestFixtureRuns(t *testing.T) {
+func TestWalkTestFixtureRuns(t *testing.T) {
 	requireCC(t)
 	root := repoRoot(t)
 	sourcePath := filepath.Join(root, "tests", "pass", "walk_tests.walk")
@@ -159,7 +159,7 @@ func TestStableRuntimeFailuresAreClear(t *testing.T) {
 	}
 }
 
-func TestV13FailFixturesHaveExpectedDiagnostics(t *testing.T) {
+func TestFailFixturesHaveExpectedDiagnostics(t *testing.T) {
 	root := repoRoot(t)
 	cases := []struct {
 		file string
@@ -220,7 +220,7 @@ func TestV13FailFixturesHaveExpectedDiagnostics(t *testing.T) {
 	}
 }
 
-func TestV13GeneratedCSnapshots(t *testing.T) {
+func TestGeneratedCSnapshots(t *testing.T) {
 	root := repoRoot(t)
 	for _, name := range []string{"hello", "functions", "explicit_systems_defer"} {
 		t.Run(name, func(t *testing.T) {
@@ -243,7 +243,7 @@ func TestV13GeneratedCSnapshots(t *testing.T) {
 	}
 }
 
-func TestV13ExamplesAreTestableFixtures(t *testing.T) {
+func TestExamplesAreTestableFixtures(t *testing.T) {
 	requireCC(t)
 	root := repoRoot(t)
 	programs := []struct {
@@ -251,8 +251,8 @@ func TestV13ExamplesAreTestableFixtures(t *testing.T) {
 		want string
 	}{
 		{"hello.walk", "3\nhello from WalkLang\ntrue\n"},
-		{"v0.walk", "11\n12\n13\ndistance is 5\n"},
-		{"v1.walk", "27\n8\n4\n3\ntrue\n"},
+		{"compiler_tracer.walk", "11\n12\n13\ndistance is 5\n"},
+		{"stable.walk", "27\n8\n4\n3\ntrue\n"},
 	}
 	for _, tc := range programs {
 		t.Run(tc.file, func(t *testing.T) {
@@ -269,7 +269,7 @@ func TestV13ExamplesAreTestableFixtures(t *testing.T) {
 		})
 	}
 
-	cCode, warnings, err := compileFileToCWithOptions(filepath.Join(root, "examples", "v0_1_tests.walk"), true)
+	cCode, warnings, err := compileFileToCWithOptions(filepath.Join(root, "examples", "compiler_tests.walk"), true)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -282,7 +282,7 @@ func TestV13ExamplesAreTestableFixtures(t *testing.T) {
 	}
 }
 
-func TestV20StructFixturesBuildAndRun(t *testing.T) {
+func TestStructFixturesBuildAndRun(t *testing.T) {
 	requireCC(t)
 	root := repoRoot(t)
 	cases := []struct {
@@ -326,7 +326,7 @@ func TestV20StructFixturesBuildAndRun(t *testing.T) {
 	}
 }
 
-func TestV20StructFailFixturesHaveExpectedDiagnostics(t *testing.T) {
+func TestStructFailFixturesHaveExpectedDiagnostics(t *testing.T) {
 	root := repoRoot(t)
 	cases := []struct {
 		file string
@@ -351,7 +351,7 @@ func TestV20StructFailFixturesHaveExpectedDiagnostics(t *testing.T) {
 	}
 }
 
-func TestV21MethodFixturesBuildAndRun(t *testing.T) {
+func TestMethodFixturesBuildAndRun(t *testing.T) {
 	requireCC(t)
 	root := repoRoot(t)
 	sourcePath := filepath.Join(root, "tests", "pass", "methods.walk")
@@ -377,7 +377,7 @@ func TestV21MethodFixturesBuildAndRun(t *testing.T) {
 	}
 }
 
-func TestV21MethodFailFixturesHaveExpectedDiagnostics(t *testing.T) {
+func TestMethodFailFixturesHaveExpectedDiagnostics(t *testing.T) {
 	root := repoRoot(t)
 	cases := []struct {
 		file string
@@ -402,7 +402,7 @@ func TestV21MethodFailFixturesHaveExpectedDiagnostics(t *testing.T) {
 	}
 }
 
-func TestV22GenericFixturesBuildAndRun(t *testing.T) {
+func TestGenericFixturesBuildAndRun(t *testing.T) {
 	requireCC(t)
 	root := repoRoot(t)
 	cases := []struct {
@@ -441,7 +441,7 @@ func TestV22GenericFixturesBuildAndRun(t *testing.T) {
 	}
 }
 
-func TestV22GenericFailFixturesHaveExpectedDiagnostics(t *testing.T) {
+func TestGenericFailFixturesHaveExpectedDiagnostics(t *testing.T) {
 	root := repoRoot(t)
 	cases := []struct {
 		file string
@@ -527,7 +527,7 @@ func TestFunctionTypeInferenceRequiresAmbiguousParamAnnotation(t *testing.T) {
 	}
 }
 
-func TestV5RuntimeGeneratedCIsInspectableAndArrayStorageIsOwned(t *testing.T) {
+func TestRuntimeGeneratedCIsInspectableAndArrayStorageIsOwned(t *testing.T) {
 	requireCC(t)
 	dir := t.TempDir()
 	sourcePath := filepath.Join(dir, "main.walk")

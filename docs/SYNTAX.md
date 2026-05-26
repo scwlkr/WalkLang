@@ -1,4 +1,4 @@
-# WalkLang v1 Syntax Guide
+# WalkLang Syntax Guide
 
 This guide is the readable syntax companion to `docs/SPEC.md`. `SPEC.md` is the contract when the two disagree.
 
@@ -418,7 +418,7 @@ func: apply(f func(int) int, x int) int
 out: apply(inc, 4)
 ```
 
-Anonymous functions and closures are not stable v1 syntax.
+Anonymous functions and closures are not stable syntax.
 
 ---
 
@@ -510,8 +510,7 @@ out: geometry.core.double(3)
 ```
 
 Draft process, IO, filesystem, JSON, terminal, HTTP, and HTML helpers are
-available in the current compiler, but they are not part of the stable v1.9
-syntax contract yet.
+available in the current compiler, but they are draft features.
 
 ```walk
 imp: process

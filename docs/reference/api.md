@@ -1,6 +1,6 @@
 # WalkLang API
 
-Source: `examples/v1.walk`
+Source: `examples/stable.walk`
 
 ## examples/math_extra.walk
 
@@ -22,7 +22,7 @@ Example:
 out: bump(4)
 ```
 
-Since: `v4.1.0`
+Since: `current`
 
 #### `func cube(x int) int`
 
@@ -40,7 +40,7 @@ Example:
 out: cube(3)
 ```
 
-Since: `v4.1.0`
+Since: `current`
 
 ### Exports
 
@@ -54,5 +54,5 @@ Example:
 exp: cube
 ```
 
-Since: `v4.1.0`
+Since: `current`
 

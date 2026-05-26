@@ -1,7 +1,7 @@
 # Draft Networking
 
 WalkLang networking is draft-only. It is implemented for native CLI experiments,
-not for the stable v1.9 language contract.
+not as part of the stable feature set.
 
 ## Scope
 

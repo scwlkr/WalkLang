@@ -1,9 +1,9 @@
-# WalkLang v1.9 Specification
+# WalkLang Specification
 
-This document is the stable WalkLang language contract for the v1 line. It is
-normative and intentionally concise. `docs/SYNTAX.md`, `docs/STDLIB.md`,
-`docs/ERRORS.md`, and `docs/COMPATIBILITY.md` provide readable examples and
-longer explanations.
+This document is the stable WalkLang feature specification for the current
+project version. It is normative and intentionally concise. `docs/SYNTAX.md`,
+`docs/STDLIB.md`, `docs/ERRORS.md`, and `docs/COMPATIBILITY.md` provide
+readable examples and longer explanations.
 
 Core rule:
 
@@ -96,8 +96,8 @@ bool
 string
 ```
 
-Struct and generic types are implemented in the experimental v2 surface. They
-are not part of the stable v1.9 compatibility contract.
+Struct and generic types are implemented as experimental features. They are not
+part of the stable feature set.
 
 ---
 
@@ -119,7 +119,7 @@ null
 var: name string? = null
 ```
 
-Other nullable scalar forms are not part of the stable v1.9 native contract.
+Other nullable scalar forms are not part of the stable native feature set.
 
 Array literals are homogeneous. Empty arrays need an explicit array annotation.
 
@@ -206,7 +206,7 @@ or   2 or more bool args
 not  exactly 1 bool arg
 ```
 
-Negative numeric literals are stable. Unary negation of names is not stable v1
+Negative numeric literals are stable. Unary negation of names is not stable
 syntax; use subtraction from zero.
 
 ```walk
@@ -276,8 +276,7 @@ expression. Failed assertions make the generated test executable exit non-zero.
 Normal `walk build` ignores `test:` blocks.
 
 The current compiler also implements draft `do:` effect calls and draft
-`defer:` scope cleanup. They are not part of the stable v1.9 compatibility
-contract.
+`defer:` scope cleanup. They are not part of the stable feature set.
 
 ---
 
@@ -310,9 +309,9 @@ module files may contain only imp:, struct:, func:, and exp: at top level
 import cycles are errors
 ```
 
-`struct:` declarations are implemented in the experimental v2 surface and are
+`struct:` declarations are implemented as an experimental feature and are
 allowed in module files by the current compiler, but structs are not part of
-the stable v1.9 contract.
+the stable feature set.
 
 ---
 
@@ -355,7 +354,7 @@ func: apply(f func(int) int, x int) int
     return: f(x)
 ```
 
-Anonymous functions and closures are not stable v1 syntax.
+Anonymous functions and closures are not stable syntax.
 
 ---
 
@@ -409,7 +408,7 @@ html
 ```
 
 Draft modules are importable for experimentation, but they are not
-compatibility-protected by the v1.9 stable contract. See `docs/STDLIB.md` for
+compatibility-protected by the stable feature set. See `docs/STDLIB.md` for
 their signatures, effect status, result structs, runtime behavior, and failure
 behavior.
 
@@ -442,7 +441,7 @@ Warnings do not fail by default. `--warnings=error` promotes warnings to
 errors. Stable warnings cover shadowing an outer name and unreachable statements
 after `return:`, `break:`, or `continue`.
 
-Stable v1.9 runtime failures include:
+Stable runtime failures include:
 
 ```text
 walk runtime error: input reached EOF
@@ -476,14 +475,14 @@ runtime behavior
 failure behavior
 ```
 
-No other built-in module is stable in v1.9.
+No other built-in module is stable.
 
 ---
 
 ## Non-Stable Current Compiler Surface
 
-The current compiler accepts experimental v2 data-modeling features and draft
-IO/runtime APIs that are not stable v1.9 behavior.
+The current compiler accepts experimental data-modeling features and draft
+IO/runtime APIs that are not stable behavior.
 
 Experimental language surface:
 
@@ -510,7 +509,7 @@ http
 html
 ```
 
-Planned or not-current stable v1 features include:
+Planned or not-current stable features include:
 
 ```text
 classes

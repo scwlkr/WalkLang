@@ -33,11 +33,11 @@
 <a href="DEPRECATION.html" aria-current="page">Deprecation</a>
 <h2>Reference</h2>
 <a href="reference/api.html">API Reference</a>
-<a href="V5_1.html">Docs Site</a>
+<a href="DOCS_SITE.html">Docs Site</a>
 <a href="reference/index.html">Reference Index</a>
 <h2>Tools</h2>
-<a href="V4.html">Editor And Docs Tools</a>
-<a href="V5.html">Runtime And Backend</a>
+<a href="TOOLING.html">Editor And Docs Tools</a>
+<a href="RUNTIME_BACKEND.html">Runtime And Backend</a>
 <a href="NETWORKING.html">Draft Networking</a>
 <a href="RICH_RUNTIMES.html">Rich Runtimes</a>
 <h2>Project</h2>
@@ -66,7 +66,7 @@ draft
   intended shape, but still not compatibility-protected
 
 stable
-  part of the v1 compatibility promise
+  part of the compatibility promise
 
 deprecated
   still works, but has a documented replacement
@@ -74,15 +74,15 @@ deprecated
 removed
   no longer accepted</code></pre>
 <h2 id="policy">Policy</h2>
-<p>Stable v1 features should not be removed during the v1.x line.</p>
+<p>Stable features should not be removed without an explicit release-note and migration entry.</p>
 <p>A stable feature can become deprecated only when release notes and docs name:</p>
 <pre><code class="language-text">the deprecated feature
 the replacement
 the first version where the deprecation applies
 the earliest version where removal is allowed
 the migration steps</code></pre>
-<p>Removal of stable behavior normally waits for <code>v2.0.0</code>. A v1.x release may break stable behavior only for a documented safety or correctness fix.</p>
-<h2 id="current-v1-9-deprecated-surface">Current v1.9 Deprecated Surface</h2>
+<p>Removal of stable behavior normally waits for a clearly named future project version. A release may break stable behavior only for a documented safety or correctness fix.</p>
+<h2 id="current-deprecated-surface">Current Deprecated Surface</h2>
 <p>None.</p>
 <h2 id="draft-and-experimental-features">Draft And Experimental Features</h2>
 <p>Draft or experimental features can change without a deprecation period. They should still be called out in release notes when the change may surprise users.</p>

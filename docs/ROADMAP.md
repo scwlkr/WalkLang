@@ -5,27 +5,18 @@
 Build the smallest useful language first.
 
 ```text
-v0: compile real programs
-v0.1: test and explore
-v1: harden and grow
-v1.1: stabilize the language contract
-v1.2: make projects and releases real
-v1.3: grow the standard library carefully
-v1.6: local function type inference
-v1.7: required-line stdin input
-v1.8: terminal game helpers
-v1.9: string interpolation
-v2: data modeling
-v2.1: methods and stronger composition
-v2.2: simple generic functions
-v3: ecosystem
-v4: professional tooling
-v5: runtime/backend maturity
-v5.12: draft network and rich-runtime boundary
-v5.12.1: docs search
-v5.12.2: docs search result previews
-v5.12.3: docs sidebar navigation cleanup
-v5.13.0: explicit systems track
+compile real programs
+test and explore
+harden and grow
+stabilize the feature specification
+make projects and releases real
+grow the standard library carefully
+add focused stable language helpers
+add experimental data modeling and composition
+add packages and professional tooling
+mature runtime and backend behavior
+add docs search and public docs improvements
+implement the explicit systems track
 later: package/runtime tracks and advanced language work
 ```
 
@@ -41,7 +32,7 @@ fifth: ecosystem grows around stable rules
 
 ---
 
-## v0 Goal
+## Compiler Tracer Bullet Goal
 
 A `.walk` file compiles to a native executable through C.
 
@@ -67,7 +58,7 @@ Expected output:
 
 ---
 
-## v0 Includes
+## Compiler Tracer Bullet Includes
 
 Language:
 
@@ -103,7 +94,7 @@ if: > age 18
 
 ---
 
-## v0 Compiler
+## Compiler Pipeline
 
 Pipeline:
 
@@ -129,7 +120,7 @@ main.walk
 
 ---
 
-## v0 Tooling
+## Compiler Tooling
 
 Required:
 
@@ -167,7 +158,7 @@ type error: x is int, got string
 
 ---
 
-## v0 Standard Library Target
+## Standard Library Target
 
 Core libraries:
 
@@ -195,7 +186,7 @@ out: math.sqrt(n)
 
 ---
 
-## v0 Non-Goals
+## Initial Non-Goals
 
 Do not build these yet:
 
@@ -222,9 +213,9 @@ class: User # rejected until later
 
 ---
 
-## v0 Done When
+## Compiler Tracer Bullet Done When
 
-v0 is done when this works:
+The compiler tracer bullet is done when this works:
 
 ```walk
 # main.walk
@@ -266,7 +257,7 @@ distance is 5
 
 ---
 
-## v0.1 Goal
+## Test And Explore Goal
 
 Make the language easier to test and explore.
 
@@ -293,7 +284,7 @@ walk> + 1 2
 3
 ```
 
-v0.1 done when:
+Test and explore work is done when:
 
 ```text
 walk test runs .walk tests
@@ -305,7 +296,7 @@ example programs can be tested automatically
 
 ---
 
-## v1 Goal
+## Stable Foundation Goal
 
 Make WalkLang feel stable.
 
@@ -339,29 +330,29 @@ imp: math_extra
 out: math_extra.cube(3)
 ```
 
-v1 done in this repo means:
+Stable foundation work is done when:
 
 ```text
-examples/v1.walk builds and runs through a sibling module
+the main example builds and runs through a sibling module
 walk check supports warning levels
 formatter rules normalize spacing and indentation
 release builds accept native compiler flags
 scripts/release.sh creates cross-platform CLI artifacts
-docs describe the stable v1 surface
+docs describe the stable feature surface
 ```
 
 ---
 
 # Next Phases
 
-## v1.1 Language Contract
+## Feature Specification
 
 Make the language less like “whatever the compiler accepts” and more like a real contract.
 
 Add:
 
 ```text
-complete v1 spec
+complete feature specification
 syntax guide
 stdlib reference
 diagnostic guide
@@ -409,7 +400,7 @@ tests/snapshots/
   functions.c
 ```
 
-v1.1 done when:
+Feature specification work is done when:
 
 ```text
 every stable feature has spec text
@@ -421,7 +412,7 @@ README clearly says what version is implemented
 
 ---
 
-## v1.2 Project Mode
+## Project Mode
 
 Make WalkLang useful for more than single-file experiments.
 
@@ -476,7 +467,7 @@ walk test
 walk fmt
 ```
 
-v1.2 done when:
+Project mode work is done when:
 
 ```text
 a stranger can install walk
@@ -490,7 +481,7 @@ and understand failures
 
 ---
 
-## v1.3 Standard Library Foundation
+## Standard Library Foundation
 
 Grow the standard library carefully without making it huge.
 
@@ -550,7 +541,7 @@ out: string.len(name)
 out: array.len(nums)
 ```
 
-v1.3 done when:
+Standard library foundation work is done when:
 
 ```text
 STDLIB.md documents every stable function
@@ -561,7 +552,7 @@ stdlib naming is consistent across modules
 
 ---
 
-## v1.4 Diagnostics and Developer Experience
+## Diagnostics and Developer Experience
 
 Make errors feel professional.
 
@@ -606,7 +597,7 @@ Warning modes:
 --warnings=error
 ```
 
-v1.4 done when:
+Diagnostics and developer experience work is done when:
 
 ```text
 common mistakes produce clear messages
@@ -617,14 +608,14 @@ walk check is useful before build
 
 ---
 
-## v1.5 Compatibility Release
+## Compatibility Policy
 
 Prepare for a real stable release.
 
 Add:
 
 ```text
-versioned language surface
+documented stable feature surface
 release notes
 migration guide
 deprecation policy
@@ -635,29 +626,22 @@ official install instructions
 Compatibility rule:
 
 ```text
-Stable v1 code should keep compiling through the v1.x line unless a documented safety fix requires a breaking change.
+Stable code should keep compiling unless a documented safety or correctness fix
+requires a breaking change.
 ```
 
-Version meanings:
-
-```text
-v1.0.x: bug fixes only
-v1.x.0: compatible improvements
-v2.0.0: breaking language changes allowed
-```
-
-v1.5 done when:
+Compatibility policy work is done when:
 
 ```text
 WalkLang can promise basic compatibility
 releases are repeatable
 users can tell stable features from experimental features
-breaking changes require a version boundary
+breaking changes require an explicit release-note and migration entry
 ```
 
 ---
 
-## v1.6 Local Function Type Inference
+## Local Function Type Inference
 
 Make obvious helper functions short without hiding type decisions at call sites.
 
@@ -677,7 +661,7 @@ func: power_four(n)
     return: ^ n 4
 ```
 
-v1.6 done when:
+Local function type inference work is done when:
 
 ```text
 inferred helpers build through generated C
@@ -688,7 +672,7 @@ compatibility tests continue to pass
 
 ---
 
-## v1.7 Required-Line Input
+## Required-Line Input
 
 Make basic stdin input a small, stable language primitive that pairs cleanly with `out:`.
 
@@ -712,7 +696,7 @@ var: name = in: 'Name? '
 out: name
 ```
 
-v1.7 done when:
+Required-line input work is done when:
 
 ```text
 in: parses anywhere expressions are valid
@@ -724,7 +708,7 @@ SPEC, SYNTAX, migration, release notes, and status docs describe the rule
 
 ---
 
-## v1.8 Terminal Game Helpers
+## Terminal Game Helpers
 
 Add small helpers needed for simple terminal games without changing WalkLang's statement model or adding broad runtime systems.
 
@@ -756,18 +740,18 @@ guessed = array.push(guessed, 'd')
 out: string.contains(word, guessed[0])
 ```
 
-v1.8 done when:
+Terminal game helper work is done when:
 
 ```text
 SPEC and STDLIB document the helpers
 pass/fail/compatibility fixtures cover the helpers
 a small Hangman playground program compiles
-the v1 stress script proves the helpers through native output
+the compatibility stress script proves the helpers through native output
 ```
 
 ---
 
-## v1.9 String Interpolation
+## String Interpolation
 
 Add display-friendly string interpolation without changing numeric `+` or making
 `string.concat` accept mixed scalar types.
@@ -788,19 +772,19 @@ var: wordLength = string.len(word)
 out: 'the secret word is {wordLength} characters long'
 ```
 
-v1.9 done when:
+String interpolation work is done when:
 
 ```text
 SPEC and SYNTAX document interpolation
 pass/fail/compatibility fixtures cover interpolation
-the v1 stress script proves interpolation through native output
+the compatibility stress script proves interpolation through native output
 ```
 
 ---
 
-## v2 Data Modeling
+## Data Modeling
 
-Add structs after the v1 language contract is solid.
+Add structs after the stable feature specification is solid.
 
 Target syntax:
 
@@ -844,7 +828,7 @@ traits maybe later
 inheritance no
 ```
 
-v2 done when:
+Data modeling work is done when:
 
 ```text
 struct declarations compile
@@ -858,7 +842,7 @@ diagnostics explain field errors
 
 ---
 
-## v2.1 Methods
+## Methods
 
 Add methods without turning WalkLang into class-based OOP.
 
@@ -893,7 +877,7 @@ Possible emitted shape:
 user.is_adult() -> User__is_adult(user)
 ```
 
-v2.1 done when:
+Method work is done when:
 
 ```text
 methods work on structs
@@ -904,7 +888,7 @@ methods remain explainable as functions
 
 ---
 
-## v2.2 Stronger Composition
+## Stronger Composition
 
 Add composition features only if structs and methods prove useful.
 
@@ -943,7 +927,7 @@ trait: Printable
     func: print(self) string
 ```
 
-v2.2 done when:
+Stronger composition work is done when:
 
 ```text
 composition solves real examples
@@ -954,7 +938,7 @@ generated C remains predictable
 
 ---
 
-## v3 Package Ecosystem
+## Package Ecosystem
 
 Add packages only after local modules are stable.
 
@@ -995,7 +979,7 @@ builds are reproducible
 package code is tested before publish
 ```
 
-v3 done when:
+Package ecosystem work is done when:
 
 ```text
 a user can create a package
@@ -1007,7 +991,7 @@ publish documented library code
 
 ---
 
-## v4 Professional Tooling
+## Professional Tooling
 
 Make WalkLang comfortable in editors and larger projects.
 
@@ -1045,7 +1029,7 @@ find references
 completion
 ```
 
-v4 done when:
+Professional tooling work is done when:
 
 ```text
 WalkLang feels usable in a normal editor
@@ -1056,9 +1040,10 @@ users can navigate larger projects
 
 ---
 
-## v4.1 Documentation Generator Hardening
+## Documentation Generator Hardening
 
-Make the v4 docs generator useful enough to support generated reference docs without doing a broad docs overhaul before v5 runtime truth is stable.
+Make the docs generator useful enough to support generated reference docs
+without doing a broad docs overhaul before runtime truth is stable.
 
 Add:
 
@@ -1070,20 +1055,21 @@ opt-in strict checks for missing public symbol docs
 2-3 existing symbols documented end-to-end
 ```
 
-Keep this slice narrow. Do not rewrite the whole docs set until v5 runtime and backend behavior have been clarified.
+Keep this slice narrow. Do not rewrite the whole docs set until runtime and
+backend behavior have been clarified.
 
-v4.1 done when:
+Documentation generator hardening is done when:
 
 ```text
 walk docs still generates Markdown by default
 walk docs --format json writes the machine-readable docs index
 walk docs --strict fails on undocumented public symbols
-the v1 example module proves structured comments end-to-end
+the main example module proves structured comments end-to-end
 ```
 
 ---
 
-## v5 Runtime and Backend Maturity
+## Runtime and Backend Maturity
 
 Improve the generated output and runtime model.
 
@@ -1115,7 +1101,7 @@ LLVM later maybe
 WASM later maybe
 ```
 
-v5 done when:
+Runtime and backend maturity work is done when:
 
 ```text
 release builds are meaningfully optimized
@@ -1126,7 +1112,7 @@ generated C remains understandable enough to inspect
 
 ---
 
-## v5.1 Public Docs and Reference Site
+## Public Docs and Reference Site
 
 Publish the documentation and generated reference surface as a static site.
 
@@ -1145,7 +1131,7 @@ custom-domain CNAME
 Keep this slice focused on publishing docs and reference material. Do not add
 networking, a playground, a package index, or a compiler explorer here.
 
-v5.1 done when:
+Public docs and reference site work is done when:
 
 ```text
 scripts/build-docs-site.sh regenerates docs/reference and public site files
@@ -1188,7 +1174,7 @@ var: response = http.get('https://example.com')
 out: response.body
 ```
 
-Draft HTTP client helpers are implemented in v5.12.0. Broader networking and
+Draft HTTP client helpers are implemented. Broader networking and
 server/runtime work still requires:
 
 ```text
@@ -1287,10 +1273,10 @@ removed
 Example:
 
 ```text
-structs: experimental in v2
-methods: experimental in v2.1
-generic functions: experimental in v2.2
-basic modules: stable in v1
+structs: experimental
+methods: experimental
+generic functions: experimental
+basic modules: stable
 ```
 
 ---
@@ -1348,71 +1334,39 @@ and trust that stable code will not randomly break.
 
 ---
 
-## Version Summary
+## Implementation Summary
 
 ```text
-v0
-  compile .walk to native exe
+compiler tracer bullet
+  compile .walk to native executable
   core syntax + types + functions + loops
 
-v0.1
+test and explore
   tests + REPL + diagnostics
 
-v1
+stable foundation
   stable modules + stdlib + docs + build flow
-
-v1.1
-  complete language contract + conformance tests
-
-v1.2
+  complete feature specification + conformance tests
   project mode + release/install workflow
-
-v1.3
-  standard library foundation
-
-v1.4
-  professional diagnostics + developer experience
-
-v1.5
-  compatibility release preparation
-
-v1.6
   local function type inference
-
-v1.7
   required-line stdin input
-
-v1.8
   terminal game helpers
+  string interpolation
 
-v2
+experimental composition
   structs + data modeling
-
-v2.1
   methods
+  simple generic functions
 
-v2.2
-  stronger composition with simple generic functions
-
-v3
+ecosystem and tooling
   package ecosystem
-
-v4
-  LSP + editor tooling + debugger foundation + MVP docs generator
-
-v4.1
+  LSP + editor tooling + debugger foundation + docs generator
   structured docs generator hardening
 
-v5
+runtime and docs maturity
   runtime/backend maturity
-
-v5.1
   public docs + generated reference site
-
-v5.12
   draft HTTP/HTML helpers + rich-runtime boundaries
-
-v5.12.1
   generated docs search
 
 later

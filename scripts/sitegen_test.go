@@ -28,10 +28,10 @@ func TestLayoutUsesRootFaviconAndCompactSidebarIcon(t *testing.T) {
 
 func TestSidebarUsesTopicNavigationInsteadOfVersionMilestones(t *testing.T) {
 	pages := []docPage{
-		{Output: "docs/SPEC.html", Title: "WalkLang v1.9 Specification", NavTitle: "Specification", Group: "Language"},
+		{Output: "docs/SPEC.html", Title: "WalkLang Specification", NavTitle: "Specification", Group: "Language"},
 		{Output: "docs/reference/api.html", Title: "WalkLang API Reference", NavTitle: "API Reference", Group: "Reference"},
 		{Output: "docs/ARCHITECTURE.html", Title: "WalkLang Architecture", NavTitle: "Architecture", Group: "Project"},
-		{Output: "docs/V1.html", Title: "WalkLang v1 Stable Contract", Group: "Releases", HideFromNav: true},
+		{Output: "docs/STABLE_FEATURES.html", Title: "WalkLang Historical Stable Contract", Group: "Releases", HideFromNav: true},
 		{Output: "docs/RELEASE_NOTES.html", Title: "WalkLang Release Notes", NavTitle: "Version History", Group: "Releases"},
 	}
 
@@ -42,7 +42,7 @@ func TestSidebarUsesTopicNavigationInsteadOfVersionMilestones(t *testing.T) {
 			t.Fatalf("sidebar should contain topic label %s, got:\n%s", want, got)
 		}
 	}
-	for _, unwanted := range []string{"v1.9", "v1 Stable Contract", ">V1<"} {
+	for _, unwanted := range []string{"Legacy stable contract", "Version milestone", ">Legacy<"} {
 		if strings.Contains(got, unwanted) {
 			t.Fatalf("sidebar should hide version milestone label %s, got:\n%s", unwanted, got)
 		}

@@ -4,6 +4,53 @@
 
 No unreleased changes yet.
 
+## v5.13.1 - Single Version And Developer Path Cleanup
+
+Date: 2026-05-26
+
+v5.13.1 aligns the current-facing project version around one number and removes
+old milestone labels from developer-facing paths that appear during normal CI,
+docs, examples, script, fixture, and test work.
+
+### Changed
+
+- Current-facing README, docs index, status, compatibility, spec, roadmap, and
+  generated docs wording now describe one Project Version instead of separate
+  language/compiler/stable-version lines.
+- Active docs source pages and generated docs routes use purpose-based names
+  such as `STABLE_FEATURES`, `TOOLING`, and `RUNTIME_BACKEND` instead of
+  milestone page names.
+- Active example and compatibility fixture paths use purpose-based names:
+  `examples/stable.walk`, `examples/compiler_tests.walk`,
+  `examples/compiler_tracer.walk`, and `tests/compat/stable/`.
+- The compatibility stress script is now `scripts/stress-compatibility.sh`, and
+  CI uses the renamed script plus `v5.13.1` release artifacts.
+- Generated API reference examples now use non-versioned `Since: current`
+  metadata, keeping old version numbers out of current-facing generated docs.
+
+### Notes
+
+- Historical release notes and migration history intentionally keep their old
+  version references.
+- This release changes docs, generated docs, examples, CI, scripts, and fixture
+  paths. It does not change the language grammar or runtime behavior.
+
+### Breaking Changes
+
+- Developer workflows that call `scripts/stress-v1.sh`, read `examples/v1.walk`,
+  or reference `tests/compat/v1/` need to update to the purpose-based path names
+  listed above.
+
+### Upgrade
+
+Regenerate docs and release artifacts with:
+
+```bash
+scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/release.sh v5.13.1 dist
+```
+
 ## v5.13.0 - Explicit Systems Track
 
 Date: 2026-05-25

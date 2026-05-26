@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestV4LSPDiagnosticsFormattingAndCompletion(t *testing.T) {
+func TestLSPDiagnosticsFormattingAndCompletion(t *testing.T) {
 	dir := t.TempDir()
 	sourcePath := filepath.Join(dir, "main.walk")
 
@@ -56,7 +56,7 @@ func TestV4LSPDiagnosticsFormattingAndCompletion(t *testing.T) {
 	}
 }
 
-func TestV4NavigationHoverReferencesAndRename(t *testing.T) {
+func TestNavigationHoverReferencesAndRename(t *testing.T) {
 	dir := t.TempDir()
 	modulePath := filepath.Join(dir, "math_extra.walk")
 	mainPath := filepath.Join(dir, "main.walk")
@@ -106,7 +106,7 @@ func TestV4NavigationHoverReferencesAndRename(t *testing.T) {
 	}
 }
 
-func TestV4DocsAndDebugMapCommands(t *testing.T) {
+func TestDocsAndDebugMapCommands(t *testing.T) {
 	dir := t.TempDir()
 	sourcePath := filepath.Join(dir, "main.walk")
 	writeFile(t, sourcePath, strings.Join([]string{
@@ -115,7 +115,7 @@ func TestV4DocsAndDebugMapCommands(t *testing.T) {
 		"/// ```walk",
 		"/// var: point = Point(1, 2)",
 		"/// ```",
-		"/// Since: v4.1.0",
+		"/// Since: current",
 		"struct: Point",
 		"    x int",
 		"    y int",
@@ -128,7 +128,7 @@ func TestV4DocsAndDebugMapCommands(t *testing.T) {
 		"/// ```walk",
 		"/// out: double(4)",
 		"/// ```",
-		"/// Since: v4.1.0",
+		"/// Since: current",
 		"func: double(x int) int",
 		"    return: * x 2",
 		"",
@@ -137,7 +137,7 @@ func TestV4DocsAndDebugMapCommands(t *testing.T) {
 		"/// ```walk",
 		"/// exp: double",
 		"/// ```",
-		"/// Since: v4.1.0",
+		"/// Since: current",
 		"exp: double",
 		"",
 		"out: double(4)",
@@ -149,7 +149,7 @@ func TestV4DocsAndDebugMapCommands(t *testing.T) {
 		t.Fatal(err)
 	}
 	docs := readText(t, docsPath)
-	for _, want := range []string{"# WalkLang API", "struct Point", "func double(x int) int", "Doubles an integer.", "Since: `v4.1.0`"} {
+	for _, want := range []string{"# WalkLang API", "struct Point", "func double(x int) int", "Doubles an integer.", "Since: `current`"} {
 		if !strings.Contains(docs, want) {
 			t.Fatalf("docs missing %q:\n%s", want, docs)
 		}
@@ -186,7 +186,7 @@ func TestV4DocsAndDebugMapCommands(t *testing.T) {
 	}
 }
 
-func TestV51DocsUseRelativePublishablePaths(t *testing.T) {
+func TestDocsUseRelativePublishablePaths(t *testing.T) {
 	dir := t.TempDir()
 	t.Chdir(dir)
 
@@ -201,7 +201,7 @@ func TestV51DocsUseRelativePublishablePaths(t *testing.T) {
 		"/// ```walk",
 		"/// out: answer()",
 		"/// ```",
-		"/// Since: v5.1.0",
+		"/// Since: current",
 		"func: answer() int",
 		"    return: 42",
 		"",

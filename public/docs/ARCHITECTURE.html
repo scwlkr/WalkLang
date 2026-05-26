@@ -33,11 +33,11 @@
 <a href="DEPRECATION.html">Deprecation</a>
 <h2>Reference</h2>
 <a href="reference/api.html">API Reference</a>
-<a href="V5_1.html">Docs Site</a>
+<a href="DOCS_SITE.html">Docs Site</a>
 <a href="reference/index.html">Reference Index</a>
 <h2>Tools</h2>
-<a href="V4.html">Editor And Docs Tools</a>
-<a href="V5.html">Runtime And Backend</a>
+<a href="TOOLING.html">Editor And Docs Tools</a>
+<a href="RUNTIME_BACKEND.html">Runtime And Backend</a>
 <a href="NETWORKING.html">Draft Networking</a>
 <a href="RICH_RUNTIMES.html">Rich Runtimes</a>
 <h2>Project</h2>
@@ -78,7 +78,7 @@ Kind: compiled
 Target: C
 Output: native executable
 VM: no
-GC: no public v1.1 promise</code></pre>
+GC: no public promise</code></pre>
 <p>Purpose:</p>
 <pre><code class="language-text">Readable source.
 Native output.
@@ -120,7 +120,7 @@ defer: do term.reset()</code></pre>
 <p>WalkLang chooses visible structure over clever syntax.</p>
 <p>---</p>
 <h2 id="3-language-shape">3. Language Shape</h2>
-<p>WalkLang v1.1 is:</p>
+<p>WalkLang is:</p>
 <pre><code class="language-text">procedural first
 limited functional
 not OOP
@@ -131,9 +131,9 @@ not inheritance-based</code></pre>
     return: + a b
 
 out: add(2, 3)</code></pre>
-<p>Not v1.1:</p>
-<pre><code class="language-walk">class: Person       # error in v1.1</code></pre>
-<p>v2 adds structs, methods, and simple generic functions for composition without classes or inheritance.</p>
+<p>Not stable syntax:</p>
+<pre><code class="language-walk">class: Person       # error</code></pre>
+<p>Structs, methods, and simple generic functions are experimental composition features without classes or inheritance.</p>
 <p>---</p>
 <h2 id="4-syntax-model">4. Syntax Model</h2>
 <p>Core visual rules:</p>
@@ -153,7 +153,7 @@ else:
 <pre><code class="language-walk">if: &gt; score 90 { out: &#39;A&#39;; }   # error</code></pre>
 <p>---</p>
 <h2 id="5-type-model">5. Type Model</h2>
-<p>WalkLang v1.1 is statically typed.</p>
+<p>WalkLang is statically typed.</p>
 <p>Types are inferred unless written.</p>
 <pre><code class="language-walk">var: age = 25        # inferred int
 var: score float = 9 # explicit float
@@ -172,7 +172,7 @@ string
 array
 null
 function
-struct (experimental in v2)</code></pre>
+struct (experimental)</code></pre>
 <p>Example:</p>
 <pre><code class="language-walk">var: count = 10
 var: price = 3.14
@@ -196,7 +196,7 @@ No GC promise.</code></pre>
 <pre><code class="language-walk">var: names = [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;]
 out: names[0]</code></pre>
 <p>The user writes array logic, not allocation logic.</p>
-<p>v5 makes array storage explicit inside generated C:</p>
+<p>The current runtime model makes array storage explicit inside generated C:</p>
 <pre><code class="language-text">array literals allocate item storage through the generated walk runtime helper
 array item storage is owned for the process lifetime
 arrays can be returned from functions without pointing at expired stack storage</code></pre>
@@ -217,10 +217,10 @@ exp: square</code></pre>
 <pre><code class="language-walk">imp: calc
 
 out: calc.square(4)</code></pre>
-<p>v1 module loading is file-local:</p>
+<p>User module loading is file-local:</p>
 <pre><code class="language-text">main.walk imp: calc -&gt; calc.walk
 calc.square -&gt; generated C symbol calc__square</code></pre>
-<p>v3 package imports are still module imports, but the module name is dotted and resolved through the package cache:</p>
+<p>Package imports are still module imports, but the module name is dotted and resolved through the package cache:</p>
 <pre><code class="language-walk">imp: geometry.core
 
 out: geometry.core.double(3)</code></pre>
@@ -232,7 +232,7 @@ walk.lock verifies geometry@0.1.0
 geometry.core.double -&gt; generated C symbol geometry__core__double</code></pre>
 <p>---</p>
 <h2 id="9-standard-library">9. Standard Library</h2>
-<p>v1.3 stable libraries:</p>
+<p>Stable libraries:</p>
 <pre><code class="language-text">math
 string
 array
@@ -252,7 +252,7 @@ json
 matrix</code></pre>
 <p>---</p>
 <h2 id="10-error-model">10. Error Model</h2>
-<p>v1.1 has compiler errors, warnings, and native runtime stops.</p>
+<p>WalkLang has compiler errors, warnings, and native runtime stops.</p>
 <p>Compile error:</p>
 <pre><code class="language-walk">var: age = 25
 age = &#39;old&#39;</code></pre>
@@ -263,34 +263,34 @@ type error: age is int, got string</code></pre>
 <pre><code class="language-walk">var: x = / 5 0</code></pre>
 <p>Diagnostic:</p>
 <pre><code class="language-text">runtime error: divide by zero</code></pre>
-<p>No v1.1 recovery:</p>
-<pre><code class="language-walk">try:          # error in v1.1
+<p>No exception-style recovery:</p>
+<pre><code class="language-walk">try:          # error
 catch:</code></pre>
 <p>---</p>
 <h2 id="11-tooling-architecture">11. Tooling Architecture</h2>
-<p>v0:</p>
+<p>Initial compiler:</p>
 <pre><code class="language-text">compiler
 formatter
 clear errors</code></pre>
-<p>v0.1:</p>
+<p>Exploration tooling:</p>
 <pre><code class="language-text">test runner
 basic REPL</code></pre>
-<p>v1:</p>
+<p>Project tooling:</p>
 <pre><code class="language-text">module loader
 warning levels
 release build flags
 cross-platform CLI release script</code></pre>
-<p>v1.1:</p>
+<p>Specification and conformance:</p>
 <pre><code class="language-text">stable contract docs
 pass/fail conformance fixtures
 generated C snapshots
 current status doc</code></pre>
-<p>v4:</p>
+<p>Professional tooling:</p>
 <pre><code class="language-text">language server
 editor integration
 docs generator
 debug map</code></pre>
-<p>v5:</p>
+<p>Runtime and backend maturity:</p>
 <pre><code class="language-text">small generated C runtime layer
 process-lifetime array storage
 source comments in generated C

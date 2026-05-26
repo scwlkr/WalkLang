@@ -1,10 +1,13 @@
-# WalkLang v1.9 Compatibility
+# WalkLang Compatibility
 
-WalkLang v1.9 defines the compatibility promise for the v1.x language line. v1.9 keeps the v1.8 release boundary and adds stable string interpolation for display text.
+WalkLang compatibility is tied to the current project version and the feature
+statuses documented in `docs/SPEC.md`, `docs/STDLIB.md`, and
+`docs/LANGUAGE_CONCEPTS.md`.
 
 ## Compatibility Promise
 
-Stable v1 code should continue to compile through the v1.x line unless one of these applies:
+Stable features should continue to compile and behave as documented unless one
+of these applies:
 
 ```text
 the behavior was undocumented
@@ -14,14 +17,6 @@ a safety or correctness fix requires a documented break
 ```
 
 When a safety or correctness fix breaks stable code, the release notes and migration guide must name the break.
-
-## Version Meanings
-
-```text
-v1.0.x: bug fixes only
-v1.x.0: compatible improvements to stable v1 behavior
-v2.0.0: breaking language changes allowed
-```
 
 ## Stability Labels
 
@@ -33,7 +28,7 @@ draft
   intended shape, but still not compatibility-protected
 
 stable
-  part of the v1 compatibility promise
+  part of the compatibility promise
 
 deprecated
   still works, but has a documented replacement
@@ -44,7 +39,7 @@ removed
 
 ## Stable Surface
 
-Stable v1 behavior is defined by:
+Stable behavior is defined by:
 
 ```text
 docs/SPEC.md
@@ -54,7 +49,7 @@ docs/ERRORS.md
 docs/COMPATIBILITY.md
 tests/pass/
 tests/fail/
-tests/compat/v1/
+compatibility fixtures
 tests/snapshots/
 ```
 
@@ -64,10 +59,10 @@ treat it as draft, experimental, or planned according to the labels in
 
 ## Compatibility Test Suite
 
-Run the focused v1 compatibility suite with:
+Run the focused stable compatibility suite with:
 
 ```bash
-go test ./cmd/walk -run TestV19CompatibilitySuite
+go test ./cmd/walk -run TestStableCompatibilitySuite
 ```
 
 The full repository test command also runs it:
@@ -80,12 +75,13 @@ The suite covers representative stable programs, test syntax, user-module export
 
 ## Draft, Experimental, Or Future Features
 
-These are not compatibility-protected in v1:
+These are implemented or planned, but not compatibility-protected as stable
+features:
 
 ```text
-structs (implemented as experimental in v2)
-methods (implemented as experimental in v2.1)
-generic functions (implemented as experimental in v2.2)
+structs (experimental)
+methods (experimental)
+generic functions (experimental)
 do: effect calls (draft)
 io, parse, process, file, dir, path, json, term, http, and html APIs (draft)
 matrix APIs (planned)
@@ -101,7 +97,8 @@ any generated C details outside snapshots
 
 ## Deprecation Policy
 
-`docs/DEPRECATION.md` owns the deprecation lifecycle. Current v1.9 deprecated surface: none.
+`docs/DEPRECATION.md` owns the deprecation lifecycle. Current deprecated
+surface: none.
 
 ## Changing The Contract
 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>WalkLang v1.9 Compatibility - WalkLang</title>
+<title>WalkLang Compatibility - WalkLang</title>
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <link rel="stylesheet" href="../assets/site.css">
 <script defer src="../assets/site.js"></script>
@@ -33,11 +33,11 @@
 <a href="DEPRECATION.html">Deprecation</a>
 <h2>Reference</h2>
 <a href="reference/api.html">API Reference</a>
-<a href="V5_1.html">Docs Site</a>
+<a href="DOCS_SITE.html">Docs Site</a>
 <a href="reference/index.html">Reference Index</a>
 <h2>Tools</h2>
-<a href="V4.html">Editor And Docs Tools</a>
-<a href="V5.html">Runtime And Backend</a>
+<a href="TOOLING.html">Editor And Docs Tools</a>
+<a href="RUNTIME_BACKEND.html">Runtime And Backend</a>
 <a href="NETWORKING.html">Draft Networking</a>
 <a href="RICH_RUNTIMES.html">Rich Runtimes</a>
 <h2>Project</h2>
@@ -56,19 +56,15 @@
 <div class="topbar"><a href="index.html">Docs</a><a href="reference/api.html">Reference</a><a href="https://github.com/scwlkr/WalkLang">GitHub</a></div>
 <div class="page">
 <article class="doc">
-<h1 id="walklang-v1-9-compatibility">WalkLang v1.9 Compatibility</h1>
-<p>WalkLang v1.9 defines the compatibility promise for the v1.x language line. v1.9 keeps the v1.8 release boundary and adds stable string interpolation for display text.</p>
+<h1 id="walklang-compatibility">WalkLang Compatibility</h1>
+<p>WalkLang compatibility is tied to the current project version and the feature statuses documented in <code>docs/SPEC.md</code>, <code>docs/STDLIB.md</code>, and <code>docs/LANGUAGE_CONCEPTS.md</code>.</p>
 <h2 id="compatibility-promise">Compatibility Promise</h2>
-<p>Stable v1 code should continue to compile through the v1.x line unless one of these applies:</p>
+<p>Stable features should continue to compile and behave as documented unless one of these applies:</p>
 <pre><code class="language-text">the behavior was undocumented
 the behavior failed conformance or compatibility tests
 the behavior relied on internal generated C shape outside snapshots
 a safety or correctness fix requires a documented break</code></pre>
 <p>When a safety or correctness fix breaks stable code, the release notes and migration guide must name the break.</p>
-<h2 id="version-meanings">Version Meanings</h2>
-<pre><code class="language-text">v1.0.x: bug fixes only
-v1.x.0: compatible improvements to stable v1 behavior
-v2.0.0: breaking language changes allowed</code></pre>
 <h2 id="stability-labels">Stability Labels</h2>
 <pre><code class="language-text">experimental
   may change anytime and is not compatibility-protected
@@ -77,7 +73,7 @@ draft
   intended shape, but still not compatibility-protected
 
 stable
-  part of the v1 compatibility promise
+  part of the compatibility promise
 
 deprecated
   still works, but has a documented replacement
@@ -85,7 +81,7 @@ deprecated
 removed
   no longer accepted</code></pre>
 <h2 id="stable-surface">Stable Surface</h2>
-<p>Stable v1 behavior is defined by:</p>
+<p>Stable behavior is defined by:</p>
 <pre><code class="language-text">docs/SPEC.md
 docs/SYNTAX.md
 docs/STDLIB.md
@@ -93,20 +89,20 @@ docs/ERRORS.md
 docs/COMPATIBILITY.md
 tests/pass/
 tests/fail/
-tests/compat/v1/
+compatibility fixtures
 tests/snapshots/</code></pre>
 <p>If a feature is accepted by the compiler but absent from the stable surface, treat it as draft, experimental, or planned according to the labels in <code>docs/LANGUAGE_CONCEPTS.md</code>.</p>
 <h2 id="compatibility-test-suite">Compatibility Test Suite</h2>
-<p>Run the focused v1 compatibility suite with:</p>
-<pre><code class="language-bash">go test ./cmd/walk -run TestV19CompatibilitySuite</code></pre>
+<p>Run the focused stable compatibility suite with:</p>
+<pre><code class="language-bash">go test ./cmd/walk -run TestStableCompatibilitySuite</code></pre>
 <p>The full repository test command also runs it:</p>
 <pre><code class="language-bash">go test ./...</code></pre>
 <p>The suite covers representative stable programs, test syntax, user-module exports, stable stdlib APIs, and selected stable diagnostic first lines.</p>
 <h2 id="draft-experimental-or-future-features">Draft, Experimental, Or Future Features</h2>
-<p>These are not compatibility-protected in v1:</p>
-<pre><code class="language-text">structs (implemented as experimental in v2)
-methods (implemented as experimental in v2.1)
-generic functions (implemented as experimental in v2.2)
+<p>These are implemented or planned, but not compatibility-protected as stable features:</p>
+<pre><code class="language-text">structs (experimental)
+methods (experimental)
+generic functions (experimental)
 do: effect calls (draft)
 io, parse, process, file, dir, path, json, term, http, and html APIs (draft)
 matrix APIs (planned)
@@ -119,7 +115,7 @@ project config behavior
 LSP/debugger behavior
 any generated C details outside snapshots</code></pre>
 <h2 id="deprecation-policy">Deprecation Policy</h2>
-<p><code>docs/DEPRECATION.md</code> owns the deprecation lifecycle. Current v1.9 deprecated surface: none.</p>
+<p><code>docs/DEPRECATION.md</code> owns the deprecation lifecycle. Current deprecated surface: none.</p>
 <h2 id="changing-the-contract">Changing The Contract</h2>
 <p>When changing stable behavior:</p>
 <p>1. Update <code>docs/SPEC.md</code>. 2. Update syntax, stdlib, diagnostics, compatibility, migration, or deprecation docs when relevant. 3. Add or update pass/fail and compatibility fixtures. 4. Update generated C snapshots when backend output intentionally changes. 5. Update release notes when the change affects users. 6. Update <code>docs/STATUS.md</code> with the new project state.</p>

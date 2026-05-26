@@ -1,4 +1,4 @@
-# WalkLang v1 Diagnostics
+# WalkLang Diagnostics
 
 WalkLang diagnostics are compiler-reported errors and warnings. They are
 intended to be deterministic enough for conformance tests.
@@ -68,14 +68,14 @@ var: x = 1
 x = 'one'
 ```
 
-v1.6 function inference diagnostics also use `type error`:
+Local function inference diagnostics also use `type error`:
 
 ```walk
 func: identity(value)
     return: value # type error: cannot infer type for parameter value
 ```
 
-v2 struct diagnostics also use `type error`:
+Struct diagnostics also use `type error`:
 
 ```walk
 struct: User
@@ -86,7 +86,7 @@ var: user = User('Walker', 25)
 out: user.height # type error: User has no field height
 ```
 
-v2.2 generic diagnostics also use `type error`:
+Generic function diagnostics also use `type error`:
 
 ```walk
 func: choose[T](left T, right T) T
@@ -136,7 +136,7 @@ walk check --warnings=error main.walk
 lines and make the executable exit non-zero. A failed assertion is not a
 compiler diagnostic.
 
-Stable v1.9 runtime failure messages include:
+Stable runtime failure messages include:
 
 ```text
 walk runtime error: input reached EOF

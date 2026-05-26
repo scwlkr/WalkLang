@@ -1,6 +1,7 @@
-# WalkLang v1.9 Standard Library
+# WalkLang Standard Library
 
-This document lists the stable built-in modules and functions for the v1 line. These APIs are compatibility-protected in v1.9.
+This document lists the stable built-in modules and functions for the current
+project version. These APIs are compatibility-protected as stable features.
 
 Import built-ins with `imp:` and call functions through their module namespace.
 
@@ -22,15 +23,14 @@ random
 testing
 ```
 
-No other built-in module is stable in v1.9.
+No other built-in module is stable.
 
 The current compiler also includes draft `io`, `parse`, `process`, `file`,
 `dir`, `path`, `json`, `term`, `http`, and `html` modules. They are importable
-and tested, but they are not compatibility-protected in v1.9.
+and tested, but they are not compatibility-protected as stable features.
 
 Draft APIs may expose draft result structs. They are documented here so current
-compiler behavior is visible, but they are not part of the stable v1.9
-compatibility contract.
+compiler behavior is visible, but they are not part of the stable feature set.
 
 Stable APIs in this document are pure expression calls unless an entry says
 otherwise. Invalid argument counts, argument types, or effect placement are
@@ -38,9 +38,8 @@ compiler diagnostics. Runtime failures named below are part of the documented
 behavior for valid programs at runtime.
 
 Proof surface: stable APIs are covered by `tests/pass/stdlib.walk`,
-`tests/pass/walk_tests.walk`, `tests/compat/v1/stable.walk`,
-`tests/compat/v1/tests.walk`, `cmd/walk/compatibility_test.go`, and
-`cmd/walk/conformance_test.go`.
+`tests/pass/walk_tests.walk`, compatibility fixtures,
+`cmd/walk/compatibility_test.go`, and `cmd/walk/conformance_test.go`.
 
 ---
 
@@ -135,7 +134,7 @@ out: string.concat('walk', 'lang')
 
 Stability: stable. Effect status: pure expression.
 
-Returns the length stored with a stable v1 array.
+Returns the length stored with a stable array.
 
 ```walk
 imp: array
@@ -191,9 +190,11 @@ out: > time.now() 0
 
 Stability: stable. Effect status: pure expression.
 
-Returns an integer in the inclusive range. If `max < min`, v1 returns `min`.
+Returns an integer in the inclusive range. If `max < min`, WalkLang returns
+`min`.
 
-`random.int` and `random.choice` use a runtime-owned PRNG seeded once per native process. v1 does not expose manual seeding.
+`random.int` and `random.choice` use a runtime-owned PRNG seeded once per
+native process. WalkLang does not expose manual seeding.
 
 ```walk
 imp: random
@@ -683,7 +684,7 @@ or file write failures runtime-stop with `walk runtime error`.
 ## Draft term
 
 Draft `term` APIs support terminal-oriented CLI output without changing the
-stable v1.9 language contract. Terminal mutation helpers are effects and must
+stable feature set. Terminal mutation helpers are effects and must
 use `do:`.
 
 ```walk
@@ -900,7 +901,7 @@ walk test tests.walk
 
 These names are planned only. They are documented here so naming can stay
 consistent, but they are not stable, not draft-implemented, not importable, and
-not compatibility-protected in v1.9.
+not compatibility-protected as stable features.
 
 ```text
 matrix.rows

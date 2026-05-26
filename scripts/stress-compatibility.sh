@@ -3,7 +3,7 @@ set -eu
 
 repo_root="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
 walk_bin="${WALK_BIN:-walk}"
-work_dir="$(mktemp -d "${TMPDIR:-/tmp}/walklang-stress-v1.XXXXXX")"
+work_dir="$(mktemp -d "${TMPDIR:-/tmp}/walklang-stress-compat.XXXXXX")"
 
 cleanup() {
     rm -rf "$work_dir"
@@ -40,15 +40,15 @@ expect_failure() {
     fi
 }
 
-go test ./cmd/walk -run TestV19CompatibilitySuite
+go test ./cmd/walk -run TestStableCompatibilitySuite
 go test ./...
 
-"$walk_bin" check --warnings=error examples/v1.walk
-"$walk_bin" emit-c examples/v1.walk -o "$work_dir/v1.c"
-grep -q "math_extra__cube" "$work_dir/v1.c"
+"$walk_bin" check --warnings=error examples/stable.walk
+"$walk_bin" emit-c examples/stable.walk -o "$work_dir/stable.c"
+grep -q "math_extra__cube" "$work_dir/stable.c"
 
-"$walk_bin" build examples/v1.walk -o "$work_dir/v1" --release
-expect_output "$work_dir/v1" "27
+"$walk_bin" build examples/stable.walk -o "$work_dir/stable" --release
+expect_output "$work_dir/stable" "27
 8
 4
 3
@@ -81,8 +81,8 @@ plural paddles
 {
 }"
 
-"$walk_bin" build examples/v0.walk -o "$work_dir/v0"
-expect_output "$work_dir/v0" "11
+"$walk_bin" build examples/compiler_tracer.walk -o "$work_dir/compiler_tracer"
+expect_output "$work_dir/compiler_tracer" "11
 12
 13
 distance is 5"
@@ -115,7 +115,7 @@ WALK
 expect_failure "$work_dir/input-eof"
 grep -q "walk runtime error: input reached EOF" "$work_dir/failure.err"
 
-"$walk_bin" test examples/v0_1_tests.walk >"$work_dir/tests.out"
+"$walk_bin" test examples/compiler_tests.walk >"$work_dir/tests.out"
 grep -q "ok 2 tests" "$work_dir/tests.out"
 
 "$walk_bin" test tests/pass/walk_tests.walk >"$work_dir/stdlib-tests.out"
@@ -182,4 +182,4 @@ project_dir="$work_dir/hello_project"
     test ! -d build
 )
 
-echo "v1.9 stress ok"
+echo "compatibility stress ok"

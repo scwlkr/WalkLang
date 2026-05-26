@@ -33,11 +33,11 @@
 <a href="DEPRECATION.html">Deprecation</a>
 <h2>Reference</h2>
 <a href="reference/api.html">API Reference</a>
-<a href="V5_1.html">Docs Site</a>
+<a href="DOCS_SITE.html">Docs Site</a>
 <a href="reference/index.html">Reference Index</a>
 <h2>Tools</h2>
-<a href="V4.html">Editor And Docs Tools</a>
-<a href="V5.html">Runtime And Backend</a>
+<a href="TOOLING.html">Editor And Docs Tools</a>
+<a href="RUNTIME_BACKEND.html">Runtime And Backend</a>
 <a href="NETWORKING.html">Draft Networking</a>
 <a href="RICH_RUNTIMES.html">Rich Runtimes</a>
 <h2>Project</h2>
@@ -59,27 +59,18 @@
 <h1 id="roadmap-md">ROADMAP.md</h1>
 <h2 id="walklang-roadmap">WalkLang Roadmap</h2>
 <p>Build the smallest useful language first.</p>
-<pre><code class="language-text">v0: compile real programs
-v0.1: test and explore
-v1: harden and grow
-v1.1: stabilize the language contract
-v1.2: make projects and releases real
-v1.3: grow the standard library carefully
-v1.6: local function type inference
-v1.7: required-line stdin input
-v1.8: terminal game helpers
-v1.9: string interpolation
-v2: data modeling
-v2.1: methods and stronger composition
-v2.2: simple generic functions
-v3: ecosystem
-v4: professional tooling
-v5: runtime/backend maturity
-v5.12: draft network and rich-runtime boundary
-v5.12.1: docs search
-v5.12.2: docs search result previews
-v5.12.3: docs sidebar navigation cleanup
-v5.13.0: explicit systems track
+<pre><code class="language-text">compile real programs
+test and explore
+harden and grow
+stabilize the feature specification
+make projects and releases real
+grow the standard library carefully
+add focused stable language helpers
+add experimental data modeling and composition
+add packages and professional tooling
+mature runtime and backend behavior
+add docs search and public docs improvements
+implement the explicit systems track
 later: package/runtime tracks and advanced language work</code></pre>
 <p>WalkLang should become real in layers:</p>
 <pre><code class="language-text">first: programs compile
@@ -88,7 +79,7 @@ third: tools are reliable
 fourth: users can build projects
 fifth: ecosystem grows around stable rules</code></pre>
 <p>---</p>
-<h2 id="v0-goal">v0 Goal</h2>
+<h2 id="compiler-tracer-bullet-goal">Compiler Tracer Bullet Goal</h2>
 <p>A <code>.walk</code> file compiles to a native executable through C.</p>
 <p>Example target:</p>
 <pre><code class="language-walk">func: add(a int, b int) int
@@ -103,7 +94,7 @@ for: n in nums
 12
 13</code></pre>
 <p>---</p>
-<h2 id="v0-includes">v0 Includes</h2>
+<h2 id="compiler-tracer-bullet-includes">Compiler Tracer Bullet Includes</h2>
 <p>Language:</p>
 <pre><code class="language-text">.walk files
 indentation blocks
@@ -129,7 +120,7 @@ var: name string? = null
 if: &gt; age 18
     name = &#39;adult&#39;</code></pre>
 <p>---</p>
-<h2 id="v0-compiler">v0 Compiler</h2>
+<h2 id="compiler-pipeline">Compiler Pipeline</h2>
 <p>Pipeline:</p>
 <pre><code class="language-text">lexer
 parser
@@ -145,7 +136,7 @@ native build</code></pre>
   -&gt; main.c
   -&gt; executable</code></pre>
 <p>---</p>
-<h2 id="v0-tooling">v0 Tooling</h2>
+<h2 id="compiler-tooling">Compiler Tooling</h2>
 <p>Required:</p>
 <pre><code class="language-text">compiler
 formatter
@@ -161,7 +152,7 @@ x = &#39;one&#39;</code></pre>
 <pre><code class="language-text">main.walk:2
 type error: x is int, got string</code></pre>
 <p>---</p>
-<h2 id="v0-standard-library-target">v0 Standard Library Target</h2>
+<h2 id="standard-library-target">Standard Library Target</h2>
 <p>Core libraries:</p>
 <pre><code class="language-text">math
 string
@@ -179,7 +170,7 @@ imp: random
 var: n = random.int(1, 10)
 out: math.sqrt(n)</code></pre>
 <p>---</p>
-<h2 id="v0-non-goals">v0 Non-Goals</h2>
+<h2 id="initial-non-goals">Initial Non-Goals</h2>
 <p>Do not build these yet:</p>
 <pre><code class="language-text">classes
 structs
@@ -196,8 +187,8 @@ full LSP</code></pre>
 <p>Example:</p>
 <pre><code class="language-walk">class: User # rejected until later</code></pre>
 <p>---</p>
-<h2 id="v0-done-when">v0 Done When</h2>
-<p>v0 is done when this works:</p>
+<h2 id="compiler-tracer-bullet-done-when">Compiler Tracer Bullet Done When</h2>
+<p>The compiler tracer bullet is done when this works:</p>
 <pre><code class="language-walk"># main.walk
 
 imp: math
@@ -230,7 +221,7 @@ else:
 13
 distance is 5</code></pre>
 <p>---</p>
-<h2 id="v0-1-goal">v0.1 Goal</h2>
+<h2 id="test-and-explore-goal">Test And Explore Goal</h2>
 <p>Make the language easier to test and explore.</p>
 <p>Add:</p>
 <pre><code class="language-text">test runner
@@ -243,14 +234,14 @@ standard library polish</code></pre>
 <p>REPL example:</p>
 <pre><code class="language-text">walk&gt; + 1 2
 3</code></pre>
-<p>v0.1 done when:</p>
+<p>Test and explore work is done when:</p>
 <pre><code class="language-text">walk test runs .walk tests
 walk repl evaluates basic expressions
 diagnostics include file, line, and column
 basic stdlib functions are documented
 example programs can be tested automatically</code></pre>
 <p>---</p>
-<h2 id="v1-goal">v1 Goal</h2>
+<h2 id="stable-foundation-goal">Stable Foundation Goal</h2>
 <p>Make WalkLang feel stable.</p>
 <p>Add or stabilize:</p>
 <pre><code class="language-text">module rules
@@ -270,19 +261,19 @@ exp: cube</code></pre>
 <pre><code class="language-walk">imp: math_extra
 
 out: math_extra.cube(3)</code></pre>
-<p>v1 done in this repo means:</p>
-<pre><code class="language-text">examples/v1.walk builds and runs through a sibling module
+<p>Stable foundation work is done when:</p>
+<pre><code class="language-text">the main example builds and runs through a sibling module
 walk check supports warning levels
 formatter rules normalize spacing and indentation
 release builds accept native compiler flags
 scripts/release.sh creates cross-platform CLI artifacts
-docs describe the stable v1 surface</code></pre>
+docs describe the stable feature surface</code></pre>
 <p>---</p>
 <h1 id="next-phases">Next Phases</h1>
-<h2 id="v1-1-language-contract">v1.1 Language Contract</h2>
+<h2 id="feature-specification">Feature Specification</h2>
 <p>Make the language less like “whatever the compiler accepts” and more like a real contract.</p>
 <p>Add:</p>
-<pre><code class="language-text">complete v1 spec
+<pre><code class="language-text">complete feature specification
 syntax guide
 stdlib reference
 diagnostic guide
@@ -316,14 +307,14 @@ tests/fail/
 tests/snapshots/
   hello.c
   functions.c</code></pre>
-<p>v1.1 done when:</p>
+<p>Feature specification work is done when:</p>
 <pre><code class="language-text">every stable feature has spec text
 every stable feature has tests
 known invalid programs fail with expected diagnostics
 generated C is predictable enough for snapshot testing
 README clearly says what version is implemented</code></pre>
 <p>---</p>
-<h2 id="v1-2-project-mode">v1.2 Project Mode</h2>
+<h2 id="project-mode">Project Mode</h2>
 <p>Make WalkLang useful for more than single-file experiments.</p>
 <p>Add:</p>
 <pre><code class="language-text">walk init
@@ -360,7 +351,7 @@ cd hello
 walk build
 walk test
 walk fmt</code></pre>
-<p>v1.2 done when:</p>
+<p>Project mode work is done when:</p>
 <pre><code class="language-text">a stranger can install walk
 create a project
 write source
@@ -369,7 +360,7 @@ test it
 format it
 and understand failures</code></pre>
 <p>---</p>
-<h2 id="v1-3-standard-library-foundation">v1.3 Standard Library Foundation</h2>
+<h2 id="standard-library-foundation">Standard Library Foundation</h2>
 <p>Grow the standard library carefully without making it huge.</p>
 <p>Stable first:</p>
 <pre><code class="language-text">math.sqrt
@@ -411,13 +402,13 @@ var: nums = [1, 2, 3]
 
 out: string.len(name)
 out: array.len(nums)</code></pre>
-<p>v1.3 done when:</p>
+<p>Standard library foundation work is done when:</p>
 <pre><code class="language-text">STDLIB.md documents every stable function
 stdlib tests run in CI
 draft APIs are clearly marked
 stdlib naming is consistent across modules</code></pre>
 <p>---</p>
-<h2 id="v1-4-diagnostics-and-developer-experience">v1.4 Diagnostics and Developer Experience</h2>
+<h2 id="diagnostics-and-developer-experience">Diagnostics and Developer Experience</h2>
 <p>Make errors feel professional.</p>
 <p>Improve diagnostics:</p>
 <pre><code class="language-text">file name
@@ -444,34 +435,31 @@ deprecated API</code></pre>
 <pre><code class="language-text">--warnings=off
 --warnings=default
 --warnings=error</code></pre>
-<p>v1.4 done when:</p>
+<p>Diagnostics and developer experience work is done when:</p>
 <pre><code class="language-text">common mistakes produce clear messages
 tests verify important diagnostics exactly
 warnings help without feeling noisy
 walk check is useful before build</code></pre>
 <p>---</p>
-<h2 id="v1-5-compatibility-release">v1.5 Compatibility Release</h2>
+<h2 id="compatibility-policy">Compatibility Policy</h2>
 <p>Prepare for a real stable release.</p>
 <p>Add:</p>
-<pre><code class="language-text">versioned language surface
+<pre><code class="language-text">documented stable feature surface
 release notes
 migration guide
 deprecation policy
 compatibility test suite
 official install instructions</code></pre>
 <p>Compatibility rule:</p>
-<pre><code class="language-text">Stable v1 code should keep compiling through the v1.x line unless a documented safety fix requires a breaking change.</code></pre>
-<p>Version meanings:</p>
-<pre><code class="language-text">v1.0.x: bug fixes only
-v1.x.0: compatible improvements
-v2.0.0: breaking language changes allowed</code></pre>
-<p>v1.5 done when:</p>
+<pre><code class="language-text">Stable code should keep compiling unless a documented safety or correctness fix
+requires a breaking change.</code></pre>
+<p>Compatibility policy work is done when:</p>
 <pre><code class="language-text">WalkLang can promise basic compatibility
 releases are repeatable
 users can tell stable features from experimental features
-breaking changes require a version boundary</code></pre>
+breaking changes require an explicit release-note and migration entry</code></pre>
 <p>---</p>
-<h2 id="v1-6-local-function-type-inference">v1.6 Local Function Type Inference</h2>
+<h2 id="local-function-type-inference">Local Function Type Inference</h2>
 <p>Make obvious helper functions short without hiding type decisions at call sites.</p>
 <p>Add:</p>
 <pre><code class="language-text">omitted parameter types inferred from local body evidence
@@ -481,13 +469,13 @@ no ordinary function inference from later call sites</code></pre>
 <p>Example:</p>
 <pre><code class="language-walk">func: power_four(n)
     return: ^ n 4</code></pre>
-<p>v1.6 done when:</p>
+<p>Local function type inference work is done when:</p>
 <pre><code class="language-text">inferred helpers build through generated C
 ambiguous helpers ask for annotations
 SPEC, SYNTAX, migration, release notes, and status docs describe the rule
 compatibility tests continue to pass</code></pre>
 <p>---</p>
-<h2 id="v1-7-required-line-input">v1.7 Required-Line Input</h2>
+<h2 id="required-line-input">Required-Line Input</h2>
 <p>Make basic stdin input a small, stable language primitive that pairs cleanly with <code>out:</code>.</p>
 <p>Add:</p>
 <pre><code class="language-text">core in: expression
@@ -501,14 +489,14 @@ immediate EOF and stdin errors runtime-stop clearly</code></pre>
 <p>Example:</p>
 <pre><code class="language-walk">var: name = in: &#39;Name? &#39;
 out: name</code></pre>
-<p>v1.7 done when:</p>
+<p>Required-line input work is done when:</p>
 <pre><code class="language-text">in: parses anywhere expressions are valid
 prompt expressions type-check as string
 generated C reads stdin without a fixed line limit
 compatibility tests cover prompt, pipes, empty lines, CRLF, EOF, and final unterminated input
 SPEC, SYNTAX, migration, release notes, and status docs describe the rule</code></pre>
 <p>---</p>
-<h2 id="v1-8-terminal-game-helpers">v1.8 Terminal Game Helpers</h2>
+<h2 id="terminal-game-helpers">Terminal Game Helpers</h2>
 <p>Add small helpers needed for simple terminal games without changing WalkLang&#39;s statement model or adding broad runtime systems.</p>
 <p>Stable additions:</p>
 <pre><code class="language-text">string.at
@@ -530,13 +518,13 @@ var: guessed array[string] = []
 
 guessed = array.push(guessed, &#39;d&#39;)
 out: string.contains(word, guessed[0])</code></pre>
-<p>v1.8 done when:</p>
+<p>Terminal game helper work is done when:</p>
 <pre><code class="language-text">SPEC and STDLIB document the helpers
 pass/fail/compatibility fixtures cover the helpers
 a small Hangman playground program compiles
-the v1 stress script proves the helpers through native output</code></pre>
+the compatibility stress script proves the helpers through native output</code></pre>
 <p>---</p>
-<h2 id="v1-9-string-interpolation">v1.9 String Interpolation</h2>
+<h2 id="string-interpolation">String Interpolation</h2>
 <p>Add display-friendly string interpolation without changing numeric <code>+</code> or making <code>string.concat</code> accept mixed scalar types.</p>
 <p>Stable addition:</p>
 <pre><code class="language-text">&#39;text {expression}&#39;</code></pre>
@@ -546,13 +534,13 @@ the v1 stress script proves the helpers through native output</code></pre>
 var: word = &#39;paddle&#39;
 var: wordLength = string.len(word)
 out: &#39;the secret word is {wordLength} characters long&#39;</code></pre>
-<p>v1.9 done when:</p>
+<p>String interpolation work is done when:</p>
 <pre><code class="language-text">SPEC and SYNTAX document interpolation
 pass/fail/compatibility fixtures cover interpolation
-the v1 stress script proves interpolation through native output</code></pre>
+the compatibility stress script proves interpolation through native output</code></pre>
 <p>---</p>
-<h2 id="v2-data-modeling">v2 Data Modeling</h2>
-<p>Add structs after the v1 language contract is solid.</p>
+<h2 id="data-modeling">Data Modeling</h2>
+<p>Add structs after the stable feature specification is solid.</p>
 <p>Target syntax:</p>
 <pre><code class="language-walk">struct: User
     name string
@@ -578,7 +566,7 @@ unknown fields are compile errors</code></pre>
 methods later
 traits maybe later
 inheritance no</code></pre>
-<p>v2 done when:</p>
+<p>Data modeling work is done when:</p>
 <pre><code class="language-text">struct declarations compile
 struct values can be created
 fields can be read
@@ -587,7 +575,7 @@ structs work in arrays
 structs work across modules
 diagnostics explain field errors</code></pre>
 <p>---</p>
-<h2 id="v2-1-methods">v2.1 Methods</h2>
+<h2 id="methods">Methods</h2>
 <p>Add methods without turning WalkLang into class-based OOP.</p>
 <p>Target syntax:</p>
 <pre><code class="language-walk">struct: User
@@ -608,13 +596,13 @@ methods do not hide state
 method calls compile predictably to functions</code></pre>
 <p>Possible emitted shape:</p>
 <pre><code class="language-text">user.is_adult() -&gt; User__is_adult(user)</code></pre>
-<p>v2.1 done when:</p>
+<p>Method work is done when:</p>
 <pre><code class="language-text">methods work on structs
 method names are namespaced by type
 method calls have clear type checking
 methods remain explainable as functions</code></pre>
 <p>---</p>
-<h2 id="v2-2-stronger-composition">v2.2 Stronger Composition</h2>
+<h2 id="stronger-composition">Stronger Composition</h2>
 <p>Add composition features only if structs and methods prove useful.</p>
 <p>Possible features:</p>
 <pre><code class="language-text">traits
@@ -635,13 +623,13 @@ complex metaprogramming</code></pre>
 <p>Trait target, if accepted later:</p>
 <pre><code class="language-walk">trait: Printable
     func: print(self) string</code></pre>
-<p>v2.2 done when:</p>
+<p>Stronger composition work is done when:</p>
 <pre><code class="language-text">composition solves real examples
 syntax remains readable
 type errors remain understandable
 generated C remains predictable</code></pre>
 <p>---</p>
-<h2 id="v3-package-ecosystem">v3 Package Ecosystem</h2>
+<h2 id="package-ecosystem">Package Ecosystem</h2>
 <p>Add packages only after local modules are stable.</p>
 <p>Add:</p>
 <pre><code class="language-text">package manifest
@@ -664,14 +652,14 @@ package names are globally unique or namespaced
 dependencies are locked
 builds are reproducible
 package code is tested before publish</code></pre>
-<p>v3 done when:</p>
+<p>Package ecosystem work is done when:</p>
 <pre><code class="language-text">a user can create a package
 import a package
 pin dependency versions
 build reproducibly
 publish documented library code</code></pre>
 <p>---</p>
-<h2 id="v4-professional-tooling">v4 Professional Tooling</h2>
+<h2 id="professional-tooling">Professional Tooling</h2>
 <p>Make WalkLang comfortable in editors and larger projects.</p>
 <p>Add:</p>
 <pre><code class="language-text">language server
@@ -695,28 +683,28 @@ hover type info
 go to definition
 find references
 completion</code></pre>
-<p>v4 done when:</p>
+<p>Professional tooling work is done when:</p>
 <pre><code class="language-text">WalkLang feels usable in a normal editor
 errors appear while editing
 formatter works from editor
 users can navigate larger projects</code></pre>
 <p>---</p>
-<h2 id="v4-1-documentation-generator-hardening">v4.1 Documentation Generator Hardening</h2>
-<p>Make the v4 docs generator useful enough to support generated reference docs without doing a broad docs overhaul before v5 runtime truth is stable.</p>
+<h2 id="documentation-generator-hardening">Documentation Generator Hardening</h2>
+<p>Make the docs generator useful enough to support generated reference docs without doing a broad docs overhaul before runtime truth is stable.</p>
 <p>Add:</p>
 <pre><code class="language-text">structured /// doc comments above public symbols
 docs.json output for tools and future sites
 Markdown rendered from the same docs index
 opt-in strict checks for missing public symbol docs
 2-3 existing symbols documented end-to-end</code></pre>
-<p>Keep this slice narrow. Do not rewrite the whole docs set until v5 runtime and backend behavior have been clarified.</p>
-<p>v4.1 done when:</p>
+<p>Keep this slice narrow. Do not rewrite the whole docs set until runtime and backend behavior have been clarified.</p>
+<p>Documentation generator hardening is done when:</p>
 <pre><code class="language-text">walk docs still generates Markdown by default
 walk docs --format json writes the machine-readable docs index
 walk docs --strict fails on undocumented public symbols
-the v1 example module proves structured comments end-to-end</code></pre>
+the main example module proves structured comments end-to-end</code></pre>
 <p>---</p>
-<h2 id="v5-runtime-and-backend-maturity">v5 Runtime and Backend Maturity</h2>
+<h2 id="runtime-and-backend-maturity">Runtime and Backend Maturity</h2>
 <p>Improve the generated output and runtime model.</p>
 <p>Possible work:</p>
 <pre><code class="language-text">runtime library cleanup
@@ -733,13 +721,13 @@ alternative backend research</code></pre>
 <pre><code class="language-text">C primary
 LLVM later maybe
 WASM later maybe</code></pre>
-<p>v5 done when:</p>
+<p>Runtime and backend maturity work is done when:</p>
 <pre><code class="language-text">release builds are meaningfully optimized
 runtime behavior is documented
 memory behavior is predictable
 generated C remains understandable enough to inspect</code></pre>
 <p>---</p>
-<h2 id="v5-1-public-docs-and-reference-site">v5.1 Public Docs and Reference Site</h2>
+<h2 id="public-docs-and-reference-site">Public Docs and Reference Site</h2>
 <p>Publish the documentation and generated reference surface as a static site.</p>
 <p>Add:</p>
 <pre><code class="language-text">repo-owned static site build
@@ -750,7 +738,7 @@ static-site link check
 GitHub Pages deployment workflow
 custom-domain CNAME</code></pre>
 <p>Keep this slice focused on publishing docs and reference material. Do not add networking, a playground, a package index, or a compiler explorer here.</p>
-<p>v5.1 done when:</p>
+<p>Public docs and reference site work is done when:</p>
 <pre><code class="language-text">scripts/build-docs-site.sh regenerates docs/reference and public site files
 scripts/check-docs-site.sh verifies generated docs and static links
 generated reference docs use publishable repo-relative source paths
@@ -775,7 +763,7 @@ compiler explorer</code></pre>
 
 var: response = http.get(&#39;https://example.com&#39;)
 out: response.body</code></pre>
-<p>Draft HTTP client helpers are implemented in v5.12.0. Broader networking and server/runtime work still requires:</p>
+<p>Draft HTTP client helpers are implemented. Broader networking and server/runtime work still requires:</p>
 <pre><code class="language-text">custom header/body design
 server package design
 async/event-loop decisions
@@ -835,10 +823,10 @@ deprecated
 removed
   no longer accepted</code></pre>
 <p>Example:</p>
-<pre><code class="language-text">structs: experimental in v2
-methods: experimental in v2.1
-generic functions: experimental in v2.2
-basic modules: stable in v1</code></pre>
+<pre><code class="language-text">structs: experimental
+methods: experimental
+generic functions: experimental
+basic modules: stable</code></pre>
 <p>---</p>
 <h2 id="release-principles">Release Principles</h2>
 <p>Each release should answer:</p>
@@ -873,69 +861,37 @@ format code,
 build a small project,
 and trust that stable code will not randomly break.</code></pre>
 <p>---</p>
-<h2 id="version-summary">Version Summary</h2>
-<pre><code class="language-text">v0
-  compile .walk to native exe
+<h2 id="implementation-summary">Implementation Summary</h2>
+<pre><code class="language-text">compiler tracer bullet
+  compile .walk to native executable
   core syntax + types + functions + loops
 
-v0.1
+test and explore
   tests + REPL + diagnostics
 
-v1
+stable foundation
   stable modules + stdlib + docs + build flow
-
-v1.1
-  complete language contract + conformance tests
-
-v1.2
+  complete feature specification + conformance tests
   project mode + release/install workflow
-
-v1.3
-  standard library foundation
-
-v1.4
-  professional diagnostics + developer experience
-
-v1.5
-  compatibility release preparation
-
-v1.6
   local function type inference
-
-v1.7
   required-line stdin input
-
-v1.8
   terminal game helpers
+  string interpolation
 
-v2
+experimental composition
   structs + data modeling
-
-v2.1
   methods
+  simple generic functions
 
-v2.2
-  stronger composition with simple generic functions
-
-v3
+ecosystem and tooling
   package ecosystem
-
-v4
-  LSP + editor tooling + debugger foundation + MVP docs generator
-
-v4.1
+  LSP + editor tooling + debugger foundation + docs generator
   structured docs generator hardening
 
-v5
+runtime and docs maturity
   runtime/backend maturity
-
-v5.1
   public docs + generated reference site
-
-v5.12
   draft HTTP/HTML helpers + rich-runtime boundaries
-
-v5.12.1
   generated docs search
 
 later

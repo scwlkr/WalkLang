@@ -1,6 +1,6 @@
 # WalkLang Official Install Instructions
 
-WalkLang v5.0.0 supports two install paths:
+WalkLang supports two install paths:
 
 ```text
 release artifact install
@@ -14,11 +14,11 @@ Use `walk version` after either path. The reported version should match the rele
 Release artifacts are produced by `scripts/release.sh` and named:
 
 ```text
-walk-v5.0.0-darwin-arm64
-walk-v5.0.0-darwin-amd64
-walk-v5.0.0-linux-amd64
-walk-v5.0.0-linux-arm64
-walk-v5.0.0-windows-amd64.exe
+walk-v5.13.1-darwin-arm64
+walk-v5.13.1-darwin-amd64
+walk-v5.13.1-linux-amd64
+walk-v5.13.1-linux-arm64
+walk-v5.13.1-windows-amd64.exe
 SHA256SUMS
 ```
 
@@ -26,12 +26,13 @@ Install on macOS or Linux:
 
 ```bash
 mkdir -p ~/.local/bin
-cp walk-v5.0.0-<os>-<arch> ~/.local/bin/walk
+cp walk-v5.13.1-<os>-<arch> ~/.local/bin/walk
 chmod +x ~/.local/bin/walk
 walk version
 ```
 
-Install on Windows by placing `walk-v5.0.0-windows-amd64.exe` somewhere on `PATH` as `walk.exe`, then run:
+Install on Windows by placing `walk-v5.13.1-windows-amd64.exe` somewhere on
+`PATH` as `walk.exe`, then run:
 
 ```powershell
 walk version
@@ -54,14 +55,14 @@ sha256sum -c SHA256SUMS
 Source installs require Go and a native C compiler available as `cc`.
 
 ```bash
-scripts/install-local.sh v5-local
+scripts/install-local.sh local
 walk version
 ```
 
 By default the script writes to `~/.local/bin/walk`. Override the install directory with:
 
 ```bash
-WALK_INSTALL_DIR=/path/to/bin scripts/install-local.sh v5-local
+WALK_INSTALL_DIR=/path/to/bin scripts/install-local.sh local
 ```
 
 ## Smoke Test
@@ -73,8 +74,8 @@ walk run playground/route_ranker.walk
 walk playground/route_ranker.walk
 walk build examples/hello.walk -o build/hello
 ./build/hello
-walk check --warnings=error examples/v1.walk
-walk test examples/v0_1_tests.walk
+walk check --warnings=error examples/stable.walk
+walk test examples/compiler_tests.walk
 walk build tests/pass/structs.walk -o build/structs
 walk build tests/pass/methods.walk -o build/methods
 walk build tests/pass/generics.walk -o build/generics
@@ -102,7 +103,7 @@ Score:
 Maintainers can produce the release artifact set with:
 
 ```bash
-scripts/release.sh v5.7.0 dist
+scripts/release.sh v5.13.1 dist
 ```
 
 The command writes the platform binaries and `dist/SHA256SUMS`.

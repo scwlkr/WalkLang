@@ -7,7 +7,7 @@ import (
 	"walklang/internal/parser"
 )
 
-func TestV1ShadowingProducesWarning(t *testing.T) {
+func TestShadowingProducesWarning(t *testing.T) {
 	program, err := parser.ParseSource(strings.Join([]string{
 		"var: x = 1",
 		"if: true",

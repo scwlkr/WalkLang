@@ -10,7 +10,7 @@ import (
 func TestInExpressionReadsRequiredLinesAndPrompts(t *testing.T) {
 	requireCC(t)
 
-	sourcePath := filepath.Join(repoRoot(t), "tests", "compat", "v1", "input.walk")
+	sourcePath := filepath.Join(repoRoot(t), "tests", "compat", "stable", "input.walk")
 
 	cCode, warnings, err := compileFileToCWithOptions(sourcePath, false)
 	if err != nil {

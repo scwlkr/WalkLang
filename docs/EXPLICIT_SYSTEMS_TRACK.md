@@ -1,6 +1,6 @@
 # WalkLang Explicit Systems Track
 
-Status: implemented in v5.13.0.
+Status: implemented.
 
 Date opened: 2026-05-25.
 
@@ -179,8 +179,8 @@ Proof required:
 
 - Package lifecycle test showing a collection-root package imports and runs.
 - Package publish/init tests rejecting `std`.
-- Existing v3 package tests must keep passing.
-- Docs must explain collection roots in `docs/PROJECTS.md` and `docs/V3.md`.
+- Existing package tests must keep passing.
+- Docs must explain collection roots in project and package documentation.
 
 ### 4. First-Class Build Modes
 
@@ -235,7 +235,7 @@ Proof required:
   both are present, and CLI override.
 - Native build test proving debug flags are present.
 - Existing release test proving `-O3 -DNDEBUG` remains present.
-- Docs updates in `docs/PROJECTS.md`, `docs/V5.md`, `docs/ARCHITECTURE.md`, and
+- Docs updates in project, runtime, architecture, and
   release notes.
 
 ## Required One-Pass Execution Order
@@ -243,9 +243,8 @@ Proof required:
 Follow this order in one branch and one release slice:
 
 1. Read this file, `docs/LANGUAGE_CONCEPTS.md`, `docs/DESIGN_RULES.md`,
-   `docs/SPEC.md`, `docs/STDLIB.md`, `docs/PROJECTS.md`, `docs/V3.md`,
-   `docs/V5.md`, `IO_PLAN.md`, and the current checker/parser/emitter/package
-   code.
+   `docs/SPEC.md`, `docs/STDLIB.md`, project docs, runtime docs, `IO_PLAN.md`,
+   and the current checker/parser/emitter/package code.
 2. Add failing tests for all four items before implementation.
 3. Implement parser, AST, formatter, checker, emitter/runtime, CLI, project
    config, package, and docs changes needed by those tests.
@@ -270,7 +269,7 @@ go test -count=1 ./...
 go build -trimpath -ldflags "-X main.version=<version>" -o build/walk ./cmd/walk
 ./build/walk version
 ./build/walk check --warnings=error tests/pass/walk_tests.walk
-WALK_BIN=$PWD/build/walk scripts/stress-v1.sh
+WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh
 scripts/build-docs-site.sh
 scripts/check-docs-site.sh
 scripts/release.sh <version> <temp>/release
@@ -286,7 +285,7 @@ Also run focused tests added for this track and record their exact names in
 - 2026-05-25: Track opened from design discussion. No implementation has started.
   Current decision: keep WalkLang explicit and implement these four items as one
   future release slice.
-- 2026-05-25: Track implemented for v5.13.0. Draft `defer:` cleanup,
-  recoverable-result policy docs, package collection-root enforcement, and
-  first-class build modes are covered by focused tests and the release
-  verification gate recorded in `docs/STATUS.md`.
+- 2026-05-25: Track implemented. Draft `defer:` cleanup, recoverable-result
+  policy docs, package collection-root enforcement, and first-class build modes
+  are covered by focused tests and the release verification gate recorded in
+  `docs/STATUS.md`.

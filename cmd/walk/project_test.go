@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func TestV12ProjectLifecycle(t *testing.T) {
+func TestProjectLifecycle(t *testing.T) {
 	requireCC(t)
 
 	dir := t.TempDir()
@@ -66,7 +66,7 @@ func TestV12ProjectLifecycle(t *testing.T) {
 	}
 }
 
-func TestV12ProjectConfigValidation(t *testing.T) {
+func TestProjectConfigValidation(t *testing.T) {
 	_, err := parseProjectConfig(strings.Join([]string{
 		"name = \"bad name\"",
 		"entry = \"src/main.walk\"",
@@ -80,7 +80,7 @@ func TestV12ProjectConfigValidation(t *testing.T) {
 	}
 }
 
-func TestV3PackageLifecycle(t *testing.T) {
+func TestPackageLifecycle(t *testing.T) {
 	requireCC(t)
 
 	dir := t.TempDir()
@@ -182,7 +182,7 @@ func TestV3PackageLifecycle(t *testing.T) {
 	}
 }
 
-func TestV3PackageDependencyConfigValidation(t *testing.T) {
+func TestPackageDependencyConfigValidation(t *testing.T) {
 	_, err := parseProjectConfig(strings.Join([]string{
 		"name = \"shape_app\"",
 		"",

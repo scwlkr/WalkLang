@@ -1,509 +1,87 @@
 # WalkLang Status
 
-Stable language contract: v1.9.
+Current WalkLang version: `v5.13.1`.
 
-Current compiler/tooling/docs release: v5.13.0 explicit systems track over the
-v5.12.3 docs sidebar navigation cleanup and the v5.12.0 draft network and
-rich-runtime IO completion.
+`v5.13.1` is the single project version for the compiler, tooling, docs,
+release artifacts, and implemented language surface. Feature maturity is
+described with status labels instead of separate version lines.
 
-Experimental implemented language surface: v2.2.
+Current feature status:
 
-State: v5.13.0 implements the one-pass explicit systems track. Draft `defer:`
-scope cleanup is available inside entry, function, loop, conditional, and test
-blocks, with lexical LIFO execution, early-return cleanup, loop-iteration
-cleanup, and argument capture at the point of `defer:`. Recoverable result data
-is now the documented policy for ordinary failures that should not stop a
-program; fail-stop APIs remain labeled in the standard library docs. Package
-collection roots are documented and reserved roots such as `std` are rejected
-for user package init/publish. Build modes are first-class through `--mode
-debug`, `--mode release`, `--debug`, `--release`, and `[build].mode`, with
-`[build].release` retained as a compatibility field. The stable language
-contract remains v1.9, and this new behavior remains draft until a later
-compatibility decision promotes it.
+```text
+stable
+  core syntax, diagnostics, modules, tests, project tooling, and standard-library helpers
 
-v5.13.0 verification on 2026-05-25: focused explicit-systems tests passed with
-`go test ./internal/format ./cmd/walk -run
-'TestFormatterNormalizesDeferEffectStatement|TestExplicitSystems|TestV13FailFixturesHaveExpectedDiagnostics|TestV13PassFixturesBuildAndRun|TestV13GeneratedCSnapshots'
--count=1`; full `go test -count=1 ./...` passed; `go build -trimpath -ldflags
-"-X main.version=v5.13.0" -o build/walk ./cmd/walk` passed; `./build/walk
-version` reported `v5.13.0`; `./build/walk check --warnings=error
-tests/pass/walk_tests.walk` passed; `WALK_BIN=$PWD/build/walk
-scripts/stress-v1.sh` passed and reported `v1.9 stress ok`;
-`scripts/build-docs-site.sh` passed; `scripts/check-docs-site.sh` passed after
-staging generated docs; `scripts/release.sh v5.13.0 <temp>/release` produced 5
-platform artifacts plus `SHA256SUMS`; `wc -l <temp>/release/SHA256SUMS`
-reported 5 checksum lines; `scripts/install-local.sh v5.13.0` refreshed
-`/Users/shanewalker/.local/bin/walk`; `walk version` reported `v5.13.0`; and
-`git diff --cached --check` passed for staged release files. Full `git diff
---check` remained blocked by pre-existing trailing whitespace in
-`playground/hangman-v2.walk`, which was left untouched; the release slice passed
-`git diff --check -- . ':(exclude)playground/hangman.walk'
-':(exclude)playground/hangman-v2.walk'`.
+draft
+  do:, defer:, io, parse, process, file, dir, path, json, term, http, and html
 
-State: v5.12.3 cleans up the generated docs sidebar so public navigation is
-organized by reader task and document role instead of exposed release
-milestones. Sidebar labels now use topic names such as `Syntax`,
-`Specification`, `Standard Library`, `API Reference`, `Architecture`,
-`Purpose`, and `Version History`. Historical `V1`, `V2`, and `V3` milestone
-pages remain generated and linkable, but they no longer appear as top-level
-sidebar entries. The stable language contract remains v1.9, and the draft
-runtime API surface remains unchanged from v5.12.0.
+experimental
+  structs, methods, and simple generic functions
+```
 
-v5.12.3 verification on 2026-05-24: focused site-generator tests passed with
-`go test ./scripts -run TestSidebarUsesTopicNavigationInsteadOfVersionMilestones
--count=1`; full site-generator tests passed with `go test ./scripts -count=1`;
-full `go test -count=1 ./...` passed; `go build -trimpath -ldflags "-X
-main.version=v5.12.3" -o build/walk ./cmd/walk` passed; `./build/walk
-version` reported `v5.12.3`; `./build/walk check --warnings=error
-tests/pass/walk_tests.walk` passed; `WALK_BIN=$PWD/build/walk
-scripts/stress-v1.sh` passed and reported `v1.9 stress ok`;
-`scripts/build-docs-site.sh` passed; `scripts/check-docs-site.sh` passed after
-staging generated docs; a generated HTML check confirmed
-`public/docs/SPEC.html` contains topic sidebar labels for `Syntax`,
-`Specification`, `API Reference`, `Architecture`, `Purpose`, and `Version
-History` without top-level `V1`, `V2`, or `V3` entries; a local Chrome headless
-smoke against `python3 -m http.server` captured
-`/tmp/walklang-sidebar-v5123.png`; `scripts/release.sh v5.12.3 <temp>/release`
-produced 5 platform artifacts plus `SHA256SUMS`; `wc -l
-<temp>/release/SHA256SUMS` reported 5 checksum lines; the host release binary
-reported `v5.12.3` from `walk version`; and scoped `git diff --check` passed
-for the release files changed in this slice.
+Current release state: `v5.13.1` aligns current-facing docs, CI, examples,
+compatibility fixtures, generated docs routes, visible test names, and
+developer scripts around one project version. Draft `defer:` cleanup,
+recoverable-result policy docs, package collection roots, and first-class build
+modes remain implemented and covered by focused tests.
 
-State: v5.12.2 improves generated docs search result quality. The site
-generator now emits section-level search entries with parent doc/group context,
-section anchors, clean prose summaries, and cleaned full text. The client-side
-search UI now renders a section title, context line, and readable preview
-instead of a raw sliced Markdown snippet, with ranking boosts for section,
-summary, and API-shaped matches such as `array.push`. The stable language
-contract remains v1.9, and the draft runtime API surface remains unchanged from
-v5.12.0.
+Last full release verification on 2026-05-26:
 
-v5.12.2 verification on 2026-05-24: focused site-generator tests passed with
-`go test ./scripts -run
-'TestLayoutUsesRootFaviconAndCompactSidebarIcon|TestSearchIndexUsesSectionsAndCleanSummaries|TestSiteCSSUsesDarkWalkLangBlueTheme'
--count=1`; full `go test -count=1 ./...` passed; `go build -trimpath
--ldflags "-X main.version=v5.12.2" -o build/walk ./cmd/walk` passed;
-`./build/walk version` reported `v5.12.2`; `./build/walk check
---warnings=error tests/pass/walk_tests.walk` passed; `WALK_BIN=$PWD/build/walk
-scripts/stress-v1.sh` passed and reported `v1.9 stress ok`;
-`scripts/build-docs-site.sh` passed; `scripts/check-docs-site.sh` passed after
-staging generated docs; a local Chrome headless smoke against
-`python3 -m http.server` typed `function` and `push` into the docs search box,
-captured `/tmp/walklang-docs-search-function.png` and
-`/tmp/walklang-docs-search-push.png`, verified clean section/context/summary
-cards, and confirmed `push` ranks `array.push(array[T], T) -> array[T]` first;
-and `scripts/release.sh v5.12.2 <temp>/release` produced 5 platform artifacts
-plus `SHA256SUMS`, with the host release binary reporting `v5.12.2` from
-`walk version`.
+```text
+go test -count=1 ./... passed
+scripts/check-docs-site.sh passed after staging generated docs
+git diff --cached --check passed
+git diff --check -- . ':(exclude)playground/hangman.walk' ':(exclude)playground/hangman-v2.walk' passed
+current-facing version/path sweep passed outside release notes, migration history, deprecated historical docs, and generated search history
+go build -trimpath -ldflags "-X main.version=v5.13.1" -o build/walk ./cmd/walk passed
+./build/walk version reported v5.13.1
+./build/walk check --warnings=error tests/pass/walk_tests.walk passed
+compatibility stress script passed
+scripts/build-docs-site.sh passed
+scripts/release.sh v5.13.1 <temp>/release produced 5 platform artifacts plus SHA256SUMS
+shasum -a 256 -c SHA256SUMS passed for all 5 artifacts
+the Darwin arm64 release artifact reported v5.13.1
+scripts/install-local.sh v5.13.1 refreshed the local walk install
+walk version reported v5.13.1
+```
 
-State: v5.12.1 adds a generated static docs search box to every hosted docs
-page. The site generator now emits `docs/search.json` from repo Markdown docs,
-loads a small client-side search script, and ranks API-heading matches such as
-`array.push` above broad roadmap/status mentions. The stable language contract
-remains v1.9, and the draft runtime API surface remains unchanged from
-v5.12.0.
+Known local state: two Hangman playground files have pre-existing unstaged
+edits and are not part of the version-alignment cleanup.
 
-v5.12.1 verification on 2026-05-24: focused site-generator tests passed with
-`go test ./scripts -run
-'TestLayoutUsesRootFaviconAndCompactSidebarIcon|TestSearchIndexIncludesRawDocText|TestSiteCSSUsesDarkWalkLangBlueTheme'
--count=1`; full `go test -count=1 ./...` passed; `go build -trimpath
--ldflags "-X main.version=v5.12.1" -o build/walk ./cmd/walk` passed;
-`./build/walk version` reported `v5.12.1`; `./build/walk check
---warnings=error tests/pass/walk_tests.walk` passed; `WALK_BIN=$PWD/build/walk
-scripts/stress-v1.sh` passed and reported `v1.9 stress ok`;
-`scripts/build-docs-site.sh` passed; `scripts/check-docs-site.sh` passed after
-staging generated docs; a local Chrome headless smoke against
-`python3 -m http.server` typed `push` into the docs search box and verified the
-first result linked to `../docs/STDLIB.html` with the `array.push` snippet; and
-`scripts/release.sh v5.12.1 <temp>/release` produced 5 platform artifacts plus
-`SHA256SUMS`, with the host release binary reporting `v5.12.1` from
-`walk version`; `git diff --check --cached` and `git diff --check` passed.
+Version-language cleanup on 2026-05-26: current-facing docs now use `v5.13.1`
+as the single project version. Historical version numbers remain only in
+release notes and migration history. `CONTEXT.md` records the resolved terms
+**Project Version**, **Feature Status**, and **Historical Version Reference**.
 
-State: v5.12.0 completes `IO_PLAN.md` Roadmap Phase 5, Network And Rich
-Runtimes, as draft compiler APIs and design docs. Draft HTTP helpers now cover
-`http.get`, `http.post`, and `http.request` through recoverable `HttpResult`
-values. Draft HTTP uses the system `curl` executable as its runtime backend,
-does not invoke a shell, follows redirects, uses a 10 second timeout, caps
-response bodies at 1 MiB, treats response bodies as UTF-8 text, and returns
-ordinary network, TLS, backend, timeout, size, and HTTP status failures as
-data. Draft HTML helpers now cover `html.escape`, `html.h1`, `html.p`, and
-`html.button` as escaped text helpers only. Rich runtime tracks for web server,
-native graphics, WASM/browser, and playground/compiler explorer integration
-remain future package/backend work documented in `docs/RICH_RUNTIMES.md`.
-Stable language contract remains v1.9.
+Version-language cleanup verification on 2026-05-26:
 
-v5.12.0 verification on 2026-05-23: focused Phase 5 tests first failed because
-`http` and `html` were not built-in modules, then `go test ./cmd/walk -run
-'TestDraftNetworkPhase5|TestV13GeneratedCSnapshots|TestV13FailFixturesHaveExpectedDiagnostics|TestV19ReleaseDocsArePresent'
--count=1` passed after implementation and generated C snapshot refresh; full
-`go test -count=1 ./...` passed; `go build -trimpath -ldflags "-X
-main.version=v5.12.0" -o build/walk ./cmd/walk` passed; `./build/walk version`
-reported `v5.12.0`; `./build/walk check --warnings=error
-tests/pass/do_effects.walk` passed; `WALK_BIN=$PWD/build/walk
-scripts/stress-v1.sh` passed and reported `v1.9 stress ok`;
-`scripts/build-docs-site.sh` passed; `scripts/check-docs-site.sh` passed after
-staging generated docs; `scripts/release.sh v5.12.0 <temp>/release` produced 5
-platform artifacts plus `SHA256SUMS`; `wc -l <temp>/release/SHA256SUMS`
-reported 5 checksum lines; the host release binary reported `v5.12.0` from
-`walk version`; and `scripts/install-local.sh v5.12.0` refreshed the local
-`walk` install.
+```text
+go test ./cmd/walk -run 'TestStableCompatibilitySuite|TestCurrentReleaseDocsArePresent' -count=1 passed
+go test ./scripts -run TestSidebarUsesTopicNavigationInsteadOfVersionMilestones -count=1 passed
+scripts/build-docs-site.sh passed
+scripts/check-docs-site.sh passed after staging generated docs
+go test -count=1 ./... passed
+WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported compatibility stress ok
+current-facing source and generated-page search found no old language-version wording outside release notes and migration history
+```
 
-Language documentation standard update on 2026-05-23: added
-`docs/LANGUAGE_CONCEPTS.md` as the canonical language vocabulary and
-documentation-governance standard. It defines firm concepts, stability words,
-the target `SPEC.md` spine, documentation roles, and the TDD-synchronous proof
-matrix for future language docs. `AGENTS.md` now points agents at that standard
-before creating or reshaping language docs, and the docs front door, docs style
-guide, static-site page list, and generated public docs include the new page.
+Developer-facing path cleanup on 2026-05-26: active examples, compatibility
+fixtures, the compatibility stress script, current docs source pages, generated
+docs routes, and visible test names now use purpose-based names instead of old
+milestone labels. Release notes and migration history kept their historical
+version references unchanged.
 
-Language documentation standard verification on 2026-05-23:
-`go test -count=1 ./...` passed; `git diff --check` passed;
-`scripts/build-docs-site.sh` passed; and `scripts/check-docs-site.sh` passed
-after staging generated docs artifacts under `docs/reference` and `public`.
+Developer-facing path cleanup verification on 2026-05-26:
 
-Docs alignment cleanup on 2026-05-24: `docs/SPEC.md` now follows the
-`docs/LANGUAGE_CONCEPTS.md` required spine for lexical structure, types,
-values, expressions, statements, declarations, functions, modules, errors, and
-standard library. `docs/SYNTAX.md` keeps the readable-guide role instead of a
-second spec. `docs/STDLIB.md` now calls out stable API effect status, runtime
-failure behavior, and proof surface; the v1 compatibility fixture proves
-`random.int(max < min)` returning `min`, and conformance tests prove stable
-runtime failures for out-of-range string indexing and empty `random.choice`.
-`docs/ERRORS.md`, compatibility, deprecation, design, roadmap, and IO planning
-docs now use the `LANGUAGE_CONCEPTS.md` terminology more directly and remove
-stale draft/future contradictions.
+```text
+go test ./cmd/walk ./internal/format ./internal/checker ./scripts -run 'TestStableCompatibilitySuite|TestCurrentReleaseDocsArePresent|TestExamplesAreTestableFixtures|TestInExpression|TestFormatter|TestShadowingProducesWarning|TestSidebarUsesTopicNavigationInsteadOfVersionMilestones' -count=1 passed
+WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported compatibility stress ok
+scripts/check-docs-site.sh passed
+go test -count=1 ./... passed
+git diff --check -- . ':(exclude)playground/hangman.walk' ':(exclude)playground/hangman-v2.walk' passed
+git diff --cached --check passed
+active-code search found no old developer-facing milestone path or test-name labels outside release notes, migration history, and deprecated docs
+```
 
-Docs alignment verification on 2026-05-24: focused
-`go test ./cmd/walk -run 'TestV19CompatibilitySuite|TestStableRuntimeFailuresAreClear|TestV13FailFixturesHaveExpectedDiagnostics|TestDoEffectConsoleAndProcessFoundation|TestRuntimeOwnedTextInputAndParseResults|TestReadLineReportsImmediateEOFAsData|TestDraftFileTextIOReadsWritesAndChecksExistence|TestDraftLocalFilesystemPhase2CompletesFileDirPathAndCwd|TestDraftRecoverableFileResults|TestDraftProcessPhase3RunsCommandsAndCapturesOutput|TestDraftJSONPhase3ParsesStringifiesReadsAndWritesText|TestDraftTerminalPhase4StylesAreOptInAndDimensionsFallback|TestDraftTerminalReadKeyReportsNonInteractiveTTYAsData|TestDraftNetworkPhase5UsesLocalHTTPAndHTMLHelpers' -count=1`
-passed; full `go test -count=1 ./...` passed; `git diff --check` passed;
-`scripts/build-docs-site.sh` passed; and `scripts/check-docs-site.sh` passed
-after staging generated docs artifacts under `docs/reference` and `public`.
-
-State: v5.11.0 completes `IO_PLAN.md` Roadmap Phase 4, Terminal UX, as draft
-compiler APIs. Draft terminal helpers now cover `term.is_tty`, foreground and
-background color, style, reset, clear, cursor movement, terminal dimensions,
-and recoverable one-key reads. ANSI terminal mutation is explicit through
-`do:` effect calls, disabled for redirected stdout by default, disabled by
-`NO_COLOR`, and forceable for deterministic tests with `CLICOLOR_FORCE`.
-`term.width()` and `term.height()` use TTY dimensions when available, then
-`COLUMNS`/`LINES`, then `80`/`24` fallbacks. `term.read_key()` returns
-`IOReadResult`; non-interactive stdin returns `error 'terminal not interactive'`
-instead of blocking, and raw mode is restored after a single key read. Stable
-language contract remains v1.9. HTTP, browser targets, graphics, and rich
-runtimes remain gated by later `IO_PLAN.md` phases.
-
-v5.11.0 verification on 2026-05-23: focused Phase 4 tests first failed because
-`term` was not a built-in module, then `go test ./cmd/walk -run
-'TestDraftTerminal|TestV13GeneratedCSnapshots|TestV13FailFixturesHaveExpectedDiagnostics|TestV19ReleaseDocsArePresent'
--count=1` passed after implementation and generated C snapshot refresh; full
-`go test -count=1 ./...` passed; `go build -trimpath -ldflags "-X
-main.version=v5.11.0" -o build/walk ./cmd/walk` passed; `./build/walk version`
-reported `v5.11.0`; `./build/walk check --warnings=error
-tests/pass/do_effects.walk` passed; `WALK_BIN=$PWD/build/walk
-scripts/stress-v1.sh` passed and reported `v1.9 stress ok`;
-`scripts/build-docs-site.sh` passed; `scripts/check-docs-site.sh` passed after
-staging generated docs; `scripts/release.sh v5.11.0 <temp>/release` produced 5
-platform artifacts plus `SHA256SUMS`; `wc -l <temp>/release/SHA256SUMS`
-reported 5 checksum lines; the host release binary reported `v5.11.0` from
-`walk version`; and `scripts/install-local.sh v5.11.0` refreshed the local
-`walk` install.
-
-State: v5.10.0 completes `IO_PLAN.md` Roadmap Phase 3, Process And Data
-Interop, as draft compiler APIs. Draft process helpers now cover argv-style
-`process.run`, stdout convenience `process.output`, and explicit shell
-`process.run_shell`, with command status, stdout, stderr, and error data exposed
-through `ProcessResult` and `ProcessOutputResult`. Draft JSON helpers now cover
-`json.parse`, `json.stringify`, `json.read`, and `json.write` through a
-conservative text boundary: `JsonResult.value` is compact validated JSON text
-until WalkLang has maps, dynamic values, or recursive generic JSON structs.
-Stable language contract remains v1.9. Terminal raw mode, HTTP, and browser
-targets remain gated by later `IO_PLAN.md` phases.
-
-v5.10.0 verification on 2026-05-23: focused Phase 3 tests first failed because
-`process.run` was unknown and `json` was not a built-in module, then
-`go test ./cmd/walk -run
-'TestDraftProcessPhase3|TestDraftJSONPhase3|TestV13GeneratedCSnapshots|TestV13FailFixturesHaveExpectedDiagnostics|TestV19ReleaseDocsArePresent'
--count=1` passed after implementation and generated C snapshot refresh; full
-`go test -count=1 ./...` passed; `go build -trimpath -ldflags "-X
-main.version=v5.10.0" -o build/walk ./cmd/walk` passed; `./build/walk version`
-reported `v5.10.0`; `./build/walk check --warnings=error
-tests/pass/do_effects.walk` passed; `WALK_BIN=$PWD/build/walk
-scripts/stress-v1.sh` passed and reported `v1.9 stress ok`;
-`scripts/build-docs-site.sh` passed; `scripts/check-docs-site.sh` passed after
-staging generated docs; `scripts/release.sh v5.10.0 <temp>/release` produced 5
-platform artifacts plus `SHA256SUMS`; `wc -l <temp>/release/SHA256SUMS`
-reported 5 checksum lines; and the host release binary reported `v5.10.0` from
-`walk version`.
-
-State: v5.9.0 completes `IO_PLAN.md` Roadmap Phase 2, Local Filesystem IO, as
-draft compiler APIs. Draft text file helpers now cover fail-stop
-`file.read`, `file.write`, `file.append`, and `file.exists`, plus recoverable
-`file.try_read`, `file.try_write`, and `file.try_append` results through
-`FileReadResult` and `FileActionResult`. Draft directory/path helpers now cover
-`dir.list`, `dir.make`, `dir.delete`, `path.join`, `path.base`, and `path.ext`.
-Draft `process.chdir` is available as an explicit `do:` effect and is covered
-by isolated cwd tests. Relative and absolute paths remain native host paths
-without normalization or `~` expansion; directory listings return direct child
-names sorted for deterministic output; directory creation/deletion is
-single-directory only; and fail-stop file/directory/cwd helpers report clear
-runtime errors. Stable language contract remains v1.9. JSON, process spawning,
-terminal raw mode, HTTP, and browser targets remain gated by later
-`IO_PLAN.md` phases.
-
-v5.9.0 verification on 2026-05-23: focused Phase 2 tests first failed because
-`dir`, `path`, `file.append`, `file.try_*`, and `process.chdir` were not
-implemented, then
-`go test ./cmd/walk -run
-'TestDraftLocalFilesystemPhase2CompletesFileDirPathAndCwd|TestDraftRecoverableFileResults|TestDraftFileTextIOReadsWritesAndChecksExistence|TestDraftFileReadMissingFileFailsClearly|TestDraftFileReadInvalidUTF8FailsClearly|TestV13FailFixturesHaveExpectedDiagnostics'
--count=1` passed after implementation; generated C snapshots were refreshed
-and `go test ./cmd/walk -run
-'TestDraftLocalFilesystemPhase2CompletesFileDirPathAndCwd|TestDraftRecoverableFileResults|TestV13GeneratedCSnapshots|TestV13FailFixturesHaveExpectedDiagnostics|TestV19ReleaseDocsArePresent'
--count=1` passed; full `go test -count=1 ./...` passed; `go build -trimpath
--ldflags "-X main.version=v5.9.0" -o build/walk ./cmd/walk` passed;
-`./build/walk version` reported `v5.9.0`; `./build/walk check
---warnings=error tests/pass/do_effects.walk` passed; `WALK_BIN=$PWD/build/walk
-scripts/stress-v1.sh` passed and reported `v1.9 stress ok`;
-`scripts/build-docs-site.sh` passed; `scripts/check-docs-site.sh` passed after
-staging generated docs; `scripts/release.sh v5.9.0 <temp>/release` produced 5
-platform artifacts plus `SHA256SUMS`; `wc -l <temp>/release/SHA256SUMS`
-reported 5 checksum lines; and the host release binary reported `v5.9.0` from
-`walk version`.
-
-State: v5.8.0 starts `IO_PLAN.md` Roadmap Phase 2, Local Filesystem IO, with a
-draft UTF-8 text-file slice. Draft `file.read`, `file.write`, and
-`file.exists` are now importable compiler APIs. `file.read` returns a
-runtime-owned string, `file.write` is an explicit `do:` effect that overwrites
-the target path, and `file.exists` returns host path existence as `bool`.
-Relative and absolute paths are passed to the host OS without normalization or
-`~` expansion; relative paths resolve against the native process current
-working directory. This first file slice is fail-stop: missing files,
-permission errors, empty read/write paths, invalid UTF-8 reads, embedded null
-bytes on read, and write failures stop the native program with a clear runtime
-error. Stable language contract remains v1.9. `file.append`, directory/path
-helpers, `process.chdir`, recoverable file result structs, JSON, process
-spawning, terminal raw mode, HTTP, and browser targets remain gated by
-`IO_PLAN.md`.
-
-v5.8.0 verification on 2026-05-23: focused file IO tests first failed because
-`imp: file` was not implemented, then
-`go test ./cmd/walk -run
-'TestDraftFileTextIOReadsWritesAndChecksExistence|TestDraftFileReadMissingFileFailsClearly|TestDraftFileReadInvalidUTF8FailsClearly|TestDoEffectConsoleAndProcessFoundation|TestRuntimeOwnedTextInputAndParseResults|TestReadLineReportsImmediateEOFAsData|TestV13GeneratedCSnapshots|TestV13FailFixturesHaveExpectedDiagnostics|TestV19ReleaseDocsArePresent'
--count=1` passed after implementation and generated C snapshot refresh; full
-`go test -count=1 ./...` passed; `go build -trimpath -ldflags "-X
-main.version=v5.8.0" -o build/walk ./cmd/walk` passed; `./build/walk version`
-reported `v5.8.0`; `./build/walk check --warnings=error
-tests/pass/do_effects.walk` passed; `WALK_BIN=$PWD/build/walk
-scripts/stress-v1.sh` passed and reported `v1.9 stress ok`;
-`scripts/build-docs-site.sh` passed; `scripts/check-docs-site.sh` passed after
-staging generated docs; `scripts/release.sh v5.8.0 <temp>/release` produced 5
-platform artifacts plus `SHA256SUMS`; `wc -l <temp>/release/SHA256SUMS`
-reported 5 checksum lines; and the host release binary reported `v5.8.0` from
-`walk version`.
-
-State: v5.7.0 completes the `IO_PLAN.md` Phase 2 runtime-owned text
-input/parse slice as draft compiler APIs. The stable language contract remains
-v1.9. Draft `IOReadResult`, `ParseIntResult`, `ParseFloatResult`, and
-`ParseBoolResult` structs now expose the concrete recoverable result shape
-`ok`, `value`, and `error`. Draft `io.read_line()` and `io.read_all()` read
-runtime-owned stdin text, with immediate `io.read_line()` EOF returned as
-`error 'eof'`; draft `parse.int`, `parse.float`, and `parse.bool` return
-invalid conversion as data instead of nullable-only values or runtime stops.
-`time.sleep` remains a separate candidate time helper. File IO, directory/path
-helpers, process spawning, terminal raw mode, JSON, HTTP, and web/graphics
-targets remain gated by `IO_PLAN.md`.
-
-v5.7.0 verification on 2026-05-23: focused IO/parse tests failed before
-implementation because `parse` was not a built-in module and `io.read_line`
-was unknown; after implementation, `go test ./cmd/walk -run
-'TestRuntimeOwnedTextInputAndParseResults|TestReadLineReportsImmediateEOFAsData|TestV13GeneratedCSnapshots|TestV13FailFixturesHaveExpectedDiagnostics|TestV19ReleaseDocsArePresent'
--count=1` passed; full `go test -count=1 ./...` passed; `go build -trimpath
--ldflags "-X main.version=v5.7.0" -o build/walk ./cmd/walk` passed;
-`./build/walk version` reported `v5.7.0`; `./build/walk check
---warnings=error tests/pass/do_effects.walk` passed; `WALK_BIN=$PWD/build/walk
-scripts/stress-v1.sh` passed and reported `v1.9 stress ok`;
-`scripts/build-docs-site.sh` passed; `scripts/check-docs-site.sh` passed after
-staging generated docs; `scripts/release.sh v5.7.0 <temp>/release` produced 5
-platform artifacts plus `SHA256SUMS`; `wc -l <temp>/release/SHA256SUMS`
-reported 5 checksum lines; and the host release binary reported `v5.7.0` from
-`walk version`.
-
-IO planning update on 2026-05-23: `IO_PLAN.md` now uses a five-phase
-implementation roadmap for future planning and handoffs: CLI text IO, local
-filesystem IO, process and data interop, terminal UX, and network/rich
-runtimes. The older Phase 0-10 notes remain as detailed dependency notes, not
-the primary roadmap. Roadmap Phase 1 is done as draft compiler APIs in
-v5.7.0; the next implementation milestone is Roadmap Phase 2, Local Filesystem
-IO. Its first gates are path policy, UTF-8 file policy, fail-stop versus
-recoverable file API shape, temp-directory tests, and cwd mutation policy for
-`process.chdir`.
-
-State: v5.6.0 completes `IO_PLAN.md` Phase 0 and the implementable Phase 1
-console/process foundation as draft compiler APIs. The stable language contract
-remains v1.9. Draft `do:` effect statements now accept registered effect calls;
-draft `io.write`, `io.write_line`, and `io.error_line` cover stdout/stderr line
-helpers; draft `process.args`, `process.arg_count`, `process.env`,
-`process.cwd`, and `process.exit` cover the first process helpers; and new IO
-functions are recorded in a built-in API registry with draft/effect/runtime
-metadata. Later IO phases remain gated on their documented prerequisites,
-especially recoverable error results, text/path policy, richer data modeling,
-and networking security policy.
-
-v5.6.0 verification on 2026-05-22: the focused IO/process tests failed before
-implementation because `do:` was unsupported and `io` was not a built-in
-module; after implementation, `go test ./cmd/walk ./internal/format -run
-'TestDoEffectConsoleAndProcessFoundation|TestProcessExitEffectExitsWithCode|TestV13PassFixturesBuildAndRun|TestV13FailFixturesHaveExpectedDiagnostics|TestV19ReleaseDocsArePresent|TestFormatterNormalizesDoEffectStatement'
--count=1` passed; full `go test -count=1 ./...` passed after refreshing the
-generated C snapshots for the new runtime helper block; `go build -trimpath
--ldflags "-X main.version=v5.6.0" -o build/walk ./cmd/walk` passed;
-`./build/walk version` reported `v5.6.0`; `./build/walk check
---warnings=error tests/pass/do_effects.walk` passed; `./build/walk
-tests/pass/do_effects.walk` printed `loading` and `done`; `WALK_BIN=$PWD/build/walk
-scripts/stress-v1.sh` passed and reported `v1.9 stress ok`;
-`scripts/build-docs-site.sh` passed; `scripts/check-docs-site.sh` passed after
-staging generated docs; `scripts/release.sh v5.6.0 <temp>/release` produced 5
-platform artifacts plus `SHA256SUMS`; `wc -l <temp>/release/SHA256SUMS`
-reported 5 checksum lines; and the host release binary reported `v5.6.0` from
-`walk version`.
-
-State: v5.5.0 adds the v1.9 stable string interpolation surface. Single-quoted
-strings can include `{expression}` display values, interpolation supports
-`int`, `float`, `bool`, `string`, and nullable string values, and doubled braces
-such as `{{word}}` print literal braces.
-
-v5.5.0 verification on 2026-05-22: focused interpolation conformance failed
-before implementation because strings printed literally and bad interpolation
-values were accepted; after the fix, `go test ./cmd/walk -run
-'TestV13PassFixturesBuildAndRun|TestV13FailFixturesHaveExpectedDiagnostics'
--count=1` passed; `go test ./cmd/walk -run
-'TestV13PassFixturesBuildAndRun|TestV19CompatibilitySuite' -count=1` passed;
-full `go test -count=1 ./...` passed; `go build -trimpath -ldflags "-X
-main.version=v5.5.0" -o build/walk ./cmd/walk` passed; `./build/walk version`
-reported `v5.5.0`; `./build/walk check --warnings=error
-tests/pass/interpolation.walk` passed; `./build/walk
-tests/pass/interpolation.walk` printed the expected interpolated lines;
-`WALK_BIN=$PWD/build/walk scripts/stress-v1.sh` passed and reported `v1.9
-stress ok`; `scripts/release.sh v5.5.0 <temp>/release` produced 5 platform
-artifacts plus `SHA256SUMS`; `wc -l <temp>/release/SHA256SUMS` reported 5
-checksum lines; the host release binary reported `v5.5.0` from `walk version`;
-`scripts/build-docs-site.sh` passed; `scripts/check-docs-site.sh` passed; and
-`git diff --check --cached` passed for the staged release diff. Full worktree
-`git diff --check` is still blocked by the pre-existing unstaged
-`playground/hangman-v2.walk` trailing whitespace.
-
-Docs brand polish update on 2026-05-22: the generated docs site is now dark-mode
-only, uses a blue WalkLang accent family instead of the previous green tokens,
-publishes the compact WalkLang icon as `/favicon.svg`, uses that compact mark in
-the docs sidebar, and declares the same mark as the VS Code `walk` language icon
-for compatible file icon themes.
-
-Docs brand polish verification on 2026-05-22: focused site-generator tests cover
-the root favicon link, compact sidebar icon, dark blue accent tokens, removed
-green tokens, and existing VS Code language icon asset path; `go test ./scripts
--count=1` passed; `scripts/build-docs-site.sh` passed; and
-`scripts/check-docs-site.sh` passed after regenerating `public/`.
-
-Live docs TLS recovery on 2026-05-22: root cause was GitHub Pages serving the
-custom domain over HTTP while no Pages TLS certificate existed for
-`walklang.wlkrlabs.com`; DNS was already valid as the DNS-only
-`walklang -> scwlkr.github.io` CNAME and the Pages health check reported the
-domain as valid and HTTPS-eligible. Removed and re-added the Pages custom
-domain to restart certificate provisioning, confirmed the new Let's Encrypt
-certificate includes `walklang.wlkrlabs.com`, enabled HTTPS enforcement, and
-triggered a fresh Pages deployment to clear the cached HTTP homepage. Live
-verification passed with `http://walklang.wlkrlabs.com` returning `301` to
-`https://walklang.wlkrlabs.com/`, `https://walklang.wlkrlabs.com` returning
-`200`, GitHub Pages API reporting `https_enforced: true`, and Pages health
-reporting `responds_to_https: true` plus `enforces_https: true`.
-
-State: v5.4.1 fixes `random.choice` and `random.int` to use a runtime-owned
-PRNG seeded once per native process instead of the C runtime's unseeded default
-`rand()` state.
-
-v5.4.1 verification on 2026-05-22: added `TestRandomChoiceSeedsFreshProcesses`
-and confirmed it failed before the runtime fix because fresh native processes
-all produced the same first `random.choice` value; after the fix, full `go test
--count=1 ./...` passed; `go build -trimpath -ldflags "-X main.version=v5.4.1"
--o build/walk ./cmd/walk` passed and `./build/walk version` reported
-`v5.4.1`; `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh` passed and reported
-`v1.8 stress ok`; `scripts/release.sh v5.4.1 <temp>/release` produced 5
-platform artifacts plus `SHA256SUMS`; `wc -l <temp>/release/SHA256SUMS`
-reported 5 checksum lines; the host release binary reported `v5.4.1` from
-`walk version`; `scripts/install-local.sh v5.4.1` installed
-`/Users/shanewalker/.local/bin/walk`; and twelve fresh installed
-`walk hangman-v2.walk` runs from `playground/` produced multiple choices.
-
-State: v5.4 is complete against the new v1.8 terminal-game helper surface.
-Stable v1.8 adds `string.at`, string indexing with `word[0]`,
-`string.contains`, `string.concat`, `array.contains`, `array.push`,
-explicitly typed empty arrays such as `var: guessed array[string] = []`, and
-`random.choice` for non-empty stable native arrays. The helpers keep the
-existing expression/module model: `array.push` returns a new array and string
-building uses `string.concat` instead of changing numeric `+`.
-
-Hangman readiness update on 2026-05-22: `playground/hangman.walk` is now a
-compiling terminal Hangman example using `in:`, `out:`, `if:`, `while:`,
-functions, string indexing, contains checks, functional array push, and random
-choice.
-
-v5.4 verification on 2026-05-22: full `go test -count=1 ./...` passed;
-`go build -o build/walk ./cmd/walk` passed; `WALK_BIN=$PWD/build/walk
-scripts/stress-v1.sh` passed and reported `v1.8 stress ok`; `./build/walk
-check --warnings=error playground/hangman.walk` passed; `./build/walk build
-playground/hangman.walk -o build/hangman` plus a piped wrong-guess smoke run
-passed; `scripts/build-docs-site.sh` passed; `scripts/release.sh v5.4.0
-<temp>/release` produced 5 platform artifacts plus `SHA256SUMS`; `wc -l
-<temp>/release/SHA256SUMS` reported 5 checksum lines; the host release binary
-reported `v5.4.0` from `walk version`; and `git diff --check` passed.
-
-State: v5.3 is complete against the new v1.7 stable `in:` input rule. `in:` is
-a core expression that returns `string`, can be used anywhere an expression is
-valid, reads exactly one required line from stdin, supports an optional string
-prompt expression written to stdout without a newline, flushes stdout before
-reading, strips only the final line ending, preserves all other characters,
-returns `''` for an empty line, accepts a final unterminated line, and
-runtime-stops on immediate EOF, stdin read failure, or allocation failure.
-
-v5.3 verification on 2026-05-22: focused `go test ./cmd/walk ./internal/format -run 'TestInExpression|TestInPrompt|TestV17Formatter' -count=1` passed; full `go test -count=1 ./...` passed; `go build -o build/walk ./cmd/walk` passed; `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh` passed and reported `v1.7 stress ok`; `scripts/check-docs-site.sh` passed after generated site artifacts were staged; `scripts/release.sh v5.3.0 <temp>/release` produced 5 platform artifacts plus `SHA256SUMS`; `wc -l <temp>/release/SHA256SUMS` reported 5 checksum lines; the host release binary reported `v5.3.0` from `walk version`; and `git diff --check` passed.
-
-IO planning update on 2026-05-22: `IO_PLAN.md` now records stable `out:` and
-`in:` as the current baseline, the proposed module-first IO direction for most
-future IO, the recommended `do:` effect-call decision point, runtime-owned
-string and recoverable-error prerequisites, feature-by-feature implementation
-costs, and a phased order for files, directories, JSON, networking, web, and
-graphics.
-
-IO planning verification on 2026-05-22: `scripts/build-docs-site.sh` passed;
-full `go test -count=1 ./...` passed; `go build -o build/walk ./cmd/walk`
-passed; `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh` passed and reported
-`v1.6 stress ok`; `scripts/release.sh v5.2.0 <temp>/release` produced 5
-platform artifacts plus `SHA256SUMS`; `wc -l <temp>/release/SHA256SUMS`
-reported 5 checksum lines; and the host release binary reported `v5.2.0` from
-`walk version`.
-
-State: v5.2 is complete against the new v1.6 local function type inference rule. Ordinary functions may omit parameter and return types when the local body proves the types; ambiguous omitted parameter types now fail with a direct annotation diagnostic; normal typed signatures remain valid; inference does not use later call sites; and C remains the primary backend.
-
-v5.2 verification on 2026-05-22: focused `go test ./cmd/walk -run 'TestFunctionTypeInference|TestV15ReleasePrepDocsArePresent' -count=1` passed; full `go test -count=1 ./...` passed; `go build -o build/walk ./cmd/walk` passed; `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh` passed and reported `v1.6 stress ok`; `scripts/check-docs-site.sh` passed after generated site artifacts were staged; `scripts/release.sh v5.2.0 <temp>/release` produced 5 platform artifacts plus `SHA256SUMS`; `wc -l <temp>/release/SHA256SUMS` reported 5 checksum lines; the host release binary reported `v5.2.0` from `walk version`; and `git diff --check` passed.
-
-Live docs verification on 2026-05-22: `walklang.wlkrlabs.com` resolves through the DNS-only `walklang -> scwlkr.github.io` CNAME to GitHub Pages addresses; `http://walklang.wlkrlabs.com/docs/` returns `200 OK` from GitHub Pages and includes the v5.1 docs content; `http://walklang.wlkrlabs.com/docs/reference/api.json` returns repo-relative source paths. HTTPS is not enforced yet because GitHub Pages still reports `The certificate does not exist yet` when enabling HTTPS and `https://walklang.wlkrlabs.com/docs/` still fails certificate hostname validation.
-
-Public positioning update on 2026-05-22: README and docs front-door wording now distinguish the stable `v1.5` language contract, the current `v5.1.0` compiler/tooling/docs release, and the experimental v2.2 language surface. README now includes a tiny WalkLang function example, a "What works today" section, and less inflated repository-scope wording. HTTPS remediation checked the live DNS CNAME, CAA records, Pages API state, and Pages HTTP response; DNS points at `scwlkr.github.io`, CAA allows Let's Encrypt, HTTP still returns `200 OK`, but GitHub still rejects HTTPS enforcement with `The certificate does not exist yet`. After the Pages deployment for commit `335c877` completed successfully, a second HTTPS enforcement attempt failed with the same certificate message and `https://walklang.wlkrlabs.com/docs/` still failed hostname validation. No DNS or repo-side blocker is visible; the remaining action is to retry once GitHub has issued the Pages certificate.
-
-Public positioning verification on 2026-05-22: `scripts/build-docs-site.sh` passed; `scripts/check-docs-site.sh` passed after generated site artifacts were staged; `git diff --check` passed; full `go test -count=1 ./...` passed; `go build -o build/walk ./cmd/walk` passed; `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh` passed; `scripts/release.sh v5.1.0 <temp>/release` produced 5 platform artifacts plus `SHA256SUMS`; `wc -l <temp>/release/SHA256SUMS` reported 5 checksum lines; and the host release binary reported `v5.1.0` from `walk version`.
-
-Docs setup on 2026-05-22: the root README now follows a Rust-style repository landing-page shape, `docs/README.md` is the canonical docs front door and source for the `https://walklang.wlkrlabs.com/docs` hosted path, `CONTRIBUTING.md` documents the local contribution and verification path, and `docs/DOCS_STYLE_GUIDE.md` records the source-grounded docs rules plus generated-reference expectations.
-
-Docs setup verification on 2026-05-22: `curl -I --max-time 10 https://walklang.wlkrlabs.com/docs` failed with `Could not resolve host`, so the hosted docs URL remains a planned publish target; changed-doc local Markdown links passed; `git diff --check` passed; `go test -count=1 ./...` passed; `go build -o build/walk ./cmd/walk` passed; `./build/walk docs --strict -o build/docs-check-api.md examples/v1.walk` passed; `./build/walk docs --strict --format json -o build/docs-check-api.json examples/v1.walk` passed; `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh` passed; and `scripts/release.sh v5.0.0 <temp>/release` produced 5 platform artifacts plus 5 checksum lines.
-
-v5 verification on 2026-05-22: baseline `go test -count=1 ./...` passed before implementation; focused `go test ./cmd/walk -run 'TestV5|TestV13GeneratedCSnapshots' -count=1` passed; full `go test -count=1 ./...` passed after the final code/test changes; `go build -o build/walk ./cmd/walk` passed; `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh` passed; `scripts/release.sh v5.0.0 <temp>/release` produced 5 platform artifacts plus `SHA256SUMS`; `wc -l <temp>/release/SHA256SUMS` reported 5 checksum lines; the host release binary reported `v5.0.0` from `walk version`; and `git diff --check` passed.
-
-Previous v4.1 verification on 2026-05-22: focused `go test ./cmd/walk -run 'TestV4DocsAndDebugMapCommands|TestV4LSPDiagnosticsFormattingAndCompletion' -count=1`, lexer/parser `go test ./internal/lexer ./internal/parser -count=1`, focused `go test ./cmd/walk -run TestV4 -count=1`, full `go test -count=1 ./...`, `go build -o build/walk ./cmd/walk`, `./build/walk docs --strict -o build/v4.1-api.md examples/v1.walk`, `./build/walk docs --strict --format json -o build/v4.1-api.json examples/v1.walk`, `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh`, `scripts/release.sh v4.1.0 <temp>/release`, `SHA256SUMS` line count check, and `git diff --check` all passed.
-
-Release CI maintenance on 2026-05-22: GitHub Actions workflow uses Node 24 first-party actions, disables unnecessary Go dependency caching for this no-`go.sum` module, runs `scripts/check-docs-site.sh`, and now publishes v5.4.1-labeled release artifacts.
-
-Playground example update on 2026-05-22: `playground/route_ranker.walk` now demonstrates a compact route-ranking program with structs, arrays, loops, typed helper functions, prefix math, and scalar output. Verification passed with `./build/walk check --warnings=error playground/route_ranker.walk`, `./build/walk build playground/route_ranker.walk -o build/route_ranker`, and `./build/route_ranker`, which printed `Library Lane` with score `46`; broader verification passed with `go test -count=1 ./...`, `scripts/check-docs-site.sh`, `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh`, `scripts/release.sh v5.1.0 <temp>/release`, a 5-line `SHA256SUMS` check, host release binary `walk version` reporting `v5.1.0`, and `git diff --check`.
-
-CLI run shortcut update on 2026-05-22: `walk run <source.walk>` now compiles a single file to a temporary native executable, runs it, streams program input and output, and removes the temporary build directory; `walk <source.walk>` is a direct shorthand for the same flow. Verification passed with focused `go test ./cmd/walk -run TestRunCommandRunsSingleFileAndDirectFileAlias -count=1`, `go build -o build/walk ./cmd/walk`, `./build/walk run playground/route_ranker.walk`, `./build/walk playground/route_ranker.walk`, full `go test -count=1 ./...`, `scripts/check-docs-site.sh`, `WALK_BIN=$PWD/build/walk scripts/stress-v1.sh`, `scripts/release.sh v5.1.0 <temp>/release`, a 5-line `SHA256SUMS` check, host release binary `walk version` reporting `v5.1.0`, and `git diff --check`.
-
-Next: continue `IO_PLAN.md` Roadmap Phase 3 process/data interop only after
-the accepted filesystem result shape, command result type, deterministic
-process tests, and JSON data-model decisions are ready.
+Next: keep new docs, examples, scripts, fixtures, and CI references aligned to
+the single Project Version whenever the next release slice starts.

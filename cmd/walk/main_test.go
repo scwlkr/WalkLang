@@ -12,7 +12,7 @@ import (
 	"walklang/internal/diagnostic"
 )
 
-func TestV1UserModuleBuildsAndRuns(t *testing.T) {
+func TestUserModuleBuildsAndRuns(t *testing.T) {
 	if _, err := exec.LookPath("cc"); err != nil {
 		t.Skip("cc is not available")
 	}
@@ -63,7 +63,7 @@ func TestV1UserModuleBuildsAndRuns(t *testing.T) {
 	}
 }
 
-func TestV1UserModuleExportsAreEnforced(t *testing.T) {
+func TestUserModuleExportsAreEnforced(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, "math_extra.walk"), strings.Join([]string{
 		"func: cube(x int) int",
@@ -84,7 +84,7 @@ func TestV1UserModuleExportsAreEnforced(t *testing.T) {
 	}
 }
 
-func TestV1UserModuleRejectsTopLevelRuntimeStatements(t *testing.T) {
+func TestUserModuleRejectsTopLevelRuntimeStatements(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, "bad_module.walk"), strings.Join([]string{
 		"var: x = 1",
@@ -102,7 +102,7 @@ func TestV1UserModuleRejectsTopLevelRuntimeStatements(t *testing.T) {
 	}
 }
 
-func TestV5ReleaseBuildArgs(t *testing.T) {
+func TestReleaseBuildArgs(t *testing.T) {
 	args := nativeBuildArgs("main.c", "main", nativeBuildOptions{
 		release: true,
 		cFlags:  []string{"-DWALK_TEST"},
@@ -115,7 +115,7 @@ func TestV5ReleaseBuildArgs(t *testing.T) {
 	}
 }
 
-func TestV1CheckWarningsCanBeErrors(t *testing.T) {
+func TestCheckWarningsCanBeErrors(t *testing.T) {
 	dir := t.TempDir()
 	sourcePath := filepath.Join(dir, "main.walk")
 	writeFile(t, sourcePath, strings.Join([]string{
@@ -164,7 +164,7 @@ func TestRunCommandRunsSingleFileAndDirectFileAlias(t *testing.T) {
 	}
 }
 
-func TestV14DiagnosticFormattingIncludesSnippetCaretAndSuggestion(t *testing.T) {
+func TestDiagnosticFormattingIncludesSnippetCaretAndSuggestion(t *testing.T) {
 	dir := t.TempDir()
 	sourcePath := filepath.Join(dir, "main.walk")
 	writeFile(t, sourcePath, "var: age int = 'old'\n")
@@ -185,7 +185,7 @@ func TestV14DiagnosticFormattingIncludesSnippetCaretAndSuggestion(t *testing.T) 
 	}
 }
 
-func TestV14WarningFormattingIncludesSnippetCaretAndSuggestion(t *testing.T) {
+func TestWarningFormattingIncludesSnippetCaretAndSuggestion(t *testing.T) {
 	dir := t.TempDir()
 	sourcePath := filepath.Join(dir, "main.walk")
 	writeFile(t, sourcePath, strings.Join([]string{
@@ -215,7 +215,7 @@ func TestV14WarningFormattingIncludesSnippetCaretAndSuggestion(t *testing.T) {
 	}
 }
 
-func TestV14UnreachableStatementWarns(t *testing.T) {
+func TestUnreachableStatementWarns(t *testing.T) {
 	dir := t.TempDir()
 	sourcePath := filepath.Join(dir, "main.walk")
 	writeFile(t, sourcePath, strings.Join([]string{

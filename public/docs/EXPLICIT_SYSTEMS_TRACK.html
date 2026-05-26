@@ -33,11 +33,11 @@
 <a href="DEPRECATION.html">Deprecation</a>
 <h2>Reference</h2>
 <a href="reference/api.html">API Reference</a>
-<a href="V5_1.html">Docs Site</a>
+<a href="DOCS_SITE.html">Docs Site</a>
 <a href="reference/index.html">Reference Index</a>
 <h2>Tools</h2>
-<a href="V4.html">Editor And Docs Tools</a>
-<a href="V5.html">Runtime And Backend</a>
+<a href="TOOLING.html">Editor And Docs Tools</a>
+<a href="RUNTIME_BACKEND.html">Runtime And Backend</a>
 <a href="NETWORKING.html">Draft Networking</a>
 <a href="RICH_RUNTIMES.html">Rich Runtimes</a>
 <h2>Project</h2>
@@ -57,7 +57,7 @@
 <div class="page">
 <article class="doc">
 <h1 id="walklang-explicit-systems-track">WalkLang Explicit Systems Track</h1>
-<p>Status: implemented in v5.13.0.</p>
+<p>Status: implemented.</p>
 <p>Date opened: 2026-05-25.</p>
 <p>This document is the persistent tracker for one explicit-language implementation slice. It covers four related improvements inspired by Odin-style language discipline:</p>
 <p>1. Scope cleanup with <code>defer:</code>. 2. Result values instead of exception-like control flow. 3. Package collections as explicit import roots. 4. First-class build modes.</p>
@@ -197,8 +197,8 @@ generated C prefix: geometry__core__</code></pre>
 <ul>
 <li>Package lifecycle test showing a collection-root package imports and runs.</li>
 <li>Package publish/init tests rejecting <code>std</code>.</li>
-<li>Existing v3 package tests must keep passing.</li>
-<li>Docs must explain collection roots in <code>docs/PROJECTS.md</code> and <code>docs/V3.md</code>.</li>
+<li>Existing package tests must keep passing.</li>
+<li>Docs must explain collection roots in project and package documentation.</li>
 </ul>
 <h3 id="4-first-class-build-modes">4. First-Class Build Modes</h3>
 <p>Goal: make debug and release behavior explicit in CLI, project config, docs, and generated native builds.</p>
@@ -246,12 +246,12 @@ walk run --release</code></pre>
 <p>both are present, and CLI override.</p>
 <li>Native build test proving debug flags are present.</li>
 <li>Existing release test proving <code>-O3 -DNDEBUG</code> remains present.</li>
-<li>Docs updates in <code>docs/PROJECTS.md</code>, <code>docs/V5.md</code>, <code>docs/ARCHITECTURE.md</code>, and</li>
+<li>Docs updates in project, runtime, architecture, and</li>
 <p>release notes.</p>
 </ul>
 <h2 id="required-one-pass-execution-order">Required One-Pass Execution Order</h2>
 <p>Follow this order in one branch and one release slice:</p>
-<p>1. Read this file, <code>docs/LANGUAGE_CONCEPTS.md</code>, <code>docs/DESIGN_RULES.md</code>, <code>docs/SPEC.md</code>, <code>docs/STDLIB.md</code>, <code>docs/PROJECTS.md</code>, <code>docs/V3.md</code>, <code>docs/V5.md</code>, <code>IO_PLAN.md</code>, and the current checker/parser/emitter/package code. 2. Add failing tests for all four items before implementation. 3. Implement parser, AST, formatter, checker, emitter/runtime, CLI, project config, package, and docs changes needed by those tests. 4. Update generated snapshots and generated docs only after source docs and code behavior agree. 5. Run the full verification gate below. 6. Update <code>docs/STATUS.md</code> and <code>docs/RELEASE_NOTES.md</code> with exact commands and outcomes. 7. Commit, tag, publish, and refresh the local installed <code>walk</code> binary following the repo release flow.</p>
+<p>1. Read this file, <code>docs/LANGUAGE_CONCEPTS.md</code>, <code>docs/DESIGN_RULES.md</code>, <code>docs/SPEC.md</code>, <code>docs/STDLIB.md</code>, project docs, runtime docs, <code>IO_PLAN.md</code>, and the current checker/parser/emitter/package code. 2. Add failing tests for all four items before implementation. 3. Implement parser, AST, formatter, checker, emitter/runtime, CLI, project config, package, and docs changes needed by those tests. 4. Update generated snapshots and generated docs only after source docs and code behavior agree. 5. Run the full verification gate below. 6. Update <code>docs/STATUS.md</code> and <code>docs/RELEASE_NOTES.md</code> with exact commands and outcomes. 7. Commit, tag, publish, and refresh the local installed <code>walk</code> binary following the repo release flow.</p>
 <p>Do not split this into separate defer/result/package/build-mode phases. If the slice becomes too large to finish safely, stop before partial implementation, record the blocker in this file, and leave tests/docs showing the exact boundary.</p>
 <h2 id="verification-gate">Verification Gate</h2>
 <p>Minimum commands before this track can be marked complete:</p>
@@ -259,7 +259,7 @@ walk run --release</code></pre>
 go build -trimpath -ldflags &#34;-X main.version=&lt;version&gt;&#34; -o build/walk ./cmd/walk
 ./build/walk version
 ./build/walk check --warnings=error tests/pass/walk_tests.walk
-WALK_BIN=$PWD/build/walk scripts/stress-v1.sh
+WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh
 scripts/build-docs-site.sh
 scripts/check-docs-site.sh
 scripts/release.sh &lt;version&gt; &lt;temp&gt;/release
@@ -270,8 +270,8 @@ git diff --check</code></pre>
 <ul>
 <li>2026-05-25: Track opened from design discussion. No implementation has started.</li>
 <p>Current decision: keep WalkLang explicit and implement these four items as one future release slice.</p>
-<li>2026-05-25: Track implemented for v5.13.0. Draft <code>defer:</code> cleanup,</li>
-<p>recoverable-result policy docs, package collection-root enforcement, and first-class build modes are covered by focused tests and the release verification gate recorded in <code>docs/STATUS.md</code>.</p>
+<li>2026-05-25: Track implemented. Draft <code>defer:</code> cleanup, recoverable-result</li>
+<p>policy docs, package collection-root enforcement, and first-class build modes are covered by focused tests and the release verification gate recorded in <code>docs/STATUS.md</code>.</p>
 </ul>
 </article>
 <footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
