@@ -23,7 +23,7 @@ bool starts_with(const std::string& text, const std::string& prefix) {
 }
 
 std::string category_for_message(const std::string& message) {
-    for (const std::string& category : {"syntax error", "type error", "name error", "module error", "warning", "internal error"}) {
+    for (const std::string category : {"syntax error", "type error", "name error", "module error", "warning", "internal error"}) {
         if (starts_with(message, category + ": ")) {
             return category;
         }
