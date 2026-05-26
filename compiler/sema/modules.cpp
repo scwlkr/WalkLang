@@ -1,0 +1,148 @@
+#include "sema/modules.h"
+
+#include "sema/builtins.h"
+
+#include <filesystem>
+#include <optional>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
+
+namespace walk::sema {
+namespace {
+
+constexpr const char* kModuleDiagnostic = "W3001";
+
+void add_module_error(DiagnosticSet& diagnostics, const SourceRange& range, std::string message) {
+    diagnostics.add(Diagnostic(DiagnosticSeverity::Error, kModuleDiagnostic, std::move(message), range));
+}
+
+std::vector<ast::Import*> imports(ast::Program& program) {
+    std::vector<ast::Import*> result;
+    for (ast::Statement* statement : program.statements) {
+        if (auto* import = dynamic_cast<ast::Import*>(statement)) {
+            result.push_back(import);
+        }
+    }
+    return result;
+}
+
+bool validate_module_surface(ast::Program& program, DiagnosticSet& diagnostics) {
+    for (ast::Statement* statement : program.statements) {
+        if (dynamic_cast<ast::Import*>(statement) != nullptr || dynamic_cast<ast::FuncDecl*>(statement) != nullptr ||
+            dynamic_cast<ast::StructDecl*>(statement) != nullptr || dynamic_cast<ast::Export*>(statement) != nullptr) {
+            continue;
+        }
+        if (dynamic_cast<ast::Defer*>(statement) != nullptr) {
+            add_module_error(diagnostics, statement->range, "module error: top-level defer is only valid in an entry or test source");
+            return false;
+        }
+        add_module_error(diagnostics, statement->range, "module error: modules may contain only imp, struct, func, and exp at top level");
+        return false;
+    }
+    return true;
+}
+
+std::vector<std::filesystem::path> module_file_candidates(const std::string& module) {
+    std::string nested = module;
+    for (char& ch : nested) {
+        if (ch == '.') {
+            ch = static_cast<char>(std::filesystem::path::preferred_separator);
+        }
+    }
+    nested += ".walk";
+    const std::string literal = module + ".walk";
+    if (nested == literal) {
+        return {nested};
+    }
+    return {nested, literal};
+}
+
+std::optional<std::filesystem::path> find_module_path(const std::string& module, const std::filesystem::path& base_dir) {
+    for (const std::filesystem::path& candidate : module_file_candidates(module)) {
+        std::filesystem::path path = base_dir / candidate;
+        std::error_code error;
+        if (std::filesystem::is_regular_file(path, error)) {
+            return path;
+        }
+    }
+    return std::nullopt;
+}
+
+class Loader {
+public:
+    bool load_imports(ast::Program& program, const std::filesystem::path& base_dir, ProgramBundle& bundle) {
+        for (ast::Import* import : imports(program)) {
+            if (is_builtin_module(import->module)) {
+                continue;
+            }
+            if (loading_.count(import->module) != 0) {
+                add_module_error(bundle.diagnostics, import->range, "module error: import cycle includes " + import->module);
+                return false;
+            }
+            if (bundle.modules.find(import->module) != bundle.modules.end()) {
+                continue;
+            }
+            const std::optional<std::filesystem::path> module_path = find_module_path(import->module, base_dir);
+            if (!module_path) {
+                add_module_error(bundle.diagnostics, import->range, "module error: module " + import->module + " not found at " + (base_dir / (import->module + ".walk")).string());
+                return false;
+            }
+            Result<SourceFile> loaded = SourceFile::load(module_path->string());
+            if (!loaded.ok()) {
+                add_module_error(bundle.diagnostics, import->range, "module error: module " + import->module + " could not be read at " + module_path->string());
+                return false;
+            }
+            auto module = std::make_unique<Module>();
+            module->name = import->module;
+            module->path = module_path->string();
+            module->source = std::make_unique<SourceFile>(loaded.take_value());
+            module->parsed = parse::parse_source(*module->source);
+            if (!module->parsed.ok()) {
+                bundle.diagnostics = std::move(module->parsed.diagnostics);
+                return false;
+            }
+            if (!validate_module_surface(*module->parsed.program, bundle.diagnostics)) {
+                return false;
+            }
+            ast::Program* module_program = module->parsed.program.get();
+            bundle.modules.emplace(import->module, std::move(module));
+            loading_.insert(import->module);
+            if (!load_imports(*module_program, module_path->parent_path(), bundle)) {
+                return false;
+            }
+            loading_.erase(import->module);
+        }
+        return true;
+    }
+
+private:
+    std::set<std::string> loading_;
+};
+
+}  // namespace
+
+bool ProgramBundle::ok() const {
+    return source != nullptr && parsed.ok() && !diagnostics.has_errors();
+}
+
+ProgramBundle load_program_with_modules(const std::string& source_path) {
+    ProgramBundle bundle;
+    Result<SourceFile> loaded = SourceFile::load(source_path);
+    if (!loaded.ok()) {
+        bundle.diagnostics.add(Diagnostic(DiagnosticSeverity::Error, "W3000", "source read failed: " + source_path));
+        return bundle;
+    }
+    bundle.source = std::make_unique<SourceFile>(loaded.take_value());
+    bundle.parsed = parse::parse_source(*bundle.source);
+    if (!bundle.parsed.ok()) {
+        bundle.diagnostics = bundle.parsed.diagnostics;
+        return bundle;
+    }
+    Loader loader;
+    loader.load_imports(*bundle.parsed.program, std::filesystem::path(source_path).parent_path(), bundle);
+    return bundle;
+}
+
+}  // namespace walk::sema

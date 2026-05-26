@@ -7,7 +7,7 @@ expected_dir="$repo_root/tests/conformance/expected"
 tmp_root="$repo_root/tests/conformance/tmp"
 
 usage() {
-    echo "usage: WALK_REF=<path> [WALK_CANDIDATE=<path>] tests/conformance/run.sh --record|--verify|--parse" >&2
+    echo "usage: WALK_REF=<path> [WALK_CANDIDATE=<path>] tests/conformance/run.sh --record|--verify|--parse|--check|--fail-diagnostics" >&2
 }
 
 if [ "$#" -ne 1 ]; then
@@ -17,7 +17,7 @@ fi
 
 action="$1"
 case "$action" in
-    --record|--verify|--parse)
+    --record|--verify|--parse|--check|--fail-diagnostics)
         ;;
     *)
         usage
@@ -25,7 +25,7 @@ case "$action" in
         ;;
 esac
 
-if [ "${WALK_REF:-}" = "" ]; then
+if [ "$action" != "--fail-diagnostics" ] && [ "${WALK_REF:-}" = "" ]; then
     echo "WALK_REF is required" >&2
     exit 2
 fi
@@ -43,13 +43,20 @@ resolve_tool() {
     esac
 }
 
-walk_ref="$(resolve_tool "$WALK_REF")"
+walk_ref=""
+if [ "${WALK_REF:-}" != "" ]; then
+    walk_ref="$(resolve_tool "$WALK_REF")"
+fi
 walk_candidate=""
 if [ "${WALK_CANDIDATE:-}" != "" ]; then
     walk_candidate="$(resolve_tool "$WALK_CANDIDATE")"
 fi
-if [ "$action" = "--parse" ] && [ "$walk_candidate" = "" ]; then
-    echo "WALK_CANDIDATE is required for --parse" >&2
+if { [ "$action" = "--parse" ] || [ "$action" = "--check" ] || [ "$action" = "--fail-diagnostics" ]; } && [ "$walk_candidate" = "" ]; then
+    echo "WALK_CANDIDATE is required for $action" >&2
+    exit 2
+fi
+if [ "$action" = "--check" ] && [ "$walk_ref" = "" ]; then
+    echo "WALK_REF is required for --check" >&2
     exit 2
 fi
 
@@ -185,6 +192,28 @@ run_parse_case() {
     status_class "$code" >"$status_file"
 }
 
+run_check_case() {
+    compiler="$1"
+    label="$2"
+    id="$3"
+    source="$4"
+    cwd="$5"
+
+    base="$(actual_base "$label" "$id")"
+    mkdir -p "$(dirname -- "$base")"
+    stdout_file="$base.stdout"
+    stderr_file="$base.stderr"
+    status_file="$base.status"
+    rm -f "$stdout_file" "$stderr_file" "$status_file"
+
+    set +e
+    (cd "$repo_root/$cwd" && "$compiler" check --warnings=error "$source") >"$stdout_file" 2>"$stderr_file"
+    code=$?
+    set -e
+
+    status_class "$code" >"$status_file"
+}
+
 validate_kind_status() {
     kind="$1"
     id="$2"
@@ -301,6 +330,55 @@ verify_parse_case_for() {
     validate_kind_status "$kind" "$id" "$actual_prefix.status"
 }
 
+verify_check_case() {
+    id="$1"
+    kind="$2"
+    source="$3"
+    cwd="$4"
+
+    run_check_case "$walk_ref" reference "$id" "$source" "$cwd"
+    run_check_case "$walk_candidate" candidate "$id" "$source" "$cwd"
+    reference_prefix="$(actual_base reference "$id")"
+    candidate_prefix="$(actual_base candidate "$id")"
+    validate_kind_status "$kind" "$id" "$reference_prefix.status"
+    validate_kind_status "$kind" "$id" "$candidate_prefix.status"
+    compare_file "$reference_prefix.status" "$candidate_prefix.status" "candidate $id check status"
+    compare_file "$reference_prefix.stdout" "$candidate_prefix.stdout" "candidate $id check stdout"
+    compare_file "$reference_prefix.stderr" "$candidate_prefix.stderr" "candidate $id check stderr"
+}
+
+verify_fail_diagnostic_case() {
+    id="$1"
+    kind="$2"
+    source="$3"
+    cwd="$4"
+
+    run_check_case "$walk_candidate" candidate "$id" "$source" "$cwd"
+    candidate_prefix="$(actual_base candidate "$id")"
+    validate_kind_status "$kind" "$id" "$candidate_prefix.status"
+    expected_prefix="$(expected_base "$id")"
+    compare_file "$expected_prefix.status" "$candidate_prefix.status" "candidate $id status"
+    compare_file "$expected_prefix.stdout" "$candidate_prefix.stdout" "candidate $id stdout"
+    compare_file "$expected_prefix.stderr" "$candidate_prefix.stderr" "candidate $id stderr"
+}
+
+is_check_case() {
+    kind="$1"
+    mode="$2"
+    case "$kind" in
+        pass|fail|compat)
+            return 0
+            ;;
+        walktop)
+            [ "$mode" = "check" ]
+            return
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
 manifest_sources_for_kind() {
     kind="$1"
     awk -F '\t' -v kind="$kind" 'NF && $1 !~ /^#/ && $2 == kind { print $4 }' "$manifest" | sort -u
@@ -392,6 +470,37 @@ while IFS="$tab" read -r id kind mode source cwd stdin_key native; do
         continue
     fi
 
+    if [ "$action" = "--check" ]; then
+        if ! is_check_case "$kind" "$mode"; then
+            continue
+        fi
+        verify_check_case "$id" "$kind" "$source" "$cwd"
+        case "$kind" in
+            pass)
+                pass_ok=$((pass_ok + 1))
+                ;;
+            fail)
+                fail_ok=$((fail_ok + 1))
+                ;;
+            compat)
+                compat_ok=$((compat_ok + 1))
+                ;;
+            walktop)
+                walktop_ok=$((walktop_ok + 1))
+                ;;
+        esac
+        continue
+    fi
+
+    if [ "$action" = "--fail-diagnostics" ]; then
+        if [ "$kind" != "fail" ]; then
+            continue
+        fi
+        verify_fail_diagnostic_case "$id" "$kind" "$source" "$cwd"
+        fail_ok=$((fail_ok + 1))
+        continue
+    fi
+
     case "$action" in
         --record)
             record_case "$id" "$kind" "$mode" "$source" "$cwd" "$stdin_key"
@@ -434,6 +543,21 @@ if [ "$action" = "--parse" ]; then
     echo "conformance parse: $pass_ok pass fixtures ok"
     echo "conformance parse: $fail_ok syntax fail fixtures ok"
     echo "conformance parse: ok"
+    exit 0
+fi
+
+if [ "$action" = "--check" ]; then
+    echo "conformance check: $pass_ok pass fixtures ok"
+    echo "conformance check: $fail_ok fail fixtures ok"
+    echo "conformance check: $compat_ok compat fixtures ok"
+    echo "conformance check: $walktop_ok walktop fixtures ok"
+    echo "conformance check: ok"
+    exit 0
+fi
+
+if [ "$action" = "--fail-diagnostics" ]; then
+    echo "conformance fail diagnostics: $fail_ok fail fixtures ok"
+    echo "conformance fail diagnostics: ok"
     exit 0
 fi
 

@@ -8,6 +8,7 @@
 - Phase 2 runtime extraction with `runtime/walk_runtime.h`, `runtime/walk_runtime.c`, host platform C files, and direct C runtime tests for allocation, strings, arrays, process, files, terminal helpers, and runtime errors.
 - Phase 3 C++ compiler skeleton under `compiler/`, with `make walk`, `make test`, C++ command dispatch, version/help behavior, deterministic diagnostics, source loading support, and a C++ unit-test harness.
 - Phase 4 C++ frontend pieces under `compiler/lex/`, `compiler/parse/`, and `compiler/ast/`, with tokenization, indentation handling, AST arena ownership, parser diagnostics, and `walk-cpp check --parse-only`.
+- Phase 5 C++ semantic checker under `compiler/sema/`, with type checking, scope/name resolution, module/export resolution, built-in signatures, warning handling, and normal `walk-cpp check`.
 
 ### Changed
 
@@ -16,6 +17,7 @@
 - Native builds now link emitted C with the Walk runtime and platform source files, and release artifacts include a runtime source archive for installed compilers.
 - `scripts/install-local.sh` and `scripts/release.sh` now build a current-host `walk-cpp` candidate artifact beside the Go reference `walk` while the port is in progress.
 - `tests/conformance/run.sh` now supports `--parse` to compare reference compiler syntax accept/reject behavior with the C++ parse-only candidate.
+- `tests/conformance/run.sh` now supports `--check` and `--fail-diagnostics` to compare C++ semantic check behavior and exact fail diagnostics against the reference oracle.
 
 ## v5.14.1 - Systems Compiler Port Contract
 

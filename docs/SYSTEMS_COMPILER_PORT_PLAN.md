@@ -407,7 +407,7 @@ Update this table at the end of every porting phase.
 | 2. Runtime Extraction | Complete | Generated C links against `runtime/walk_runtime.c` with current tests passing |
 | 3. C++ Skeleton | Complete | `make walk` builds a C++ `walk` that supports version/help and test harness entrypoints |
 | 4. Lexer, Parser, AST | Complete | C++ frontend parses current pass fixtures and rejects fail syntax fixtures |
-| 5. Semantic Checker | Not started | C++ checker matches current type, name, module, and warning diagnostics |
+| 5. Semantic Checker | Complete | C++ checker matches current type, name, module, and warning diagnostics |
 | 6. C Backend | Not started | C++ compiler emits C that passes native behavior and snapshot checks |
 | 7. CLI, Project, Package | Not started | C++ `walk` supports current command surface and project/package tests |
 | 8. Runtime Module Parity | Not started | Draft runtime modules pass native tests through the C runtime |
@@ -1033,6 +1033,22 @@ make test
 WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --check
 WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --fail-diagnostics
 go test -count=1 ./...
+```
+
+Completed on 2026-05-26:
+
+```text
+compiler/sema/ now contains the C++ semantic checker, deterministic scope tracking, type helpers, builtin module signatures, and module loading for normal source-file checks.
+walk-cpp check now parses, loads imports, checks type/name/module/export rules, reports warnings, supports --warnings=off|default|error, and does not delegate to the Go reference compiler.
+tests/conformance/run.sh --check compares reference and C++ check behavior across current pass, fail, compat, and walktop check fixtures.
+tests/conformance/run.sh --fail-diagnostics verifies exact C++ fail diagnostics against the recorded oracle artifacts.
+make test passed and reported C++ compiler tests passed
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --check passed with 20 pass fixtures, 52 fail fixtures, 4 compat fixtures, and 2 walktop fixtures
+WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --fail-diagnostics passed with 52 fail fixtures
+go test -count=1 ./... passed
+scripts/release.sh v5.14-cpp-sema <temp>/release passed with 8 checksummed artifacts
+the current-host walk-cpp release artifact reported v5.14-cpp-sema and passed check --warnings=error tests/pass/hello.walk
+the current-host walktop release artifact passed --once --fixture tools/walktop/testdata/basic
 ```
 
 Phase completion prompt:

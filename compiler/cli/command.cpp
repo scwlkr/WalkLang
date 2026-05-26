@@ -1,11 +1,14 @@
 #include "cli/command.h"
 
 #include "parse/parser.h"
+#include "sema/checker.h"
+#include "sema/modules.h"
 #include "support/diagnostic.h"
 #include "support/source_file.h"
 #include "support/version.h"
 
 #include <algorithm>
+#include <optional>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -41,52 +44,131 @@ std::string format_simple_error(std::string code, std::string message) {
     return format_diagnostic(diagnostic) + "\n";
 }
 
-CommandResult parse_only_check(const std::vector<std::string>& args) {
-    bool parse_only = false;
-    std::string source_path;
+enum class WarningMode {
+    Off,
+    Default,
+    Error,
+};
 
+struct CheckArgs {
+    bool parse_only = false;
+    WarningMode warning_mode = WarningMode::Default;
+    std::string source_path;
+};
+
+std::optional<WarningMode> parse_warning_value(const std::string& value) {
+    if (value == "off") {
+        return WarningMode::Off;
+    }
+    if (value == "default") {
+        return WarningMode::Default;
+    }
+    if (value == "error") {
+        return WarningMode::Error;
+    }
+    return std::nullopt;
+}
+
+std::string check_usage() {
+    return "usage: walk-cpp check [--parse-only] [--warnings=off|default|error] <source.walk>";
+}
+
+std::optional<CheckArgs> parse_check_args(const std::vector<std::string>& args, CommandResult& error) {
+    CheckArgs parsed;
     for (std::size_t index = 0; index < args.size(); ++index) {
         const std::string& arg = args[index];
         if (arg == "--parse-only") {
-            parse_only = true;
-            continue;
-        }
-        if (arg == "--warnings=off" || arg == "--warnings=default" || arg == "--warnings=error") {
+            parsed.parse_only = true;
             continue;
         }
         if (arg == "--warnings") {
-            if (index + 1 >= args.size() || (args[index + 1] != "off" && args[index + 1] != "default" && args[index + 1] != "error")) {
-                return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk-cpp check --parse-only [--warnings=off|default|error] <source.walk>")};
+            if (index + 1 >= args.size()) {
+                error = {kUsageExitCode, "", format_simple_error("W0005", check_usage())};
+                return std::nullopt;
             }
+            const std::optional<WarningMode> mode = parse_warning_value(args[index + 1]);
+            if (!mode) {
+                error = {kUsageExitCode, "", format_simple_error("W0005", check_usage())};
+                return std::nullopt;
+            }
+            parsed.warning_mode = *mode;
             ++index;
             continue;
         }
+        if (arg.rfind("--warnings=", 0) == 0) {
+            const std::optional<WarningMode> mode = parse_warning_value(arg.substr(std::string("--warnings=").size()));
+            if (!mode) {
+                error = {kUsageExitCode, "", format_simple_error("W0005", check_usage())};
+                return std::nullopt;
+            }
+            parsed.warning_mode = *mode;
+            continue;
+        }
         if (!arg.empty() && arg[0] == '-') {
-            return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk-cpp check --parse-only [--warnings=off|default|error] <source.walk>")};
+            error = {kUsageExitCode, "", format_simple_error("W0005", check_usage())};
+            return std::nullopt;
         }
-        if (!source_path.empty()) {
-            return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk-cpp check --parse-only [--warnings=off|default|error] <source.walk>")};
+        if (!parsed.source_path.empty()) {
+            error = {kUsageExitCode, "", format_simple_error("W0005", check_usage())};
+            return std::nullopt;
         }
-        source_path = arg;
+        parsed.source_path = arg;
+    }
+    if (parsed.source_path.empty()) {
+        error = {kUsageExitCode, "", format_simple_error("W0005", check_usage())};
+        return std::nullopt;
+    }
+    return parsed;
+}
+
+CommandResult handle_warnings(const std::vector<sema::Warning>& warnings, WarningMode mode) {
+    if (mode == WarningMode::Off || warnings.empty()) {
+        return {0, "", ""};
+    }
+    std::ostringstream stderr_text;
+    for (const sema::Warning& warning : warnings) {
+        stderr_text << format_diagnostic(Diagnostic(DiagnosticSeverity::Warning, "", warning.message, warning.range)) << "\n";
+    }
+    if (mode == WarningMode::Error) {
+        stderr_text << "warnings-as-errors: " << warnings.size() << " warning(s)\n";
+        return {kDiagnosticExitCode, "", stderr_text.str()};
+    }
+    return {0, "", stderr_text.str()};
+}
+
+CommandResult parse_only_check(const std::vector<std::string>& args) {
+    CommandResult parse_error;
+    const std::optional<CheckArgs> parsed = parse_check_args(args, parse_error);
+    if (!parsed) {
+        return parse_error;
     }
 
-    if (!parse_only) {
-        return {kDiagnosticExitCode, "", format_simple_error("W0001", "command \"check\" is not ported in this phase without --parse-only")};
-    }
-    if (source_path.empty()) {
-        return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk-cpp check --parse-only [--warnings=off|default|error] <source.walk>")};
+    if (parsed->parse_only) {
+        Result<SourceFile> loaded = SourceFile::load(parsed->source_path);
+        if (!loaded.ok()) {
+            return {kDiagnosticExitCode, "", format_simple_error("W0006", loaded.error())};
+        }
+        SourceFile source = loaded.take_value();
+        parse::ParseResult parsed_source = parse::parse_source(source);
+        if (!parsed_source.ok()) {
+            return {kDiagnosticExitCode, "", parsed_source.diagnostics.format(&source)};
+        }
+        return {0, "", ""};
     }
 
-    Result<SourceFile> loaded = SourceFile::load(source_path);
-    if (!loaded.ok()) {
-        return {kDiagnosticExitCode, "", format_simple_error("W0006", loaded.error())};
+    sema::ProgramBundle bundle = sema::load_program_with_modules(parsed->source_path);
+    if (!bundle.ok()) {
+        return {kDiagnosticExitCode, "", bundle.diagnostics.format(bundle.source.get())};
     }
-    SourceFile source = loaded.take_value();
-    parse::ParseResult parsed = parse::parse_source(source);
-    if (!parsed.ok()) {
-        return {kDiagnosticExitCode, "", parsed.diagnostics.format(&source)};
+    sema::CheckResult checked = sema::check_programs(*bundle.parsed.program, bundle.modules);
+    if (!checked.ok()) {
+        return {kDiagnosticExitCode, "", checked.diagnostics.format(bundle.source.get())};
     }
-    return {0, "", ""};
+    CommandResult warning_result = handle_warnings(checked.warnings, parsed->warning_mode);
+    if (warning_result.exit_code != 0) {
+        return warning_result;
+    }
+    return {0, "ok\n", warning_result.stderr_text};
 }
 
 }  // namespace
@@ -95,7 +177,7 @@ std::vector<CommandInfo> command_table() {
     return {
         {"version", "print compiler version", true},
         {"help", "show this help", true},
-        {"check", "parse-only frontend check", true},
+        {"check", "semantic check", true},
         {"emit-c", "not ported in this phase", false},
         {"run", "not ported in this phase", false},
         {"build", "not ported in this phase", false},
@@ -125,7 +207,7 @@ std::string help_text() {
         }
         output << command.summary << "\n";
     }
-    output << "\nPhase 4 ports check --parse-only; other language commands remain staged for later phases.\n";
+    output << "\nPhase 5 ports check; other language commands remain staged for later phases.\n";
     return output.str();
 }
 

@@ -56,9 +56,28 @@ void test_help_command_lists_phase_commands() {
 
 void test_unported_command_is_diagnostic_not_delegation() {
     const walk::cli::CommandResult result = walk::cli::dispatch({"check", "examples/hello.walk"});
-    expect_eq_int("unported exit", result.exit_code, 1);
-    expect_eq("unported stdout", result.stdout_text, "");
-    expect_eq("unported stderr", result.stderr_text, "error[W0001]: command \"check\" is not ported in this phase without --parse-only\n");
+    expect_eq_int("check exit", result.exit_code, 0);
+    expect_eq("check stdout", result.stdout_text, "ok\n");
+    expect_eq("check stderr", result.stderr_text, "");
+}
+
+void test_check_warnings_error_mode() {
+    const std::filesystem::path dir = std::filesystem::path("build") / "cpp-tests";
+    std::filesystem::create_directories(dir);
+    const std::filesystem::path path = dir / "warning.walk";
+    {
+        std::ofstream output(path, std::ios::binary);
+        output << "var: x = 1\n";
+        output << "if: true\n";
+        output << "    var: x = 2\n";
+        output << "    out: x\n";
+    }
+
+    const walk::cli::CommandResult result = walk::cli::dispatch({"check", "--warnings=error", path.string()});
+    expect_eq_int("warnings error exit", result.exit_code, 1);
+    expect_eq("warnings error stdout", result.stdout_text, "");
+    expect_true("warnings error stderr", result.stderr_text.find("warning: x shadows outer name") != std::string::npos, "missing warning");
+    expect_true("warnings error summary", result.stderr_text.find("warnings-as-errors: 1 warning(s)") != std::string::npos, "missing warning summary");
 }
 
 void test_unknown_command_is_usage_error() {
@@ -98,7 +117,7 @@ void test_diagnostic_formatting_with_source() {
     expect_eq(
         "diagnostic source format",
         walk::format_diagnostic(diagnostic, &source),
-        "main.walk:2:1: error[W1234]: sample message\ntwo three\n^~~");
+        "main.walk:2:1: error[W1234]: sample message\n\ntwo three\n^");
 }
 
 void test_diagnostic_set_sorts_deterministically() {
@@ -110,24 +129,29 @@ void test_diagnostic_set_sorts_deterministically() {
     expect_eq(
         "diagnostic set format",
         diagnostics.format(&source),
-        "main.walk:1:1: error[W1000]: first\nfirst\n^~~~~\nmain.walk:2:1: warning[W2000]: second\nsecond\n^~~~~~\n");
+        "main.walk:1:1: error[W1000]: first\n\nfirst\n^\nmain.walk:2:1: warning: second\n\nsecond\n^\n");
 }
 
 }  // namespace
 
 int run_lexer_tests();
 int run_parser_tests();
+int run_checker_tests();
+int run_module_tests();
 
 int main() {
     test_version_command();
     test_help_command_lists_phase_commands();
     test_unported_command_is_diagnostic_not_delegation();
+    test_check_warnings_error_mode();
     test_unknown_command_is_usage_error();
     test_source_file_loading_and_positions();
     test_diagnostic_formatting_with_source();
     test_diagnostic_set_sorts_deterministically();
     failures += run_lexer_tests();
     failures += run_parser_tests();
+    failures += run_checker_tests();
+    failures += run_module_tests();
 
     if (failures != 0) {
         std::cerr << failures << " C++ compiler test(s) failed\n";
