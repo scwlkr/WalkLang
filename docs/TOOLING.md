@@ -149,28 +149,30 @@ lives under `tools/walktop/`, and it builds into its own native command instead
 of a Go-side `walk` subcommand.
 
 ```bash
-walk build --mode release --warnings=error tools/walktop/src/main.walk -o build/walktop
+walk-cpp build --mode release --warnings=error tools/walktop/src/main.walk -o build/walktop
 NO_COLOR=1 build/walktop --once --fixture tools/walktop/testdata/basic
 ```
 
-The normal source install flow builds and installs `walktop` beside `walk`.
+The normal source install and release-artifact flows build `walktop` through
+the C++ compiler candidate and install it beside `walk`.
 
 ## C++ Compiler Candidate
 
 The systems compiler port builds a candidate executable named `walk-cpp`:
 
 ```bash
-make walk WALK_VERSION=v5.14.1-phase9-dev
+make walk WALK_VERSION=v5.14.1-phase10-dev
 ./build/walk-cpp version
 ./build/walk-cpp help
 make test
 ```
 
-As of Phase 9 of the systems compiler port, `walk-cpp` supports the current
+As of Phase 10 of the systems compiler port, `walk-cpp` supports the current
 compiler, project/package, formatter, docs, debug-map, LSP initialize/
-diagnostics/formatting, REPL, and static docs-site generation paths without
-shelling out to the Go reference compiler. The Go reference compiler remains in
-the repository until the final removal phase.
+diagnostics/formatting, REPL, static docs-site generation, and `walktop`
+build/test/install/release paths without shelling out to the Go reference
+compiler for those paths. The Go reference compiler remains in the repository
+until the final removal phase.
 
 ## Non-Goals
 

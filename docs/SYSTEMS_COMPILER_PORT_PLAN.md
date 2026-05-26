@@ -412,7 +412,7 @@ Update this table at the end of every porting phase.
 | 7. CLI, Project, Package | Complete | C++ `walk` supports current command surface and project/package tests |
 | 8. Runtime Module Parity | Complete | Draft runtime modules pass native tests through the C runtime |
 | 9. Tooling Parity | Complete | Formatter, docs generator, debug map, LSP, and REPL pass parity checks |
-| 10. Standard Platform Parity | Not started | `walktop` builds, tests, runs, installs, and releases through C++ `walk` |
+| 10. Standard Platform Parity | Complete | `walktop` builds, tests, runs, installs, and releases through C++ `walk` |
 | 11. Remove Go And JavaScript | Not started | No Go or JavaScript source remains; docs/site still build |
 | 12. Final Release Gate | Not started | C++/C release artifacts, checksums, install, docs, and language breakdown are verified |
 
@@ -1425,7 +1425,7 @@ Phase completion prompt:
 
 ## Phase 10: Standard Platform Parity
 
-Status: Not started
+Status: Complete
 
 Goal: prove the first standard-platform tool through the permanent compiler.
 
@@ -1465,6 +1465,40 @@ scripts/install-local.sh v5.14-cpp-platform
 walk version
 command -v walktop
 NO_COLOR=1 walktop --once --fixture tools/walktop/testdata/basic
+```
+
+Completed on 2026-05-26:
+
+```text
+scripts/install-local.sh now builds walktop through the installed walk-cpp
+candidate by default.
+scripts/release.sh now builds the current-host walktop release artifact through
+build/walk-cpp by default.
+docs/INSTALL.md, docs/TOOLING.md, docs/STANDARD_PLATFORM.md, and
+docs/RELEASE_NOTES.md record the C++ standard-platform path.
+make walk WALK_VERSION=v5.14-cpp-platform passed
+cd tools/walktop && ../../build/walk-cpp check --warnings=error passed
+cd tools/walktop && ../../build/walk-cpp test --warnings=error passed with 4 tests
+./build/walk-cpp build --mode release --warnings=error tools/walktop/src/main.walk -o build/walktop passed
+NO_COLOR=1 ./build/walktop --once --fixture tools/walktop/testdata/basic matched the deterministic dashboard
+NO_COLOR=1 ./build/walktop --once passed live local OS-command mode
+scripts/install-local.sh v5.14-cpp-platform refreshed the local walk, walk-cpp,
+runtime source, and walktop install through the default C++ walktop build driver
+walk version and walk-cpp version reported v5.14-cpp-platform
+command -v walktop reported ~/.local/bin/walktop
+NO_COLOR=1 walktop --once --fixture tools/walktop/testdata/basic matched the deterministic dashboard
+NO_COLOR=1 walktop --once passed live local OS-command mode
+scripts/release.sh v5.14-cpp-platform <temp>/release produced 5 walk artifacts,
+1 runtime source archive, 1 current-host walk-cpp artifact, 1 current-host
+walktop artifact built by walk-cpp, and SHA256SUMS
+shasum -a 256 -c SHA256SUMS passed for all 8 artifacts
+the current-host walk-cpp release artifact reported v5.14-cpp-platform
+the current-host walktop release artifact passed --once --fixture tools/walktop/testdata/basic
+make test passed and reported C++ compiler tests passed
+go test -count=1 ./... passed
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --check passed with 2 walktop fixtures
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --native passed with 2 walktop fixtures and 36 native executions
+WALK_BIN=$PWD/build/walk-cpp scripts/stress-compatibility.sh passed and reported compatibility stress ok
 ```
 
 Phase completion prompt:

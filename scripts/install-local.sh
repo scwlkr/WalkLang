@@ -38,7 +38,7 @@ cp runtime/platform/walk_platform_posix.c "$runtime_install_dir/platform/walk_pl
 cp runtime/platform/walk_platform_windows.c "$runtime_install_dir/platform/walk_platform_windows.c"
 echo "$runtime_install_dir"
 
-build_driver="${WALK_BUILD_BIN:-$binary}"
+build_driver="${WALK_BUILD_BIN:-$cpp_binary}"
 WALK_RUNTIME_DIR="$runtime_install_dir" "$build_driver" build --mode release --warnings=error tools/walktop/src/main.walk -o "$work_dir/walktop" >/dev/null
 cp "$work_dir/walktop" "$tool_binary"
 chmod +x "$tool_binary"

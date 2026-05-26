@@ -72,9 +72,8 @@ add_checksum "$walk_cpp_name"
 walktop_name="walktop-${version}-${host_goos}-${host_goarch}${host_ext}"
 walktop_path="$out_dir/$walktop_name"
 
-go build -trimpath -ldflags "-X main.version=${version}" -o "$work_dir/walk" ./cmd/walk
-build_driver="${WALK_RELEASE_BUILD_BIN:-$work_dir/walk}"
-"$build_driver" build --mode release --warnings=error tools/walktop/src/main.walk -o "$work_dir/walktop${host_ext}" >/dev/null
+build_driver="${WALK_RELEASE_BUILD_BIN:-build/walk-cpp}"
+WALK_RUNTIME_DIR="$PWD/runtime" "$build_driver" build --mode release --warnings=error tools/walktop/src/main.walk -o "$work_dir/walktop${host_ext}" >/dev/null
 cp "$work_dir/walktop${host_ext}" "$walktop_path"
 echo "$walktop_path"
 add_checksum "$walktop_name"

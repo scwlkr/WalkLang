@@ -125,16 +125,16 @@ walk debug-map -o build/debug-map.json src/main.walk</code></pre>
 <p>The map records source files, symbol names, symbol kinds, and line/column locations. It is a foundation for debugger adapters and generated-C source mapping in later backend work.</p>
 <h2 id="official-tools">Official Tools</h2>
 <p><code>walktop</code> is the first official standalone WalkLang-built tool. Its source lives under <code>tools/walktop/</code>, and it builds into its own native command instead of a Go-side <code>walk</code> subcommand.</p>
-<pre><code class="language-bash">walk build --mode release --warnings=error tools/walktop/src/main.walk -o build/walktop
+<pre><code class="language-bash">walk-cpp build --mode release --warnings=error tools/walktop/src/main.walk -o build/walktop
 NO_COLOR=1 build/walktop --once --fixture tools/walktop/testdata/basic</code></pre>
-<p>The normal source install flow builds and installs <code>walktop</code> beside <code>walk</code>.</p>
+<p>The normal source install and release-artifact flows build <code>walktop</code> through the C++ compiler candidate and install it beside <code>walk</code>.</p>
 <h2 id="c-compiler-candidate">C++ Compiler Candidate</h2>
 <p>The systems compiler port builds a candidate executable named <code>walk-cpp</code>:</p>
-<pre><code class="language-bash">make walk WALK_VERSION=v5.14.1-phase9-dev
+<pre><code class="language-bash">make walk WALK_VERSION=v5.14.1-phase10-dev
 ./build/walk-cpp version
 ./build/walk-cpp help
 make test</code></pre>
-<p>As of Phase 9 of the systems compiler port, <code>walk-cpp</code> supports the current compiler, project/package, formatter, docs, debug-map, LSP initialize/ diagnostics/formatting, REPL, and static docs-site generation paths without shelling out to the Go reference compiler. The Go reference compiler remains in the repository until the final removal phase.</p>
+<p>As of Phase 10 of the systems compiler port, <code>walk-cpp</code> supports the current compiler, project/package, formatter, docs, debug-map, LSP initialize/ diagnostics/formatting, REPL, static docs-site generation, and <code>walktop</code> build/test/install/release paths without shelling out to the Go reference compiler for those paths. The Go reference compiler remains in the repository until the final removal phase.</p>
 <h2 id="non-goals">Non-Goals</h2>
 <p>Professional tooling does not add:</p>
 <pre><code class="language-text">JetBrains plugin implementation

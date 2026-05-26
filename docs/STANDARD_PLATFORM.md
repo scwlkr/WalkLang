@@ -94,7 +94,9 @@ tools/walktop/
 ```
 
 `walktop` is built from WalkLang source into a standalone native command and
-installed by the normal local install flow after it passes the release gate.
+installed by the normal local install flow after it passes the release gate. In
+the systems compiler port, that standard install and release path builds
+`walktop` through the C++ compiler candidate.
 
 ## walktop v0 Scope
 
@@ -160,7 +162,7 @@ The first implementation slice shipped:
 - `walktop --once`, `walktop --frames 5`, and `walktop --fixture tools/walktop/testdata/basic`.
 - Fixture-mode tests for parse, render, argument, and warning behavior.
 - End-to-end native build/run proof for `walktop --once --fixture ...`.
-- Install and release scripts that build `walktop` from WalkLang source.
+- Install and release scripts that build `walktop` from WalkLang source through the C++ compiler candidate.
 - Docs, generated docs, status, and release notes for the shipped slice.
 
 No new terminal primitive was required for this slice.

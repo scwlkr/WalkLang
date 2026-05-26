@@ -11,8 +11,9 @@ oracle, is complete. Phase 2, runtime extraction, is complete. Phase 3, the C++
 skeleton, is complete. Phase 4, lexer, parser, and AST construction, is
 complete. Phase 5, semantic checking, is complete. Phase 6, the C backend, is
 complete. Phase 7, CLI project and package workflows, is complete. Phase 8,
-runtime module parity, is complete. Phase 9, tooling parity, is complete. The
-next porting step is Phase 10, standard platform parity.
+runtime module parity, is complete. Phase 9, tooling parity, is complete. Phase
+10, standard platform parity, is complete. The next porting step is Phase 11,
+remove Go and JavaScript.
 
 `v5.14.1` is the single project version for the compiler, tooling, docs,
 release artifacts, and implemented language surface. Feature maturity is
@@ -46,7 +47,8 @@ through `term` APIs, and is installed by the normal local install flow beside
 under `runtime/`; release artifacts include a runtime source archive, and source
 install copies that runtime beside the installed compiler. Source install and
 release artifact generation now also build the current-host `walk-cpp`
-candidate, which is not yet a replacement for the Go reference compiler.
+candidate and use that candidate to build `walktop` by default. `walk-cpp` is
+not yet a replacement for the Go reference compiler.
 
 Systems compiler port state on 2026-05-26: Phase 1 now records the current
 reference compiler as an executable conformance oracle under
@@ -88,7 +90,9 @@ debug-map output under `compiler/debug_map/`, stdio LSP initialization,
 diagnostics, and formatting under `compiler/lsp/`, and the expression REPL
 wrapper under `compiler/repl/`. `scripts/build-docs-site.sh` now uses the C++
 toolchain by default, and the Go site generator under `scripts/sitegen.go` has
-been removed.
+been removed. Phase 10 proves the first standard-platform slice through the C++
+candidate: `walktop` checks, tests, builds, fixture-runs, live-runs, installs,
+and releases through `walk-cpp` by default.
 
 Phase 1 conformance oracle verification on 2026-05-26:
 
@@ -262,6 +266,33 @@ WALK_REF=~/.local/bin/walk WALK_CANDIDATE=~/.local/bin/walk-cpp WALK_RUNTIME_DIR
 NO_COLOR=1 walktop --once --fixture tools/walktop/testdata/basic passed after the local refresh
 ```
 
+Phase 10 standard platform parity verification on 2026-05-26:
+
+```text
+make walk WALK_VERSION=v5.14-cpp-platform passed
+cd tools/walktop && ../../build/walk-cpp check --warnings=error passed
+cd tools/walktop && ../../build/walk-cpp test --warnings=error passed with 4 tests
+./build/walk-cpp build --mode release --warnings=error tools/walktop/src/main.walk -o build/walktop passed
+NO_COLOR=1 ./build/walktop --once --fixture tools/walktop/testdata/basic matched the deterministic dashboard
+NO_COLOR=1 ./build/walktop --once passed live local OS-command mode
+scripts/install-local.sh v5.14-cpp-platform refreshed the local walk, walk-cpp, runtime source, and walktop install through the default C++ walktop build driver
+walk version reported v5.14-cpp-platform
+walk-cpp version reported v5.14-cpp-platform
+command -v walktop reported ~/.local/bin/walktop
+NO_COLOR=1 walktop --once --fixture tools/walktop/testdata/basic matched the deterministic dashboard
+NO_COLOR=1 walktop --once passed live local OS-command mode
+scripts/release.sh v5.14-cpp-platform <temp>/release produced 5 walk artifacts, 1 runtime source archive, 1 current-host walk-cpp artifact, 1 current-host walktop artifact built by walk-cpp, and SHA256SUMS
+shasum -a 256 -c SHA256SUMS passed for all 8 artifacts
+the current-host walk-cpp release artifact reported v5.14-cpp-platform
+the current-host walktop release artifact passed --once --fixture tools/walktop/testdata/basic
+make test passed and reported C++ compiler tests passed
+go test -count=1 ./... passed
+go build -trimpath -ldflags "-X main.version=v5.14.1" -o build/walk-ref ./cmd/walk passed
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --check passed with 20 pass fixtures, 52 fail fixtures, 4 compat fixtures, 2 walktop fixtures, and ok
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --native passed with 20 pass fixtures, 3 compat fixtures, 11 runtime module fixtures, 2 walktop fixtures, and 36 native executions
+WALK_BIN=$PWD/build/walk-cpp scripts/stress-compatibility.sh passed and reported compatibility stress ok
+```
+
 Last release verification on 2026-05-26:
 
 ```text
@@ -317,7 +348,7 @@ git diff --cached --check passed
 ```
 
 Known local state: no unrelated playground edits are present in the current
-Phase 7 CLI/project/package worktree.
+Phase 10 standard-platform parity worktree.
 
 Standard platform implementation on 2026-05-26: WalkLang's intended product
 shape is recorded as one general-use language with one standard platform in one
@@ -395,6 +426,6 @@ WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported com
 git diff --check -- . ':(exclude)playground/hangman.walk' ':(exclude)playground/hangman-v2.walk' passed
 ```
 
-Next: begin Phase 10 in `docs/SYSTEMS_COMPILER_PORT_PLAN.md` by proving
-`walktop` and the first standard-platform slice through C++ check/test/build,
-fixture/live, install, and release-script paths.
+Next: begin Phase 11 in `docs/SYSTEMS_COMPILER_PORT_PLAN.md` by removing the
+Go reference compiler and JavaScript site assets only after the completed
+Phase 10 C++/C standard-platform proof stays green.

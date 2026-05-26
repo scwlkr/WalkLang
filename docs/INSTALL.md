@@ -25,11 +25,12 @@ walktop-v5.14.1-<release-host-os>-<release-host-arch>
 SHA256SUMS
 ```
 
-`scripts/release.sh` cross-builds the `walk` compiler artifacts and builds one
-current-host `walk-cpp` port-candidate artifact plus one current-host `walktop`
-artifact from WalkLang source. It also packages the C runtime source used by
-native builds. Source install always installs the runtime source and builds the
-local `walk-cpp` and `walktop` binaries.
+`scripts/release.sh` cross-builds the `walk` compiler artifacts, builds one
+current-host `walk-cpp` port-candidate artifact, then uses that C++ compiler
+candidate to build one current-host `walktop` artifact from WalkLang source. It
+also packages the C runtime source used by native builds. Source install always
+installs the runtime source and builds the local `walk-cpp` and `walktop`
+binaries.
 
 Install on macOS or Linux:
 
@@ -91,15 +92,13 @@ directory. Override it with:
 WALK_RUNTIME_INSTALL_DIR=/path/to/runtime scripts/install-local.sh local
 ```
 
-`walk-cpp` is the systems compiler port candidate. As of Phase 7 it supports
-single-file `check`, `emit-c`, `build`, `run`, and `test`, plus project mode
-and local package commands: `init`, `fmt`, `clean`, project `check/build/test`,
-and `package init/resolve/publish`. Later docs, debug-map, LSP, and REPL
-commands still return a `not ported in this phase` diagnostic instead of
-delegating to the Go reference compiler.
+`walk-cpp` is the systems compiler port candidate. As of Phase 10 it supports
+the current compiler, project/package, formatter, docs, debug-map, LSP, REPL,
+static docs-site, and `walktop` build/test/install/release paths without
+delegating those paths to the Go reference compiler.
 
-Maintainers can force source install to build `walktop` through the C++ port
-candidate:
+Source install builds `walktop` through the installed `walk-cpp` candidate by
+default. Maintainers can override the WalkLang build driver for diagnostics:
 
 ```bash
 WALK_BUILD_BIN=build/walk-cpp scripts/install-local.sh local
@@ -157,10 +156,10 @@ scripts/release.sh v5.14.1 dist
 
 The command writes the compiler platform binaries, the runtime source archive,
 the current-host `walk-cpp` port-candidate binary, the current-host `walktop`
-binary, and `dist/SHA256SUMS`.
+binary built by `walk-cpp`, and `dist/SHA256SUMS`.
 
-Maintainers can force release artifact generation to build `walktop` through
-the C++ port candidate:
+Release artifact generation builds `walktop` through `build/walk-cpp` by
+default. Maintainers can override the WalkLang build driver for diagnostics:
 
 ```bash
 WALK_RELEASE_BUILD_BIN=build/walk-cpp scripts/release.sh v5.14.1 dist

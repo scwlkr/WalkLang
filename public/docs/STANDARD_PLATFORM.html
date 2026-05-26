@@ -107,7 +107,7 @@ docs and install flow</code></pre>
   src/walktop.walk
   tests/main_test.walk
   testdata/basic/</code></pre>
-<p><code>walktop</code> is built from WalkLang source into a standalone native command and installed by the normal local install flow after it passes the release gate.</p>
+<p><code>walktop</code> is built from WalkLang source into a standalone native command and installed by the normal local install flow after it passes the release gate. In the systems compiler port, that standard install and release path builds <code>walktop</code> through the C++ compiler candidate.</p>
 <h2 id="walktop-v0-scope">walktop v0 Scope</h2>
 <p>Minimum command surface:</p>
 <pre><code class="language-text">walktop --once
@@ -144,7 +144,7 @@ no placeholder/debug layout</code></pre>
 <li><code>walktop --once</code>, <code>walktop --frames 5</code>, and <code>walktop --fixture tools/walktop/testdata/basic</code>.</li>
 <li>Fixture-mode tests for parse, render, argument, and warning behavior.</li>
 <li>End-to-end native build/run proof for <code>walktop --once --fixture ...</code>.</li>
-<li>Install and release scripts that build <code>walktop</code> from WalkLang source.</li>
+<li>Install and release scripts that build <code>walktop</code> from WalkLang source through the C++ compiler candidate.</li>
 <li>Docs, generated docs, status, and release notes for the shipped slice.</li>
 </ul>
 <p>No new terminal primitive was required for this slice.</p>
