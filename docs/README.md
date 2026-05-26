@@ -82,8 +82,8 @@ The public docs home is configured for:
 walklang.wlkrlabs.com/docs
 ```
 
-The target public scheme is HTTPS once GitHub Pages issues the custom-domain
-certificate. `docs/STATUS.md` records the current live HTTP/HTTPS state.
+The public scheme is HTTPS, and HTTP redirects to HTTPS. `docs/STATUS.md`
+records the latest checked live HTTP/HTTPS state.
 
 Use stable, relative links inside this directory so the same Markdown works in
 GitHub and on the hosted site. Run `scripts/check-docs-site.sh` before

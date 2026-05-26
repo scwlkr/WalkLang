@@ -82,16 +82,17 @@ features:
 structs (experimental)
 methods (experimental)
 generic functions (experimental)
-do: effect calls (draft)
+do: effect calls and defer: scope cleanup (draft)
 io, parse, process, file, dir, path, json, term, http, and html APIs (draft)
 matrix APIs (planned)
-traits
-interfaces
-closures
-anonymous functions
-package manager behavior
-project config behavior
-LSP/debugger behavior
+traits (planned)
+interfaces (planned)
+closures (planned)
+anonymous functions (planned)
+package manager behavior (draft)
+project config behavior (draft)
+LSP behavior (draft)
+debugger behavior beyond debug-map (planned)
 any generated C details outside snapshots
 ```
 

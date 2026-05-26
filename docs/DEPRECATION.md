@@ -44,22 +44,29 @@ correctness fix.
 
 None.
 
-## Draft And Experimental Features
+## Draft, Experimental, And Planned Features
 
-Draft or experimental features can change without a deprecation period. They should still be called out in release notes when the change may surprise users.
+Draft or experimental features can change without a deprecation period. They
+should still be called out in release notes when the change may surprise users.
+Planned features are named direction only; they are not importable or
+compatibility-protected until implemented and documented elsewhere.
 
-Current draft or experimental areas include:
+Current draft, experimental, or planned areas include:
 
 ```text
-do: effect calls
-io, parse, process, file, dir, path, json, term, http, and html APIs
-matrix APIs
-structs
-methods
-generic functions
-traits
-interfaces
-closures
-package manager behavior
-debugger and full LSP behavior
+do: effect calls (draft)
+defer: scope cleanup (draft)
+io, parse, process, file, dir, path, json, term, http, and html APIs (draft)
+matrix APIs (planned)
+structs (experimental)
+methods (experimental)
+generic functions (experimental)
+traits (planned)
+interfaces (planned)
+closures (planned)
+anonymous functions (planned)
+package manager behavior (draft)
+project config behavior (draft)
+LSP behavior (draft)
+debugger behavior beyond debug-map (planned)
 ```

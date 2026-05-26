@@ -85,20 +85,24 @@ the migration steps</code></pre>
 <p>Removal of stable behavior normally waits for a clearly named future project version. A release may break stable behavior only for a documented safety or correctness fix.</p>
 <h2 id="current-deprecated-surface">Current Deprecated Surface</h2>
 <p>None.</p>
-<h2 id="draft-and-experimental-features">Draft And Experimental Features</h2>
-<p>Draft or experimental features can change without a deprecation period. They should still be called out in release notes when the change may surprise users.</p>
-<p>Current draft or experimental areas include:</p>
-<pre><code class="language-text">do: effect calls
-io, parse, process, file, dir, path, json, term, http, and html APIs
-matrix APIs
-structs
-methods
-generic functions
-traits
-interfaces
-closures
-package manager behavior
-debugger and full LSP behavior</code></pre>
+<h2 id="draft-experimental-and-planned-features">Draft, Experimental, And Planned Features</h2>
+<p>Draft or experimental features can change without a deprecation period. They should still be called out in release notes when the change may surprise users. Planned features are named direction only; they are not importable or compatibility-protected until implemented and documented elsewhere.</p>
+<p>Current draft, experimental, or planned areas include:</p>
+<pre><code class="language-text">do: effect calls (draft)
+defer: scope cleanup (draft)
+io, parse, process, file, dir, path, json, term, http, and html APIs (draft)
+matrix APIs (planned)
+structs (experimental)
+methods (experimental)
+generic functions (experimental)
+traits (planned)
+interfaces (planned)
+closures (planned)
+anonymous functions (planned)
+package manager behavior (draft)
+project config behavior (draft)
+LSP behavior (draft)
+debugger behavior beyond debug-map (planned)</code></pre>
 </article>
 <footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
 </div>

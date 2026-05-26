@@ -79,10 +79,11 @@ NO_COLOR=1 ./build/walktop --once --fixture tools/walktop/testdata/basic passed
 NO_COLOR=1 ./build/walktop --once passed live local OS-command mode
 ```
 
-Version-language cleanup on 2026-05-26: current-facing docs now use `v5.13.1`
-as the single project version. Historical version numbers remain only in
-release notes and migration history. `CONTEXT.md` records the resolved terms
-**Project Version**, **Feature Status**, and **Historical Version Reference**.
+Version-language cleanup baseline on 2026-05-26: current-facing docs moved to
+the single project version model during the `v5.13.1` cleanup. The current
+project version is `v5.14.0`; historical version numbers remain in release
+notes and migration history. `CONTEXT.md` records the resolved terms **Project
+Version**, **Feature Status**, and **Historical Version Reference**.
 
 Version-language cleanup verification on 2026-05-26:
 
@@ -112,6 +113,29 @@ go test -count=1 ./... passed
 git diff --check -- . ':(exclude)playground/hangman.walk' ':(exclude)playground/hangman-v2.walk' passed
 git diff --cached --check passed
 active-code search found no old developer-facing milestone path or test-name labels outside release notes, migration history, and deprecated docs
+```
+
+Docs alignment cleanup on 2026-05-26: active docs now match the `v5.14.0`
+project version, current verification scripts, current `route_ranker` smoke
+output, current editor-tooling wording, planned-only matrix API status, and live
+hosted-docs HTTPS behavior.
+
+Hosted docs state checked on 2026-05-26:
+
+```text
+https://walklang.wlkrlabs.com/docs/ returned HTTP/2 200
+http://walklang.wlkrlabs.com/docs/ returned 301 to https://walklang.wlkrlabs.com/docs/
+```
+
+Docs alignment verification on 2026-05-26:
+
+```text
+walk run playground/route_ranker.walk reported Market Mile / 28
+scripts/build-docs-site.sh passed
+scripts/check-docs-site.sh passed
+go test -count=1 ./... passed
+WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported compatibility stress ok
+git diff --check -- . ':(exclude)playground/hangman.walk' ':(exclude)playground/hangman-v2.walk' passed
 ```
 
 Next: continue standard-platform expansion after the CLI proof app, with future

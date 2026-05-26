@@ -71,7 +71,7 @@ public/docs/reference/api.html
 public/docs/reference/api.md
 public/docs/reference/api.json</code></pre>
 <p><code>public/CNAME</code> sets the custom domain to <code>walklang.wlkrlabs.com</code> for static hosts that honor CNAME files.</p>
-<p>HTTPS enforcement depends on GitHub Pages issuing a certificate for the custom domain. <code>docs/STATUS.md</code> records the current live HTTPS state.</p>
+<p>HTTPS is the public scheme for the custom domain, and HTTP redirects to HTTPS. <code>docs/STATUS.md</code> records the latest checked live HTTP/HTTPS state.</p>
 <h2 id="reference-generation">Reference Generation</h2>
 <p>The reference source remains real WalkLang code with structured comments:</p>
 <pre><code class="language-text">examples/stable.walk

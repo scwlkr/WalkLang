@@ -66,7 +66,7 @@ install flow.
 - Project mode supports `walk init`, `walk.toml`, source/test layout, builds,
   checks, tests, formatting, explicit debug/release build modes, and cleanup.
 - Static docs and generated API reference output are repo-owned and deployed
-  through GitHub Pages; live custom-domain HTTPS readiness is tracked in
+  through GitHub Pages; live custom-domain HTTPS state is tracked in
   [STATUS.md](docs/STATUS.md).
 
 ## Quick Start

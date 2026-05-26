@@ -106,7 +106,7 @@ git diff --cached --check passed</code></pre>
 ../../build/walk test --warnings=error in tools/walktop passed 4 WalkLang tests
 NO_COLOR=1 ./build/walktop --once --fixture tools/walktop/testdata/basic passed
 NO_COLOR=1 ./build/walktop --once passed live local OS-command mode</code></pre>
-<p>Version-language cleanup on 2026-05-26: current-facing docs now use <code>v5.13.1</code> as the single project version. Historical version numbers remain only in release notes and migration history. <code>CONTEXT.md</code> records the resolved terms **Project Version**, **Feature Status**, and **Historical Version Reference**.</p>
+<p>Version-language cleanup baseline on 2026-05-26: current-facing docs moved to the single project version model during the <code>v5.13.1</code> cleanup. The current project version is <code>v5.14.0</code>; historical version numbers remain in release notes and migration history. <code>CONTEXT.md</code> records the resolved terms **Project Version**, **Feature Status**, and **Historical Version Reference**.</p>
 <p>Version-language cleanup verification on 2026-05-26:</p>
 <pre><code class="language-text">go test ./cmd/walk -run &#39;TestStableCompatibilitySuite|TestCurrentReleaseDocsArePresent&#39; -count=1 passed
 go test ./scripts -run TestSidebarUsesTopicNavigationInsteadOfVersionMilestones -count=1 passed
@@ -124,6 +124,17 @@ go test -count=1 ./... passed
 git diff --check -- . &#39;:(exclude)playground/hangman.walk&#39; &#39;:(exclude)playground/hangman-v2.walk&#39; passed
 git diff --cached --check passed
 active-code search found no old developer-facing milestone path or test-name labels outside release notes, migration history, and deprecated docs</code></pre>
+<p>Docs alignment cleanup on 2026-05-26: active docs now match the <code>v5.14.0</code> project version, current verification scripts, current <code>route_ranker</code> smoke output, current editor-tooling wording, planned-only matrix API status, and live hosted-docs HTTPS behavior.</p>
+<p>Hosted docs state checked on 2026-05-26:</p>
+<pre><code class="language-text">https://walklang.wlkrlabs.com/docs/ returned HTTP/2 200
+http://walklang.wlkrlabs.com/docs/ returned 301 to https://walklang.wlkrlabs.com/docs/</code></pre>
+<p>Docs alignment verification on 2026-05-26:</p>
+<pre><code class="language-text">walk run playground/route_ranker.walk reported Market Mile / 28
+scripts/build-docs-site.sh passed
+scripts/check-docs-site.sh passed
+go test -count=1 ./... passed
+WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported compatibility stress ok
+git diff --check -- . &#39;:(exclude)playground/hangman.walk&#39; &#39;:(exclude)playground/hangman-v2.walk&#39; passed</code></pre>
 <p>Next: continue standard-platform expansion after the CLI proof app, with future areas gated by the same proof parity rules.</p>
 </article>
 <footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>

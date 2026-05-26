@@ -1,6 +1,7 @@
 # WalkLang Editor Tooling
 
-This directory contains first-party editor integration scaffolds for v4.
+This directory contains first-party editor integration scaffolds for the current
+WalkLang toolchain.
 
 ```text
 vscode/

@@ -22,14 +22,14 @@ Run the standard checks before sending changes:
 ```bash
 go test -count=1 ./...
 go build -o build/walk ./cmd/walk
-WALK_BIN=$PWD/build/walk scripts/stress-v1.sh
+WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh
 git diff --check
 ```
 
 For release artifact work, also run:
 
 ```bash
-scripts/release.sh v5.0.0 dist
+scripts/release.sh <version> dist
 ```
 
 ## Documentation

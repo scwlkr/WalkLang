@@ -103,9 +103,9 @@ Expected `playground/route_ranker.walk` output:
 
 ```text
 Best route:
-Library Lane
+Market Mile
 Score:
-46
+28
 ```
 
 ## Build Release Artifacts Locally

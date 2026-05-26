@@ -30,8 +30,8 @@ public/docs/reference/api.json
 `public/CNAME` sets the custom domain to `walklang.wlkrlabs.com` for static
 hosts that honor CNAME files.
 
-HTTPS enforcement depends on GitHub Pages issuing a certificate for the custom
-domain. `docs/STATUS.md` records the current live HTTPS state.
+HTTPS is the public scheme for the custom domain, and HTTP redirects to HTTPS.
+`docs/STATUS.md` records the latest checked live HTTP/HTTPS state.
 
 ## Reference Generation
 
