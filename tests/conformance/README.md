@@ -24,8 +24,8 @@ id	kind	mode	source	cwd	stdin	native
 Build the active compiler and verify it against the recorded oracle:
 
 ```bash
-make walk WALK_VERSION=v6.0.0-port-candidate
-make conformance WALK_VERSION=v6.0.0-port-candidate
+make walk WALK_VERSION=v6.0.0
+make conformance WALK_VERSION=v6.0.0
 ```
 
 The runner compares stdout, stderr, success/failure status, and generated C for

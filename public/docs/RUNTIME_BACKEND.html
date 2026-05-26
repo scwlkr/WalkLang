@@ -67,7 +67,7 @@ debuggable
 readable enough to inspect</code></pre>
 <p>WalkLang source still follows the same pipeline:</p>
 <pre><code class="language-text">.walk -&gt; generated C + Walk C runtime -&gt; native executable</code></pre>
-<p>The C++/C compiler uses the same backend shape for source-file builds:</p>
+<p>As of v6.0.0, the C++/C compiler uses the same backend shape for source-file builds:</p>
 <pre><code class="language-text">.walk -&gt; C++ parser/checker -&gt; typed IR -&gt; generated C + Walk C runtime -&gt; native executable</code></pre>
 <p><code>walk emit-c</code>, <code>walk build</code>, <code>walk run</code>, and <code>walk test</code> are implemented through that C++ IR and C emitter. Project, package, formatter, docs, LSP, and REPL workflows also run through the same C++/C toolchain.</p>
 <h2 id="build-modes">Build Modes</h2>

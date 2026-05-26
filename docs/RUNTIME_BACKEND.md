@@ -20,7 +20,8 @@ WalkLang source still follows the same pipeline:
 .walk -> generated C + Walk C runtime -> native executable
 ```
 
-The C++/C compiler uses the same backend shape for source-file builds:
+As of v6.0.0, the C++/C compiler uses the same backend shape for source-file
+builds:
 
 ```text
 .walk -> C++ parser/checker -> typed IR -> generated C + Walk C runtime -> native executable

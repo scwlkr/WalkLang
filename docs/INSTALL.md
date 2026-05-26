@@ -12,27 +12,27 @@ release or local build label you installed.
 
 ## Release Artifact Install
 
-Release artifacts are produced by `scripts/release.sh`. In the Phase 11 port
-candidate, the script is C++/C-only and writes current-host artifacts:
+Release artifacts are produced by `scripts/release.sh`. The v6.0.0 release
+path is C++/C-only and writes current-host artifacts:
 
 ```text
-walk-v6.0.0-port-candidate-<host-os>-<host-arch>
-walk-runtime-v6.0.0-port-candidate.tar.gz
-walktop-v6.0.0-port-candidate-<host-os>-<host-arch>
+walk-v6.0.0-<host-os>-<host-arch>
+walk-runtime-v6.0.0.tar.gz
+walktop-v6.0.0-<host-os>-<host-arch>
 SHA256SUMS
 ```
 
-The final v6 release gate is responsible for publishing the official
-cross-platform artifact set. The port-candidate release script exists to prove
-that repo-controlled release packaging no longer depends on Go.
+The release script builds `walk` from C++ sources, packages the C runtime
+source, builds `walktop` through the newly built `walk`, and checksums each
+artifact.
 
 Install on macOS or Linux:
 
 ```bash
 mkdir -p ~/.local/bin ~/.local/lib/walk
-cp walk-v6.0.0-port-candidate-<os>-<arch> ~/.local/bin/walk
-cp walktop-v6.0.0-port-candidate-<os>-<arch> ~/.local/bin/walktop
-tar -xzf walk-runtime-v6.0.0-port-candidate.tar.gz -C ~/.local/lib/walk
+cp walk-v6.0.0-<os>-<arch> ~/.local/bin/walk
+cp walktop-v6.0.0-<os>-<arch> ~/.local/bin/walktop
+tar -xzf walk-runtime-v6.0.0.tar.gz -C ~/.local/lib/walk
 chmod +x ~/.local/bin/walk ~/.local/bin/walktop
 walk version
 NO_COLOR=1 walktop --once
@@ -126,10 +126,10 @@ Score:
 
 ## Build Release Artifacts Locally
 
-Maintainers can produce the current-host port-candidate artifact set with:
+Maintainers can produce the current-host release artifact set with:
 
 ```bash
-make release VERSION=v6.0.0-port-candidate OUT=dist
+make release VERSION=v6.0.0 OUT=dist
 ```
 
 The command writes the current-host `walk` compiler binary, the runtime source
@@ -140,5 +140,5 @@ Release artifact generation builds `walktop` through `build/walk` by default.
 Maintainers can override the WalkLang build driver for diagnostics:
 
 ```bash
-WALK_RELEASE_BUILD_BIN=build/walk scripts/release.sh v6.0.0-port-candidate dist
+WALK_RELEASE_BUILD_BIN=build/walk scripts/release.sh v6.0.0 dist
 ```

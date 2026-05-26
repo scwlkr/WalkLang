@@ -38,12 +38,14 @@ out: add(2, 3)
 
 ## Current Version
 
-WalkLang is currently `v6.0.0-port-candidate`.
+WalkLang is currently `v6.0.0`.
 
-`v6.0.0-port-candidate` promotes the C++/C systems compiler port to the
-repo-local `walk` binary and removes the Go reference implementation and
-JavaScript docs assets. Features inside a release are labeled `stable`,
-`draft`, `experimental`, or `planned` when their maturity matters.
+`v6.0.0` is the first completed C++/C systems compiler release. The repo-local
+`walk` binary is built from C++ sources, generated programs link with the Walk
+C runtime, and the repository no longer carries the former Go reference
+implementation or JavaScript docs assets. Features inside a release are
+labeled `stable`, `draft`, `experimental`, or `planned` when their maturity
+matters.
 
 The first CLI standard-platform slice remains `walktop`, an official
 standalone WalkLang-built system monitor installed by the normal local install

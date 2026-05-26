@@ -12,6 +12,7 @@ OUT ?= dist
 BUILD_DIR := build
 CPP_BUILD_DIR := $(BUILD_DIR)/cpp/$(subst /,_,$(WALK_VERSION))
 WALK := $(BUILD_DIR)/walk
+WALK_VERSION_FILE := $(BUILD_DIR)/.walk-version
 CPP_TEST_TMP := $(BUILD_DIR)/cpp-tests
 
 CPPFLAGS += -Icompiler -DWALK_VERSION=\"$(WALK_VERSION)\"
@@ -86,13 +87,17 @@ TEST_CPP_SOURCES := \
 TEST_CPP_OBJECTS := $(TEST_CPP_SOURCES:%.cpp=$(CPP_BUILD_DIR)/%.o)
 TEST_CPP_BIN := $(CPP_BUILD_DIR)/walk-tests
 
-.PHONY: walk test conformance docs check-docs release install-local clean
+.PHONY: walk test conformance docs check-docs release install-local clean FORCE
 
 walk: $(WALK)
 
-$(WALK): $(WALK_CPP_OBJECTS)
+$(WALK_VERSION_FILE): FORCE
 	@mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $^ -o $@
+	@if [ ! -f "$@" ] || [ "$$(cat "$@")" != "$(WALK_VERSION)" ]; then printf '%s\n' "$(WALK_VERSION)" > "$@"; fi
+
+$(WALK): $(WALK_VERSION_FILE) $(WALK_CPP_OBJECTS)
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(filter-out $(WALK_VERSION_FILE),$^) -o $@
 
 $(CPP_BUILD_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
@@ -122,4 +127,4 @@ install-local:
 	scripts/install-local.sh "$(VERSION)"
 
 clean:
-	rm -rf $(BUILD_DIR)/cpp $(CPP_TEST_TMP) $(WALK)
+	rm -rf $(BUILD_DIR)/cpp $(CPP_TEST_TMP) $(WALK) $(WALK_VERSION_FILE)

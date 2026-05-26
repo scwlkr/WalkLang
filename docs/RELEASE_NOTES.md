@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+No unreleased changes.
+
+## v6.0.0 - Systems Compiler Port
+
+Date: 2026-05-26
+
+v6.0.0 ships the completed systems compiler port. `walk` is now built from
+C++ sources, Walk programs still compile through generated C and the Walk C
+runtime, and the former Go reference implementation plus JavaScript docs assets
+are removed from the active repository.
+
 ### Added
 
 - Phase 1 systems compiler port conformance oracle under `tests/conformance/`, with a manifest, recorded reference outputs, generated-C snapshot oracle artifacts, and a shell runner that supports `WALK_REF` plus future `WALK_CANDIDATE` comparison.

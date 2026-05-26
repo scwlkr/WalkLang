@@ -267,7 +267,7 @@ windows/amd64</code></pre>
 <p>No phase can mark complete while it regresses a row already ported.</p>
 <h2 id="status-board">Status Board</h2>
 <p>Update this table at the end of every porting phase.</p>
-<p>| Phase | Status | Required exit proof | | --- | --- | --- | | 0. Port Contract | Complete | This document exists, is linked, and generated docs build | | 1. Conformance Oracle | Complete | Dual-compiler harness records current behavior from the reference compiler | | 2. Runtime Extraction | Complete | Generated C links against <code>runtime/walk_runtime.c</code> with current tests passing | | 3. C++ Skeleton | Complete | <code>make walk</code> builds a C++ <code>walk</code> that supports version/help and test harness entrypoints | | 4. Lexer, Parser, AST | Complete | C++ frontend parses current pass fixtures and rejects fail syntax fixtures | | 5. Semantic Checker | Complete | C++ checker matches current type, name, module, and warning diagnostics | | 6. C Backend | Complete | C++ compiler emits C that passes native behavior and snapshot checks | | 7. CLI, Project, Package | Complete | C++ <code>walk</code> supports current command surface and project/package tests | | 8. Runtime Module Parity | Complete | Draft runtime modules pass native tests through the C runtime | | 9. Tooling Parity | Complete | Formatter, docs generator, debug map, LSP, and REPL pass parity checks | | 10. Standard Platform Parity | Complete | <code>walktop</code> builds, tests, runs, installs, and releases through C++ <code>walk</code> | | 11. Remove Go And JavaScript | Complete | No Go or JavaScript source remains; docs/site still build | | 12. Final Release Gate | Not started | C++/C release artifacts, checksums, install, docs, and language breakdown are verified |</p>
+<p>| Phase | Status | Required exit proof | | --- | --- | --- | | 0. Port Contract | Complete | This document exists, is linked, and generated docs build | | 1. Conformance Oracle | Complete | Dual-compiler harness records current behavior from the reference compiler | | 2. Runtime Extraction | Complete | Generated C links against <code>runtime/walk_runtime.c</code> with current tests passing | | 3. C++ Skeleton | Complete | <code>make walk</code> builds a C++ <code>walk</code> that supports version/help and test harness entrypoints | | 4. Lexer, Parser, AST | Complete | C++ frontend parses current pass fixtures and rejects fail syntax fixtures | | 5. Semantic Checker | Complete | C++ checker matches current type, name, module, and warning diagnostics | | 6. C Backend | Complete | C++ compiler emits C that passes native behavior and snapshot checks | | 7. CLI, Project, Package | Complete | C++ <code>walk</code> supports current command surface and project/package tests | | 8. Runtime Module Parity | Complete | Draft runtime modules pass native tests through the C runtime | | 9. Tooling Parity | Complete | Formatter, docs generator, debug map, LSP, and REPL pass parity checks | | 10. Standard Platform Parity | Complete | <code>walktop</code> builds, tests, runs, installs, and releases through C++ <code>walk</code> | | 11. Remove Go And JavaScript | Complete | No Go or JavaScript source remains; docs/site still build | | 12. Final Release Gate | Complete | C++/C release artifacts, checksums, install, docs, and language breakdown are verified |</p>
 <p>Status values:</p>
 <pre><code class="language-text">Not started
 In progress
@@ -1012,7 +1012,7 @@ find . -path ./.git -prune -o \( -name &#39;*.go&#39; -o -name &#39;go.mod&#39; 
 <p>Phase completion prompt:</p>
 <pre><code class="language-text">/goal Complete Phase 11 in docs/SYSTEMS_COMPILER_PORT_PLAN.md. Remove the Go reference implementation, Go module metadata, Go docs tooling, and JavaScript site assets only after C++/C parity is proven. Update README, CONTRIBUTING, AGENTS, docs, CI, status, and release notes. Prove make/test/conformance/docs/stress and prove no Go or JavaScript files remain. Commit the result and preserve unrelated playground edits.</code></pre>
 <h2 id="phase-12-final-release-gate">Phase 12: Final Release Gate</h2>
-<p>Status: Not started</p>
+<p>Status: Complete</p>
 <p>Goal: ship the first fully C++/C/assembly WalkLang release and prove public language accounting.</p>
 <p>Files to modify:</p>
 <pre><code class="language-text">README.md
@@ -1026,6 +1026,22 @@ scripts/release.sh
 scripts/install-local.sh</code></pre>
 <p>Required work:</p>
 <p>1. Set the release version for the completed port. 2. Build release artifacts through C++/C only. 3. Verify checksums. 4. Install locally. 5. Verify <code>walk</code> and <code>walktop</code>. 6. Push branch and tag. 7. Publish GitHub release. 8. Wait for GitHub language breakdown to refresh or query it through API. 9. Confirm no Go and no JavaScript in GitHub language results. 10. Mark this plan complete.</p>
+<p>Verification on 2026-05-26:</p>
+<pre><code class="language-text">make clean passed
+make walk WALK_VERSION=v6.0.0 passed
+./build/walk version reported v6.0.0
+make test passed
+make conformance passed
+scripts/build-docs-site.sh passed
+WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed
+scripts/release.sh v6.0.0 dist/v6.0.0 passed
+shasum -a 256 -c dist/v6.0.0/SHA256SUMS passed for all 3 artifacts
+scripts/install-local.sh v6.0.0 passed
+walk version reported v6.0.0
+command -v walktop returned /Users/shanewalker/.local/bin/walktop
+NO_COLOR=1 walktop --once --fixture tools/walktop/testdata/basic passed
+git ls-files &#39;*.go&#39; &#39;go.mod&#39; &#39;go.sum&#39; returned empty
+git ls-files &#39;*.js&#39; returned empty</code></pre>
 <p>Exit proof:</p>
 <pre><code class="language-bash">make clean
 make walk WALK_VERSION=v6.0.0

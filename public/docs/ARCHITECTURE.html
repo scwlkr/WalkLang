@@ -65,7 +65,7 @@ Optional explicit types: yes</code></pre>
 <h2 id="walklang-architecture">WalkLang Architecture</h2>
 <p>WalkLang is a compiled, general-purpose language for readable native programs on any OS.</p>
 <pre><code class="language-text">main.walk -&gt; lexer -&gt; parser -&gt; typed IR -&gt; generated C + Walk C runtime -&gt; native executable</code></pre>
-<p>The active compiler is the C++/C systems port. It checks source files, lowers checked programs to typed IR, emits deterministic C, links that C with the Walk runtime, and runs source-file, project, package, docs, LSP, REPL, and <code>walktop</code> workflows without a Go reference implementation.</p>
+<p>As of v6.0.0, the active compiler is the completed C++/C systems port. It checks source files, lowers checked programs to typed IR, emits deterministic C, links that C with the Walk runtime, and runs source-file, project, package, docs, LSP, REPL, and <code>walktop</code> workflows without a Go reference implementation.</p>
 <p>Example:</p>
 <pre><code class="language-walk"># main.walk
 out: &#39;hello&#39;</code></pre>

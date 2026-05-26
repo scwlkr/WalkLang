@@ -58,9 +58,9 @@
 <div class="page">
 <article class="doc">
 <h1 id="walklang-status">WalkLang Status</h1>
-<p>Current WalkLang version: <code>v6.0.0-port-candidate</code>.</p>
-<p>Current architecture direction on 2026-05-26: <code>docs/SYSTEMS_COMPILER_PORT_PLAN.md</code> is the accepted execution contract for the systems architecture: C++ compiler core, C runtime and platform layer, C backend, optional assembly leaf routines, and no final Go or JavaScript implementation footprint. Phases 1 through 11 are complete. The next porting step is Phase 12, the final C++/C release gate.</p>
-<p><code>v6.0.0-port-candidate</code> promotes the C++/C compiler to the repo-local <code>walk</code> binary, removes the Go reference implementation and Go module metadata, removes JavaScript source files, and keeps the current language surface verified against the recorded conformance oracle. Feature maturity is described with status labels instead of separate version lines.</p>
+<p>Current WalkLang version: <code>v6.0.0</code>.</p>
+<p>Current architecture direction on 2026-05-26: <code>docs/SYSTEMS_COMPILER_PORT_PLAN.md</code> is the accepted execution contract for the systems architecture: C++ compiler core, C runtime and platform layer, C backend, optional assembly leaf routines, and no final Go or JavaScript implementation footprint. Phases 1 through 12 are complete. The systems compiler port is complete.</p>
+<p><code>v6.0.0</code> is the first completed C++/C systems compiler release. The repo-local <code>walk</code> binary builds from C++ sources, generated programs link with the Walk C runtime, the former Go reference implementation and Go module metadata are removed, JavaScript source files are removed, and the current language surface is verified against the recorded conformance oracle. Feature maturity is described with status labels instead of separate version lines.</p>
 <p>Current feature status:</p>
 <pre><code class="language-text">stable
   core syntax, diagnostics, modules, tests, project tooling, and standard-library helpers
@@ -74,8 +74,27 @@ experimental
 standard platform
   CLI standard-platform slice with `walktop` as the first official standalone
   WalkLang-built tool</code></pre>
-<p>Current release state: <code>v6.0.0-port-candidate</code> is not the final public v6 release. It is the Phase 11 source state that proves <code>walk</code> builds from C++/C, the docs site is static HTML/CSS without JavaScript assets, and repo-local install/release packaging no longer depends on Go. <code>walktop</code> remains under <code>tools/walktop/</code> as a real WalkLang project and standalone native command.</p>
+<p>Current release state: <code>v6.0.0</code> is the final public v6 systems-port release. It proves <code>walk</code> builds from C++/C, the docs site is static HTML/CSS without JavaScript assets, and repo-local install/release packaging no longer depends on Go. <code>walktop</code> remains under <code>tools/walktop/</code> as a real WalkLang project and standalone native command.</p>
 <p>Systems compiler port state on 2026-05-26: <code>tests/conformance/</code> preserves the recorded oracle that was captured before the reference compiler was removed. The manifest covers 20 pass fixtures, 52 fail fixtures, 4 compatibility fixtures, 11 runtime-module fixtures, 3 generated-C snapshot fixtures, and 4 <code>walktop</code> fixture groups. <code>make conformance</code> now builds the active C++/C <code>build/walk</code> binary and verifies it against those recorded artifacts.</p>
+<p>Phase 12 final release verification on 2026-05-26:</p>
+<pre><code class="language-text">make clean passed
+make walk WALK_VERSION=v6.0.0 passed
+./build/walk version reported v6.0.0
+make test passed
+make conformance passed with 20 pass fixtures, 52 fail fixtures, 36 native executions, 4 compat fixtures, 11 runtime module fixtures, 3 snapshot fixtures, and 4 walktop fixture groups
+make walk WALK_VERSION=v6.0.0 passed again after conformance and relinked build/walk back to v6.0.0
+scripts/build-docs-site.sh passed
+WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported compatibility stress ok
+scripts/release.sh v6.0.0 dist/v6.0.0 passed and produced current-host walk, runtime, walktop, and SHA256SUMS artifacts
+shasum -a 256 -c dist/v6.0.0/SHA256SUMS passed for all 3 artifacts
+dist/v6.0.0/walk-v6.0.0-darwin-arm64 version reported v6.0.0
+dist/v6.0.0/walktop-v6.0.0-darwin-arm64 passed --once --fixture tools/walktop/testdata/basic
+scripts/install-local.sh v6.0.0 passed, installed walk/runtime/walktop, and verified walktop fixture mode
+walk version reported v6.0.0
+command -v walktop returned /Users/shanewalker/.local/bin/walktop
+NO_COLOR=1 walktop --once --fixture tools/walktop/testdata/basic passed
+git ls-files &#39;*.go&#39; &#39;go.mod&#39; &#39;go.sum&#39; returned empty
+git ls-files &#39;*.js&#39; returned empty</code></pre>
 <p>Phase 11 pre-removal parity proof on 2026-05-26:</p>
 <pre><code class="language-text">make clean passed
 make walk WALK_VERSION=v6.0.0-port-candidate passed
@@ -341,7 +360,7 @@ scripts/check-docs-site.sh passed
 go test -count=1 ./... passed
 WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported compatibility stress ok
 git diff --check -- . &#39;:(exclude)playground/hangman.walk&#39; &#39;:(exclude)playground/hangman-v2.walk&#39; passed</code></pre>
-<p>Next: complete Phase 12 in <code>docs/SYSTEMS_COMPILER_PORT_PLAN.md</code> by cutting the first fully C++/C release, verifying install and release artifacts, publishing the GitHub release, and confirming public language accounting.</p>
+<p>Next: post-release maintenance should keep the C++/C compiler, C runtime, static docs surface, release artifacts, local install flow, and GitHub language accounting aligned with the v6 systems architecture.</p>
 </article>
 <footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
 </div>

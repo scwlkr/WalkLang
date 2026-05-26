@@ -10,13 +10,13 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - run: make clean
-      - run: make walk WALK_VERSION=v6.0.0-port-candidate
+      - run: make walk WALK_VERSION=v6.0.0
       - run: make test
-      - run: make conformance WALK_VERSION=v6.0.0-port-candidate
+      - run: make conformance WALK_VERSION=v6.0.0
       - run: WALK_BIN="$PWD/build/walk" scripts/stress-compatibility.sh
       - run: scripts/check-docs-site.sh
-      - run: make release VERSION=v6.0.0-port-candidate OUT=dist
+      - run: make release VERSION=v6.0.0 OUT=dist
       - uses: actions/upload-artifact@v7
         with:
-          name: walk-v6.0.0-port-candidate
+          name: walk-v6.0.0
           path: dist/

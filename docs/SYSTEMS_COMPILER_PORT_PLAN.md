@@ -414,7 +414,7 @@ Update this table at the end of every porting phase.
 | 9. Tooling Parity | Complete | Formatter, docs generator, debug map, LSP, and REPL pass parity checks |
 | 10. Standard Platform Parity | Complete | `walktop` builds, tests, runs, installs, and releases through C++ `walk` |
 | 11. Remove Go And JavaScript | Complete | No Go or JavaScript source remains; docs/site still build |
-| 12. Final Release Gate | Not started | C++/C release artifacts, checksums, install, docs, and language breakdown are verified |
+| 12. Final Release Gate | Complete | C++/C release artifacts, checksums, install, docs, and language breakdown are verified |
 
 Status values:
 
@@ -1633,7 +1633,7 @@ Phase completion prompt:
 
 ## Phase 12: Final Release Gate
 
-Status: Not started
+Status: Complete
 
 Goal: ship the first fully C++/C/assembly WalkLang release and prove public
 language accounting.
@@ -1664,6 +1664,26 @@ Required work:
 8. Wait for GitHub language breakdown to refresh or query it through API.
 9. Confirm no Go and no JavaScript in GitHub language results.
 10. Mark this plan complete.
+
+Verification on 2026-05-26:
+
+```text
+make clean passed
+make walk WALK_VERSION=v6.0.0 passed
+./build/walk version reported v6.0.0
+make test passed
+make conformance passed
+scripts/build-docs-site.sh passed
+WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed
+scripts/release.sh v6.0.0 dist/v6.0.0 passed
+shasum -a 256 -c dist/v6.0.0/SHA256SUMS passed for all 3 artifacts
+scripts/install-local.sh v6.0.0 passed
+walk version reported v6.0.0
+command -v walktop returned /Users/shanewalker/.local/bin/walktop
+NO_COLOR=1 walktop --once --fixture tools/walktop/testdata/basic passed
+git ls-files '*.go' 'go.mod' 'go.sum' returned empty
+git ls-files '*.js' returned empty
+```
 
 Exit proof:
 

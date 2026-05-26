@@ -19,6 +19,19 @@ mkdir -p "$out_dir"
 checksums="$out_dir/SHA256SUMS"
 : > "$checksums"
 
+assert_no_removed_port_sources() {
+    if ! command -v git >/dev/null 2>&1; then
+        return
+    fi
+    if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        return
+    fi
+    if [ "$(git ls-files '*.go' 'go.mod' 'go.sum' '*.js')" != "" ]; then
+        echo "release blocked: Go or JavaScript source is tracked in this port" >&2
+        exit 1
+    fi
+}
+
 add_checksum() {
     name="$1"
     if command -v sha256sum >/dev/null 2>&1; then
@@ -60,6 +73,7 @@ if [ "$host_os" = "windows" ]; then
     host_ext=".exe"
 fi
 
+assert_no_removed_port_sources
 make -s walk WALK_VERSION="${version}"
 
 walk_name="walk-${version}-${host_os}-${host_arch}${host_ext}"

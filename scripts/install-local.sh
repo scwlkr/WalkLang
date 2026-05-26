@@ -13,11 +13,25 @@ cleanup() {
 }
 trap cleanup EXIT
 
+assert_no_removed_port_sources() {
+    if ! command -v git >/dev/null 2>&1; then
+        return
+    fi
+    if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        return
+    fi
+    if [ "$(git ls-files '*.go' 'go.mod' 'go.sum' '*.js')" != "" ]; then
+        echo "install blocked: Go or JavaScript source is tracked in this port" >&2
+        exit 1
+    fi
+}
+
 mkdir -p "$install_dir"
 install_root="$(CDPATH= cd -- "$install_dir/.." && pwd)"
 runtime_install_dir="${WALK_RUNTIME_INSTALL_DIR:-"$install_root/lib/walk/runtime"}"
 
 cd "$repo_root"
+assert_no_removed_port_sources
 make -s walk WALK_VERSION="$version"
 cp build/walk "$binary"
 chmod +x "$binary"

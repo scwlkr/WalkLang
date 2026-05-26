@@ -59,6 +59,10 @@
 <article class="doc">
 <h1 id="walklang-release-notes">WalkLang Release Notes</h1>
 <h2 id="unreleased">Unreleased</h2>
+<p>No unreleased changes.</p>
+<h2 id="v6-0-0-systems-compiler-port">v6.0.0 - Systems Compiler Port</h2>
+<p>Date: 2026-05-26</p>
+<p>v6.0.0 ships the completed systems compiler port. <code>walk</code> is now built from C++ sources, Walk programs still compile through generated C and the Walk C runtime, and the former Go reference implementation plus JavaScript docs assets are removed from the active repository.</p>
 <h3 id="added">Added</h3>
 <ul>
 <li>Phase 1 systems compiler port conformance oracle under <code>tests/conformance/</code>, with a manifest, recorded reference outputs, generated-C snapshot oracle artifacts, and a shell runner that supports <code>WALK_REF</code> plus future <code>WALK_CANDIDATE</code> comparison.</li>

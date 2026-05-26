@@ -16,10 +16,11 @@ WalkLang is a compiled, general-purpose language for readable native programs on
 main.walk -> lexer -> parser -> typed IR -> generated C + Walk C runtime -> native executable
 ```
 
-The active compiler is the C++/C systems port. It checks source files, lowers
-checked programs to typed IR, emits deterministic C, links that C with the Walk
-runtime, and runs source-file, project, package, docs, LSP, REPL, and `walktop`
-workflows without a Go reference implementation.
+As of v6.0.0, the active compiler is the completed C++/C systems port. It
+checks source files, lowers checked programs to typed IR, emits deterministic
+C, links that C with the Walk runtime, and runs source-file, project, package,
+docs, LSP, REPL, and `walktop` workflows without a Go reference
+implementation.
 
 Example:
 
