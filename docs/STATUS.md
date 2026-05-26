@@ -7,8 +7,9 @@ is now the accepted execution contract for porting WalkLang from the current
 reference compiler to the permanent systems architecture: C++ compiler core, C
 runtime and platform layer, C backend, optional assembly leaf routines, and no
 final Go or JavaScript implementation footprint. Phase 1, the conformance
-oracle, is complete. Phase 2, runtime extraction, is complete. The next porting
-step is Phase 3, the C++ skeleton.
+oracle, is complete. Phase 2, runtime extraction, is complete. Phase 3, the C++
+skeleton, is complete. The next porting step is Phase 4, lexer, parser, and AST
+construction.
 
 `v5.14.1` is the single project version for the compiler, tooling, docs,
 release artifacts, and implemented language surface. Feature maturity is
@@ -40,7 +41,9 @@ deterministic fixture mode for tests, renders a compact color-forward dashboard
 through `term` APIs, and is installed by the normal local install flow beside
 `walk`. Native builds now link generated C with the external Walk runtime source
 under `runtime/`; release artifacts include a runtime source archive, and source
-install copies that runtime beside the installed compiler.
+install copies that runtime beside the installed compiler. Source install and
+release artifact generation now also build the current-host `walk-cpp` skeleton
+candidate, which is not yet a replacement for the Go reference compiler.
 
 Systems compiler port state on 2026-05-26: Phase 1 now records the current
 reference compiler as an executable conformance oracle under
@@ -54,7 +57,13 @@ extracts the generated helper layer into `runtime/walk_runtime.h`,
 `runtime/walk_runtime.c`, and host platform files under `runtime/platform/`.
 Generated C includes `walk_runtime.h`, calls stable `walk_rt_*` helpers, and
 keeps `walk emit-c` inspectable through a link comment instead of embedding the
-runtime body in every emitted file.
+runtime body in every emitted file. Phase 3 adds the permanent C++ compiler
+skeleton under `compiler/`, a top-level `Makefile`, command dispatch for the
+planned CLI surface, `WALK_VERSION` embedding, source loading support,
+deterministic diagnostics, and a C++ unit-test harness. The C++ candidate builds
+as `build/walk-cpp`; for this phase only `version` and `help` are implemented,
+and every other recognized command returns a `not ported in this phase`
+diagnostic without delegating to the Go reference compiler.
 
 Phase 1 conformance oracle verification on 2026-05-26:
 
@@ -85,6 +94,24 @@ the Darwin arm64 walk release artifact reported v5.14-runtime
 the Darwin arm64 walktop release artifact passed --once --fixture tools/walktop/testdata/basic
 scripts/install-local.sh v5.14.1 refreshed the local walk, runtime source, and walktop install
 installed walk built examples/hello.walk from a temp directory using ~/.local/lib/walk/runtime
+```
+
+Phase 3 C++ skeleton verification on 2026-05-26:
+
+```text
+make clean passed
+make walk WALK_VERSION=v5.14-cpp-skeleton passed
+./build/walk-cpp version reported v5.14-cpp-skeleton
+./build/walk-cpp help listed the Phase 3 command surface
+make test passed and reported C++ skeleton tests passed
+go test -count=1 ./... passed
+scripts/build-docs-site.sh passed
+scripts/check-docs-site.sh passed
+scripts/release.sh v5.14-cpp-skeleton <temp>/release produced 5 walk artifacts, 1 current-host walk-cpp skeleton artifact, 1 runtime source archive, 1 current-host walktop artifact, and SHA256SUMS
+shasum -a 256 -c SHA256SUMS passed for all 8 artifacts
+WALK_INSTALL_DIR=<temp>/bin scripts/install-local.sh v5.14-cpp-skeleton passed and installed temp walk, walk-cpp, runtime source, and walktop without touching the normal local install
+git diff --check passed
+language-accounting impact checked: active C++ source is now present under compiler/ and tests/cpp/ while Go remains as the reference compiler until the final removal phase
 ```
 
 Last release verification on 2026-05-26:
@@ -140,7 +167,7 @@ git diff --cached --check passed
 ```
 
 Known local state: no unrelated playground edits are present in the current
-Phase 2 runtime extraction worktree.
+Phase 3 C++ skeleton worktree.
 
 Standard platform implementation on 2026-05-26: WalkLang's intended product
 shape is recorded as one general-use language with one standard platform in one
@@ -218,5 +245,5 @@ WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported com
 git diff --check -- . ':(exclude)playground/hangman.walk' ':(exclude)playground/hangman-v2.walk' passed
 ```
 
-Next: begin Phase 3 in `docs/SYSTEMS_COMPILER_PORT_PLAN.md` by creating the C++
-compiler skeleton without changing the current reference compiler behavior.
+Next: begin Phase 4 in `docs/SYSTEMS_COMPILER_PORT_PLAN.md` by porting source
+loading, lexing, indentation handling, parsing, and AST construction to C++.

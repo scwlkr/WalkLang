@@ -155,6 +155,23 @@ NO_COLOR=1 build/walktop --once --fixture tools/walktop/testdata/basic
 
 The normal source install flow builds and installs `walktop` beside `walk`.
 
+## C++ Compiler Candidate
+
+The systems compiler port builds a candidate executable named `walk-cpp`:
+
+```bash
+make walk WALK_VERSION=v5.14-cpp-skeleton
+./build/walk-cpp version
+./build/walk-cpp help
+make test
+```
+
+In the Phase 3 skeleton, `walk-cpp` intentionally supports only `version` and
+`help`. Recognized commands such as `check`, `emit-c`, `run`, `build`, `test`,
+`fmt`, `clean`, `init`, `package`, `docs`, `debug-map`, `lsp`, and `repl`
+return a `not ported in this phase` diagnostic. They do not shell out to the Go
+reference compiler.
+
 ## Non-Goals
 
 Professional tooling does not add:

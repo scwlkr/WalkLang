@@ -268,7 +268,7 @@ windows/amd64</code></pre>
 <p>No phase can mark complete while it regresses a row already ported.</p>
 <h2 id="status-board">Status Board</h2>
 <p>Update this table at the end of every porting phase.</p>
-<p>| Phase | Status | Required exit proof | | --- | --- | --- | | 0. Port Contract | Complete | This document exists, is linked, and generated docs build | | 1. Conformance Oracle | Complete | Dual-compiler harness records current behavior from the reference compiler | | 2. Runtime Extraction | Complete | Generated C links against <code>runtime/walk_runtime.c</code> with current tests passing | | 3. C++ Skeleton | Not started | <code>make walk</code> builds a C++ <code>walk</code> that supports version/help and test harness entrypoints | | 4. Lexer, Parser, AST | Not started | C++ frontend parses current pass fixtures and rejects fail syntax fixtures | | 5. Semantic Checker | Not started | C++ checker matches current type, name, module, and warning diagnostics | | 6. C Backend | Not started | C++ compiler emits C that passes native behavior and snapshot checks | | 7. CLI, Project, Package | Not started | C++ <code>walk</code> supports current command surface and project/package tests | | 8. Runtime Module Parity | Not started | Draft runtime modules pass native tests through the C runtime | | 9. Tooling Parity | Not started | Formatter, docs generator, debug map, LSP, and REPL pass parity checks | | 10. Standard Platform Parity | Not started | <code>walktop</code> builds, tests, runs, installs, and releases through C++ <code>walk</code> | | 11. Remove Go And JavaScript | Not started | No Go or JavaScript source remains; docs/site still build | | 12. Final Release Gate | Not started | C++/C release artifacts, checksums, install, docs, and language breakdown are verified |</p>
+<p>| Phase | Status | Required exit proof | | --- | --- | --- | | 0. Port Contract | Complete | This document exists, is linked, and generated docs build | | 1. Conformance Oracle | Complete | Dual-compiler harness records current behavior from the reference compiler | | 2. Runtime Extraction | Complete | Generated C links against <code>runtime/walk_runtime.c</code> with current tests passing | | 3. C++ Skeleton | Complete | <code>make walk</code> builds a C++ <code>walk</code> that supports version/help and test harness entrypoints | | 4. Lexer, Parser, AST | Not started | C++ frontend parses current pass fixtures and rejects fail syntax fixtures | | 5. Semantic Checker | Not started | C++ checker matches current type, name, module, and warning diagnostics | | 6. C Backend | Not started | C++ compiler emits C that passes native behavior and snapshot checks | | 7. CLI, Project, Package | Not started | C++ <code>walk</code> supports current command surface and project/package tests | | 8. Runtime Module Parity | Not started | Draft runtime modules pass native tests through the C runtime | | 9. Tooling Parity | Not started | Formatter, docs generator, debug map, LSP, and REPL pass parity checks | | 10. Standard Platform Parity | Not started | <code>walktop</code> builds, tests, runs, installs, and releases through C++ <code>walk</code> | | 11. Remove Go And JavaScript | Not started | No Go or JavaScript source remains; docs/site still build | | 12. Final Release Gate | Not started | C++/C release artifacts, checksums, install, docs, and language breakdown are verified |</p>
 <p>Status values:</p>
 <pre><code class="language-text">Not started
 In progress
@@ -461,7 +461,7 @@ scripts/release.sh v5.14-runtime &lt;temp&gt;/release passed with 7 checksummed 
 <p>Phase completion prompt:</p>
 <pre><code class="language-text">/goal Complete Phase 2 in docs/SYSTEMS_COMPILER_PORT_PLAN.md. Extract the generated runtime helpers into a real C runtime and platform layer, keep generated C deterministic, update snapshots/docs/status, prove all current tests and compatibility stress still pass, run release proof for the changed backend, commit the result, and preserve unrelated playground edits.</code></pre>
 <h2 id="phase-3-c-skeleton">Phase 3: C++ Skeleton</h2>
-<p>Status: Not started</p>
+<p>Status: Complete</p>
 <p>Goal: introduce the permanent C++ compiler executable and build system without claiming language parity yet.</p>
 <p>Files to create:</p>
 <pre><code class="language-text">Makefile
@@ -509,6 +509,15 @@ make test
 go test -count=1 ./...
 scripts/build-docs-site.sh
 scripts/check-docs-site.sh</code></pre>
+<p>Completion evidence on 2026-05-26:</p>
+<pre><code class="language-text">make clean passed
+make walk WALK_VERSION=v5.14-cpp-skeleton passed
+./build/walk-cpp version reported v5.14-cpp-skeleton
+./build/walk-cpp help listed the Phase 3 command surface
+make test passed and reported C++ skeleton tests passed
+go test -count=1 ./... passed
+scripts/build-docs-site.sh passed
+scripts/check-docs-site.sh passed</code></pre>
 <p>Phase completion prompt:</p>
 <pre><code class="language-text">/goal Complete Phase 3 in docs/SYSTEMS_COMPILER_PORT_PLAN.md. Add the C++ compiler skeleton, Makefile, command dispatch, version/help behavior, source/diagnostic support, and C++ test harness without delegating commands to the reference compiler. Update docs/status, run the required proof, commit the result, and preserve unrelated playground edits.</code></pre>
 <h2 id="phase-4-lexer-parser-ast">Phase 4: Lexer, Parser, AST</h2>

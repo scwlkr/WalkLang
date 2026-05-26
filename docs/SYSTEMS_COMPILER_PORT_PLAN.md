@@ -405,7 +405,7 @@ Update this table at the end of every porting phase.
 | 0. Port Contract | Complete | This document exists, is linked, and generated docs build |
 | 1. Conformance Oracle | Complete | Dual-compiler harness records current behavior from the reference compiler |
 | 2. Runtime Extraction | Complete | Generated C links against `runtime/walk_runtime.c` with current tests passing |
-| 3. C++ Skeleton | Not started | `make walk` builds a C++ `walk` that supports version/help and test harness entrypoints |
+| 3. C++ Skeleton | Complete | `make walk` builds a C++ `walk` that supports version/help and test harness entrypoints |
 | 4. Lexer, Parser, AST | Not started | C++ frontend parses current pass fixtures and rejects fail syntax fixtures |
 | 5. Semantic Checker | Not started | C++ checker matches current type, name, module, and warning diagnostics |
 | 6. C Backend | Not started | C++ compiler emits C that passes native behavior and snapshot checks |
@@ -754,7 +754,7 @@ Phase completion prompt:
 
 ## Phase 3: C++ Skeleton
 
-Status: Not started
+Status: Complete
 
 Goal: introduce the permanent C++ compiler executable and build system without
 claiming language parity yet.
@@ -827,6 +827,19 @@ make test
 go test -count=1 ./...
 scripts/build-docs-site.sh
 scripts/check-docs-site.sh
+```
+
+Completion evidence on 2026-05-26:
+
+```text
+make clean passed
+make walk WALK_VERSION=v5.14-cpp-skeleton passed
+./build/walk-cpp version reported v5.14-cpp-skeleton
+./build/walk-cpp help listed the Phase 3 command surface
+make test passed and reported C++ skeleton tests passed
+go test -count=1 ./... passed
+scripts/build-docs-site.sh passed
+scripts/check-docs-site.sh passed
 ```
 
 Phase completion prompt:

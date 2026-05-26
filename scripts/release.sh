@@ -60,6 +60,15 @@ host_ext=""
 if [ "$host_goos" = "windows" ]; then
     host_ext=".exe"
 fi
+
+walk_cpp_name="walk-cpp-${version}-${host_goos}-${host_goarch}${host_ext}"
+walk_cpp_path="$out_dir/$walk_cpp_name"
+make -s walk WALK_VERSION="${version}"
+cp build/walk-cpp "$walk_cpp_path"
+chmod +x "$walk_cpp_path"
+echo "$walk_cpp_path"
+add_checksum "$walk_cpp_name"
+
 walktop_name="walktop-${version}-${host_goos}-${host_goarch}${host_ext}"
 walktop_path="$out_dir/$walktop_name"
 

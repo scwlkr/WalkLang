@@ -19,26 +19,30 @@ walk-v5.14.1-darwin-amd64
 walk-v5.14.1-linux-amd64
 walk-v5.14.1-linux-arm64
 walk-v5.14.1-windows-amd64.exe
+walk-cpp-v5.14.1-<release-host-os>-<release-host-arch>
 walk-runtime-v5.14.1.tar.gz
 walktop-v5.14.1-<release-host-os>-<release-host-arch>
 SHA256SUMS
 ```
 
 `scripts/release.sh` cross-builds the `walk` compiler artifacts and builds one
-current-host `walktop` artifact from WalkLang source. It also packages the C
-runtime source used by native builds. Source install always installs the runtime
-source and builds the local `walktop` binary.
+current-host `walk-cpp` skeleton artifact plus one current-host `walktop`
+artifact from WalkLang source. It also packages the C runtime source used by
+native builds. Source install always installs the runtime source and builds the
+local `walk-cpp` and `walktop` binaries.
 
 Install on macOS or Linux:
 
 ```bash
 mkdir -p ~/.local/bin
 cp walk-v5.14.1-<os>-<arch> ~/.local/bin/walk
+cp walk-cpp-v5.14.1-<os>-<arch> ~/.local/bin/walk-cpp
 cp walktop-v5.14.1-<os>-<arch> ~/.local/bin/walktop
 mkdir -p ~/.local/lib/walk
 tar -xzf walk-runtime-v5.14.1.tar.gz -C ~/.local/lib/walk
-chmod +x ~/.local/bin/walk ~/.local/bin/walktop
+chmod +x ~/.local/bin/walk ~/.local/bin/walk-cpp ~/.local/bin/walktop
 walk version
+walk-cpp version
 NO_COLOR=1 walktop --once
 ```
 
@@ -63,16 +67,18 @@ sha256sum -c SHA256SUMS
 
 ## Source Install
 
-Source installs require Go and a native C compiler available as `cc`.
+Source installs require Go, `make`, a C++20 compiler, and a native C compiler
+available as `cc`.
 
 ```bash
 scripts/install-local.sh local
 walk version
+walk-cpp version
 NO_COLOR=1 walktop --once --fixture tools/walktop/testdata/basic
 ```
 
-By default the script writes `walk` and `walktop` to `~/.local/bin`. Override
-the install directory with:
+By default the script writes `walk`, `walk-cpp`, and `walktop` to
+`~/.local/bin`. Override the install directory with:
 
 ```bash
 WALK_INSTALL_DIR=/path/to/bin scripts/install-local.sh local
@@ -84,6 +90,11 @@ directory. Override it with:
 ```bash
 WALK_RUNTIME_INSTALL_DIR=/path/to/runtime scripts/install-local.sh local
 ```
+
+`walk-cpp` is the systems compiler port candidate. In Phase 3 it is a skeleton
+binary only: `version` and `help` work, and every other recognized command
+returns a `not ported in this phase` diagnostic instead of delegating to the Go
+reference compiler.
 
 ## Smoke Test
 
@@ -128,4 +139,5 @@ scripts/release.sh v5.14.1 dist
 ```
 
 The command writes the compiler platform binaries, the runtime source archive,
-the current-host `walktop` binary, and `dist/SHA256SUMS`.
+the current-host `walk-cpp` skeleton binary, the current-host `walktop` binary,
+and `dist/SHA256SUMS`.

@@ -128,6 +128,13 @@ walk debug-map -o build/debug-map.json src/main.walk</code></pre>
 <pre><code class="language-bash">walk build --mode release --warnings=error tools/walktop/src/main.walk -o build/walktop
 NO_COLOR=1 build/walktop --once --fixture tools/walktop/testdata/basic</code></pre>
 <p>The normal source install flow builds and installs <code>walktop</code> beside <code>walk</code>.</p>
+<h2 id="c-compiler-candidate">C++ Compiler Candidate</h2>
+<p>The systems compiler port builds a candidate executable named <code>walk-cpp</code>:</p>
+<pre><code class="language-bash">make walk WALK_VERSION=v5.14-cpp-skeleton
+./build/walk-cpp version
+./build/walk-cpp help
+make test</code></pre>
+<p>In the Phase 3 skeleton, <code>walk-cpp</code> intentionally supports only <code>version</code> and <code>help</code>. Recognized commands such as <code>check</code>, <code>emit-c</code>, <code>run</code>, <code>build</code>, <code>test</code>, <code>fmt</code>, <code>clean</code>, <code>init</code>, <code>package</code>, <code>docs</code>, <code>debug-map</code>, <code>lsp</code>, and <code>repl</code> return a <code>not ported in this phase</code> diagnostic. They do not shell out to the Go reference compiler.</p>
 <h2 id="non-goals">Non-Goals</h2>
 <p>Professional tooling does not add:</p>
 <pre><code class="language-text">JetBrains plugin implementation

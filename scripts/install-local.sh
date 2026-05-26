@@ -5,6 +5,7 @@ repo_root="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
 install_dir="${WALK_INSTALL_DIR:-"$HOME/.local/bin"}"
 version="${WALK_VERSION:-${1:-local}}"
 binary="$install_dir/walk"
+cpp_binary="$install_dir/walk-cpp"
 tool_binary="$install_dir/walktop"
 work_dir="$(mktemp -d "${TMPDIR:-/tmp}/walklang-install.XXXXXX")"
 
@@ -22,6 +23,12 @@ go build -trimpath -ldflags "-X main.version=$version" -o "$binary" ./cmd/walk
 
 echo "$binary"
 "$binary" version
+
+make -s walk WALK_VERSION="$version"
+cp build/walk-cpp "$cpp_binary"
+chmod +x "$cpp_binary"
+echo "$cpp_binary"
+"$cpp_binary" version
 
 mkdir -p "$runtime_install_dir/platform"
 cp runtime/walk_runtime.h "$runtime_install_dir/walk_runtime.h"

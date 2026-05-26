@@ -64,12 +64,14 @@
 <ul>
 <li>Phase 1 systems compiler port conformance oracle under <code>tests/conformance/</code>, with a manifest, recorded reference outputs, generated-C snapshot oracle artifacts, and a shell runner that supports <code>WALK_REF</code> plus future <code>WALK_CANDIDATE</code> comparison.</li>
 <li>Phase 2 runtime extraction with <code>runtime/walk_runtime.h</code>, <code>runtime/walk_runtime.c</code>, host platform C files, and direct C runtime tests for allocation, strings, arrays, process, files, terminal helpers, and runtime errors.</li>
+<li>Phase 3 C++ compiler skeleton under <code>compiler/</code>, with <code>make walk</code>, <code>make test</code>, C++ command dispatch, version/help behavior, deterministic diagnostics, source loading support, and a C++ unit-test harness.</li>
 </ul>
 <h3 id="changed">Changed</h3>
 <ul>
 <li><code>scripts/stress-compatibility.sh</code> now verifies the recorded conformance oracle before running the older compatibility stress checks.</li>
 <li>Generated C now includes <code>walk_runtime.h</code> and calls the stable <code>walk_rt_*</code> runtime ABI instead of embedding helper bodies in every output file.</li>
 <li>Native builds now link emitted C with the Walk runtime and platform source files, and release artifacts include a runtime source archive for installed compilers.</li>
+<li><code>scripts/install-local.sh</code> and <code>scripts/release.sh</code> now build a current-host <code>walk-cpp</code> skeleton artifact beside the Go reference <code>walk</code> while the port is in progress.</li>
 </ul>
 <h2 id="v5-14-1-systems-compiler-port-contract">v5.14.1 - Systems Compiler Port Contract</h2>
 <p>Date: 2026-05-26</p>
