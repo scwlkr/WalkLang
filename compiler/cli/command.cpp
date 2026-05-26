@@ -2,7 +2,9 @@
 
 #include "codegen/c/c_emitter.h"
 #include "ir/lower.h"
+#include "package/package.h"
 #include "parse/parser.h"
+#include "project/project.h"
 #include "sema/checker.h"
 #include "sema/modules.h"
 #include "support/diagnostic.h"
@@ -91,14 +93,14 @@ struct RunArgs {
     NativeOptions native;
 };
 
+struct ProjectBuildArgs {
+    WarningMode warning_mode = WarningMode::Default;
+    NativeOptions native;
+};
+
 struct CompiledC {
     std::string c_code;
     std::string warning_stderr;
-};
-
-struct ProjectConfig {
-    std::filesystem::path root;
-    std::string entry = "src/main.walk";
 };
 
 std::optional<WarningMode> parse_warning_value(const std::string& value) {
@@ -389,9 +391,67 @@ std::optional<RunArgs> parse_run_like_args(const std::vector<std::string>& args,
     return parsed;
 }
 
-std::optional<WarningMode> parse_project_test_args(const std::vector<std::string>& args, CommandResult& error) {
+bool use_project_build(const std::vector<std::string>& args) {
+    if (args.empty()) {
+        return true;
+    }
+    for (std::size_t index = 0; index < args.size(); ++index) {
+        const std::string& arg = args[index];
+        if (arg == "--release" || arg == "--debug" || arg.rfind("--mode=", 0) == 0 || arg.rfind("--warnings=", 0) == 0) {
+            continue;
+        }
+        if (arg == "--cc" || arg == "--cflag" || arg == "--warnings" || arg == "--mode") {
+            ++index;
+            if (index >= args.size()) {
+                return false;
+            }
+            continue;
+        }
+        return false;
+    }
+    return true;
+}
+
+bool use_project_check_like(const std::vector<std::string>& args) {
+    if (args.empty()) {
+        return true;
+    }
+    for (std::size_t index = 0; index < args.size(); ++index) {
+        const std::string& arg = args[index];
+        if (arg.rfind("--warnings=", 0) == 0) {
+            continue;
+        }
+        if (arg == "--warnings") {
+            ++index;
+            if (index >= args.size()) {
+                return false;
+            }
+            continue;
+        }
+        return false;
+    }
+    return true;
+}
+
+std::optional<ProjectBuildArgs> parse_project_build_args(const std::vector<std::string>& args, CommandResult& error) {
+    ProjectBuildArgs parsed;
+    const std::string usage = "usage: walk-cpp build [--mode debug|release] [--warnings=off|default|error] [--cc <cc>] [--cflag <flag>]";
+    for (std::size_t index = 0; index < args.size(); ++index) {
+        if (parse_warning_arg(args, index, parsed.warning_mode, error, usage) || parse_native_arg(args, index, parsed.native, error, usage)) {
+            if (error.exit_code != 0) {
+                return std::nullopt;
+            }
+            continue;
+        }
+        error = {kUsageExitCode, "", format_simple_error("W0005", usage)};
+        return std::nullopt;
+    }
+    return parsed;
+}
+
+std::optional<WarningMode> parse_project_check_args(const std::vector<std::string>& args, CommandResult& error, const std::string& command) {
     WarningMode mode = WarningMode::Default;
-    const std::string usage = "usage: walk-cpp test [--warnings=off|default|error]";
+    const std::string usage = "usage: walk-cpp " + command + " [--warnings=off|default|error]";
     for (std::size_t index = 0; index < args.size(); ++index) {
         if (parse_warning_arg(args, index, mode, error, usage)) {
             if (error.exit_code != 0) {
@@ -449,109 +509,52 @@ std::optional<CompiledC> compile_file_to_c(
     return CompiledC{emitted.take_value(), warning_result.stderr_text};
 }
 
-std::string trim(std::string value) {
-    const auto begin = std::find_if_not(value.begin(), value.end(), [](unsigned char ch) {
-        return std::isspace(ch) != 0;
-    });
-    const auto end = std::find_if_not(value.rbegin(), value.rend(), [](unsigned char ch) {
-        return std::isspace(ch) != 0;
-    }).base();
-    if (begin >= end) {
-        return "";
+std::optional<std::string> check_file_with_search_dirs(
+    const std::string& source_path,
+    WarningMode warning_mode,
+    CommandResult& error,
+    const std::vector<std::string>& search_dirs = {}) {
+    sema::ProgramBundle bundle = sema::load_program_with_modules_and_search_dirs(source_path, search_dirs);
+    if (!bundle.ok()) {
+        error = {kDiagnosticExitCode, "", bundle.diagnostics.format(bundle.source.get())};
+        return std::nullopt;
     }
-    return std::string(begin, end);
+    sema::CheckResult checked = sema::check_programs(*bundle.parsed.program, bundle.modules);
+    if (!checked.ok()) {
+        error = {kDiagnosticExitCode, "", checked.diagnostics.format(bundle.source.get())};
+        return std::nullopt;
+    }
+    CommandResult warning_result = handle_warnings(checked.warnings, warning_mode);
+    if (warning_result.exit_code != 0) {
+        error = warning_result;
+        return std::nullopt;
+    }
+    return warning_result.stderr_text;
 }
 
-std::string strip_toml_comment(const std::string& value) {
-    const std::size_t index = value.find('#');
-    if (index == std::string::npos) {
-        return value;
-    }
-    return value.substr(0, index);
-}
-
-std::string unquote(std::string value) {
-    value = trim(std::move(value));
-    if (value.size() >= 2 && value.front() == '"' && value.back() == '"') {
-        return value.substr(1, value.size() - 2);
-    }
-    return value;
-}
-
-Result<ProjectConfig> load_project_config_from_cwd() {
-    std::filesystem::path dir = std::filesystem::current_path();
-    for (;;) {
-        const std::filesystem::path config_path = dir / "walk.toml";
-        if (std::filesystem::is_regular_file(config_path)) {
-            ProjectConfig config;
-            config.root = dir;
-            std::ifstream input(config_path, std::ios::binary);
-            if (!input) {
-                return Result<ProjectConfig>::failure("could not read " + config_path.string());
-            }
-            std::string section;
-            std::string line;
-            while (std::getline(input, line)) {
-                line = trim(strip_toml_comment(line));
-                if (line.empty()) {
-                    continue;
-                }
-                if (line.front() == '[' && line.back() == ']') {
-                    section = trim(line.substr(1, line.size() - 2));
-                    continue;
-                }
-                const std::size_t equals = line.find('=');
-                if (equals == std::string::npos) {
-                    continue;
-                }
-                const std::string key = trim(line.substr(0, equals));
-                const std::string value = unquote(line.substr(equals + 1));
-                if (section.empty() && key == "entry") {
-                    config.entry = value;
-                }
-            }
-            return Result<ProjectConfig>::success(std::move(config));
-        }
-        const std::filesystem::path parent = dir.parent_path();
-        if (parent == dir || parent.empty()) {
-            return Result<ProjectConfig>::failure("walk.toml not found; run walk init <project-name> or pass a .walk source file");
-        }
-        dir = parent;
-    }
-}
-
-std::vector<std::filesystem::path> project_test_files(const ProjectConfig& config) {
-    std::vector<std::filesystem::path> files;
-    const std::filesystem::path tests_dir = config.root / "tests";
-    if (!std::filesystem::is_directory(tests_dir)) {
-        return files;
-    }
-    for (const auto& entry : std::filesystem::recursive_directory_iterator(tests_dir)) {
-        if (!entry.is_regular_file()) {
-            continue;
-        }
-        const std::string name = entry.path().filename().string();
-        if (name.size() >= std::string("_test.walk").size() && name.substr(name.size() - std::string("_test.walk").size()) == "_test.walk") {
-            files.push_back(entry.path());
-        }
-    }
-    std::sort(files.begin(), files.end());
-    return files;
-}
-
-std::vector<std::string> project_search_dirs(const ProjectConfig& config, const std::filesystem::path& source_path) {
-    std::vector<std::string> dirs;
-    dirs.push_back(source_path.parent_path().string());
-    dirs.push_back((config.root / std::filesystem::path(config.entry).parent_path()).string());
-    dirs.push_back((config.root / "tests").string());
+std::vector<std::string> path_strings(const std::vector<std::filesystem::path>& paths) {
     std::vector<std::string> result;
     std::set<std::string> seen;
-    for (const std::string& dir : dirs) {
-        if (!dir.empty() && seen.insert(dir).second) {
-            result.push_back(dir);
+    for (const std::filesystem::path& path : paths) {
+        if (path.empty()) {
+            continue;
+        }
+        const std::string text = path.string();
+        if (seen.insert(text).second) {
+            result.push_back(text);
         }
     }
     return result;
+}
+
+Result<std::vector<std::string>> project_search_dirs_with_packages(const project::ProjectConfig& config, const std::filesystem::path& source_path) {
+    std::vector<std::filesystem::path> dirs = project::local_search_dirs(config, source_path);
+    Result<std::vector<std::filesystem::path>> package_dirs = package::package_search_dirs(config);
+    if (!package_dirs.ok()) {
+        return Result<std::vector<std::string>>::failure(package_dirs.error());
+    }
+    dirs.insert(dirs.end(), package_dirs.value().begin(), package_dirs.value().end());
+    return Result<std::vector<std::string>>::success(path_strings(dirs));
 }
 
 std::string shell_quote(const std::string& value) {
@@ -621,6 +624,12 @@ Result<std::filesystem::path> find_runtime_dir() {
     const std::optional<std::filesystem::path> found = find_runtime_dir_from(std::filesystem::current_path());
     if (found) {
         return Result<std::filesystem::path>::success(*found);
+    }
+    if (const char* home = std::getenv("HOME")) {
+        const std::filesystem::path default_install = std::filesystem::path(home) / ".local" / "lib" / "walk" / "runtime";
+        if (is_runtime_dir(default_install)) {
+            return Result<std::filesystem::path>::success(std::filesystem::absolute(default_install).lexically_normal());
+        }
     }
     return Result<std::filesystem::path>::failure("walk runtime not found; run from the repo or set WALK_RUNTIME_DIR");
 }
@@ -712,6 +721,277 @@ int run_passthrough(const std::string& executable) {
     return std::system(shell_quote(executable).c_str());
 }
 
+CommandResult init_command(const std::vector<std::string>& args) {
+    if (args.size() != 1) {
+        return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk-cpp init <project-name>")};
+    }
+    Result<std::filesystem::path> created = project::init_project(args[0]);
+    if (!created.ok()) {
+        return {kDiagnosticExitCode, "", format_simple_error("W7001", created.error())};
+    }
+    return {0, created.value().string() + "\n", ""};
+}
+
+CommandResult clean_command(const std::vector<std::string>& args) {
+    if (!args.empty()) {
+        return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk-cpp clean")};
+    }
+    Result<project::ProjectConfig> config = project::load_project_config_from_cwd();
+    if (!config.ok()) {
+        return {kDiagnosticExitCode, "", format_simple_error("W7002", config.error())};
+    }
+    Result<void> cleaned = project::clean_project(config.value());
+    if (!cleaned.ok()) {
+        return {kDiagnosticExitCode, "", format_simple_error("W7003", cleaned.error())};
+    }
+    return {0, "clean\n", ""};
+}
+
+CommandResult project_check_command(const std::vector<std::string>& args) {
+    CommandResult parse_error{0, "", ""};
+    const std::optional<WarningMode> warning_mode = parse_project_check_args(args, parse_error, "check");
+    if (!warning_mode) {
+        return parse_error;
+    }
+    Result<project::ProjectConfig> config = project::load_project_config_from_cwd();
+    if (!config.ok()) {
+        return {kDiagnosticExitCode, "", format_simple_error("W7002", config.error())};
+    }
+    std::string stderr_text;
+    for (const std::string& warning : config.value().warnings) {
+        stderr_text += warning + "\n";
+    }
+    Result<std::filesystem::path> entry_path = project::project_path(config.value(), config.value().entry);
+    if (!entry_path.ok()) {
+        return {kDiagnosticExitCode, "", format_simple_error("W7004", entry_path.error())};
+    }
+    std::vector<std::filesystem::path> sources{entry_path.value()};
+    const std::vector<std::filesystem::path> tests = project::test_files(config.value());
+    sources.insert(sources.end(), tests.begin(), tests.end());
+    for (const std::filesystem::path& source : sources) {
+        Result<std::vector<std::string>> search_dirs = project_search_dirs_with_packages(config.value(), source);
+        if (!search_dirs.ok()) {
+            return {kDiagnosticExitCode, "", stderr_text + format_simple_error("W7005", search_dirs.error())};
+        }
+        CommandResult check_error;
+        std::optional<std::string> warnings = check_file_with_search_dirs(source.string(), *warning_mode, check_error, search_dirs.value());
+        if (!warnings) {
+            check_error.stderr_text = stderr_text + check_error.stderr_text;
+            return check_error;
+        }
+        stderr_text += *warnings;
+    }
+    return {0, "ok\n", stderr_text};
+}
+
+CommandResult project_build_command(const std::vector<std::string>& args) {
+    CommandResult parse_error{0, "", ""};
+    const std::optional<ProjectBuildArgs> parsed = parse_project_build_args(args, parse_error);
+    if (!parsed) {
+        return parse_error;
+    }
+    Result<project::ProjectConfig> config = project::load_project_config_from_cwd();
+    if (!config.ok()) {
+        return {kDiagnosticExitCode, "", format_simple_error("W7002", config.error())};
+    }
+    std::string stderr_text;
+    for (const std::string& warning : config.value().warnings) {
+        stderr_text += warning + "\n";
+    }
+    Result<std::filesystem::path> entry_path = project::project_path(config.value(), config.value().entry);
+    if (!entry_path.ok()) {
+        return {kDiagnosticExitCode, "", stderr_text + format_simple_error("W7004", entry_path.error())};
+    }
+    Result<std::filesystem::path> output_path = project::project_path(config.value(), config.value().build.output);
+    if (!output_path.ok()) {
+        return {kDiagnosticExitCode, "", stderr_text + format_simple_error("W7004", output_path.error())};
+    }
+    NativeOptions native = parsed->native;
+    if (!native.mode_set) {
+        native.release = config.value().build.release;
+    }
+    Result<std::vector<std::string>> search_dirs = project_search_dirs_with_packages(config.value(), entry_path.value());
+    if (!search_dirs.ok()) {
+        return {kDiagnosticExitCode, "", stderr_text + format_simple_error("W7005", search_dirs.error())};
+    }
+    CommandResult compile_error;
+    std::optional<CompiledC> compiled = compile_file_to_c(entry_path.value().string(), false, parsed->warning_mode, compile_error, search_dirs.value());
+    if (!compiled) {
+        compile_error.stderr_text = stderr_text + compile_error.stderr_text;
+        return compile_error;
+    }
+    stderr_text += compiled->warning_stderr;
+    Result<void> built = build_c(compiled->c_code, output_path.value().string() + ".c", output_path.value().string(), native);
+    if (!built.ok()) {
+        return {kDiagnosticExitCode, "", stderr_text + format_simple_error("W5003", built.error())};
+    }
+    return {0, output_path.value().string() + "\n", stderr_text};
+}
+
+CommandResult project_test_command(const std::vector<std::string>& args) {
+    CommandResult parse_error{0, "", ""};
+    const std::optional<WarningMode> warning_mode = parse_project_check_args(args, parse_error, "test");
+    if (!warning_mode) {
+        return parse_error;
+    }
+    Result<project::ProjectConfig> config = project::load_project_config_from_cwd();
+    if (!config.ok()) {
+        return {kDiagnosticExitCode, "", format_simple_error("W7002", config.error())};
+    }
+    const std::vector<std::filesystem::path> tests = project::test_files(config.value());
+    if (tests.empty()) {
+        return {0, "ok 0 test files\n", ""};
+    }
+    std::string warning_stderr;
+    for (const std::filesystem::path& test_path : tests) {
+        Result<std::vector<std::string>> search_dirs = project_search_dirs_with_packages(config.value(), test_path);
+        if (!search_dirs.ok()) {
+            return {kDiagnosticExitCode, "", warning_stderr + format_simple_error("W7005", search_dirs.error())};
+        }
+        CommandResult compile_error;
+        std::optional<CompiledC> compiled = compile_file_to_c(test_path.string(), true, *warning_mode, compile_error, search_dirs.value());
+        if (!compiled) {
+            compile_error.stderr_text = warning_stderr + compile_error.stderr_text;
+            return compile_error;
+        }
+        warning_stderr += compiled->warning_stderr;
+        const std::filesystem::path dir = temp_dir("walk-cpp-project-test");
+        const std::filesystem::path exe = dir / "tests";
+        Result<void> built = build_c(compiled->c_code, (dir / "tests.c").string(), exe.string(), {});
+        if (!built.ok()) {
+            std::filesystem::remove_all(dir);
+            return {kDiagnosticExitCode, "", warning_stderr + format_simple_error("W5003", built.error())};
+        }
+        if (const int code = run_passthrough(exe.string()); code != 0) {
+            std::filesystem::remove_all(dir);
+            return {kDiagnosticExitCode, "", warning_stderr + format_simple_error("W5005", "tests failed")};
+        }
+        std::filesystem::remove_all(dir);
+    }
+    return {0, "", warning_stderr};
+}
+
+CommandResult fmt_command(const std::vector<std::string>& args) {
+    bool write = false;
+    std::string source_path;
+    for (const std::string& arg : args) {
+        if (arg == "-w") {
+            write = true;
+            continue;
+        }
+        if (!source_path.empty()) {
+            return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk-cpp fmt [-w] <source.walk>")};
+        }
+        source_path = arg;
+    }
+    if (source_path.empty()) {
+        Result<project::ProjectConfig> config = project::load_project_config_from_cwd();
+        if (!config.ok()) {
+            return {kDiagnosticExitCode, "", format_simple_error("W7002", config.error())};
+        }
+        std::ostringstream stdout_text;
+        for (const std::filesystem::path& path : project::format_files(config.value())) {
+            const std::string source = read_text_file(path);
+            Result<std::string> formatted = project::format_source(source, path.string());
+            if (!formatted.ok()) {
+                return {kDiagnosticExitCode, "", formatted.error()};
+            }
+            if (source != formatted.value()) {
+                Result<void> written = write_file(path.string(), formatted.value());
+                if (!written.ok()) {
+                    return {kDiagnosticExitCode, "", format_simple_error("W7006", written.error())};
+                }
+            }
+            std::error_code rel_error;
+            const std::filesystem::path rel = std::filesystem::relative(path, config.value().root, rel_error);
+            stdout_text << (rel_error ? path.string() : rel.string()) << "\n";
+        }
+        return {0, stdout_text.str(), ""};
+    }
+
+    const std::string source = read_text_file(source_path);
+    Result<std::string> formatted = project::format_source(source, source_path);
+    if (!formatted.ok()) {
+        return {kDiagnosticExitCode, "", formatted.error()};
+    }
+    if (write) {
+        Result<void> written = write_file(source_path, formatted.value());
+        if (!written.ok()) {
+            return {kDiagnosticExitCode, "", format_simple_error("W7006", written.error())};
+        }
+        return {0, "", ""};
+    }
+    return {0, formatted.value(), ""};
+}
+
+CommandResult package_command(const std::vector<std::string>& args) {
+    if (args.empty()) {
+        return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk-cpp package <init|resolve|publish>")};
+    }
+    const std::string& subcommand = args.front();
+    const std::vector<std::string> rest(args.begin() + 1, args.end());
+    if (subcommand == "init") {
+        if (rest.size() != 1) {
+            return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk-cpp package init <package-name>")};
+        }
+        Result<std::filesystem::path> created = package::init_package(rest[0]);
+        if (!created.ok()) {
+            return {kDiagnosticExitCode, "", format_simple_error("W7101", created.error())};
+        }
+        return {0, created.value().string() + "\n", ""};
+    }
+    if (subcommand == "resolve") {
+        if (rest.size() != 1) {
+            return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk-cpp package resolve <registry-dir>")};
+        }
+        Result<project::ProjectConfig> config = project::load_project_config_from_cwd();
+        if (!config.ok()) {
+            return {kDiagnosticExitCode, "", format_simple_error("W7002", config.error())};
+        }
+        if (config.value().dependencies.empty()) {
+            return {0, "ok 0 dependencies\n", ""};
+        }
+        Result<std::vector<package::LockEntry>> entries = package::resolve_dependencies(config.value(), rest[0]);
+        if (!entries.ok()) {
+            return {kDiagnosticExitCode, "", format_simple_error("W7102", entries.error())};
+        }
+        Result<void> written = package::write_lock_file(config.value().root, entries.value());
+        if (!written.ok()) {
+            return {kDiagnosticExitCode, "", format_simple_error("W7103", written.error())};
+        }
+        return {0, "resolved " + std::to_string(entries.value().size()) + " package(s)\n", ""};
+    }
+    if (subcommand == "publish") {
+        if (rest.size() != 1) {
+            return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk-cpp package publish <registry-dir>")};
+        }
+        Result<project::ProjectConfig> config = project::load_project_config_from_cwd();
+        if (!config.ok()) {
+            return {kDiagnosticExitCode, "", format_simple_error("W7002", config.error())};
+        }
+        Result<void> manifest = package::validate_publish_manifest(config.value());
+        if (!manifest.ok()) {
+            return {kDiagnosticExitCode, "", format_simple_error("W7104", manifest.error())};
+        }
+        CommandResult checked = project_check_command({"--warnings=error"});
+        if (checked.exit_code != 0) {
+            checked.stderr_text = format_simple_error("W7105", "package check failed: " + checked.stderr_text);
+            return checked;
+        }
+        CommandResult tested = project_test_command({"--warnings=error"});
+        if (tested.exit_code != 0) {
+            tested.stderr_text = checked.stderr_text + format_simple_error("W7106", "package tests failed: " + tested.stderr_text);
+            return tested;
+        }
+        Result<std::filesystem::path> destination = package::publish_package(config.value(), rest[0]);
+        if (!destination.ok()) {
+            return {kDiagnosticExitCode, checked.stdout_text + tested.stdout_text, checked.stderr_text + tested.stderr_text + format_simple_error("W7107", destination.error())};
+        }
+        return {0, checked.stdout_text + tested.stdout_text + destination.value().string() + "\n", checked.stderr_text + tested.stderr_text};
+    }
+    return {kUsageExitCode, "", format_simple_error("W0005", "unknown package command \"" + subcommand + "\"")};
+}
+
 CommandResult emit_c_command(const std::vector<std::string>& args) {
     CommandResult parse_error{0, "", ""};
     const std::optional<EmitArgs> parsed = parse_emit_args(args, parse_error);
@@ -731,6 +1011,9 @@ CommandResult emit_c_command(const std::vector<std::string>& args) {
 }
 
 CommandResult build_command(const std::vector<std::string>& args) {
+    if (use_project_build(args)) {
+        return project_build_command(args);
+    }
     CommandResult parse_error{0, "", ""};
     const std::optional<BuildArgs> parsed = parse_build_args(args, parse_error);
     if (!parsed) {
@@ -780,40 +1063,10 @@ CommandResult run_command(const std::vector<std::string>& args) {
 }
 
 CommandResult test_command(const std::vector<std::string>& args) {
-    CommandResult parse_error{0, "", ""};
-    if (std::optional<WarningMode> project_mode = parse_project_test_args(args, parse_error)) {
-        Result<ProjectConfig> config = load_project_config_from_cwd();
-        if (config.ok()) {
-            const std::vector<std::filesystem::path> tests = project_test_files(config.value());
-            if (tests.empty()) {
-                return {0, "ok 0 test files\n", ""};
-            }
-            std::string warning_stderr;
-            for (const std::filesystem::path& test_path : tests) {
-                CommandResult compile_error;
-                std::optional<CompiledC> compiled =
-                    compile_file_to_c(test_path.string(), true, *project_mode, compile_error, project_search_dirs(config.value(), test_path));
-                if (!compiled) {
-                    return compile_error;
-                }
-                warning_stderr += compiled->warning_stderr;
-                const std::filesystem::path dir = temp_dir("walk-cpp-project-test");
-                const std::filesystem::path exe = dir / "tests";
-                Result<void> built = build_c(compiled->c_code, (dir / "tests.c").string(), exe.string(), {});
-                if (!built.ok()) {
-                    std::filesystem::remove_all(dir);
-                    return {kDiagnosticExitCode, "", format_simple_error("W5003", built.error())};
-                }
-                if (const int code = run_passthrough(exe.string()); code != 0) {
-                    std::filesystem::remove_all(dir);
-                    return {kDiagnosticExitCode, "", warning_stderr + format_simple_error("W5005", "tests failed")};
-                }
-                std::filesystem::remove_all(dir);
-            }
-            return {0, "", warning_stderr};
-        }
+    if (use_project_check_like(args)) {
+        return project_test_command(args);
     }
-    parse_error = {0, "", ""};
+    CommandResult parse_error{0, "", ""};
     const std::optional<RunArgs> parsed = parse_run_like_args(args, parse_error, test_usage());
     if (!parsed) {
         return parse_error;
@@ -838,7 +1091,10 @@ CommandResult test_command(const std::vector<std::string>& args) {
     return {0, "", compiled->warning_stderr};
 }
 
-CommandResult parse_only_check(const std::vector<std::string>& args) {
+CommandResult check_command(const std::vector<std::string>& args) {
+    if (use_project_check_like(args)) {
+        return project_check_command(args);
+    }
     CommandResult parse_error{0, "", ""};
     const std::optional<CheckArgs> parsed = parse_check_args(args, parse_error);
     if (!parsed) {
@@ -858,19 +1114,12 @@ CommandResult parse_only_check(const std::vector<std::string>& args) {
         return {0, "", ""};
     }
 
-    sema::ProgramBundle bundle = sema::load_program_with_modules(parsed->source_path);
-    if (!bundle.ok()) {
-        return {kDiagnosticExitCode, "", bundle.diagnostics.format(bundle.source.get())};
+    CommandResult check_error;
+    std::optional<std::string> warnings = check_file_with_search_dirs(parsed->source_path, parsed->warning_mode, check_error);
+    if (!warnings) {
+        return check_error;
     }
-    sema::CheckResult checked = sema::check_programs(*bundle.parsed.program, bundle.modules);
-    if (!checked.ok()) {
-        return {kDiagnosticExitCode, "", checked.diagnostics.format(bundle.source.get())};
-    }
-    CommandResult warning_result = handle_warnings(checked.warnings, parsed->warning_mode);
-    if (warning_result.exit_code != 0) {
-        return warning_result;
-    }
-    return {0, "ok\n", warning_result.stderr_text};
+    return {0, "ok\n", *warnings};
 }
 
 }  // namespace
@@ -884,10 +1133,10 @@ std::vector<CommandInfo> command_table() {
         {"run", "compile and run a source file", true},
         {"build", "compile a native executable", true},
         {"test", "compile and run source tests", true},
-        {"fmt", "not ported in this phase", false},
-        {"clean", "not ported in this phase", false},
-        {"init", "not ported in this phase", false},
-        {"package", "not ported in this phase", false},
+        {"fmt", "format WalkLang source", true},
+        {"clean", "remove project build outputs", true},
+        {"init", "create a WalkLang project", true},
+        {"package", "manage local packages", true},
         {"docs", "not ported in this phase", false},
         {"debug-map", "not ported in this phase", false},
         {"lsp", "not ported in this phase", false},
@@ -909,7 +1158,7 @@ std::string help_text() {
         }
         output << command.summary << "\n";
     }
-    output << "\nPhase 6 ports check, emit-c, build, run, and test; project and tooling commands remain staged for later phases.\n";
+    output << "\nPhase 7 ports project mode and local package workflows; docs, debug-map, lsp, and repl remain staged for later phases.\n";
     return output.str();
 }
 
@@ -931,13 +1180,16 @@ CommandResult dispatch(const std::vector<std::string>& args) {
         }
         return {0, std::string(kWalkVersion) + "\n", ""};
     }
+    if (std::filesystem::path(command_name).extension() == ".walk") {
+        return run_command(args);
+    }
 
     const CommandInfo* command = find_command(command_name);
     if (command == nullptr) {
         return {kUsageExitCode, "", format_simple_error("W0004", "unknown command \"" + command_name + "\"")};
     }
     if (command_name == "check") {
-        return parse_only_check(std::vector<std::string>(args.begin() + 1, args.end()));
+        return check_command(std::vector<std::string>(args.begin() + 1, args.end()));
     }
     if (command_name == "emit-c") {
         return emit_c_command(std::vector<std::string>(args.begin() + 1, args.end()));
@@ -950,6 +1202,18 @@ CommandResult dispatch(const std::vector<std::string>& args) {
     }
     if (command_name == "test") {
         return test_command(std::vector<std::string>(args.begin() + 1, args.end()));
+    }
+    if (command_name == "fmt") {
+        return fmt_command(std::vector<std::string>(args.begin() + 1, args.end()));
+    }
+    if (command_name == "clean") {
+        return clean_command(std::vector<std::string>(args.begin() + 1, args.end()));
+    }
+    if (command_name == "init") {
+        return init_command(std::vector<std::string>(args.begin() + 1, args.end()));
+    }
+    if (command_name == "package") {
+        return package_command(std::vector<std::string>(args.begin() + 1, args.end()));
     }
     if (!command->ported) {
         return {kDiagnosticExitCode, "", format_simple_error("W0001", "command \"" + command_name + "\" is not ported in this phase")};

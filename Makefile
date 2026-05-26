@@ -26,14 +26,17 @@ WALK_CPP_SOURCES := \
 	compiler/ir/ir.cpp \
 	compiler/ir/lower.cpp \
 	compiler/lex/lexer.cpp \
+	compiler/package/package.cpp \
 	compiler/parse/parser.cpp \
+	compiler/project/project.cpp \
 	compiler/sema/builtins.cpp \
 	compiler/sema/checker.cpp \
 	compiler/sema/modules.cpp \
 	compiler/sema/scope.cpp \
 	compiler/sema/types.cpp \
 	compiler/support/diagnostic.cpp \
-	compiler/support/source_file.cpp
+	compiler/support/source_file.cpp \
+	compiler/support/toml_like.cpp
 
 WALK_CPP_OBJECTS := $(WALK_CPP_SOURCES:%.cpp=$(CPP_BUILD_DIR)/%.o)
 
@@ -43,7 +46,9 @@ TEST_CPP_SOURCES := \
 	tests/cpp/emitter_tests.cpp \
 	tests/cpp/lexer_tests.cpp \
 	tests/cpp/module_tests.cpp \
+	tests/cpp/package_tests.cpp \
 	tests/cpp/parser_tests.cpp \
+	tests/cpp/project_tests.cpp \
 	compiler/cli/command.cpp \
 	compiler/ast/ast.cpp \
 	compiler/codegen/c/c_emitter.cpp \
@@ -51,14 +56,17 @@ TEST_CPP_SOURCES := \
 	compiler/ir/ir.cpp \
 	compiler/ir/lower.cpp \
 	compiler/lex/lexer.cpp \
+	compiler/package/package.cpp \
 	compiler/parse/parser.cpp \
+	compiler/project/project.cpp \
 	compiler/sema/builtins.cpp \
 	compiler/sema/checker.cpp \
 	compiler/sema/modules.cpp \
 	compiler/sema/scope.cpp \
 	compiler/sema/types.cpp \
 	compiler/support/diagnostic.cpp \
-	compiler/support/source_file.cpp
+	compiler/support/source_file.cpp \
+	compiler/support/toml_like.cpp
 
 TEST_CPP_OBJECTS := $(TEST_CPP_SOURCES:%.cpp=$(CPP_BUILD_DIR)/%.o)
 TEST_CPP_BIN := $(CPP_BUILD_DIR)/walk-cpp-tests

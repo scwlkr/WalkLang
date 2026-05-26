@@ -17,6 +17,10 @@ if ! command -v "$walk_bin" >/dev/null 2>&1; then
     exit 1
 fi
 
+if [ "${WALK_RUNTIME_DIR:-}" = "" ] && [ -f "$repo_root/runtime/walk_runtime.c" ]; then
+    export WALK_RUNTIME_DIR="$repo_root/runtime"
+fi
+
 WALK_REF="$walk_bin" tests/conformance/run.sh --verify
 
 expect_output() {

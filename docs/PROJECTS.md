@@ -2,6 +2,9 @@
 
 Project mode starts when a directory contains `walk.toml`.
 
+The reference `walk` compiler and the Phase 7 `walk-cpp` port candidate both
+support the project workflow below.
+
 Create a project:
 
 ```bash

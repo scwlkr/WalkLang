@@ -7,7 +7,7 @@ expected_dir="$repo_root/tests/conformance/expected"
 tmp_root="$repo_root/tests/conformance/tmp"
 
 usage() {
-    echo "usage: WALK_REF=<path> [WALK_CANDIDATE=<path>] tests/conformance/run.sh --record|--verify|--parse|--check|--fail-diagnostics|--emit-c|--native" >&2
+    echo "usage: WALK_REF=<path> [WALK_CANDIDATE=<path>] tests/conformance/run.sh --record|--verify|--parse|--check|--fail-diagnostics|--emit-c|--native|--project|--package" >&2
 }
 
 if [ "$#" -ne 1 ]; then
@@ -17,7 +17,7 @@ fi
 
 action="$1"
 case "$action" in
-    --record|--verify|--parse|--check|--fail-diagnostics|--emit-c|--native)
+    --record|--verify|--parse|--check|--fail-diagnostics|--emit-c|--native|--project|--package)
         ;;
     *)
         usage
@@ -51,11 +51,11 @@ walk_candidate=""
 if [ "${WALK_CANDIDATE:-}" != "" ]; then
     walk_candidate="$(resolve_tool "$WALK_CANDIDATE")"
 fi
-if { [ "$action" = "--parse" ] || [ "$action" = "--check" ] || [ "$action" = "--fail-diagnostics" ] || [ "$action" = "--emit-c" ] || [ "$action" = "--native" ]; } && [ "$walk_candidate" = "" ]; then
+if { [ "$action" = "--parse" ] || [ "$action" = "--check" ] || [ "$action" = "--fail-diagnostics" ] || [ "$action" = "--emit-c" ] || [ "$action" = "--native" ] || [ "$action" = "--project" ] || [ "$action" = "--package" ]; } && [ "$walk_candidate" = "" ]; then
     echo "WALK_CANDIDATE is required for $action" >&2
     exit 2
 fi
-if { [ "$action" = "--check" ] || [ "$action" = "--emit-c" ] || [ "$action" = "--native" ]; } && [ "$walk_ref" = "" ]; then
+if { [ "$action" = "--check" ] || [ "$action" = "--emit-c" ] || [ "$action" = "--native" ] || [ "$action" = "--project" ] || [ "$action" = "--package" ]; } && [ "$walk_ref" = "" ]; then
     echo "WALK_REF is required for $action" >&2
     exit 2
 fi
@@ -441,6 +441,137 @@ snapshot_ok=0
 walktop_ok=0
 
 check_coverage
+
+write_file() {
+    path="$1"
+    shift
+    mkdir -p "$(dirname -- "$path")"
+    cat >"$path"
+}
+
+run_project_conformance_for() {
+    compiler="$1"
+    label="$2"
+    root="$work_dir/project-$label"
+    project_dir="$root/hello_project"
+    rm -rf "$root"
+    mkdir -p "$root"
+
+    "$compiler" init "$project_dir" >"$root/init.out" 2>"$root/init.err"
+    test -f "$project_dir/walk.toml"
+    test -f "$project_dir/src/main.walk"
+    test -f "$project_dir/src/math_extra.walk"
+    test -f "$project_dir/tests/main_test.walk"
+
+    (cd "$project_dir" && "$compiler" check --warnings=error) >"$root/check.out" 2>"$root/check.err"
+    printf 'ok\n' >"$root/check.expected"
+    compare_file "$root/check.expected" "$root/check.out" "$label project check stdout"
+    : >"$root/empty.expected"
+    compare_file "$root/empty.expected" "$root/check.err" "$label project check stderr"
+
+    (cd "$project_dir" && "$compiler" build) >"$root/build.out" 2>"$root/build.err"
+    "$project_dir/build/hello_project" >"$root/run.out" 2>"$root/run.err"
+    printf '27\n' >"$root/run.expected"
+    compare_file "$root/run.expected" "$root/run.out" "$label project executable output"
+
+    (cd "$project_dir" && "$compiler" test --warnings=error) >"$root/test.out" 2>"$root/test.err"
+    grep -q 'ok 1 tests' "$root/test.out"
+
+    printf 'out:+ 1 2\n' >"$project_dir/src/messy.walk"
+    (cd "$project_dir" && "$compiler" fmt) >"$root/fmt.out" 2>"$root/fmt.err"
+    printf 'out: + 1 2\n' >"$root/formatted.expected"
+    compare_file "$root/formatted.expected" "$project_dir/src/messy.walk" "$label project fmt"
+
+    (cd "$project_dir" && "$compiler" clean) >"$root/clean.out" 2>"$root/clean.err"
+    test ! -d "$project_dir/build"
+}
+
+run_package_conformance_for() {
+    compiler="$1"
+    label="$2"
+    root="$work_dir/package-$label"
+    registry="$root/registry"
+    package_dir="$root/geometry"
+    app_dir="$root/shape_app"
+    rm -rf "$root"
+    mkdir -p "$root"
+
+    "$compiler" package init "$package_dir" >"$root/package-init.out" 2>"$root/package-init.err"
+    test -f "$package_dir/README.md"
+    test -f "$package_dir/walk.toml"
+    test -f "$package_dir/src/geometry/core.walk"
+    (cd "$package_dir" && "$compiler" package publish "$registry") >"$root/publish.out" 2>"$root/publish.err"
+    test -f "$registry/geometry/0.1.0/walk.toml"
+
+    "$compiler" init "$app_dir" >"$root/app-init.out" 2>"$root/app-init.err"
+    write_file "$app_dir/walk.toml" <<'EOF'
+name = "shape_app"
+version = "0.1.0"
+entry = "src/main.walk"
+
+[build]
+output = "build/shape_app"
+release = false
+
+[dependencies]
+geometry = "0.1.0"
+EOF
+    write_file "$app_dir/src/main.walk" <<'EOF'
+imp: geometry.core
+
+out: geometry.core.double(4)
+EOF
+    write_file "$app_dir/tests/main_test.walk" <<'EOF'
+imp: geometry.core
+
+test: 'package import works'
+    assert: == geometry.core.double(4) 8
+EOF
+
+    if (cd "$app_dir" && "$compiler" check --warnings=error) >"$root/unlocked.out" 2>"$root/unlocked.err"; then
+        echo "$label package check unexpectedly passed before resolve" >&2
+        exit 1
+    fi
+    grep -q 'dependencies are not locked' "$root/unlocked.err"
+
+    (cd "$app_dir" && "$compiler" package resolve "$registry") >"$root/resolve.out" 2>"$root/resolve.err"
+    grep -q 'name = "geometry"' "$app_dir/walk.lock"
+    grep -q 'version = "0.1.0"' "$app_dir/walk.lock"
+    grep -q 'checksum = "sha256:' "$app_dir/walk.lock"
+
+    (cd "$app_dir" && "$compiler" check --warnings=error) >"$root/app-check.out" 2>"$root/app-check.err"
+    (cd "$app_dir" && "$compiler" test --warnings=error) >"$root/app-test.out" 2>"$root/app-test.err"
+    (cd "$app_dir" && "$compiler" build) >"$root/app-build.out" 2>"$root/app-build.err"
+    "$app_dir/build/shape_app" >"$root/app-run.out" 2>"$root/app-run.err"
+    printf '8\n' >"$root/app-run.expected"
+    compare_file "$root/app-run.expected" "$root/app-run.out" "$label package executable output"
+
+    write_file "$app_dir/.walk/packages/geometry/0.1.0/src/geometry/core.walk" <<'EOF'
+func: double(x int) int
+    return: + x 100
+
+exp: double
+EOF
+    if (cd "$app_dir" && "$compiler" check --warnings=error) >"$root/corrupt.out" 2>"$root/corrupt.err"; then
+        echo "$label package check unexpectedly passed with corrupt cache" >&2
+        exit 1
+    fi
+    grep -q 'cache does not match walk.lock' "$root/corrupt.err"
+}
+
+if [ "$action" = "--project" ]; then
+    run_project_conformance_for "$walk_ref" reference
+    run_project_conformance_for "$walk_candidate" candidate
+    echo "conformance project: ok"
+    exit 0
+fi
+
+if [ "$action" = "--package" ]; then
+    run_package_conformance_for "$walk_ref" reference
+    run_package_conformance_for "$walk_candidate" candidate
+    echo "conformance package: ok"
+    exit 0
+fi
 
 while IFS="$tab" read -r id kind mode source cwd stdin_key native; do
     case "$id" in

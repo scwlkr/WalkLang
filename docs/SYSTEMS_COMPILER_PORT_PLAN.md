@@ -408,8 +408,8 @@ Update this table at the end of every porting phase.
 | 3. C++ Skeleton | Complete | `make walk` builds a C++ `walk` that supports version/help and test harness entrypoints |
 | 4. Lexer, Parser, AST | Complete | C++ frontend parses current pass fixtures and rejects fail syntax fixtures |
 | 5. Semantic Checker | Complete | C++ checker matches current type, name, module, and warning diagnostics |
-| 6. C Backend | Not started | C++ compiler emits C that passes native behavior and snapshot checks |
-| 7. CLI, Project, Package | Not started | C++ `walk` supports current command surface and project/package tests |
+| 6. C Backend | Complete | C++ compiler emits C that passes native behavior and snapshot checks |
+| 7. CLI, Project, Package | Complete | C++ `walk` supports current command surface and project/package tests |
 | 8. Runtime Module Parity | Not started | Draft runtime modules pass native tests through the C runtime |
 | 9. Tooling Parity | Not started | Formatter, docs generator, debug map, LSP, and REPL pass parity checks |
 | 10. Standard Platform Parity | Not started | `walktop` builds, tests, runs, installs, and releases through C++ `walk` |
@@ -954,7 +954,7 @@ Phase completion prompt:
 
 ## Phase 5: Semantic Checker
 
-Status: Not started
+Status: Complete
 
 Goal: port type checking, name resolution, module resolution, warnings, and
 semantic diagnostics.
@@ -1203,6 +1203,37 @@ WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformanc
 WALK_BIN=$PWD/build/walk-cpp scripts/stress-compatibility.sh
 scripts/build-docs-site.sh
 scripts/check-docs-site.sh
+```
+
+Completed on 2026-05-26:
+
+```text
+compiler/project/ now owns project config parsing, project scaffolding,
+project-relative path validation, project test/format file discovery, clean
+behavior, and the C++ formatter path.
+compiler/package/ now owns package scaffolding, manifest validation, local
+registry publishing, dependency resolution, deterministic walk.lock writing,
+cache copying, SHA-256 package checksums, and cache verification.
+compiler/support/toml_like.* centralizes the small TOML-like parser used for
+walk.toml and walk.lock.
+walk-cpp now ports init, clean, fmt, project check/build/test, package
+init/resolve/publish, direct .walk run shorthand, and package-aware module
+search paths without delegating to the Go reference compiler.
+tests/conformance/run.sh now supports --project and --package gates that run
+the current project lifecycle and package cache/checksum lifecycle against both
+the reference compiler and walk-cpp.
+scripts/install-local.sh accepts WALK_BUILD_BIN=build/walk-cpp for build-driver
+proof, and scripts/release.sh accepts WALK_RELEASE_BUILD_BIN=build/walk-cpp for
+release-script build-driver proof.
+make test passed and reported C++ compiler tests passed
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --project passed
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --package passed
+WALK_BIN=$PWD/build/walk-cpp scripts/stress-compatibility.sh passed with
+project lifecycle checks active
+scripts/build-docs-site.sh passed
+scripts/check-docs-site.sh passed after staging generated docs
+WALK_RELEASE_BUILD_BIN=build/walk-cpp scripts/release.sh v5.14-cpp-project-package <temp>/release passed with 8 checksummed artifacts
+WALK_INSTALL_DIR=<temp>/bin WALK_BUILD_BIN=build/walk-cpp scripts/install-local.sh v5.14-cpp-project-package passed, and the temp walk-cpp passed project/package conformance with WALK_RUNTIME_DIR pointed at the temp runtime install
 ```
 
 Phase completion prompt:

@@ -10,6 +10,7 @@
 - Phase 4 C++ frontend pieces under `compiler/lex/`, `compiler/parse/`, and `compiler/ast/`, with tokenization, indentation handling, AST arena ownership, parser diagnostics, and `walk-cpp check --parse-only`.
 - Phase 5 C++ semantic checker under `compiler/sema/`, with type checking, scope/name resolution, module/export resolution, built-in signatures, warning handling, and normal `walk-cpp check`.
 - Phase 6 C++ backend pieces under `compiler/ir/` and `compiler/codegen/c/`, with typed IR lowering, deterministic C emission, runtime-backed native builds, and C++ candidate `emit-c`, `build`, `run`, and `test`.
+- Phase 7 C++ project and package workflow pieces under `compiler/project/` and `compiler/package/`, with `walk.toml` parsing, project `init/fmt/clean/check/build/test`, local package `init/resolve/publish`, `walk.lock`, package cache verification, and preserved package checksums.
 
 ### Changed
 
@@ -20,7 +21,9 @@
 - `tests/conformance/run.sh` now supports `--parse` to compare reference compiler syntax accept/reject behavior with the C++ parse-only candidate.
 - `tests/conformance/run.sh` now supports `--check` and `--fail-diagnostics` to compare C++ semantic check behavior and exact fail diagnostics against the reference oracle.
 - `tests/conformance/run.sh` now supports `--emit-c` and `--native` to compare generated C snapshots and native behavior between the reference compiler and `walk-cpp`.
+- `tests/conformance/run.sh` now supports `--project` and `--package` to prove project lifecycle and package lock/cache behavior against the reference compiler and `walk-cpp`.
 - `scripts/stress-compatibility.sh` now keeps backend compatibility checks active for staged `walk-cpp` candidates while skipping later-phase formatter/project lifecycle checks only when the candidate advertises those commands as not ported.
+- `scripts/install-local.sh` and `scripts/release.sh` can use `build/walk-cpp` as the WalkLang build driver through `WALK_BUILD_BIN` and `WALK_RELEASE_BUILD_BIN`.
 
 ## v5.14.1 - Systems Compiler Port Contract
 
