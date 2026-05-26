@@ -65,12 +65,13 @@ Optional explicit types: yes</code></pre>
 <h1 id="architecture-md">ARCHITECTURE.md</h1>
 <h2 id="walklang-architecture">WalkLang Architecture</h2>
 <p>WalkLang is a compiled, general-purpose language for readable native programs on any OS.</p>
-<pre><code class="language-text">main.walk -&gt; lexer -&gt; parser -&gt; typed IR -&gt; C -&gt; native executable</code></pre>
+<pre><code class="language-text">main.walk -&gt; lexer -&gt; parser -&gt; typed IR -&gt; generated C + Walk C runtime -&gt; native executable</code></pre>
 <p>Example:</p>
 <pre><code class="language-walk"># main.walk
 out: &#39;hello&#39;</code></pre>
 <p>Build shape:</p>
-<pre><code class="language-text">main.walk -&gt; main.c -&gt; main / main.exe</code></pre>
+<pre><code class="language-text">main.walk -&gt; main.c -&gt; main / main.exe
+main.c links with runtime/walk_runtime.c and the host runtime/platform file</code></pre>
 <p>Build mode is explicit at the tool boundary. Debug mode is the default and uses inspectable native flags (<code>-g -O0</code>); release mode uses optimized native flags (<code>-O3 -DNDEBUG</code>). <code>--release</code> remains a compatibility alias for <code>--mode release</code>.</p>
 <p>---</p>
 <h2 id="1-identity">1. Identity</h2>
@@ -198,8 +199,8 @@ No GC promise.</code></pre>
 <pre><code class="language-walk">var: names = [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;]
 out: names[0]</code></pre>
 <p>The user writes array logic, not allocation logic.</p>
-<p>The current runtime model makes array storage explicit inside generated C:</p>
-<pre><code class="language-text">array literals allocate item storage through the generated walk runtime helper
+<p>The current runtime model makes array storage explicit in the C runtime:</p>
+<pre><code class="language-text">array literals allocate item storage through the walk runtime helper
 array item storage is owned for the process lifetime
 arrays can be returned from functions without pointing at expired stack storage</code></pre>
 <p>This is still not source-level memory management. WalkLang programs do not call <code>malloc</code>, <code>free</code>, or pointer APIs.</p>
@@ -293,7 +294,7 @@ editor integration
 docs generator
 debug map</code></pre>
 <p>Runtime and backend maturity:</p>
-<pre><code class="language-text">small generated C runtime layer
+<pre><code class="language-text">external Walk C runtime and host platform layer
 process-lifetime array storage
 source comments in generated C
 optimized native release builds

@@ -19,13 +19,15 @@ walk-v5.14.1-darwin-amd64
 walk-v5.14.1-linux-amd64
 walk-v5.14.1-linux-arm64
 walk-v5.14.1-windows-amd64.exe
+walk-runtime-v5.14.1.tar.gz
 walktop-v5.14.1-<release-host-os>-<release-host-arch>
 SHA256SUMS
 ```
 
 `scripts/release.sh` cross-builds the `walk` compiler artifacts and builds one
-current-host `walktop` artifact from WalkLang source. Source install always
-builds the local `walktop` binary.
+current-host `walktop` artifact from WalkLang source. It also packages the C
+runtime source used by native builds. Source install always installs the runtime
+source and builds the local `walktop` binary.
 
 Install on macOS or Linux:
 
@@ -33,6 +35,8 @@ Install on macOS or Linux:
 mkdir -p ~/.local/bin
 cp walk-v5.14.1-<os>-<arch> ~/.local/bin/walk
 cp walktop-v5.14.1-<os>-<arch> ~/.local/bin/walktop
+mkdir -p ~/.local/lib/walk
+tar -xzf walk-runtime-v5.14.1.tar.gz -C ~/.local/lib/walk
 chmod +x ~/.local/bin/walk ~/.local/bin/walktop
 walk version
 NO_COLOR=1 walktop --once
@@ -72,6 +76,13 @@ the install directory with:
 
 ```bash
 WALK_INSTALL_DIR=/path/to/bin scripts/install-local.sh local
+```
+
+The runtime source is installed to `../lib/walk/runtime` relative to the install
+directory. Override it with:
+
+```bash
+WALK_RUNTIME_INSTALL_DIR=/path/to/runtime scripts/install-local.sh local
 ```
 
 ## Smoke Test
@@ -116,5 +127,5 @@ Maintainers can produce the release artifact set with:
 scripts/release.sh v5.14.1 dist
 ```
 
-The command writes the compiler platform binaries, the current-host `walktop`
-binary, and `dist/SHA256SUMS`.
+The command writes the compiler platform binaries, the runtime source archive,
+the current-host `walktop` binary, and `dist/SHA256SUMS`.

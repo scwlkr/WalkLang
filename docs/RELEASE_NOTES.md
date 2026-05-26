@@ -5,10 +5,13 @@
 ### Added
 
 - Phase 1 systems compiler port conformance oracle under `tests/conformance/`, with a manifest, recorded reference outputs, generated-C snapshot oracle artifacts, and a shell runner that supports `WALK_REF` plus future `WALK_CANDIDATE` comparison.
+- Phase 2 runtime extraction with `runtime/walk_runtime.h`, `runtime/walk_runtime.c`, host platform C files, and direct C runtime tests for allocation, strings, arrays, process, files, terminal helpers, and runtime errors.
 
 ### Changed
 
 - `scripts/stress-compatibility.sh` now verifies the recorded conformance oracle before running the older compatibility stress checks.
+- Generated C now includes `walk_runtime.h` and calls the stable `walk_rt_*` runtime ABI instead of embedding helper bodies in every output file.
+- Native builds now link emitted C with the Walk runtime and platform source files, and release artifacts include a runtime source archive for installed compilers.
 
 ## v5.14.1 - Systems Compiler Port Contract
 

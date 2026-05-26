@@ -49,6 +49,11 @@ for target in $targets; do
     add_checksum "$name"
 done
 
+runtime_name="walk-runtime-${version}.tar.gz"
+tar -czf "$out_dir/$runtime_name" runtime
+echo "$out_dir/$runtime_name"
+add_checksum "$runtime_name"
+
 host_goos="$(go env GOOS)"
 host_goarch="$(go env GOARCH)"
 host_ext=""

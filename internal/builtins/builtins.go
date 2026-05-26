@@ -128,7 +128,7 @@ func init() {
 		Return: ast.Basic(ast.TypeVoid),
 		Effect: true,
 		Draft:  true,
-		CName:  "__walk_io_write",
+		CName:  "walk_rt_io_write",
 	})
 	register(Function{
 		Module: "io",
@@ -137,7 +137,7 @@ func init() {
 		Return: ast.Basic(ast.TypeVoid),
 		Effect: true,
 		Draft:  true,
-		CName:  "__walk_io_write_line",
+		CName:  "walk_rt_io_write_line",
 	})
 	register(Function{
 		Module: "io",
@@ -146,21 +146,21 @@ func init() {
 		Return: ast.Basic(ast.TypeVoid),
 		Effect: true,
 		Draft:  true,
-		CName:  "__walk_io_error_line",
+		CName:  "walk_rt_io_error_line",
 	})
 	register(Function{
 		Module: "io",
 		Name:   "read_line",
 		Return: ast.Struct("IOReadResult"),
 		Draft:  true,
-		CName:  "__walk_io_read_line",
+		CName:  "walk_rt_io_read_line",
 	})
 	register(Function{
 		Module: "io",
 		Name:   "read_all",
 		Return: ast.Struct("IOReadResult"),
 		Draft:  true,
-		CName:  "__walk_io_read_all",
+		CName:  "walk_rt_io_read_all",
 	})
 	register(Function{
 		Module: "file",
@@ -168,7 +168,7 @@ func init() {
 		Params: []ast.Type{ast.Basic(ast.TypeString)},
 		Return: ast.Basic(ast.TypeString),
 		Draft:  true,
-		CName:  "__walk_file_read",
+		CName:  "walk_rt_file_read",
 	})
 	register(Function{
 		Module: "file",
@@ -176,7 +176,7 @@ func init() {
 		Params: []ast.Type{ast.Basic(ast.TypeString)},
 		Return: ast.Struct("FileReadResult"),
 		Draft:  true,
-		CName:  "__walk_file_try_read",
+		CName:  "walk_rt_file_try_read",
 	})
 	register(Function{
 		Module: "file",
@@ -185,7 +185,7 @@ func init() {
 		Return: ast.Basic(ast.TypeVoid),
 		Effect: true,
 		Draft:  true,
-		CName:  "__walk_file_write",
+		CName:  "walk_rt_file_write",
 	})
 	register(Function{
 		Module: "file",
@@ -193,7 +193,7 @@ func init() {
 		Params: []ast.Type{ast.Basic(ast.TypeString), ast.Basic(ast.TypeString)},
 		Return: ast.Struct("FileActionResult"),
 		Draft:  true,
-		CName:  "__walk_file_try_write",
+		CName:  "walk_rt_file_try_write",
 	})
 	register(Function{
 		Module: "file",
@@ -202,7 +202,7 @@ func init() {
 		Return: ast.Basic(ast.TypeVoid),
 		Effect: true,
 		Draft:  true,
-		CName:  "__walk_file_append",
+		CName:  "walk_rt_file_append",
 	})
 	register(Function{
 		Module: "file",
@@ -210,7 +210,7 @@ func init() {
 		Params: []ast.Type{ast.Basic(ast.TypeString), ast.Basic(ast.TypeString)},
 		Return: ast.Struct("FileActionResult"),
 		Draft:  true,
-		CName:  "__walk_file_try_append",
+		CName:  "walk_rt_file_try_append",
 	})
 	register(Function{
 		Module: "file",
@@ -218,7 +218,7 @@ func init() {
 		Params: []ast.Type{ast.Basic(ast.TypeString)},
 		Return: ast.Basic(ast.TypeBool),
 		Draft:  true,
-		CName:  "__walk_file_exists",
+		CName:  "walk_rt_file_exists",
 	})
 	register(Function{
 		Module: "dir",
@@ -226,7 +226,7 @@ func init() {
 		Params: []ast.Type{ast.Basic(ast.TypeString)},
 		Return: ast.ArrayOf(ast.Basic(ast.TypeString)),
 		Draft:  true,
-		CName:  "__walk_dir_list",
+		CName:  "walk_rt_dir_list",
 	})
 	register(Function{
 		Module: "dir",
@@ -235,7 +235,7 @@ func init() {
 		Return: ast.Basic(ast.TypeVoid),
 		Effect: true,
 		Draft:  true,
-		CName:  "__walk_dir_make",
+		CName:  "walk_rt_dir_make",
 	})
 	register(Function{
 		Module: "dir",
@@ -244,7 +244,7 @@ func init() {
 		Return: ast.Basic(ast.TypeVoid),
 		Effect: true,
 		Draft:  true,
-		CName:  "__walk_dir_delete",
+		CName:  "walk_rt_dir_delete",
 	})
 	register(Function{
 		Module: "path",
@@ -252,7 +252,7 @@ func init() {
 		Params: []ast.Type{ast.Basic(ast.TypeString), ast.Basic(ast.TypeString)},
 		Return: ast.Basic(ast.TypeString),
 		Draft:  true,
-		CName:  "__walk_path_join",
+		CName:  "walk_rt_path_join",
 	})
 	register(Function{
 		Module: "path",
@@ -260,7 +260,7 @@ func init() {
 		Params: []ast.Type{ast.Basic(ast.TypeString)},
 		Return: ast.Basic(ast.TypeString),
 		Draft:  true,
-		CName:  "__walk_path_base",
+		CName:  "walk_rt_path_base",
 	})
 	register(Function{
 		Module: "path",
@@ -268,21 +268,21 @@ func init() {
 		Params: []ast.Type{ast.Basic(ast.TypeString)},
 		Return: ast.Basic(ast.TypeString),
 		Draft:  true,
-		CName:  "__walk_path_ext",
+		CName:  "walk_rt_path_ext",
 	})
 	register(Function{
 		Module: "process",
 		Name:   "args",
 		Return: ast.ArrayOf(ast.Basic(ast.TypeString)),
 		Draft:  true,
-		CName:  "__walk_process_args",
+		CName:  "walk_rt_process_args",
 	})
 	register(Function{
 		Module: "process",
 		Name:   "arg_count",
 		Return: ast.Basic(ast.TypeInt),
 		Draft:  true,
-		CName:  "__walk_process_arg_count",
+		CName:  "walk_rt_process_arg_count",
 	})
 	register(Function{
 		Module: "process",
@@ -290,14 +290,14 @@ func init() {
 		Params: []ast.Type{ast.Basic(ast.TypeString)},
 		Return: nullableString(),
 		Draft:  true,
-		CName:  "__walk_process_env",
+		CName:  "walk_rt_process_env",
 	})
 	register(Function{
 		Module: "process",
 		Name:   "cwd",
 		Return: ast.Basic(ast.TypeString),
 		Draft:  true,
-		CName:  "__walk_process_cwd",
+		CName:  "walk_rt_process_cwd",
 	})
 	register(Function{
 		Module: "process",
@@ -306,7 +306,7 @@ func init() {
 		Return: ast.Basic(ast.TypeVoid),
 		Effect: true,
 		Draft:  true,
-		CName:  "__walk_process_chdir",
+		CName:  "walk_rt_process_chdir",
 	})
 	register(Function{
 		Module: "process",
@@ -314,7 +314,7 @@ func init() {
 		Params: []ast.Type{ast.Basic(ast.TypeString), ast.ArrayOf(ast.Basic(ast.TypeString))},
 		Return: ast.Struct("ProcessResult"),
 		Draft:  true,
-		CName:  "__walk_process_run",
+		CName:  "walk_rt_process_run",
 	})
 	register(Function{
 		Module: "process",
@@ -322,7 +322,7 @@ func init() {
 		Params: []ast.Type{ast.Basic(ast.TypeString), ast.ArrayOf(ast.Basic(ast.TypeString))},
 		Return: ast.Struct("ProcessOutputResult"),
 		Draft:  true,
-		CName:  "__walk_process_output",
+		CName:  "walk_rt_process_output",
 	})
 	register(Function{
 		Module: "process",
@@ -330,7 +330,7 @@ func init() {
 		Params: []ast.Type{ast.Basic(ast.TypeString)},
 		Return: ast.Struct("ProcessResult"),
 		Draft:  true,
-		CName:  "__walk_process_run_shell",
+		CName:  "walk_rt_process_run_shell",
 	})
 	register(Function{
 		Module: "process",
@@ -339,7 +339,7 @@ func init() {
 		Return: ast.Basic(ast.TypeVoid),
 		Effect: true,
 		Draft:  true,
-		CName:  "__walk_process_exit",
+		CName:  "walk_rt_process_exit",
 	})
 	register(Function{
 		Module: "parse",
@@ -347,7 +347,7 @@ func init() {
 		Params: []ast.Type{ast.Basic(ast.TypeString)},
 		Return: ast.Struct("ParseIntResult"),
 		Draft:  true,
-		CName:  "__walk_parse_int",
+		CName:  "walk_rt_parse_int",
 	})
 	register(Function{
 		Module: "parse",
@@ -355,7 +355,7 @@ func init() {
 		Params: []ast.Type{ast.Basic(ast.TypeString)},
 		Return: ast.Struct("ParseFloatResult"),
 		Draft:  true,
-		CName:  "__walk_parse_float",
+		CName:  "walk_rt_parse_float",
 	})
 	register(Function{
 		Module: "parse",
@@ -363,7 +363,7 @@ func init() {
 		Params: []ast.Type{ast.Basic(ast.TypeString)},
 		Return: ast.Struct("ParseBoolResult"),
 		Draft:  true,
-		CName:  "__walk_parse_bool",
+		CName:  "walk_rt_parse_bool",
 	})
 	register(Function{
 		Module: "json",
@@ -371,7 +371,7 @@ func init() {
 		Params: []ast.Type{ast.Basic(ast.TypeString)},
 		Return: ast.Struct("JsonResult"),
 		Draft:  true,
-		CName:  "__walk_json_parse",
+		CName:  "walk_rt_json_parse",
 	})
 	register(Function{
 		Module: "json",
@@ -379,7 +379,7 @@ func init() {
 		Params: []ast.Type{ast.Basic(ast.TypeString)},
 		Return: ast.Basic(ast.TypeString),
 		Draft:  true,
-		CName:  "__walk_json_stringify",
+		CName:  "walk_rt_json_stringify",
 	})
 	register(Function{
 		Module: "json",
@@ -387,7 +387,7 @@ func init() {
 		Params: []ast.Type{ast.Basic(ast.TypeString)},
 		Return: ast.Struct("JsonResult"),
 		Draft:  true,
-		CName:  "__walk_json_read",
+		CName:  "walk_rt_json_read",
 	})
 	register(Function{
 		Module: "json",
@@ -396,14 +396,14 @@ func init() {
 		Return: ast.Basic(ast.TypeVoid),
 		Effect: true,
 		Draft:  true,
-		CName:  "__walk_json_write",
+		CName:  "walk_rt_json_write",
 	})
 	register(Function{
 		Module: "term",
 		Name:   "is_tty",
 		Return: ast.Basic(ast.TypeBool),
 		Draft:  true,
-		CName:  "__walk_term_is_tty",
+		CName:  "walk_rt_term_is_tty",
 	})
 	register(Function{
 		Module: "term",
@@ -412,7 +412,7 @@ func init() {
 		Return: ast.Basic(ast.TypeVoid),
 		Effect: true,
 		Draft:  true,
-		CName:  "__walk_term_color",
+		CName:  "walk_rt_term_color",
 	})
 	register(Function{
 		Module: "term",
@@ -421,7 +421,7 @@ func init() {
 		Return: ast.Basic(ast.TypeVoid),
 		Effect: true,
 		Draft:  true,
-		CName:  "__walk_term_background",
+		CName:  "walk_rt_term_background",
 	})
 	register(Function{
 		Module: "term",
@@ -430,7 +430,7 @@ func init() {
 		Return: ast.Basic(ast.TypeVoid),
 		Effect: true,
 		Draft:  true,
-		CName:  "__walk_term_style",
+		CName:  "walk_rt_term_style",
 	})
 	register(Function{
 		Module: "term",
@@ -438,7 +438,7 @@ func init() {
 		Return: ast.Basic(ast.TypeVoid),
 		Effect: true,
 		Draft:  true,
-		CName:  "__walk_term_reset",
+		CName:  "walk_rt_term_reset",
 	})
 	register(Function{
 		Module: "term",
@@ -446,7 +446,7 @@ func init() {
 		Return: ast.Basic(ast.TypeVoid),
 		Effect: true,
 		Draft:  true,
-		CName:  "__walk_term_clear",
+		CName:  "walk_rt_term_clear",
 	})
 	register(Function{
 		Module: "term",
@@ -455,28 +455,28 @@ func init() {
 		Return: ast.Basic(ast.TypeVoid),
 		Effect: true,
 		Draft:  true,
-		CName:  "__walk_term_move",
+		CName:  "walk_rt_term_move",
 	})
 	register(Function{
 		Module: "term",
 		Name:   "width",
 		Return: ast.Basic(ast.TypeInt),
 		Draft:  true,
-		CName:  "__walk_term_width",
+		CName:  "walk_rt_term_width",
 	})
 	register(Function{
 		Module: "term",
 		Name:   "height",
 		Return: ast.Basic(ast.TypeInt),
 		Draft:  true,
-		CName:  "__walk_term_height",
+		CName:  "walk_rt_term_height",
 	})
 	register(Function{
 		Module: "term",
 		Name:   "read_key",
 		Return: ast.Struct("IOReadResult"),
 		Draft:  true,
-		CName:  "__walk_term_read_key",
+		CName:  "walk_rt_term_read_key",
 	})
 	register(Function{
 		Module: "http",
@@ -484,7 +484,7 @@ func init() {
 		Params: []ast.Type{ast.Basic(ast.TypeString)},
 		Return: ast.Struct("HttpResult"),
 		Draft:  true,
-		CName:  "__walk_http_get",
+		CName:  "walk_rt_http_get",
 	})
 	register(Function{
 		Module: "http",
@@ -492,7 +492,7 @@ func init() {
 		Params: []ast.Type{ast.Basic(ast.TypeString), ast.Basic(ast.TypeString)},
 		Return: ast.Struct("HttpResult"),
 		Draft:  true,
-		CName:  "__walk_http_post",
+		CName:  "walk_rt_http_post",
 	})
 	register(Function{
 		Module: "http",
@@ -500,7 +500,7 @@ func init() {
 		Params: []ast.Type{ast.Basic(ast.TypeString), ast.Basic(ast.TypeString), ast.Basic(ast.TypeString)},
 		Return: ast.Struct("HttpResult"),
 		Draft:  true,
-		CName:  "__walk_http_request",
+		CName:  "walk_rt_http_request",
 	})
 	register(Function{
 		Module: "html",
@@ -508,7 +508,7 @@ func init() {
 		Params: []ast.Type{ast.Basic(ast.TypeString)},
 		Return: ast.Basic(ast.TypeString),
 		Draft:  true,
-		CName:  "__walk_html_escape",
+		CName:  "walk_rt_html_escape",
 	})
 	register(Function{
 		Module: "html",
@@ -516,7 +516,7 @@ func init() {
 		Params: []ast.Type{ast.Basic(ast.TypeString)},
 		Return: ast.Basic(ast.TypeString),
 		Draft:  true,
-		CName:  "__walk_html_h1",
+		CName:  "walk_rt_html_h1",
 	})
 	register(Function{
 		Module: "html",
@@ -524,7 +524,7 @@ func init() {
 		Params: []ast.Type{ast.Basic(ast.TypeString)},
 		Return: ast.Basic(ast.TypeString),
 		Draft:  true,
-		CName:  "__walk_html_p",
+		CName:  "walk_rt_html_p",
 	})
 	register(Function{
 		Module: "html",
@@ -532,7 +532,7 @@ func init() {
 		Params: []ast.Type{ast.Basic(ast.TypeString)},
 		Return: ast.Basic(ast.TypeString),
 		Draft:  true,
-		CName:  "__walk_html_button",
+		CName:  "walk_rt_html_button",
 	})
 }
 

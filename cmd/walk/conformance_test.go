@@ -550,11 +550,11 @@ func TestRuntimeGeneratedCIsInspectableAndArrayStorageIsOwned(t *testing.T) {
 		t.Fatalf("unexpected warnings: %#v", warnings)
 	}
 	for _, want := range []string{
-		"walk runtime: no user pointers",
-		"static WALK_UNUSED void *__walk_alloc_array",
+		"#include \"walk_runtime.h\"",
+		"Build generated C with runtime/walk_runtime.c",
 		"WalkArrayInt make_numbers(void)",
 		"/* source: main.walk:2:5 */",
-		"__walk_print_int",
+		"walk_rt_print_int",
 	} {
 		if !strings.Contains(cCode, want) {
 			t.Fatalf("generated C missing %q:\n%s", want, cCode)

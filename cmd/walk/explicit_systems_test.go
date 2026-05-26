@@ -113,14 +113,18 @@ func TestExplicitSystemsRecoverableResultDocsAndRuntimePolicy(t *testing.T) {
 }
 
 func TestExplicitSystemsBuildModeArgsAndConfig(t *testing.T) {
-	debugArgs := nativeBuildArgs("main.c", "main", nativeBuildOptions{})
+	runtimeDir := filepath.Join(repoRoot(t), "runtime")
+	debugArgs := nativeBuildArgs("main.c", "main", nativeBuildOptions{}, runtimeDir)
 	for _, want := range []string{"-g", "-O0"} {
 		if !slices.Contains(debugArgs, want) {
 			t.Fatalf("debug build args missing %q: %#v", want, debugArgs)
 		}
 	}
+	if !slices.Contains(debugArgs, filepath.Join(runtimeDir, "walk_runtime.c")) {
+		t.Fatalf("debug build args missing runtime source: %#v", debugArgs)
+	}
 
-	releaseArgs := nativeBuildArgs("main.c", "main", nativeBuildOptions{release: true})
+	releaseArgs := nativeBuildArgs("main.c", "main", nativeBuildOptions{release: true}, runtimeDir)
 	for _, want := range []string{"-O3", "-DNDEBUG"} {
 		if !slices.Contains(releaseArgs, want) {
 			t.Fatalf("release build args missing %q: %#v", want, releaseArgs)

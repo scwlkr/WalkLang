@@ -17,7 +17,7 @@ readable enough to inspect
 WalkLang source still follows the same pipeline:
 
 ```text
-.walk -> generated C -> native executable
+.walk -> generated C + Walk C runtime -> native executable
 ```
 
 ## Build Modes
@@ -63,22 +63,25 @@ Use `--cc` or `WALK_CC` to choose the native compiler.
 
 ## Runtime Layer
 
-Generated C includes a small `walk runtime` section before user code. It defines:
+Generated C includes `walk_runtime.h` and calls the stable internal
+`walk_rt_*` ABI. `walk build` links emitted C with:
 
 ```text
-WalkInt
-WalkFloat
-WalkBool
-WalkString
-WalkSize
-WalkArray*
-runtime print helpers
-runtime string length helper
-runtime random helper
-runtime array allocation helper
+runtime/walk_runtime.c
+runtime/platform/walk_platform_posix.c or runtime/platform/walk_platform_windows.c
 ```
 
-The helper layer keeps compiler-emitted code predictable without exposing pointers, allocation calls, or runtime ownership to WalkLang source.
+`walk emit-c` stays useful as an inspection format by emitting a short comment
+that names the runtime C files required for a native build.
+
+The runtime header defines Walk scalar aliases, runtime-owned array structs,
+draft result structs, and helper entrypoints for printing, strings, arrays,
+files, directories, paths, processes, JSON, terminal helpers, HTTP, and HTML.
+The platform layer contains host-specific terminal, file-existence, directory,
+path separator, cwd, chdir, and temporary-path behavior.
+
+The helper layer keeps compiler-emitted code predictable without exposing
+pointers, allocation calls, or runtime ownership to WalkLang source.
 
 ## Memory Model
 
@@ -91,7 +94,9 @@ no pointer syntax
 no public garbage collector promise
 ```
 
-Array literals allocate item storage through the generated runtime helper. That storage is owned by the generated program for the process lifetime, so arrays can be returned from functions without pointing at expired stack memory.
+Array literals allocate item storage through the runtime helper. That storage is
+owned by the generated program for the process lifetime, so arrays can be
+returned from functions without pointing at expired stack memory.
 
 Example:
 
@@ -104,11 +109,13 @@ var: got = numbers()
 out: got[0]
 ```
 
-The generated C keeps the allocation explicit in the runtime layer and keeps user statements tagged with source comments.
+The generated C keeps the allocation explicit in runtime calls and keeps user
+statements tagged with source comments.
 
 ## Generated C Inspectability
 
-Generated C starts with a short backend comment and runtime section. Emitted source statements include comments like:
+Generated C starts with a short backend comment, a `walk_runtime.h` include,
+and a link comment. Emitted source statements include comments like:
 
 ```c
 /* source: main.walk:6:1 */
@@ -118,8 +125,7 @@ These comments do not change runtime behavior. They make emitted functions and `
 
 ## Draft Runtime Backends
 
-Draft IO helpers grow the generated runtime without changing the stable feature
-set.
+Draft IO helpers grow the C runtime without changing the stable feature set.
 
 Current draft runtime families include:
 

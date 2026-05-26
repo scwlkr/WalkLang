@@ -60,7 +60,7 @@
 <article class="doc">
 <h1 id="walklang-status">WalkLang Status</h1>
 <p>Current WalkLang version: <code>v5.14.1</code>.</p>
-<p>Current architecture direction on 2026-05-26: <code>docs/SYSTEMS_COMPILER_PORT_PLAN.md</code> is now the accepted execution contract for porting WalkLang from the current reference compiler to the permanent systems architecture: C++ compiler core, C runtime and platform layer, C backend, optional assembly leaf routines, and no final Go or JavaScript implementation footprint. Phase 1, the conformance oracle, is complete. The next porting step is Phase 2, runtime extraction.</p>
+<p>Current architecture direction on 2026-05-26: <code>docs/SYSTEMS_COMPILER_PORT_PLAN.md</code> is now the accepted execution contract for porting WalkLang from the current reference compiler to the permanent systems architecture: C++ compiler core, C runtime and platform layer, C backend, optional assembly leaf routines, and no final Go or JavaScript implementation footprint. Phase 1, the conformance oracle, is complete. Phase 2, runtime extraction, is complete. The next porting step is Phase 3, the C++ skeleton.</p>
 <p><code>v5.14.1</code> is the single project version for the compiler, tooling, docs, release artifacts, and implemented language surface. Feature maturity is described with status labels instead of separate version lines.</p>
 <p>Current feature status:</p>
 <pre><code class="language-text">stable
@@ -75,8 +75,8 @@ experimental
 standard platform
   CLI standard-platform slice with `walktop` as the first official standalone
   WalkLang-built tool</code></pre>
-<p>Current release state: <code>v5.14.1</code> publishes the systems compiler port contract in <code>docs/SYSTEMS_COMPILER_PORT_PLAN.md</code> and keeps <code>walktop</code> under <code>tools/walktop/</code> as a real WalkLang project and standalone native command. <code>walktop</code> supports <code>--once</code>, <code>--frames 5</code>, and <code>--fixture tools/walktop/testdata/basic</code>, uses OS commands for live data, uses deterministic fixture mode for tests, renders a compact color-forward dashboard through <code>term</code> APIs, and is installed by the normal local install flow beside <code>walk</code>.</p>
-<p>Systems compiler port state on 2026-05-26: Phase 1 now records the current reference compiler as an executable conformance oracle under <code>tests/conformance/</code>. The manifest covers 20 pass fixtures, 52 fail fixtures, 4 compatibility fixtures, 3 generated-C snapshot fixtures, and 4 <code>walktop</code> fixture groups. The runner records expected behavior with <code>WALK_REF=... --record</code>, verifies it with <code>--verify</code>, and can compare a future <code>WALK_CANDIDATE</code> against the same expected artifacts. <code>scripts/stress-compatibility.sh</code> now invokes the conformance verifier before the older compatibility stress checks.</p>
+<p>Current release state: <code>v5.14.1</code> publishes the systems compiler port contract in <code>docs/SYSTEMS_COMPILER_PORT_PLAN.md</code> and keeps <code>walktop</code> under <code>tools/walktop/</code> as a real WalkLang project and standalone native command. <code>walktop</code> supports <code>--once</code>, <code>--frames 5</code>, and <code>--fixture tools/walktop/testdata/basic</code>, uses OS commands for live data, uses deterministic fixture mode for tests, renders a compact color-forward dashboard through <code>term</code> APIs, and is installed by the normal local install flow beside <code>walk</code>. Native builds now link generated C with the external Walk runtime source under <code>runtime/</code>; release artifacts include a runtime source archive, and source install copies that runtime beside the installed compiler.</p>
+<p>Systems compiler port state on 2026-05-26: Phase 1 now records the current reference compiler as an executable conformance oracle under <code>tests/conformance/</code>. The manifest covers 20 pass fixtures, 52 fail fixtures, 4 compatibility fixtures, 3 generated-C snapshot fixtures, and 4 <code>walktop</code> fixture groups. The runner records expected behavior with <code>WALK_REF=... --record</code>, verifies it with <code>--verify</code>, and can compare a future <code>WALK_CANDIDATE</code> against the same expected artifacts. <code>scripts/stress-compatibility.sh</code> now invokes the conformance verifier before the older compatibility stress checks. Phase 2 now extracts the generated helper layer into <code>runtime/walk_runtime.h</code>, <code>runtime/walk_runtime.c</code>, and host platform files under <code>runtime/platform/</code>. Generated C includes <code>walk_runtime.h</code>, calls stable <code>walk_rt_*</code> helpers, and keeps <code>walk emit-c</code> inspectable through a link comment instead of embedding the runtime body in every emitted file.</p>
 <p>Phase 1 conformance oracle verification on 2026-05-26:</p>
 <pre><code class="language-text">go build -trimpath -ldflags &#34;-X main.version=v5.14.1&#34; -o build/walk-ref ./cmd/walk passed
 WALK_REF=$PWD/build/walk-ref tests/conformance/run.sh --record passed
@@ -86,6 +86,20 @@ scripts/build-docs-site.sh passed
 scripts/check-docs-site.sh passed after staging generated docs
 go test -count=1 ./... passed
 conformance summary: 20 pass, 52 fail, 25 native executions, 4 compat, 3 snapshot, and 4 walktop fixture groups</code></pre>
+<p>Phase 2 runtime extraction verification on 2026-05-26:</p>
+<pre><code class="language-text">go test -count=1 ./... passed
+go build -trimpath -ldflags &#34;-X main.version=v5.14.1&#34; -o build/walk ./cmd/walk passed
+./build/walk version reported v5.14.1
+WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported compatibility stress ok
+scripts/build-docs-site.sh passed
+scripts/check-docs-site.sh passed after staging generated docs
+scripts/release.sh v5.14-runtime &lt;temp&gt;/release produced 5 walk artifacts, 1 runtime source archive, 1 current-host walktop artifact, and SHA256SUMS
+wc -l &lt;temp&gt;/release/SHA256SUMS reported 7
+shasum -a 256 -c SHA256SUMS passed for all 7 artifacts
+the Darwin arm64 walk release artifact reported v5.14-runtime
+the Darwin arm64 walktop release artifact passed --once --fixture tools/walktop/testdata/basic
+scripts/install-local.sh v5.14.1 refreshed the local walk, runtime source, and walktop install
+installed walk built examples/hello.walk from a temp directory using ~/.local/lib/walk/runtime</code></pre>
 <p>Last release verification on 2026-05-26:</p>
 <pre><code class="language-text">scripts/build-docs-site.sh passed
 scripts/check-docs-site.sh passed
@@ -93,8 +107,9 @@ go test -count=1 ./... passed
 go build -trimpath -ldflags &#34;-X main.version=v5.14.1&#34; -o build/walk ./cmd/walk passed
 ./build/walk version reported v5.14.1
 WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported compatibility stress ok
-scripts/release.sh v5.14.1 &lt;temp&gt;/release produced 5 walk artifacts, 1 current-host walktop artifact, and SHA256SUMS
-shasum -a 256 -c SHA256SUMS passed for all 6 artifacts
+scripts/release.sh v5.14.1 &lt;temp&gt;/release produced 5 walk artifacts, 1 runtime source archive, 1 current-host walktop artifact, and SHA256SUMS
+wc -l &lt;temp&gt;/release/SHA256SUMS reported 7
+shasum -a 256 -c SHA256SUMS passed for all 7 artifacts
 the Darwin arm64 walk release artifact reported v5.14.1
 the Darwin arm64 walktop release artifact passed --once --fixture tools/walktop/testdata/basic
 scripts/install-local.sh v5.14.1 refreshed the local walk and walktop install
@@ -129,7 +144,7 @@ command -v walktop reported ~/.local/bin/walktop
 NO_COLOR=1 walktop --once --fixture tools/walktop/testdata/basic matched the deterministic dashboard
 git diff --check -- . &#39;:(exclude)playground/hangman.walk&#39; &#39;:(exclude)playground/hangman-v2.walk&#39; passed
 git diff --cached --check passed</code></pre>
-<p>Known local state: two Hangman playground files have pre-existing unstaged edits and are not part of the version-alignment cleanup.</p>
+<p>Known local state: no unrelated playground edits are present in the current Phase 2 runtime extraction worktree.</p>
 <p>Standard platform implementation on 2026-05-26: WalkLang&#39;s intended product shape is recorded as one general-use language with one standard platform in one monorepo. <code>CONTEXT.md</code> records the standard-platform vocabulary, <code>docs/adr/</code> records the monorepo decision, and <code>docs/STANDARD_PLATFORM.md</code> records the CLI-first implementation path. The first standard platform area is CLI. The first official standalone WalkLang-built tool is <code>walktop</code>, a release-quality system monitor installed by the normal local WalkLang install flow.</p>
 <p>Focused standard platform verification on 2026-05-26:</p>
 <pre><code class="language-text">go test ./cmd/walk -run TestWalktop -count=1 passed
@@ -165,7 +180,7 @@ scripts/check-docs-site.sh passed
 go test -count=1 ./... passed
 WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported compatibility stress ok
 git diff --check -- . &#39;:(exclude)playground/hangman.walk&#39; &#39;:(exclude)playground/hangman-v2.walk&#39; passed</code></pre>
-<p>Next: begin Phase 2 in <code>docs/SYSTEMS_COMPILER_PORT_PLAN.md</code> by extracting the runtime helper layer into <code>runtime/walk_runtime.c</code> and platform C files while keeping current generated C behavior covered by the conformance oracle.</p>
+<p>Next: begin Phase 3 in <code>docs/SYSTEMS_COMPILER_PORT_PLAN.md</code> by creating the C++ compiler skeleton without changing the current reference compiler behavior.</p>
 </article>
 <footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
 </div>

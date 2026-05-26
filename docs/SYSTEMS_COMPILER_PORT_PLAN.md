@@ -404,7 +404,7 @@ Update this table at the end of every porting phase.
 | --- | --- | --- |
 | 0. Port Contract | Complete | This document exists, is linked, and generated docs build |
 | 1. Conformance Oracle | Complete | Dual-compiler harness records current behavior from the reference compiler |
-| 2. Runtime Extraction | Not started | Generated C links against `runtime/walk_runtime.c` with current tests passing |
+| 2. Runtime Extraction | Complete | Generated C links against `runtime/walk_runtime.c` with current tests passing |
 | 3. C++ Skeleton | Not started | `make walk` builds a C++ `walk` that supports version/help and test harness entrypoints |
 | 4. Lexer, Parser, AST | Not started | C++ frontend parses current pass fixtures and rejects fail syntax fixtures |
 | 5. Semantic Checker | Not started | C++ checker matches current type, name, module, and warning diagnostics |
@@ -652,7 +652,7 @@ Phase completion prompt:
 
 ## Phase 2: Runtime Extraction
 
-Status: Not started
+Status: Complete
 
 Goal: move the generated helper layer out of ad hoc emitted C strings and into a
 real C runtime library with a stable internal ABI.
@@ -728,6 +728,22 @@ WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh
 scripts/build-docs-site.sh
 scripts/check-docs-site.sh
 scripts/release.sh v5.14-runtime <temp>/release
+```
+
+Completed on 2026-05-26:
+
+```text
+Generated C includes walk_runtime.h and calls walk_rt_* runtime functions.
+walk build links emitted C with runtime/walk_runtime.c and the host platform C file.
+walk emit-c emits a runtime include and link comment instead of embedding helper bodies.
+tests/runtime/ compiles direct C runtime programs for allocation, strings, arrays, process, files, terminal helpers, and panic messages.
+scripts/release.sh packages walk-runtime-<version>.tar.gz beside compiler and walktop artifacts.
+go test -count=1 ./... passed
+go build -trimpath -ldflags "-X main.version=v5.14.1" -o build/walk ./cmd/walk passed
+WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed
+scripts/build-docs-site.sh passed
+scripts/check-docs-site.sh passed after staging generated docs
+scripts/release.sh v5.14-runtime <temp>/release passed with 7 checksummed artifacts
 ```
 
 Phase completion prompt:

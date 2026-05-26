@@ -17,6 +17,7 @@ import (
 	"walklang/internal/emitter"
 	walkfmt "walklang/internal/format"
 	"walklang/internal/parser"
+	"walklang/internal/runtimebuild"
 )
 
 var version = "dev"
@@ -909,7 +910,11 @@ func buildC(cCode string, cPath string, output string, options nativeBuildOption
 	if cc == "" {
 		cc = "cc"
 	}
-	command := exec.Command(cc, nativeBuildArgs(cPath, output, options)...)
+	runtimeDir, err := runtimebuild.FindRuntimeDir()
+	if err != nil {
+		return err
+	}
+	command := exec.Command(cc, nativeBuildArgs(cPath, output, options, runtimeDir)...)
 	result, err := command.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("native build failed: %s", string(result))
@@ -917,8 +922,10 @@ func buildC(cCode string, cPath string, output string, options nativeBuildOption
 	return nil
 }
 
-func nativeBuildArgs(cPath string, output string, options nativeBuildOptions) []string {
-	args := []string{cPath, "-o", output}
+func nativeBuildArgs(cPath string, output string, options nativeBuildOptions, runtimeDir string) []string {
+	args := []string{cPath}
+	args = append(args, runtimebuild.SourceFiles(runtimeDir, runtime.GOOS)...)
+	args = append(args, "-I", runtimeDir, "-o", output)
 	if options.release {
 		args = append(args, "-O3", "-DNDEBUG")
 	} else {

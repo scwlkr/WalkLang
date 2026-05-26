@@ -13,7 +13,7 @@ Optional explicit types: yes
 WalkLang is a compiled, general-purpose language for readable native programs on any OS.
 
 ```text
-main.walk -> lexer -> parser -> typed IR -> C -> native executable
+main.walk -> lexer -> parser -> typed IR -> generated C + Walk C runtime -> native executable
 ```
 
 Example:
@@ -27,6 +27,7 @@ Build shape:
 
 ```text
 main.walk -> main.c -> main / main.exe
+main.c links with runtime/walk_runtime.c and the host runtime/platform file
 ```
 
 Build mode is explicit at the tool boundary. Debug mode is the default and uses
@@ -275,10 +276,10 @@ out: names[0]
 
 The user writes array logic, not allocation logic.
 
-The current runtime model makes array storage explicit inside generated C:
+The current runtime model makes array storage explicit in the C runtime:
 
 ```text
-array literals allocate item storage through the generated walk runtime helper
+array literals allocate item storage through the walk runtime helper
 array item storage is owned for the process lifetime
 arrays can be returned from functions without pointing at expired stack storage
 ```
@@ -464,7 +465,7 @@ debug map
 Runtime and backend maturity:
 
 ```text
-small generated C runtime layer
+external Walk C runtime and host platform layer
 process-lifetime array storage
 source comments in generated C
 optimized native release builds

@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -11,6 +12,7 @@ import (
 	"walklang/internal/emitter"
 	walkfmt "walklang/internal/format"
 	"walklang/internal/parser"
+	"walklang/internal/runtimebuild"
 )
 
 func compileToC(t *testing.T, source string) string {
@@ -38,12 +40,12 @@ func TestEmitCForVariablesAndOutput(t *testing.T) {
 	}, "\n"))
 
 	for _, want := range []string{
-		"typedef long long WalkInt;",
+		"#include \"walk_runtime.h\"",
 		"/* source: main.walk:1:1 */",
 		"WalkInt x = (1 + 2);",
 		"const WalkBool ok = true;",
-		"__walk_print_int((WalkInt)(x));",
-		"__walk_print_bool((WalkBool)(ok));",
+		"walk_rt_print_int((WalkInt)(x));",
+		"walk_rt_print_bool((WalkBool)(ok));",
 	} {
 		if !strings.Contains(cCode, want) {
 			t.Fatalf("generated C missing %q:\n%s", want, cCode)
@@ -66,12 +68,7 @@ func TestGeneratedCBuildsAndRuns(t *testing.T) {
 	dir := t.TempDir()
 	cPath := filepath.Join(dir, "main.c")
 	exePath := filepath.Join(dir, "main")
-	if err := os.WriteFile(cPath, []byte(cCode), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if output, err := exec.Command("cc", cPath, "-o", exePath, "-lm").CombinedOutput(); err != nil {
-		t.Fatalf("cc failed: %v\n%s", err, string(output))
-	}
+	buildGeneratedC(t, cCode, cPath, exePath)
 	output, err := exec.Command(exePath).CombinedOutput()
 	if err != nil {
 		t.Fatalf("program failed: %v\n%s", err, string(output))
@@ -116,12 +113,7 @@ func TestRepresentativeProgramBuildsAndRuns(t *testing.T) {
 	dir := t.TempDir()
 	cPath := filepath.Join(dir, "representative.c")
 	exePath := filepath.Join(dir, "representative")
-	if err := os.WriteFile(cPath, []byte(cCode), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if output, err := exec.Command("cc", cPath, "-o", exePath, "-lm").CombinedOutput(); err != nil {
-		t.Fatalf("cc failed: %v\n%s\n%s", err, string(output), cCode)
-	}
+	buildGeneratedC(t, cCode, cPath, exePath)
 	output, err := exec.Command(exePath).CombinedOutput()
 	if err != nil {
 		t.Fatalf("program failed: %v\n%s", err, string(output))
@@ -171,12 +163,7 @@ func TestControlFlowNullArraysAndFunctionValues(t *testing.T) {
 	dir := t.TempDir()
 	cPath := filepath.Join(dir, "features.c")
 	exePath := filepath.Join(dir, "features")
-	if err := os.WriteFile(cPath, []byte(cCode), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if output, err := exec.Command("cc", cPath, "-o", exePath, "-lm").CombinedOutput(); err != nil {
-		t.Fatalf("cc failed: %v\n%s\n%s", err, string(output), cCode)
-	}
+	buildGeneratedC(t, cCode, cPath, exePath)
 	output, err := exec.Command(exePath).CombinedOutput()
 	if err != nil {
 		t.Fatalf("program failed: %v\n%s", err, string(output))
@@ -225,12 +212,7 @@ func TestTestRunnerProgramBuildsAndRuns(t *testing.T) {
 	dir := t.TempDir()
 	cPath := filepath.Join(dir, "tests.c")
 	exePath := filepath.Join(dir, "tests")
-	if err := os.WriteFile(cPath, []byte(cCode), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if output, err := exec.Command("cc", cPath, "-o", exePath, "-lm").CombinedOutput(); err != nil {
-		t.Fatalf("cc failed: %v\n%s\n%s", err, string(output), cCode)
-	}
+	buildGeneratedC(t, cCode, cPath, exePath)
 	output, err := exec.Command(exePath).CombinedOutput()
 	if err != nil {
 		t.Fatalf("test program failed: %v\n%s\n%s", err, string(output), cCode)
@@ -238,6 +220,20 @@ func TestTestRunnerProgramBuildsAndRuns(t *testing.T) {
 	want := "test: add works\ntest: stdlib polish works\nok 2 tests\n"
 	if got := string(output); got != want {
 		t.Fatalf("output mismatch:\nwant %q\ngot  %q\nC:\n%s", want, got, cCode)
+	}
+}
+
+func buildGeneratedC(t *testing.T, cCode string, cPath string, exePath string) {
+	t.Helper()
+	if err := os.WriteFile(cPath, []byte(cCode), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	runtimeDir := filepath.Clean(filepath.Join("..", "..", "runtime"))
+	args := []string{cPath}
+	args = append(args, runtimebuild.SourceFiles(runtimeDir, runtime.GOOS)...)
+	args = append(args, "-I", runtimeDir, "-o", exePath, "-lm")
+	if output, err := exec.Command("cc", args...).CombinedOutput(); err != nil {
+		t.Fatalf("cc failed: %v\n%s\n%s", err, string(output), cCode)
 	}
 }
 
@@ -280,7 +276,7 @@ func TestStringEqualityUsesValueComparison(t *testing.T) {
 	}, "\n"))
 
 	for _, want := range []string{
-		"#include <string.h>",
+		"#include \"walk_runtime.h\"",
 		`strcmp(name, "WalkLang") == 0`,
 		`strcmp(name, "Python") != 0`,
 	} {

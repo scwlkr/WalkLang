@@ -67,7 +67,7 @@ portable
 debuggable
 readable enough to inspect</code></pre>
 <p>WalkLang source still follows the same pipeline:</p>
-<pre><code class="language-text">.walk -&gt; generated C -&gt; native executable</code></pre>
+<pre><code class="language-text">.walk -&gt; generated C + Walk C runtime -&gt; native executable</code></pre>
 <h2 id="build-modes">Build Modes</h2>
 <p>Builds have an explicit mode. Debug is the default and emits native compiler flags suitable for inspection:</p>
 <pre><code class="language-bash">walk build main.walk -o build/main --mode debug
@@ -85,17 +85,11 @@ walk run main.walk --release</code></pre>
 <pre><code class="language-bash">walk build main.walk -o build/main --mode release --cflag -DWALK_TRACE=0</code></pre>
 <p>Use <code>--cc</code> or <code>WALK_CC</code> to choose the native compiler.</p>
 <h2 id="runtime-layer">Runtime Layer</h2>
-<p>Generated C includes a small <code>walk runtime</code> section before user code. It defines:</p>
-<pre><code class="language-text">WalkInt
-WalkFloat
-WalkBool
-WalkString
-WalkSize
-WalkArray*
-runtime print helpers
-runtime string length helper
-runtime random helper
-runtime array allocation helper</code></pre>
+<p>Generated C includes <code>walk_runtime.h</code> and calls the stable internal <code>walk_rt_*</code> ABI. <code>walk build</code> links emitted C with:</p>
+<pre><code class="language-text">runtime/walk_runtime.c
+runtime/platform/walk_platform_posix.c or runtime/platform/walk_platform_windows.c</code></pre>
+<p><code>walk emit-c</code> stays useful as an inspection format by emitting a short comment that names the runtime C files required for a native build.</p>
+<p>The runtime header defines Walk scalar aliases, runtime-owned array structs, draft result structs, and helper entrypoints for printing, strings, arrays, files, directories, paths, processes, JSON, terminal helpers, HTTP, and HTML. The platform layer contains host-specific terminal, file-existence, directory, path separator, cwd, chdir, and temporary-path behavior.</p>
 <p>The helper layer keeps compiler-emitted code predictable without exposing pointers, allocation calls, or runtime ownership to WalkLang source.</p>
 <h2 id="memory-model">Memory Model</h2>
 <p>WalkLang still has no source-level memory management.</p>
@@ -103,7 +97,7 @@ runtime array allocation helper</code></pre>
 no free syntax
 no pointer syntax
 no public garbage collector promise</code></pre>
-<p>Array literals allocate item storage through the generated runtime helper. That storage is owned by the generated program for the process lifetime, so arrays can be returned from functions without pointing at expired stack memory.</p>
+<p>Array literals allocate item storage through the runtime helper. That storage is owned by the generated program for the process lifetime, so arrays can be returned from functions without pointing at expired stack memory.</p>
 <p>Example:</p>
 <pre><code class="language-walk">func: numbers() array[int]
     var: nums = [4, 5, 6]
@@ -111,13 +105,13 @@ no public garbage collector promise</code></pre>
 
 var: got = numbers()
 out: got[0]</code></pre>
-<p>The generated C keeps the allocation explicit in the runtime layer and keeps user statements tagged with source comments.</p>
+<p>The generated C keeps the allocation explicit in runtime calls and keeps user statements tagged with source comments.</p>
 <h2 id="generated-c-inspectability">Generated C Inspectability</h2>
-<p>Generated C starts with a short backend comment and runtime section. Emitted source statements include comments like:</p>
+<p>Generated C starts with a short backend comment, a <code>walk_runtime.h</code> include, and a link comment. Emitted source statements include comments like:</p>
 <pre><code class="language-c">/* source: main.walk:6:1 */</code></pre>
 <p>These comments do not change runtime behavior. They make emitted functions and <code>main</code> easier to inspect while preserving predictable C output and snapshot coverage.</p>
 <h2 id="draft-runtime-backends">Draft Runtime Backends</h2>
-<p>Draft IO helpers grow the generated runtime without changing the stable feature set.</p>
+<p>Draft IO helpers grow the C runtime without changing the stable feature set.</p>
 <p>Current draft runtime families include:</p>
 <pre><code class="language-text">console and stdin helpers
 local files, directories, and paths

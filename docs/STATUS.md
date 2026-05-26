@@ -7,7 +7,8 @@ is now the accepted execution contract for porting WalkLang from the current
 reference compiler to the permanent systems architecture: C++ compiler core, C
 runtime and platform layer, C backend, optional assembly leaf routines, and no
 final Go or JavaScript implementation footprint. Phase 1, the conformance
-oracle, is complete. The next porting step is Phase 2, runtime extraction.
+oracle, is complete. Phase 2, runtime extraction, is complete. The next porting
+step is Phase 3, the C++ skeleton.
 
 `v5.14.1` is the single project version for the compiler, tooling, docs,
 release artifacts, and implemented language surface. Feature maturity is
@@ -37,7 +38,9 @@ in `docs/SYSTEMS_COMPILER_PORT_PLAN.md` and keeps `walktop` under
 `--fixture tools/walktop/testdata/basic`, uses OS commands for live data, uses
 deterministic fixture mode for tests, renders a compact color-forward dashboard
 through `term` APIs, and is installed by the normal local install flow beside
-`walk`.
+`walk`. Native builds now link generated C with the external Walk runtime source
+under `runtime/`; release artifacts include a runtime source archive, and source
+install copies that runtime beside the installed compiler.
 
 Systems compiler port state on 2026-05-26: Phase 1 now records the current
 reference compiler as an executable conformance oracle under
@@ -46,7 +49,12 @@ compatibility fixtures, 3 generated-C snapshot fixtures, and 4 `walktop` fixture
 groups. The runner records expected behavior with `WALK_REF=... --record`,
 verifies it with `--verify`, and can compare a future `WALK_CANDIDATE` against
 the same expected artifacts. `scripts/stress-compatibility.sh` now invokes the
-conformance verifier before the older compatibility stress checks.
+conformance verifier before the older compatibility stress checks. Phase 2 now
+extracts the generated helper layer into `runtime/walk_runtime.h`,
+`runtime/walk_runtime.c`, and host platform files under `runtime/platform/`.
+Generated C includes `walk_runtime.h`, calls stable `walk_rt_*` helpers, and
+keeps `walk emit-c` inspectable through a link comment instead of embedding the
+runtime body in every emitted file.
 
 Phase 1 conformance oracle verification on 2026-05-26:
 
@@ -61,6 +69,24 @@ go test -count=1 ./... passed
 conformance summary: 20 pass, 52 fail, 25 native executions, 4 compat, 3 snapshot, and 4 walktop fixture groups
 ```
 
+Phase 2 runtime extraction verification on 2026-05-26:
+
+```text
+go test -count=1 ./... passed
+go build -trimpath -ldflags "-X main.version=v5.14.1" -o build/walk ./cmd/walk passed
+./build/walk version reported v5.14.1
+WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported compatibility stress ok
+scripts/build-docs-site.sh passed
+scripts/check-docs-site.sh passed after staging generated docs
+scripts/release.sh v5.14-runtime <temp>/release produced 5 walk artifacts, 1 runtime source archive, 1 current-host walktop artifact, and SHA256SUMS
+wc -l <temp>/release/SHA256SUMS reported 7
+shasum -a 256 -c SHA256SUMS passed for all 7 artifacts
+the Darwin arm64 walk release artifact reported v5.14-runtime
+the Darwin arm64 walktop release artifact passed --once --fixture tools/walktop/testdata/basic
+scripts/install-local.sh v5.14.1 refreshed the local walk, runtime source, and walktop install
+installed walk built examples/hello.walk from a temp directory using ~/.local/lib/walk/runtime
+```
+
 Last release verification on 2026-05-26:
 
 ```text
@@ -70,8 +96,9 @@ go test -count=1 ./... passed
 go build -trimpath -ldflags "-X main.version=v5.14.1" -o build/walk ./cmd/walk passed
 ./build/walk version reported v5.14.1
 WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported compatibility stress ok
-scripts/release.sh v5.14.1 <temp>/release produced 5 walk artifacts, 1 current-host walktop artifact, and SHA256SUMS
-shasum -a 256 -c SHA256SUMS passed for all 6 artifacts
+scripts/release.sh v5.14.1 <temp>/release produced 5 walk artifacts, 1 runtime source archive, 1 current-host walktop artifact, and SHA256SUMS
+wc -l <temp>/release/SHA256SUMS reported 7
+shasum -a 256 -c SHA256SUMS passed for all 7 artifacts
 the Darwin arm64 walk release artifact reported v5.14.1
 the Darwin arm64 walktop release artifact passed --once --fixture tools/walktop/testdata/basic
 scripts/install-local.sh v5.14.1 refreshed the local walk and walktop install
@@ -112,8 +139,8 @@ git diff --check -- . ':(exclude)playground/hangman.walk' ':(exclude)playground/
 git diff --cached --check passed
 ```
 
-Known local state: two Hangman playground files have pre-existing unstaged
-edits and are not part of the version-alignment cleanup.
+Known local state: no unrelated playground edits are present in the current
+Phase 2 runtime extraction worktree.
 
 Standard platform implementation on 2026-05-26: WalkLang's intended product
 shape is recorded as one general-use language with one standard platform in one
@@ -191,6 +218,5 @@ WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported com
 git diff --check -- . ':(exclude)playground/hangman.walk' ':(exclude)playground/hangman-v2.walk' passed
 ```
 
-Next: begin Phase 2 in `docs/SYSTEMS_COMPILER_PORT_PLAN.md` by extracting the
-runtime helper layer into `runtime/walk_runtime.c` and platform C files while
-keeping current generated C behavior covered by the conformance oracle.
+Next: begin Phase 3 in `docs/SYSTEMS_COMPILER_PORT_PLAN.md` by creating the C++
+compiler skeleton without changing the current reference compiler behavior.

@@ -45,11 +45,8 @@ func TestUserModuleBuildsAndRuns(t *testing.T) {
 
 	cPath := filepath.Join(dir, "main.c")
 	exePath := filepath.Join(dir, "main")
-	if err := os.WriteFile(cPath, []byte(cCode), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if output, err := exec.Command("cc", cPath, "-o", exePath, "-lm").CombinedOutput(); err != nil {
-		t.Fatalf("cc failed: %v\n%s\n%s", err, string(output), cCode)
+	if err := buildC(cCode, cPath, exePath, nativeBuildOptions{}); err != nil {
+		t.Fatalf("cc failed: %v\n%s", err, cCode)
 	}
 	output, err := exec.Command(exePath).CombinedOutput()
 	if err != nil {
@@ -106,11 +103,13 @@ func TestReleaseBuildArgs(t *testing.T) {
 	args := nativeBuildArgs("main.c", "main", nativeBuildOptions{
 		release: true,
 		cFlags:  []string{"-DWALK_TEST"},
-	})
+	}, filepath.Join(repoRoot(t), "runtime"))
 
-	for _, want := range []string{"main.c", "-o", "main", "-O3", "-DNDEBUG", "-DWALK_TEST", "-lm"} {
+	for _, want := range []string{"main.c", "walk_runtime.c", "walk_platform_posix.c", "-I", "-o", "main", "-O3", "-DNDEBUG", "-DWALK_TEST", "-lm"} {
 		if !slices.Contains(args, want) {
-			t.Fatalf("build args missing %q: %#v", want, args)
+			if !strings.Contains(strings.Join(args, " "), want) {
+				t.Fatalf("build args missing %q: %#v", want, args)
+			}
 		}
 	}
 }
