@@ -20,7 +20,7 @@ func: all_guessed(word string, guessed array[string]) bool
             return: false
         index = + index 1
     return: true
-var: word_bank = ['dog', 'cat', 'car', 'bike', 'motor']
+var: word_bank = ['dog', 'cat', 'car', 'bike', 'motor', 'grace', 'water', 'ocean', 'graphite', 'macbook']
 var: word = random.choice(word_bank)
 var: guessed array[string] = []
 var: misses = 0

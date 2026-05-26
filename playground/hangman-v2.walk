@@ -11,35 +11,43 @@ var: letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
 
 # game start
 var: secretWordLength = string.len(secretWord)
-const: maxGuesses = 7
 
 # print secret word to user
 out: 'the secret word is {secretWordLength} characters long'
 
-# 1. ask for letter
-var: guess = in: 'input 1 letter: '
-      if: guess # 2. validate it
+# turns start
+var: guessed array[string] = []
 
-
-# 3. check if it was already guessed
-
-# 4. add it to guessed list
-
-# 5. check whether it is in secrete word
-
-# 6. if wrong, increase missedGuesses
-
-# 7. rebuild the visible word
-
-# 8. Check win
-
-# 9. Check lose
-
-
-# guess tracking
-# var: guessed array[string] = []
-# while: != game false
-#       var: guess = in: 'input 1 letter: '
-#      
-#      out: guessed[0]
-
+while: == game true
+      
+      var: display = ' '
+      var: i = 0
+      var: maxWrongGuesses = 6
+      var: guess = in: 'input 1 letter: '
+      if: != string.len(guess) 1                               
+            out: 'guess must be a single letter'
+      else: 
+            if: array.contains(guessed, guess)
+                  out: 'you already guessed that'
+            else: 
+                  if: string.contains(secretWord, guess)
+                        out: 'CORRECT! "{guess}" is in the secret word'
+                        guessed = array.push(guessed, guess)
+                  else: != string.contains(secretWord, guess)
+                        out: 'WRONG! "{guess}" is not in the secret word'
+                        guessed = array.push(guessed, guess)
+                        wrongGuesses = + wrongGuesses 1
+                              if: == maxGuesses maxWrongGuesses
+                                    var: == game false
+      while: < i string.len(secretWord)
+            var: currentLetter = string.at(secretWord, i)
+            var: revealedLetter = array.contains(guessed, currentLetter)
+            if: == revealedLetter true
+                  display = string.concat(display, currentLetter)
+            else:
+                  display = string.concat(display, '_')
+                  if: != display '_' 
+                       #  var: game = false
+            display = string.concat(display, ' ')
+            i = + i 1
+      out: display
