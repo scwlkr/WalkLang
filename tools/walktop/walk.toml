@@ -1,0 +1,7 @@
+name = "walktop"
+version = "0.1.0"
+entry = "src/main.walk"
+
+[build]
+output = "build/walktop"
+mode = "release"

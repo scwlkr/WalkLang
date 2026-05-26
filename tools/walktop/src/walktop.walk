@@ -1,0 +1,401 @@
+imp: array
+imp: file
+imp: parse
+imp: path
+imp: process
+imp: string
+struct: MetricResult
+    ok bool
+    value int
+    error string
+struct: FloatMetricResult
+    ok bool
+    value float
+    error string
+struct: TextResult
+    ok bool
+    value string
+    error string
+struct: CliResult
+    ok bool
+    value int
+    error string
+struct: WalktopSnapshot
+    os string
+    load int
+    memory int
+    disk int
+    processes int
+    warning string
+func: metric(ok bool, value int, error string) MetricResult
+    return: MetricResult(ok, value, error)
+func: float_metric(ok bool, value float, error string) FloatMetricResult
+    return: FloatMetricResult(ok, value, error)
+func: text_result(ok bool, value string, error string) TextResult
+    return: TextResult(ok, value, error)
+func: cli_result(ok bool, value int, error string) CliResult
+    return: CliResult(ok, value, error)
+func: snapshot(os string, load int, memory int, disk int, processes int, warning string) WalktopSnapshot
+    return: WalktopSnapshot(os, clamp_percent(load), clamp_percent(memory), clamp_percent(disk), processes, warning)
+func: clamp_percent(value int) int
+    if: < value 0
+        return: 0
+    if: > value 100
+        return: 100
+    return: value
+func: is_space(ch string) bool
+    if: == ch ' '
+        return: true
+    if: == ch '\t'
+        return: true
+    if: == ch '\n'
+        return: true
+    return: false
+func: is_digit(ch string) bool
+    return: string.contains('0123456789', ch)
+func: is_dot(ch string) bool
+    var: dot ='.'
+    return: == ch dot
+func: is_space_line_break(ch string) bool
+    if: == ch '\n'
+        return: true
+    return: false
+func: trim(text string) string
+    var: length = string.len(text)
+    if: == length 0
+        return: ''
+    var: start = 0
+    while: < start length
+        if: is_space(text[start])
+            start = + start 1
+        else:
+            break:
+    var: end = - length 1
+    while: >= end start
+        if: is_space(text[end])
+            end = - end 1
+        else:
+            break:
+    var: result_text = ''
+    var: i = start
+    while: <= i end
+        result_text = string.concat(result_text, text[i])
+        i = + i 1
+    return: result_text
+func: first_line(text string) string
+    var: result_text = ''
+    var: i = 0
+    while: < i string.len(text)
+        var: ch = text[i]
+        if: is_space_line_break(ch)
+            return: trim(result_text)
+        result_text = string.concat(result_text, ch)
+        i = + i 1
+    return: trim(result_text)
+func: starts_with_at(text string, marker string, start int) bool
+    var: marker_len = string.len(marker)
+    if: >(+ start marker_len) string.len(text)
+        return: false
+    var: i = 0
+    while: < i marker_len
+        if: != text[+ start i] marker[i]
+            return: false
+        i = + i 1
+    return: true
+func: number_token_from_index(text string, start int) string
+    var: token = ''
+    var: seen = false
+    var: i = start
+    while: < i string.len(text)
+        var: ch = text[i]
+        if: is_digit(ch)
+            token = string.concat(token, ch)
+            seen = true
+        else:
+            if: is_dot(ch)
+                token = string.concat(token, ch)
+                seen = true
+            else:
+                if: seen
+                    return: token
+        i = + i 1
+    return: token
+func: int_token_from_index(text string, start int) string
+    var: token = ''
+    var: seen = false
+    var: i = start
+    while: < i string.len(text)
+        var: ch = text[i]
+        if: is_digit(ch)
+            token = string.concat(token, ch)
+            seen = true
+        else:
+            if: seen
+                return: token
+        i = + i 1
+    return: token
+func: int_after_label(text string, label string) MetricResult
+    var: i = 0
+    while: < i string.len(text)
+        if: starts_with_at(text, label, i)
+            var: token = int_token_from_index(text, + i string.len(label))
+            var: parsed = parse.int(token)
+            if: parsed.ok
+                return: metric(true, parsed.value, '')
+            return: metric(false, 0, 'invalid int')
+        i = + i 1
+    return: metric(false, 0, 'label missing')
+func: first_int(text string) MetricResult
+    var: token = int_token_from_index(text, 0)
+    var: parsed = parse.int(token)
+    if: parsed.ok
+        return: metric(true, parsed.value, '')
+    return: metric(false, 0, 'invalid int')
+func: first_percent(text string) MetricResult
+    var: token = ''
+    var: i = 0
+    while: < i string.len(text)
+        var: ch = text[i]
+        if: is_digit(ch)
+            token = string.concat(token, ch)
+        else:
+            if: == ch '%'
+                if: != token ''
+                    var: parsed = parse.int(token)
+                    if: parsed.ok
+                        return: metric(true, clamp_percent(parsed.value), '')
+                    return: metric(false, 0, 'invalid percent')
+            token = ''
+        i = + i 1
+    return: metric(false, 0, 'percent missing')
+func: float_after_label(text string, label string) FloatMetricResult
+    var: i = 0
+    while: < i string.len(text)
+        if: starts_with_at(text, label, i)
+            var: token = number_token_from_index(text, + i string.len(label))
+            var: parsed = parse.float(token)
+            if: parsed.ok
+                return: float_metric(true, parsed.value, '')
+            return: float_metric(false, 0, 'invalid load')
+        i = + i 1
+    return: float_metric(false, 0, 'load missing')
+func: percent_from_load(load float) int
+    if: >= load 4.0
+        return: 100
+    if: >= load 3.5
+        return: 88
+    if: >= load 3.0
+        return: 75
+    if: >= load 2.5
+        return: 63
+    if: >= load 2.0
+        return: 50
+    if: >= load 1.5
+        return: 38
+    if: >= load 1.0
+        return: 25
+    if: >= load 0.5
+        return: 13
+    if: > load 0
+        return: 5
+    return: 0
+func: load_percent_from_text(text string) MetricResult
+    var: load = float_after_label(text, 'load averages:')
+    if: not load.ok
+        load = float_after_label(text, 'load average:')
+    if: load.ok
+        return: metric(true, percent_from_load(load.value), '')
+    return: metric(false, 0, 'load missing')
+func: percent_from_parts(used int, total int) int
+    if: <= total 0
+        return: 0
+    var: capped = used
+    if: < capped 0
+        capped = 0
+    if: > capped total
+        capped = total
+    var: percent = 0
+    var: i = 0
+    repeat: 100
+        i = + i 1
+        var: used_scaled = * capped 100
+        var: total_scaled = * total i
+        if: >= used_scaled total_scaled
+            percent = i
+    return: percent
+func: memory_percent_from_text(text string) MetricResult
+    if: string.contains(text, 'MemTotal:')
+        var: total = int_after_label(text, 'MemTotal:')
+        var: available = int_after_label(text, 'MemAvailable:')
+        if: and total.ok available.ok
+            return: metric(true, percent_from_parts((- total.value available.value), total.value), '')
+        return: metric(false, 0, 'memory missing')
+    var: free = int_after_label(text, 'Pages free:')
+    var: active = int_after_label(text, 'Pages active:')
+    var: inactive = int_after_label(text, 'Pages inactive:')
+    var: speculative = int_after_label(text, 'Pages speculative:')
+    var: wired = int_after_label(text, 'Pages wired down:')
+    var: compressed = int_after_label(text, 'Pages occupied by compressor:')
+    if: and free.ok active.ok inactive.ok speculative.ok wired.ok compressed.ok
+        var: used_pages =
+            +:
+                active.value
+                inactive.value
+                wired.value
+                compressed.value
+        var: total_pages =
+            +:
+                used_pages
+                free.value
+                speculative.value
+        return: metric(true, percent_from_parts(used_pages, total_pages), '')
+    return: metric(false, 0, 'memory missing')
+func: append_warning(current string, next string) string
+    if: == next ''
+        return: current
+    if: == current ''
+        return: next
+    return: '{current}; {next}'
+func: snapshot_from_texts(os_text string, uptime_text string, memory_text string, df_text string, process_text string, warning string) WalktopSnapshot
+    var: os_label = first_line(os_text)
+    var: combined_warning = warning
+    if: == os_label ''
+        os_label = 'unknown'
+        combined_warning = append_warning(combined_warning, 'os data missing')
+    var: load = load_percent_from_text(uptime_text)
+    if: not load.ok
+        combined_warning = append_warning(combined_warning, 'load data missing')
+    var: memory = memory_percent_from_text(memory_text)
+    if: not memory.ok
+        combined_warning = append_warning(combined_warning, 'memory data missing')
+    var: disk = first_percent(df_text)
+    if: not disk.ok
+        combined_warning = append_warning(combined_warning, 'disk data missing')
+    var: processes = first_int(process_text)
+    if: not processes.ok
+        combined_warning = append_warning(combined_warning, 'process data missing')
+    return: snapshot(os_label, load.value, memory.value, disk.value, processes.value, combined_warning)
+func: read_fixture(root string, name string) TextResult
+    var: read = file.try_read(path.join(root, name))
+    if: read.ok
+        return: text_result(true, read.value, '')
+    return: text_result(false, '', 'fixture data missing')
+func: warning_from_text(result TextResult, current string) string
+    if: result.ok
+        return: current
+    return: append_warning(current, result.error)
+func: snapshot_from_fixture(root string) WalktopSnapshot
+    var: os_text = read_fixture(root, 'uname.txt')
+    var: uptime_text = read_fixture(root, 'uptime.txt')
+    var: memory_text = read_fixture(root, 'memory.txt')
+    var: df_text = read_fixture(root, 'df.txt')
+    var: process_text = read_fixture(root, 'processes.txt')
+    var: warning = ''
+    warning = warning_from_text(os_text, warning)
+    warning = warning_from_text(uptime_text, warning)
+    warning = warning_from_text(memory_text, warning)
+    warning = warning_from_text(df_text, warning)
+    warning = warning_from_text(process_text, warning)
+    return: snapshot_from_texts(os_text.value, uptime_text.value, memory_text.value, df_text.value, process_text.value, warning)
+func: run_live(command string) TextResult
+    var: result = process.run_shell(command)
+    if: result.ok
+        return: text_result(true, result.stdout, '')
+    return: text_result(false, '', 'live data incomplete')
+func: snapshot_live() WalktopSnapshot
+    var: os_text = run_live('uname -s')
+    var: memory_command = 'vm_stat'
+    if: string.contains(os_text.value, 'Linux')
+        memory_command = 'cat /proc/meminfo'
+    var: uptime_text = run_live('uptime')
+    var: memory_text = run_live(memory_command)
+    var: df_text = run_live('df -k /')
+    var: process_text = run_live('ps -ax -o pid= | wc -l')
+    var: warning = ''
+    warning = warning_from_text(os_text, warning)
+    warning = warning_from_text(uptime_text, warning)
+    warning = warning_from_text(memory_text, warning)
+    warning = warning_from_text(df_text, warning)
+    warning = warning_from_text(process_text, warning)
+    return: snapshot_from_texts(os_text.value, uptime_text.value, memory_text.value, df_text.value, process_text.value, warning)
+func: filled_slots(percent int) int
+    var: slots = 0
+    var: i = 0
+    repeat: 20
+        i = + i 1
+        var: threshold = * i 5
+        if: >= percent threshold
+            slots = i
+    return: slots
+func: bar(percent int) string
+    var: filled = filled_slots(clamp_percent(percent))
+    var: bar_text = '['
+    var: dash = string.at('x-y', 1)
+    var: i = 0
+    repeat: 20
+        i = + i 1
+        if: <= i filled
+            bar_text = string.concat(bar_text, '#')
+        else:
+            bar_text = string.concat(bar_text, dash)
+    return: string.concat(bar_text,']')
+func: status_line(warning string) string
+    if: == warning ''
+        return: 'Status   ok'
+    return: 'Warning  {warning}'
+func: render_dashboard(state WalktopSnapshot, frame int, frames int) string
+    return: 'WalkTop  v0.1.0\nOS       {state.os}\nLoad     {bar(state.load)} {state.load}%\nMemory   {bar(state.memory)} {state.memory}%\nDisk     {bar(state.disk)} {state.disk}%\nProcs    {state.processes}\nFrame    {frame}/{frames}\n{status_line(state.warning)}'
+func: has_flag(args array[string], flag string) bool
+    var: i = 0
+    while: < i array.len(args)
+        if: == args[i] flag
+            return: true
+        i = + i 1
+    return: false
+func: arg_value(args array[string], flag string, fallback string) string
+    var: i = 0
+    while: < i array.len(args)
+        if: == args[i] flag
+            if: <(+ i 1) array.len(args)
+                return: args[+ i 1]
+            return: fallback
+        i = + i 1
+    return: fallback
+func: validate_args(args array[string]) CliResult
+    var: frames = 1
+    var: once = false
+    var: i = 0
+    while: < i array.len(args)
+        var: arg = args[i]
+        if: == arg '--once'
+            once = true
+            i = + i 1
+        else:
+            if: == arg '--frames'
+                if: >=(+ i 1) array.len(args)
+                    return: cli_result(false, 0, 'walktop: --frames needs a value')
+                var: parsed = parse.int(trim(args[+ i 1]))
+                if: not parsed.ok
+                    return: cli_result(false, 0, 'walktop: --frames needs an integer')
+                if: <= parsed.value 0
+                    return: cli_result(false, 0, 'walktop: --frames must be greater than zero')
+                frames = parsed.value
+                i = + i 2
+            else:
+                if: == arg '--fixture'
+                    if: >=(+ i 1) array.len(args)
+                        return: cli_result(false, 0, 'walktop: --fixture needs a path')
+                    i = + i 2
+                else:
+                    return: cli_result(false, 0, 'walktop: unknown argument {arg}')
+    if: once
+        frames = 1
+    return: cli_result(true, frames, '')
+exp: validate_args
+exp: arg_value
+exp: snapshot_from_texts
+exp: snapshot_from_fixture
+exp: snapshot_live
+exp: render_dashboard
+exp: bar
+exp: load_percent_from_text

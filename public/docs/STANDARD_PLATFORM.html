@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WalkLang Standard Platform - WalkLang</title>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="stylesheet" href="../assets/site.css">
+<script defer src="../assets/site.js"></script>
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+<a class="brand" href="../index.html"><img src="../assets/icon.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>
+<form class="doc-search" role="search" data-site-root="../" data-search-index="../docs/search.json">
+<label for="doc-search-input">Search docs</label>
+<input id="doc-search-input" type="search" autocomplete="off" placeholder="try push or array.push">
+<div class="search-results" id="doc-search-results" aria-live="polite"></div>
+</form>
+<nav class="nav" aria-label="Documentation">
+<h2>Start</h2>
+<a href="index.html">Documentation</a>
+<a href="INSTALL.html">Install</a>
+<a href="PROJECTS.html">Project Mode</a>
+<h2>Language</h2>
+<a href="SYNTAX.html">Syntax</a>
+<a href="SPEC.html">Specification</a>
+<a href="LANGUAGE_CONCEPTS.html">Language Concepts</a>
+<a href="STDLIB.html">Standard Library</a>
+<a href="ERRORS.html">Diagnostics</a>
+<a href="COMPATIBILITY.html">Compatibility</a>
+<a href="MIGRATING.html">Migration</a>
+<a href="DEPRECATION.html">Deprecation</a>
+<h2>Reference</h2>
+<a href="reference/api.html">API Reference</a>
+<a href="DOCS_SITE.html">Docs Site</a>
+<a href="reference/index.html">Reference Index</a>
+<h2>Tools</h2>
+<a href="TOOLING.html">Editor And Docs Tools</a>
+<a href="RUNTIME_BACKEND.html">Runtime And Backend</a>
+<a href="NETWORKING.html">Draft Networking</a>
+<a href="RICH_RUNTIMES.html">Rich Runtimes</a>
+<h2>Project</h2>
+<a href="ARCHITECTURE.html">Architecture</a>
+<a href="DESIGN_RULES.html">Design Rules</a>
+<a href="STANDARD_PLATFORM.html" aria-current="page">Standard Platform</a>
+<a href="EXPLICIT_SYSTEMS_TRACK.html">Explicit Systems Track</a>
+<a href="DOCS_STYLE_GUIDE.html">Docs Style Guide</a>
+<a href="PURPOSE.html">Purpose</a>
+<a href="ROADMAP.html">Roadmap</a>
+<a href="STATUS.html">Status</a>
+<h2>Releases</h2>
+<a href="RELEASE_NOTES.html">Version History</a>
+</nav>
+</aside>
+<main class="content">
+<div class="topbar"><a href="index.html">Docs</a><a href="reference/api.html">Reference</a><a href="https://github.com/scwlkr/WalkLang">GitHub</a></div>
+<div class="page">
+<article class="doc">
+<h1 id="walklang-standard-platform">WalkLang Standard Platform</h1>
+<p>Status: CLI standard-platform slice implemented for <code>walktop</code>; future platform areas remain planned.</p>
+<p>WalkLang is intended to become a general use language and personal foundation language for the owner&#39;s projects. The product shape is one language with one official standard platform, kept in one monorepo and verified through one release gate.</p>
+<p>This document records the standard platform model. The first CLI slice is implemented through <code>walktop</code>; future platform areas remain planned until their own proof slices ship.</p>
+<h2 id="platform-model">Platform Model</h2>
+<p>WalkLang should grow through a small explicit core plus a standard platform. The standard platform is organized around user-facing capability areas instead of backend-shaped implementation buckets.</p>
+<p>Initial capability areas:</p>
+<pre><code class="language-text">CLI
+TUI
+database
+web app
+desktop app
+game
+automation</code></pre>
+<p>Official standard platform areas stay in this monorepo. They are not separate official repos, independently versioned packages, or disconnected plugins.</p>
+<h2 id="proof-parity">Proof Parity</h2>
+<p>Every official standard platform area needs the same discipline as core language work:</p>
+<pre><code class="language-text">spec or design doc
+source docs
+positive tests
+negative tests when invalid forms matter
+fixture mode for host-dependent behavior
+generated reference docs when APIs are exposed
+native build or runtime proof
+release/install proof when tools are shipped
+status and release-note updates</code></pre>
+<p>Draft means the API may change. It does not mean untested, undocumented, or half-wired.</p>
+<h2 id="first-area-cli">First Area: CLI</h2>
+<p>The first standard platform area is CLI. CLI is the best first area because it already exercises the current draft process, file, terminal, parse, and IO surface without requiring web, database, desktop, game, or full TUI runtime commitments.</p>
+<p>The CLI area should prove:</p>
+<pre><code class="language-text">arguments
+environment access
+configuration
+file IO
+process execution
+terminal-safe output
+color-forward output with plain fallback
+deterministic tests
+docs and install flow</code></pre>
+<h2 id="first-tool-walktop">First Tool: walktop</h2>
+<p><code>walktop</code> is the first CLI proof app and an official standalone WalkLang tool. It is a small system monitor, similar in spirit to a tiny <code>htop</code> or <code>btop</code>, but it stays in CLI scope. It does not require live keyboard input or commit WalkLang to a full TUI framework.</p>
+<p><code>walktop</code> source lives at:</p>
+<pre><code class="language-text">tools/walktop/
+  README.md
+  walk.toml
+  src/main.walk
+  src/walktop.walk
+  tests/main_test.walk
+  testdata/basic/</code></pre>
+<p><code>walktop</code> is built from WalkLang source into a standalone native command and installed by the normal local install flow after it passes the release gate.</p>
+<h2 id="walktop-v0-scope">walktop v0 Scope</h2>
+<p>Minimum command surface:</p>
+<pre><code class="language-text">walktop --once
+walktop --frames 5
+walktop --fixture tools/walktop/testdata/basic</code></pre>
+<p>Minimum display:</p>
+<pre><code class="language-text">title and version
+OS label
+CPU or load bar
+memory bar
+disk bar
+process count
+spinner or frame counter
+clear warning/error row when data is missing</code></pre>
+<p>Quality bar:</p>
+<pre><code class="language-text">compact dashboard
+aligned metric rows
+stable-width bars
+intentional color on capable terminals
+plain deterministic output for NO_COLOR, redirected output, and tests
+no raw command output
+no noisy ASCII art
+no placeholder/debug layout</code></pre>
+<h2 id="data-source">Data Source</h2>
+<p><code>walktop</code> gathers data by calling existing OS commands through WalkLang process APIs and parsing text output. This proves CLI capability before adding a dedicated WalkLang <code>system</code> module.</p>
+<p>Live mode may call real OS commands. Tests must use fixture mode so parsing, rendering, animation frames, failure paths, and fallback output do not depend on the current machine&#39;s CPU, memory, disk, or process state.</p>
+<h2 id="terminal-styling">Terminal Styling</h2>
+<p><code>walktop</code> uses WalkLang terminal APIs for color, style, clear, and cursor behavior wherever possible. Raw ANSI strings should not be used as an app-local shortcut.</p>
+<p>If <code>walktop</code> needs a small missing terminal primitive to meet the release-quality bar, add that primitive through the normal proof loop. Do not build a broad TUI framework in the CLI slice.</p>
+<h2 id="implemented-slice">Implemented Slice</h2>
+<p>The first implementation slice shipped:</p>
+<ul>
+<li><code>tools/walktop/</code> as a real WalkLang project.</li>
+<li><code>walktop --once</code>, <code>walktop --frames 5</code>, and <code>walktop --fixture tools/walktop/testdata/basic</code>.</li>
+<li>Fixture-mode tests for parse, render, argument, and warning behavior.</li>
+<li>End-to-end native build/run proof for <code>walktop --once --fixture ...</code>.</li>
+<li>Install and release scripts that build <code>walktop</code> from WalkLang source.</li>
+<li>Docs, generated docs, status, and release notes for the shipped slice.</li>
+</ul>
+<p>No new terminal primitive was required for this slice.</p>
+</article>
+<footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
+</div>
+</main>
+</div>
+</body>
+</html>

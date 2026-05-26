@@ -4,6 +4,47 @@
 
 No unreleased changes yet.
 
+## v5.14.0 - CLI Standard Platform And walktop
+
+Date: 2026-05-26
+
+v5.14.0 ships the first CLI standard-platform slice with `walktop`, an official
+standalone WalkLang-built system monitor.
+
+### Added
+
+- `tools/walktop/`, a real WalkLang project with `src/main.walk`, `src/walktop.walk`, tests, fixture data, and local README.
+- `walktop --once`, `walktop --frames 5`, and `walktop --fixture tools/walktop/testdata/basic`.
+- Deterministic fixture-mode parsing and rendering tests for dashboard output, argument validation, stable bars, and warning rows.
+- End-to-end native build/run coverage proving `walktop --once --fixture ...` through the public compiler path.
+
+### Changed
+
+- `scripts/install-local.sh` now builds and installs `walktop` beside `walk` from WalkLang source.
+- `scripts/release.sh` now emits the existing cross-platform `walk` artifacts plus one current-host `walktop` artifact and checksums it.
+- Install and standard-platform docs now describe the shipped `walktop` slice.
+
+### Notes
+
+- `walktop` stays CLI-only. It uses terminal color/style/clear APIs but does not add a keyboard/event-loop TUI framework.
+- Live mode gathers local machine data through OS commands first; fixture mode keeps tests deterministic.
+- No new terminal primitive was needed for this slice.
+
+### Breaking Changes
+
+None.
+
+### Upgrade
+
+Regenerate docs, install locally, and produce release artifacts with:
+
+```bash
+scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/install-local.sh v5.14.0
+scripts/release.sh v5.14.0 dist
+```
+
 ## v5.13.1 - Single Version And Developer Path Cleanup
 
 Date: 2026-05-26

@@ -8,10 +8,25 @@ fi
 
 version="$1"
 out_dir="${2:-dist}"
+work_dir="$(mktemp -d "${TMPDIR:-/tmp}/walklang-release.XXXXXX")"
+
+cleanup() {
+    rm -rf "$work_dir"
+}
+trap cleanup EXIT
 
 mkdir -p "$out_dir"
 checksums="$out_dir/SHA256SUMS"
 : > "$checksums"
+
+add_checksum() {
+    name="$1"
+    if command -v sha256sum >/dev/null 2>&1; then
+        (cd "$out_dir" && sha256sum "$name" >> SHA256SUMS)
+    else
+        (cd "$out_dir" && shasum -a 256 "$name" >> SHA256SUMS)
+    fi
+}
 
 targets="
 darwin/arm64
@@ -31,11 +46,22 @@ for target in $targets; do
     path="$out_dir/$name"
     echo "$path"
     GOOS="$goos" GOARCH="$goarch" go build -trimpath -ldflags "-s -w -X main.version=${version}" -o "$out_dir/$name" ./cmd/walk
-    if command -v sha256sum >/dev/null 2>&1; then
-        (cd "$out_dir" && sha256sum "$name" >> SHA256SUMS)
-    else
-        (cd "$out_dir" && shasum -a 256 "$name" >> SHA256SUMS)
-    fi
+    add_checksum "$name"
 done
+
+host_goos="$(go env GOOS)"
+host_goarch="$(go env GOARCH)"
+host_ext=""
+if [ "$host_goos" = "windows" ]; then
+    host_ext=".exe"
+fi
+walktop_name="walktop-${version}-${host_goos}-${host_goarch}${host_ext}"
+walktop_path="$out_dir/$walktop_name"
+
+go build -trimpath -ldflags "-X main.version=${version}" -o "$work_dir/walk" ./cmd/walk
+"$work_dir/walk" build --mode release --warnings=error tools/walktop/src/main.walk -o "$work_dir/walktop${host_ext}" >/dev/null
+cp "$work_dir/walktop${host_ext}" "$walktop_path"
+echo "$walktop_path"
+add_checksum "$walktop_name"
 
 echo "$checksums"

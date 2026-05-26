@@ -43,6 +43,7 @@
 <h2>Project</h2>
 <a href="ARCHITECTURE.html">Architecture</a>
 <a href="DESIGN_RULES.html">Design Rules</a>
+<a href="STANDARD_PLATFORM.html">Standard Platform</a>
 <a href="EXPLICIT_SYSTEMS_TRACK.html">Explicit Systems Track</a>
 <a href="DOCS_STYLE_GUIDE.html">Docs Style Guide</a>
 <a href="PURPOSE.html">Purpose</a>
@@ -59,6 +60,36 @@
 <h1 id="walklang-release-notes">WalkLang Release Notes</h1>
 <h2 id="unreleased">Unreleased</h2>
 <p>No unreleased changes yet.</p>
+<h2 id="v5-14-0-cli-standard-platform-and-walktop">v5.14.0 - CLI Standard Platform And walktop</h2>
+<p>Date: 2026-05-26</p>
+<p>v5.14.0 ships the first CLI standard-platform slice with <code>walktop</code>, an official standalone WalkLang-built system monitor.</p>
+<h3 id="added">Added</h3>
+<ul>
+<li><code>tools/walktop/</code>, a real WalkLang project with <code>src/main.walk</code>, <code>src/walktop.walk</code>, tests, fixture data, and local README.</li>
+<li><code>walktop --once</code>, <code>walktop --frames 5</code>, and <code>walktop --fixture tools/walktop/testdata/basic</code>.</li>
+<li>Deterministic fixture-mode parsing and rendering tests for dashboard output, argument validation, stable bars, and warning rows.</li>
+<li>End-to-end native build/run coverage proving <code>walktop --once --fixture ...</code> through the public compiler path.</li>
+</ul>
+<h3 id="changed">Changed</h3>
+<ul>
+<li><code>scripts/install-local.sh</code> now builds and installs <code>walktop</code> beside <code>walk</code> from WalkLang source.</li>
+<li><code>scripts/release.sh</code> now emits the existing cross-platform <code>walk</code> artifacts plus one current-host <code>walktop</code> artifact and checksums it.</li>
+<li>Install and standard-platform docs now describe the shipped <code>walktop</code> slice.</li>
+</ul>
+<h3 id="notes">Notes</h3>
+<ul>
+<li><code>walktop</code> stays CLI-only. It uses terminal color/style/clear APIs but does not add a keyboard/event-loop TUI framework.</li>
+<li>Live mode gathers local machine data through OS commands first; fixture mode keeps tests deterministic.</li>
+<li>No new terminal primitive was needed for this slice.</li>
+</ul>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<p>None.</p>
+<h3 id="upgrade">Upgrade</h3>
+<p>Regenerate docs, install locally, and produce release artifacts with:</p>
+<pre><code class="language-bash">scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/install-local.sh v5.14.0
+scripts/release.sh v5.14.0 dist</code></pre>
 <h2 id="v5-13-1-single-version-and-developer-path-cleanup">v5.13.1 - Single Version And Developer Path Cleanup</h2>
 <p>Date: 2026-05-26</p>
 <p>v5.13.1 aligns the current-facing project version around one number and removes old milestone labels from developer-facing paths that appear during normal CI, docs, examples, script, fixture, and test work.</p>

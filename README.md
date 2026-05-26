@@ -38,15 +38,15 @@ out: add(2, 3)
 
 ## Current Version
 
-WalkLang is currently `v5.13.1`.
+WalkLang is currently `v5.14.0`.
 
-`v5.13.1` covers the compiler, tooling, docs, release artifacts, and
+`v5.14.0` covers the compiler, tooling, docs, release artifacts, and
 implemented language surface. Features inside a release are labeled `stable`,
 `draft`, `experimental`, or `planned` when their maturity matters.
 
-This release includes the explicit systems track: draft `defer:` cleanup,
-recoverable-result policy docs, package collection roots, and first-class build
-modes.
+This release ships the first CLI standard-platform slice: `walktop`, an
+official standalone WalkLang-built system monitor installed by the normal local
+install flow.
 
 ## What Works Today
 
@@ -61,6 +61,8 @@ modes.
 - `walk run`, direct `walk file.walk`, `walk build`, `walk check`, `walk test`,
   `walk fmt`, `walk clean`, `walk package`, `walk docs`, `walk debug-map`,
   `walk lsp`, `walk repl`, and `walk version` are implemented.
+- `walktop` builds from `tools/walktop/src/main.walk` into a standalone native
+  command with deterministic fixture mode and live OS-command mode.
 - Project mode supports `walk init`, `walk.toml`, source/test layout, builds,
   checks, tests, formatting, explicit debug/release build modes, and cleanup.
 - Static docs and generated API reference output are repo-owned and deployed

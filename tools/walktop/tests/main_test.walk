@@ -1,0 +1,27 @@
+imp: string
+imp: walktop
+test: 'fixture parser renders deterministic dashboard'
+    var: snapshot = walktop.snapshot_from_fixture('testdata/basic')
+    var: rendered = walktop.render_dashboard(snapshot, 1, 1)
+    assert: == rendered 'WalkTop  v0.1.0\nOS       Darwin fixture\nLoad     [##########----------] 50%\nMemory   [##############------] 70%\nDisk     [#########-----------] 45%\nProcs    128\nFrame    1/1\nStatus   ok'
+test: 'malformed fixture reports warning row'
+    var: snapshot = walktop.snapshot_from_texts('', 'bad', 'bad', 'bad', 'bad', '')
+    var: rendered = walktop.render_dashboard(snapshot, 1, 1)
+    assert: string.contains(rendered, 'Warning  os data missing; load data missing; memory data missing; disk data missing; process data missing')
+test: 'frame arguments validate deterministically'
+    var: ok_args = ['--frames', '5', '--fixture', 'testdata/basic']
+    var: ok = walktop.validate_args(ok_args)
+    assert: ok.ok
+    assert: == ok.value 5
+    var: once_args = ['--frames', '5', '--once']
+    var: once = walktop.validate_args(once_args)
+    assert: once.ok
+    assert: == once.value 1
+    var: bad_args = ['--frames', '0']
+    var: bad = walktop.validate_args(bad_args)
+    assert: not bad.ok
+    assert: == bad.error 'walktop: --frames must be greater than zero'
+test: 'bars are stable width'
+    assert: == walktop.bar(0) '[--------------------]'
+    assert: == walktop.bar(50) '[##########----------]'
+    assert: == walktop.bar(100) '[####################]'

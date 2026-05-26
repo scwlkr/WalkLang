@@ -1,0 +1,23 @@
+imp: io
+imp: process
+imp: term
+imp: walktop
+var: args = process.args()
+var: validation = walktop.validate_args(args)
+if: not validation.ok
+    do: io.error_line(validation.error)
+    do: process.exit(2)
+var: frames = validation.value
+var: fixture = walktop.arg_value(args, '--fixture', '')
+var: frame = 1
+while: <= frame frames
+    var: snapshot = walktop.snapshot_live()
+    if: != fixture ''
+        snapshot = walktop.snapshot_from_fixture(fixture)
+    if: > frames 1
+        do: term.clear()
+    do: term.color('cyan')
+    do: term.style('bold')
+    do: io.write_line(walktop.render_dashboard(snapshot, frame, frames))
+    do: term.reset()
+    frame = + frame 1

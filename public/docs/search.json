@@ -40,8 +40,8 @@
     "section": "Current Version",
     "group": "Start",
     "url": "docs/index.html#current-version",
-    "summary": "WalkLang is currently v5.13.1. That single project version covers the compiler, tooling, backend, release artifacts, docs, and implemented language",
-    "text": "WalkLang Documentation Current Version WalkLang is currently v5.13.1. That single project version covers the compiler, tooling, backend, release artifacts, docs, and implemented language surface. Features inside v5.13.1 use maturity labels: - stable: core syntax, diagnostics, modules, tests, and standard-library helpers - draft: do:, defer:, io, parse, process, file, dir, path, json, term, http, and html - experimental: structs, methods, and simple generic functions - Stable feature specification - Standard library - Compatibility promise - Release notes - Current status",
+    "summary": "WalkLang is currently v5.14.0. That single project version covers the compiler, tooling, backend, release artifacts, docs, and implemented language",
+    "text": "WalkLang Documentation Current Version WalkLang is currently v5.14.0. That single project version covers the compiler, tooling, backend, release artifacts, docs, and implemented language surface. Features inside v5.14.0 use maturity labels: - stable: core syntax, diagnostics, modules, tests, and standard-library helpers - draft: do:, defer:, io, parse, process, file, dir, path, json, term, http, and html - experimental: structs, methods, and simple generic functions - standard platform: walktop is the first official standalone WalkLang-built CLI tool - Stable feature specification - Standard library - Compatibility promise - Release notes - Current status",
     "level": 2
   },
   {
@@ -49,8 +49,8 @@
     "section": "Project Direction",
     "group": "Start",
     "url": "docs/index.html#project-direction",
-    "summary": "Roadmap Explicit systems track",
-    "text": "WalkLang Documentation Project Direction - Roadmap - Explicit systems track - Design rules - Purpose - Docs style guide",
+    "summary": "Roadmap Standard platform",
+    "text": "WalkLang Documentation Project Direction - Roadmap - Standard platform - Explicit systems track - Design rules - Purpose - Docs style guide",
     "level": 2
   },
   {
@@ -85,8 +85,8 @@
     "section": "Release Artifact Install",
     "group": "Start",
     "url": "docs/INSTALL.html#release-artifact-install",
-    "summary": "Release artifacts are produced by scripts/release.sh and named: Install on macOS or Linux:",
-    "text": "WalkLang Official Install Instructions Release Artifact Install Release artifacts are produced by scripts/release.sh and named: text walk-v5.13.1-darwin-arm64 walk-v5.13.1-darwin-amd64 walk-v5.13.1-linux-amd64 walk-v5.13.1-linux-arm64 walk-v5.13.1-windows-amd64.exe SHA256SUMS Install on macOS or Linux: bash mkdir -p ~/.local/bin cp walk-v5.13.1-\u003cos\u003e-\u003carch\u003e ~/.local/bin/walk chmod +x ~/.local/bin/walk walk version Install on Windows by placing walk-v5.13.1-windows-amd64.exe somewhere on PATH as walk.exe, then run: powershell walk version Verify checksums before installing: bash shasum -a 256 -c SHA256SUMS On systems with GNU coreutils, this also works: bash sha256sum -c SHA256SUMS",
+    "summary": "Release artifacts are produced by scripts/release.sh and named: scripts/release.sh cross-builds the walk compiler artifacts and builds one",
+    "text": "WalkLang Official Install Instructions Release Artifact Install Release artifacts are produced by scripts/release.sh and named: text walk-v5.14.0-darwin-arm64 walk-v5.14.0-darwin-amd64 walk-v5.14.0-linux-amd64 walk-v5.14.0-linux-arm64 walk-v5.14.0-windows-amd64.exe walktop-v5.14.0-\u003crelease-host-os\u003e-\u003crelease-host-arch\u003e SHA256SUMS scripts/release.sh cross-builds the walk compiler artifacts and builds one current-host walktop artifact from WalkLang source. Source install always builds the local walktop binary. Install on macOS or Linux: bash mkdir -p ~/.local/bin cp walk-v5.14.0-\u003cos\u003e-\u003carch\u003e ~/.local/bin/walk cp walktop-v5.14.0-\u003cos\u003e-\u003carch\u003e ~/.local/bin/walktop chmod +x ~/.local/bin/walk ~/.local/bin/walktop walk version NO COLOR=1 walktop --once Install on Windows by placing walk-v5.14.0-windows-amd64.exe somewhere on PATH as walk.exe, then run: powershell walk version Verify checksums before installing: bash shasum -a 256 -c SHA256SUMS On systems with GNU coreutils, this also works: bash sha256sum -c SHA256SUMS",
     "level": 2
   },
   {
@@ -94,8 +94,8 @@
     "section": "Source Install",
     "group": "Start",
     "url": "docs/INSTALL.html#source-install",
-    "summary": "Source installs require Go and a native C compiler available as cc. By default the script writes to ~/.local/bin/walk. Override the install directory with:",
-    "text": "WalkLang Official Install Instructions Source Install Source installs require Go and a native C compiler available as cc. bash scripts/install-local.sh local walk version By default the script writes to ~/.local/bin/walk. Override the install directory with: bash WALK INSTALL DIR=/path/to/bin scripts/install-local.sh local",
+    "summary": "Source installs require Go and a native C compiler available as cc. By default the script writes walk and walktop to ~/.local/bin. Override",
+    "text": "WalkLang Official Install Instructions Source Install Source installs require Go and a native C compiler available as cc. bash scripts/install-local.sh local walk version NO COLOR=1 walktop --once --fixture tools/walktop/testdata/basic By default the script writes walk and walktop to ~/.local/bin. Override the install directory with: bash WALK INSTALL DIR=/path/to/bin scripts/install-local.sh local",
     "level": 2
   },
   {
@@ -104,7 +104,7 @@
     "group": "Start",
     "url": "docs/INSTALL.html#smoke-test",
     "summary": "After install: Expected examples/hello.walk output:",
-    "text": "WalkLang Official Install Instructions Smoke Test After install: bash walk run playground/route ranker.walk walk playground/route ranker.walk walk build examples/hello.walk -o build/hello ./build/hello walk check --warnings=error examples/stable.walk walk test examples/compiler tests.walk walk build tests/pass/structs.walk -o build/structs walk build tests/pass/methods.walk -o build/methods walk build tests/pass/generics.walk -o build/generics Expected examples/hello.walk output: text 3 hello from WalkLang true Expected playground/route ranker.walk output: text Best route: Library Lane Score: 46",
+    "text": "WalkLang Official Install Instructions Smoke Test After install: bash walk run playground/route ranker.walk walk playground/route ranker.walk walk build examples/hello.walk -o build/hello ./build/hello walk check --warnings=error examples/stable.walk walk test examples/compiler tests.walk walk build tests/pass/structs.walk -o build/structs walk build tests/pass/methods.walk -o build/methods walk build tests/pass/generics.walk -o build/generics NO COLOR=1 walktop --once Expected examples/hello.walk output: text 3 hello from WalkLang true Expected playground/route ranker.walk output: text Best route: Library Lane Score: 46",
     "level": 2
   },
   {
@@ -112,8 +112,8 @@
     "section": "Build Release Artifacts Locally",
     "group": "Start",
     "url": "docs/INSTALL.html#build-release-artifacts-locally",
-    "summary": "Maintainers can produce the release artifact set with: The command writes the platform binaries and dist/SHA256SUMS.",
-    "text": "WalkLang Official Install Instructions Build Release Artifacts Locally Maintainers can produce the release artifact set with: bash scripts/release.sh v5.13.1 dist The command writes the platform binaries and dist/SHA256SUMS.",
+    "summary": "Maintainers can produce the release artifact set with: The command writes the compiler platform binaries, the current-host walktop",
+    "text": "WalkLang Official Install Instructions Build Release Artifacts Locally Maintainers can produce the release artifact set with: bash scripts/release.sh v5.14.0 dist The command writes the compiler platform binaries, the current-host walktop binary, and dist/SHA256SUMS.",
     "level": 2
   },
   {
@@ -1922,7 +1922,7 @@
     "group": "Releases",
     "url": "docs/STABLE_FEATURES.html#build-flow",
     "summary": "Native builds still go through generated C and cc. Install the local CLI first:",
-    "text": "WalkLang Stable Feature Notes Build Flow Native builds still go through generated C and cc. Install the local CLI first: bash scripts/install-local.sh local walk version bash walk build examples/stable.walk -o build/stable --release ./build/stable Use a different C compiler or flags when needed: bash walk build examples/stable.walk -o build/stable --cc clang --cflag -Wall Run the compatibility stress path: bash scripts/stress-compatibility.sh Run the focused stable compatibility suite: bash go test ./cmd/walk -run TestStableCompatibilitySuite Build release CLI artifacts: bash scripts/release.sh v5.13.1",
+    "text": "WalkLang Stable Feature Notes Build Flow Native builds still go through generated C and cc. Install the local CLI first: bash scripts/install-local.sh local walk version bash walk build examples/stable.walk -o build/stable --release ./build/stable Use a different C compiler or flags when needed: bash walk build examples/stable.walk -o build/stable --cc clang --cflag -Wall Run the compatibility stress path: bash scripts/stress-compatibility.sh Run the focused stable compatibility suite: bash go test ./cmd/walk -run TestStableCompatibilitySuite Build release CLI artifacts: bash scripts/release.sh v5.14.0",
     "level": 2
   },
   {
@@ -2157,6 +2157,15 @@
     "url": "docs/TOOLING.html#debugger-foundation",
     "summary": "Generate a deterministic source symbol map: The map records source files, symbol names, symbol kinds, and line/column locations. It is a foundation for debugger adapters and generated-C source mapping in later...",
     "text": "WalkLang Professional Tooling Debugger Foundation Generate a deterministic source symbol map: bash walk debug-map src/main.walk walk debug-map -o build/debug-map.json src/main.walk The map records source files, symbol names, symbol kinds, and line/column locations. It is a foundation for debugger adapters and generated-C source mapping in later backend work.",
+    "level": 2
+  },
+  {
+    "title": "WalkLang Professional Tooling",
+    "section": "Official Tools",
+    "group": "Tools",
+    "url": "docs/TOOLING.html#official-tools",
+    "summary": "walktop is the first official standalone WalkLang-built tool. Its source lives under tools/walktop/, and it builds into its own native command instead",
+    "text": "WalkLang Professional Tooling Official Tools walktop is the first official standalone WalkLang-built tool. Its source lives under tools/walktop/, and it builds into its own native command instead of a Go-side walk subcommand. bash walk build --mode release --warnings=error tools/walktop/src/main.walk -o build/walktop NO COLOR=1 build/walktop --once --fixture tools/walktop/testdata/basic The normal source install flow builds and installs walktop beside walk.",
     "level": 2
   },
   {
@@ -2682,6 +2691,87 @@
     "level": 2
   },
   {
+    "title": "WalkLang Standard Platform",
+    "section": "WalkLang Standard Platform",
+    "group": "Project",
+    "url": "docs/STANDARD_PLATFORM.html#walklang-standard-platform",
+    "summary": "areas remain planned. WalkLang is intended to become a general use language and personal foundation",
+    "text": "WalkLang Standard Platform WalkLang Standard Platform Status: CLI standard-platform slice implemented for walktop; future platform areas remain planned. WalkLang is intended to become a general use language and personal foundation language for the owner's projects. The product shape is one language with one official standard platform, kept in one monorepo and verified through one release gate. This document records the standard platform model. The first CLI slice is implemented through walktop; future platform areas remain planned until their own proof slices ship.",
+    "level": 1
+  },
+  {
+    "title": "WalkLang Standard Platform",
+    "section": "Platform Model",
+    "group": "Project",
+    "url": "docs/STANDARD_PLATFORM.html#platform-model",
+    "summary": "WalkLang should grow through a small explicit core plus a standard platform. The standard platform is organized around user-facing capability areas instead",
+    "text": "WalkLang Standard Platform Platform Model WalkLang should grow through a small explicit core plus a standard platform. The standard platform is organized around user-facing capability areas instead of backend-shaped implementation buckets. Initial capability areas: text CLI TUI database web app desktop app game automation Official standard platform areas stay in this monorepo. They are not separate official repos, independently versioned packages, or disconnected plugins.",
+    "level": 2
+  },
+  {
+    "title": "WalkLang Standard Platform",
+    "section": "Proof Parity",
+    "group": "Project",
+    "url": "docs/STANDARD_PLATFORM.html#proof-parity",
+    "summary": "Every official standard platform area needs the same discipline as core language work:",
+    "text": "WalkLang Standard Platform Proof Parity Every official standard platform area needs the same discipline as core language work: text spec or design doc source docs positive tests negative tests when invalid forms matter fixture mode for host-dependent behavior generated reference docs when APIs are exposed native build or runtime proof release/install proof when tools are shipped status and release-note updates Draft means the API may change. It does not mean untested, undocumented, or half-wired.",
+    "level": 2
+  },
+  {
+    "title": "WalkLang Standard Platform",
+    "section": "First Area: CLI",
+    "group": "Project",
+    "url": "docs/STANDARD_PLATFORM.html#first-area-cli",
+    "summary": "The first standard platform area is CLI. CLI is the best first area because it already exercises the current draft process, file, terminal, parse, and IO",
+    "text": "WalkLang Standard Platform First Area: CLI The first standard platform area is CLI. CLI is the best first area because it already exercises the current draft process, file, terminal, parse, and IO surface without requiring web, database, desktop, game, or full TUI runtime commitments. The CLI area should prove: text arguments environment access configuration file IO process execution terminal-safe output color-forward output with plain fallback deterministic tests docs and install flow",
+    "level": 2
+  },
+  {
+    "title": "WalkLang Standard Platform",
+    "section": "First Tool: walktop",
+    "group": "Project",
+    "url": "docs/STANDARD_PLATFORM.html#first-tool-walktop",
+    "summary": "walktop is the first CLI proof app and an official standalone WalkLang tool. It is a small system monitor, similar in spirit to a tiny htop or btop, but",
+    "text": "WalkLang Standard Platform First Tool: walktop walktop is the first CLI proof app and an official standalone WalkLang tool. It is a small system monitor, similar in spirit to a tiny htop or btop, but it stays in CLI scope. It does not require live keyboard input or commit WalkLang to a full TUI framework. walktop source lives at: text tools/walktop/ README.md walk.toml src/main.walk src/walktop.walk tests/main test.walk testdata/basic/ walktop is built from WalkLang source into a standalone native command and installed by the normal local install flow after it passes the release gate.",
+    "level": 2
+  },
+  {
+    "title": "WalkLang Standard Platform",
+    "section": "walktop v0 Scope",
+    "group": "Project",
+    "url": "docs/STANDARD_PLATFORM.html#walktop-v0-scope",
+    "summary": "Minimum command surface: Minimum display:",
+    "text": "WalkLang Standard Platform walktop v0 Scope Minimum command surface: text walktop --once walktop --frames 5 walktop --fixture tools/walktop/testdata/basic Minimum display: text title and version OS label CPU or load bar memory bar disk bar process count spinner or frame counter clear warning/error row when data is missing Quality bar: text compact dashboard aligned metric rows stable-width bars intentional color on capable terminals plain deterministic output for NO COLOR, redirected output, and tests no raw command output no noisy ASCII art no placeholder/debug layout",
+    "level": 2
+  },
+  {
+    "title": "WalkLang Standard Platform",
+    "section": "Data Source",
+    "group": "Project",
+    "url": "docs/STANDARD_PLATFORM.html#data-source",
+    "summary": "walktop gathers data by calling existing OS commands through WalkLang process APIs and parsing text output. This proves CLI capability before adding",
+    "text": "WalkLang Standard Platform Data Source walktop gathers data by calling existing OS commands through WalkLang process APIs and parsing text output. This proves CLI capability before adding a dedicated WalkLang system module. Live mode may call real OS commands. Tests must use fixture mode so parsing, rendering, animation frames, failure paths, and fallback output do not depend on the current machine's CPU, memory, disk, or process state.",
+    "level": 2
+  },
+  {
+    "title": "WalkLang Standard Platform",
+    "section": "Terminal Styling",
+    "group": "Project",
+    "url": "docs/STANDARD_PLATFORM.html#terminal-styling",
+    "summary": "walktop uses WalkLang terminal APIs for color, style, clear, and cursor behavior wherever possible. Raw ANSI strings should not be used as an app-local",
+    "text": "WalkLang Standard Platform Terminal Styling walktop uses WalkLang terminal APIs for color, style, clear, and cursor behavior wherever possible. Raw ANSI strings should not be used as an app-local shortcut. If walktop needs a small missing terminal primitive to meet the release-quality bar, add that primitive through the normal proof loop. Do not build a broad TUI framework in the CLI slice.",
+    "level": 2
+  },
+  {
+    "title": "WalkLang Standard Platform",
+    "section": "Implemented Slice",
+    "group": "Project",
+    "url": "docs/STANDARD_PLATFORM.html#implemented-slice",
+    "summary": "The first implementation slice shipped: tools/walktop/ as a real WalkLang project.",
+    "text": "WalkLang Standard Platform Implemented Slice The first implementation slice shipped: - tools/walktop/ as a real WalkLang project. - walktop --once, walktop --frames 5, and walktop --fixture tools/walktop/testdata/basic. - Fixture-mode tests for parse, render, argument, and warning behavior. - End-to-end native build/run proof for walktop --once --fixture .... - Install and release scripts that build walktop from WalkLang source. - Docs, generated docs, status, and release notes for the shipped slice. No new terminal primitive was required for this slice.",
+    "level": 2
+  },
+  {
     "title": "WalkLang Explicit Systems Track",
     "section": "WalkLang Explicit Systems Track",
     "group": "Project",
@@ -3181,8 +3271,8 @@
     "section": "WalkLang Status",
     "group": "Project",
     "url": "docs/STATUS.html#walklang-status",
-    "summary": "Current WalkLang version: v5.13.1. v5.13.1 is the single project version for the compiler, tooling, docs,",
-    "text": "WalkLang Status WalkLang Status Current WalkLang version: v5.13.1. v5.13.1 is the single project version for the compiler, tooling, docs, release artifacts, and implemented language surface. Feature maturity is described with status labels instead of separate version lines. Current feature status: text stable core syntax, diagnostics, modules, tests, project tooling, and standard-library helpers draft do:, defer:, io, parse, process, file, dir, path, json, term, http, and html experimental structs, methods, and simple generic functions Current release state: v5.13.1 aligns current-facing docs, CI, examples, compatibility fixtures, generated docs routes, visible test names, and developer scripts around one project version. Draft defer: cleanup, recoverable-result policy docs, package collection roots, and first-class build modes remain implemented and covered by focused tests. Last full release verification on 2026-05-26: text go test -count=1 ./... passed scripts/check-docs-site.sh passed after staging generated docs git diff --cached --check passed git diff --check -- . ': exclude playground/hangman.walk' ': exclude playground/hangman-v2.walk' passed current-facing version/path sweep passed outside release notes, migration history, deprecated historical docs, and generated search history go build -trimpath -ldflags \"-X main.version=v5.13.1\" -o build/walk ./cmd/walk passed ./build/walk version reported v5.13.1 ./build/walk check --warnings=error tests/pass/walk tests.walk passed compatibility stress script passed scripts/build-docs-site.sh passed scripts/release.sh v5.13.1 \u003ctemp\u003e/release produced 5 platform artifacts plus SHA256SUMS shasum -a 256 -c SHA256SUMS passed for all 5 artifacts the Darwin arm64 release artifact reported v5.13.1 scripts/install-local.sh v5.13.1 refreshed the local walk install walk version reported v5.13.1 Known local state: two Hangman playground files have pre-existing unstaged edits and are not part of the version-alignment cleanup. Version-language cleanup on 2026-05-26: current-facing docs now use v5.13.1 as the single project version. Historical version numbers remain only in release notes and migration history. CONTEXT.md records the resolved terms Project Version, Feature Status, and Historical Version Reference. Version-language cleanup verification on 2026-05-26: text go test ./cmd/walk -run 'TestStableCompatibilitySuite|TestCurrentReleaseDocsArePresent' -count=1 passed go test ./scripts -run TestSidebarUsesTopicNavigationInsteadOfVersionMilestones -count=1 passed scripts/build-docs-site.sh passed scripts/check-docs-site.sh passed after staging generated docs go test -count=1 ./... passed WALK BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported compatibility stress ok current-facing source and generated-page search found no old language-version wording outside release notes and migration history Developer-facing path cleanup on 2026-05-26: active examples, compatibility fixtures, the compatibility stress script, current docs source pages, generated docs routes, and visible test names now use purpose-based names instead of old milestone labels. Release notes and migration history kept their historical version references unchanged. Developer-facing path cleanup verification on 2026-05-26: text go test ./cmd/walk ./internal/format ./internal/checker ./scripts -run 'TestStableCompatibilitySuite|TestCurrentReleaseDocsArePresent|TestExamplesAreTestableFixtures|TestInExpression|TestFormatter|TestShadowingProducesWarning|TestSidebarUsesTopicNavigationInsteadOfVersionMilestones' -count=1 passed WALK BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported compatibility stress ok scripts/check-docs-site.sh passed go test -count=1 ./... passed git diff --check -- . ': exclude playground/hangman.walk' ': exclude playground/hangman-v2.walk' passed git diff --cached --check passed active-code search found no old developer-facing milestone path or test-name labels outside release notes, migration history, and deprecated docs Next: keep new docs, examples, scripts, fixtures, and CI references aligned to the single Project Version whenever the next release slice starts.",
+    "summary": "Current WalkLang version: v5.14.0. v5.14.0 is the single project version for the compiler, tooling, docs,",
+    "text": "WalkLang Status WalkLang Status Current WalkLang version: v5.14.0. v5.14.0 is the single project version for the compiler, tooling, docs, release artifacts, and implemented language surface. Feature maturity is described with status labels instead of separate version lines. Current feature status: text stable core syntax, diagnostics, modules, tests, project tooling, and standard-library helpers draft do:, defer:, io, parse, process, file, dir, path, json, term, http, and html experimental structs, methods, and simple generic functions standard platform CLI standard-platform slice with walktop as the first official standalone WalkLang-built tool Current release state: v5.14.0 ships walktop under tools/walktop/ as a real WalkLang project and standalone native command. walktop supports --once, --frames 5, and --fixture tools/walktop/testdata/basic, uses OS commands for live data, uses deterministic fixture mode for tests, renders a compact color-forward dashboard through term APIs, and is installed by the normal local install flow beside walk. Last full release verification on 2026-05-26: text go test -count=1 ./... passed go build -trimpath -ldflags \"-X main.version=v5.14.0\" -o build/walk ./cmd/walk passed ./build/walk version reported v5.14.0 ./build/walk check --warnings=error tests/pass/walk tests.walk passed cd tools/walktop \u0026\u0026 ../../build/walk check --warnings=error passed cd tools/walktop \u0026\u0026 ../../build/walk test --warnings=error passed with 4 tests ./build/walk build --mode release --warnings=error tools/walktop/src/main.walk -o build/walktop passed NO COLOR=1 ./build/walktop --once --fixture tools/walktop/testdata/basic matched the deterministic dashboard NO COLOR=1 ./build/walktop --frames 5 --fixture tools/walktop/testdata/basic produced 40 dashboard lines NO COLOR=1 ./build/walktop --once passed live OS-command mode on the local Darwin host WALK BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported compatibility stress ok scripts/build-docs-site.sh passed scripts/check-docs-site.sh passed scripts/release.sh v5.14.0 \u003ctemp\u003e/release produced 5 walk artifacts, 1 current-host walktop artifact, and SHA256SUMS wc -l \u003ctemp\u003e/release/SHA256SUMS reported 6 shasum -a 256 -c SHA256SUMS passed for all 6 artifacts the Darwin arm64 walk release artifact reported v5.14.0 the Darwin arm64 walktop release artifact passed --once --fixture tools/walktop/testdata/basic scripts/install-local.sh v5.14.0 refreshed the local walk and walktop install walk version reported v5.14.0 command -v walktop reported ~/.local/bin/walktop NO COLOR=1 walktop --once --fixture tools/walktop/testdata/basic matched the deterministic dashboard git diff --check -- . ': exclude playground/hangman.walk' ': exclude playground/hangman-v2.walk' passed git diff --cached --check passed Known local state: two Hangman playground files have pre-existing unstaged edits and are not part of the version-alignment cleanup. Standard platform implementation on 2026-05-26: WalkLang's intended product shape is recorded as one general-use language with one standard platform in one monorepo. CONTEXT.md records the standard-platform vocabulary, docs/adr/ records the monorepo decision, and docs/STANDARD PLATFORM.md records the CLI-first implementation path. The first standard platform area is CLI. The first official standalone WalkLang-built tool is walktop, a release-quality system monitor installed by the normal local WalkLang install flow. Focused standard platform verification on 2026-05-26: text go test ./cmd/walk -run TestWalktop -count=1 passed ../../build/walk test --warnings=error in tools/walktop passed 4 WalkLang tests NO COLOR=1 ./build/walktop --once --fixture tools/walktop/testdata/basic passed NO COLOR=1 ./build/walktop --once passed live local OS-command mode Version-language cleanup on 2026-05-26: current-facing docs now use v5.13.1 as the single project version. Historical version numbers remain only in release notes and migration history. CONTEXT.md records the resolved terms Project Version, Feature Status, and Historical Version Reference. Version-language cleanup verification on 2026-05-26: text go test ./cmd/walk -run 'TestStableCompatibilitySuite|TestCurrentReleaseDocsArePresent' -count=1 passed go test ./scripts -run TestSidebarUsesTopicNavigationInsteadOfVersionMilestones -count=1 passed scripts/build-docs-site.sh passed scripts/check-docs-site.sh passed after staging generated docs go test -count=1 ./... passed WALK BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported compatibility stress ok current-facing source and generated-page search found no old language-version wording outside release notes and migration history Developer-facing path cleanup on 2026-05-26: active examples, compatibility fixtures, the compatibility stress script, current docs source pages, generated docs routes, and visible test names now use purpose-based names instead of old milestone labels. Release notes and migration history kept their historical version references unchanged. Developer-facing path cleanup verification on 2026-05-26: text go test ./cmd/walk ./internal/format ./internal/checker ./scripts -run 'TestStableCompatibilitySuite|TestCurrentReleaseDocsArePresent|TestExamplesAreTestableFixtures|TestInExpression|TestFormatter|TestShadowingProducesWarning|TestSidebarUsesTopicNavigationInsteadOfVersionMilestones' -count=1 passed WALK BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported compatibility stress ok scripts/check-docs-site.sh passed go test -count=1 ./... passed git diff --check -- . ': exclude playground/hangman.walk' ': exclude playground/hangman-v2.walk' passed git diff --cached --check passed active-code search found no old developer-facing milestone path or test-name labels outside release notes, migration history, and deprecated docs Next: continue standard-platform expansion after the CLI proof app, with future areas gated by the same proof parity rules.",
     "level": 1
   },
   {
@@ -3202,6 +3292,60 @@
     "summary": "No unreleased changes yet.",
     "text": "WalkLang Release Notes Unreleased No unreleased changes yet.",
     "level": 2
+  },
+  {
+    "title": "WalkLang Release Notes",
+    "section": "v5.14.0 - CLI Standard Platform And walktop",
+    "group": "Releases",
+    "url": "docs/RELEASE_NOTES.html#v5-14-0-cli-standard-platform-and-walktop",
+    "summary": "v5.14.0 ships the first CLI standard-platform slice with walktop, an official standalone WalkLang-built system monitor.",
+    "text": "WalkLang Release Notes v5.14.0 - CLI Standard Platform And walktop Date: 2026-05-26 v5.14.0 ships the first CLI standard-platform slice with walktop, an official standalone WalkLang-built system monitor.",
+    "level": 2
+  },
+  {
+    "title": "WalkLang Release Notes",
+    "section": "Added",
+    "group": "Releases",
+    "url": "docs/RELEASE_NOTES.html#added",
+    "summary": "tools/walktop/, a real WalkLang project with src/main.walk, src/walktop.walk, tests, fixture data, and local README. walktop --once, walktop --frames 5, and walktop --fixture tools/walktop/testdata/basic.",
+    "text": "WalkLang Release Notes Added - tools/walktop/, a real WalkLang project with src/main.walk, src/walktop.walk, tests, fixture data, and local README. - walktop --once, walktop --frames 5, and walktop --fixture tools/walktop/testdata/basic. - Deterministic fixture-mode parsing and rendering tests for dashboard output, argument validation, stable bars, and warning rows. - End-to-end native build/run coverage proving walktop --once --fixture ... through the public compiler path.",
+    "level": 3
+  },
+  {
+    "title": "WalkLang Release Notes",
+    "section": "Changed",
+    "group": "Releases",
+    "url": "docs/RELEASE_NOTES.html#changed",
+    "summary": "scripts/install-local.sh now builds and installs walktop beside walk from WalkLang source. scripts/release.sh now emits the existing cross-platform walk artifacts plus one current-host walktop artifact and...",
+    "text": "WalkLang Release Notes Changed - scripts/install-local.sh now builds and installs walktop beside walk from WalkLang source. - scripts/release.sh now emits the existing cross-platform walk artifacts plus one current-host walktop artifact and checksums it. - Install and standard-platform docs now describe the shipped walktop slice.",
+    "level": 3
+  },
+  {
+    "title": "WalkLang Release Notes",
+    "section": "Notes",
+    "group": "Releases",
+    "url": "docs/RELEASE_NOTES.html#notes",
+    "summary": "walktop stays CLI-only. It uses terminal color/style/clear APIs but does not add a keyboard/event-loop TUI framework. Live mode gathers local machine data through OS commands first; fixture mode keeps tests...",
+    "text": "WalkLang Release Notes Notes - walktop stays CLI-only. It uses terminal color/style/clear APIs but does not add a keyboard/event-loop TUI framework. - Live mode gathers local machine data through OS commands first; fixture mode keeps tests deterministic. - No new terminal primitive was needed for this slice.",
+    "level": 3
+  },
+  {
+    "title": "WalkLang Release Notes",
+    "section": "Breaking Changes",
+    "group": "Releases",
+    "url": "docs/RELEASE_NOTES.html#breaking-changes",
+    "summary": "None.",
+    "text": "WalkLang Release Notes Breaking Changes None.",
+    "level": 3
+  },
+  {
+    "title": "WalkLang Release Notes",
+    "section": "Upgrade",
+    "group": "Releases",
+    "url": "docs/RELEASE_NOTES.html#upgrade",
+    "summary": "Regenerate docs, install locally, and produce release artifacts with:",
+    "text": "WalkLang Release Notes Upgrade Regenerate docs, install locally, and produce release artifacts with: bash scripts/build-docs-site.sh scripts/check-docs-site.sh scripts/install-local.sh v5.14.0 scripts/release.sh v5.14.0 dist",
+    "level": 3
   },
   {
     "title": "WalkLang Release Notes",

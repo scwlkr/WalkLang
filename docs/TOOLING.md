@@ -142,6 +142,19 @@ walk debug-map -o build/debug-map.json src/main.walk
 
 The map records source files, symbol names, symbol kinds, and line/column locations. It is a foundation for debugger adapters and generated-C source mapping in later backend work.
 
+## Official Tools
+
+`walktop` is the first official standalone WalkLang-built tool. Its source
+lives under `tools/walktop/`, and it builds into its own native command instead
+of a Go-side `walk` subcommand.
+
+```bash
+walk build --mode release --warnings=error tools/walktop/src/main.walk -o build/walktop
+NO_COLOR=1 build/walktop --once --fixture tools/walktop/testdata/basic
+```
+
+The normal source install flow builds and installs `walktop` beside `walk`.
+
 ## Non-Goals
 
 Professional tooling does not add:

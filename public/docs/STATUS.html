@@ -43,6 +43,7 @@
 <h2>Project</h2>
 <a href="ARCHITECTURE.html">Architecture</a>
 <a href="DESIGN_RULES.html">Design Rules</a>
+<a href="STANDARD_PLATFORM.html">Standard Platform</a>
 <a href="EXPLICIT_SYSTEMS_TRACK.html">Explicit Systems Track</a>
 <a href="DOCS_STYLE_GUIDE.html">Docs Style Guide</a>
 <a href="PURPOSE.html">Purpose</a>
@@ -57,8 +58,8 @@
 <div class="page">
 <article class="doc">
 <h1 id="walklang-status">WalkLang Status</h1>
-<p>Current WalkLang version: <code>v5.13.1</code>.</p>
-<p><code>v5.13.1</code> is the single project version for the compiler, tooling, docs, release artifacts, and implemented language surface. Feature maturity is described with status labels instead of separate version lines.</p>
+<p>Current WalkLang version: <code>v5.14.0</code>.</p>
+<p><code>v5.14.0</code> is the single project version for the compiler, tooling, docs, release artifacts, and implemented language surface. Feature maturity is described with status labels instead of separate version lines.</p>
 <p>Current feature status:</p>
 <pre><code class="language-text">stable
   core syntax, diagnostics, modules, tests, project tooling, and standard-library helpers
@@ -67,25 +68,44 @@ draft
   do:, defer:, io, parse, process, file, dir, path, json, term, http, and html
 
 experimental
-  structs, methods, and simple generic functions</code></pre>
-<p>Current release state: <code>v5.13.1</code> aligns current-facing docs, CI, examples, compatibility fixtures, generated docs routes, visible test names, and developer scripts around one project version. Draft <code>defer:</code> cleanup, recoverable-result policy docs, package collection roots, and first-class build modes remain implemented and covered by focused tests.</p>
+  structs, methods, and simple generic functions
+
+standard platform
+  CLI standard-platform slice with `walktop` as the first official standalone
+  WalkLang-built tool</code></pre>
+<p>Current release state: <code>v5.14.0</code> ships <code>walktop</code> under <code>tools/walktop/</code> as a real WalkLang project and standalone native command. <code>walktop</code> supports <code>--once</code>, <code>--frames 5</code>, and <code>--fixture tools/walktop/testdata/basic</code>, uses OS commands for live data, uses deterministic fixture mode for tests, renders a compact color-forward dashboard through <code>term</code> APIs, and is installed by the normal local install flow beside <code>walk</code>.</p>
 <p>Last full release verification on 2026-05-26:</p>
 <pre><code class="language-text">go test -count=1 ./... passed
-scripts/check-docs-site.sh passed after staging generated docs
-git diff --cached --check passed
-git diff --check -- . &#39;:(exclude)playground/hangman.walk&#39; &#39;:(exclude)playground/hangman-v2.walk&#39; passed
-current-facing version/path sweep passed outside release notes, migration history, deprecated historical docs, and generated search history
-go build -trimpath -ldflags &#34;-X main.version=v5.13.1&#34; -o build/walk ./cmd/walk passed
-./build/walk version reported v5.13.1
+go build -trimpath -ldflags &#34;-X main.version=v5.14.0&#34; -o build/walk ./cmd/walk passed
+./build/walk version reported v5.14.0
 ./build/walk check --warnings=error tests/pass/walk_tests.walk passed
-compatibility stress script passed
+cd tools/walktop &amp;&amp; ../../build/walk check --warnings=error passed
+cd tools/walktop &amp;&amp; ../../build/walk test --warnings=error passed with 4 tests
+./build/walk build --mode release --warnings=error tools/walktop/src/main.walk -o build/walktop passed
+NO_COLOR=1 ./build/walktop --once --fixture tools/walktop/testdata/basic matched the deterministic dashboard
+NO_COLOR=1 ./build/walktop --frames 5 --fixture tools/walktop/testdata/basic produced 40 dashboard lines
+NO_COLOR=1 ./build/walktop --once passed live OS-command mode on the local Darwin host
+WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported compatibility stress ok
 scripts/build-docs-site.sh passed
-scripts/release.sh v5.13.1 &lt;temp&gt;/release produced 5 platform artifacts plus SHA256SUMS
-shasum -a 256 -c SHA256SUMS passed for all 5 artifacts
-the Darwin arm64 release artifact reported v5.13.1
-scripts/install-local.sh v5.13.1 refreshed the local walk install
-walk version reported v5.13.1</code></pre>
+scripts/check-docs-site.sh passed
+scripts/release.sh v5.14.0 &lt;temp&gt;/release produced 5 walk artifacts, 1 current-host walktop artifact, and SHA256SUMS
+wc -l &lt;temp&gt;/release/SHA256SUMS reported 6
+shasum -a 256 -c SHA256SUMS passed for all 6 artifacts
+the Darwin arm64 walk release artifact reported v5.14.0
+the Darwin arm64 walktop release artifact passed --once --fixture tools/walktop/testdata/basic
+scripts/install-local.sh v5.14.0 refreshed the local walk and walktop install
+walk version reported v5.14.0
+command -v walktop reported ~/.local/bin/walktop
+NO_COLOR=1 walktop --once --fixture tools/walktop/testdata/basic matched the deterministic dashboard
+git diff --check -- . &#39;:(exclude)playground/hangman.walk&#39; &#39;:(exclude)playground/hangman-v2.walk&#39; passed
+git diff --cached --check passed</code></pre>
 <p>Known local state: two Hangman playground files have pre-existing unstaged edits and are not part of the version-alignment cleanup.</p>
+<p>Standard platform implementation on 2026-05-26: WalkLang&#39;s intended product shape is recorded as one general-use language with one standard platform in one monorepo. <code>CONTEXT.md</code> records the standard-platform vocabulary, <code>docs/adr/</code> records the monorepo decision, and <code>docs/STANDARD_PLATFORM.md</code> records the CLI-first implementation path. The first standard platform area is CLI. The first official standalone WalkLang-built tool is <code>walktop</code>, a release-quality system monitor installed by the normal local WalkLang install flow.</p>
+<p>Focused standard platform verification on 2026-05-26:</p>
+<pre><code class="language-text">go test ./cmd/walk -run TestWalktop -count=1 passed
+../../build/walk test --warnings=error in tools/walktop passed 4 WalkLang tests
+NO_COLOR=1 ./build/walktop --once --fixture tools/walktop/testdata/basic passed
+NO_COLOR=1 ./build/walktop --once passed live local OS-command mode</code></pre>
 <p>Version-language cleanup on 2026-05-26: current-facing docs now use <code>v5.13.1</code> as the single project version. Historical version numbers remain only in release notes and migration history. <code>CONTEXT.md</code> records the resolved terms **Project Version**, **Feature Status**, and **Historical Version Reference**.</p>
 <p>Version-language cleanup verification on 2026-05-26:</p>
 <pre><code class="language-text">go test ./cmd/walk -run &#39;TestStableCompatibilitySuite|TestCurrentReleaseDocsArePresent&#39; -count=1 passed
@@ -104,7 +124,7 @@ go test -count=1 ./... passed
 git diff --check -- . &#39;:(exclude)playground/hangman.walk&#39; &#39;:(exclude)playground/hangman-v2.walk&#39; passed
 git diff --cached --check passed
 active-code search found no old developer-facing milestone path or test-name labels outside release notes, migration history, and deprecated docs</code></pre>
-<p>Next: keep new docs, examples, scripts, fixtures, and CI references aligned to the single Project Version whenever the next release slice starts.</p>
+<p>Next: continue standard-platform expansion after the CLI proof app, with future areas gated by the same proof parity rules.</p>
 </article>
 <footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
 </div>
