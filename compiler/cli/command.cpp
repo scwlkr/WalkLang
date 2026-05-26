@@ -1,6 +1,8 @@
 #include "cli/command.h"
 
+#include "parse/parser.h"
 #include "support/diagnostic.h"
+#include "support/source_file.h"
 #include "support/version.h"
 
 #include <algorithm>
@@ -39,13 +41,61 @@ std::string format_simple_error(std::string code, std::string message) {
     return format_diagnostic(diagnostic) + "\n";
 }
 
+CommandResult parse_only_check(const std::vector<std::string>& args) {
+    bool parse_only = false;
+    std::string source_path;
+
+    for (std::size_t index = 0; index < args.size(); ++index) {
+        const std::string& arg = args[index];
+        if (arg == "--parse-only") {
+            parse_only = true;
+            continue;
+        }
+        if (arg == "--warnings=off" || arg == "--warnings=default" || arg == "--warnings=error") {
+            continue;
+        }
+        if (arg == "--warnings") {
+            if (index + 1 >= args.size() || (args[index + 1] != "off" && args[index + 1] != "default" && args[index + 1] != "error")) {
+                return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk-cpp check --parse-only [--warnings=off|default|error] <source.walk>")};
+            }
+            ++index;
+            continue;
+        }
+        if (!arg.empty() && arg[0] == '-') {
+            return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk-cpp check --parse-only [--warnings=off|default|error] <source.walk>")};
+        }
+        if (!source_path.empty()) {
+            return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk-cpp check --parse-only [--warnings=off|default|error] <source.walk>")};
+        }
+        source_path = arg;
+    }
+
+    if (!parse_only) {
+        return {kDiagnosticExitCode, "", format_simple_error("W0001", "command \"check\" is not ported in this phase without --parse-only")};
+    }
+    if (source_path.empty()) {
+        return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk-cpp check --parse-only [--warnings=off|default|error] <source.walk>")};
+    }
+
+    Result<SourceFile> loaded = SourceFile::load(source_path);
+    if (!loaded.ok()) {
+        return {kDiagnosticExitCode, "", format_simple_error("W0006", loaded.error())};
+    }
+    SourceFile source = loaded.take_value();
+    parse::ParseResult parsed = parse::parse_source(source);
+    if (!parsed.ok()) {
+        return {kDiagnosticExitCode, "", parsed.diagnostics.format(&source)};
+    }
+    return {0, "", ""};
+}
+
 }  // namespace
 
 std::vector<CommandInfo> command_table() {
     return {
         {"version", "print compiler version", true},
         {"help", "show this help", true},
-        {"check", "not ported in this phase", false},
+        {"check", "parse-only frontend check", true},
         {"emit-c", "not ported in this phase", false},
         {"run", "not ported in this phase", false},
         {"build", "not ported in this phase", false},
@@ -63,7 +113,7 @@ std::vector<CommandInfo> command_table() {
 
 std::string help_text() {
     std::ostringstream output;
-    output << "WalkLang C++ compiler skeleton\n";
+    output << "WalkLang C++ compiler\n";
     output << "usage: walk-cpp <command> [args]\n\n";
     output << "commands:\n";
     for (const CommandInfo& command : command_table()) {
@@ -75,7 +125,7 @@ std::string help_text() {
         }
         output << command.summary << "\n";
     }
-    output << "\nOnly version and help are ported in Phase 3.\n";
+    output << "\nPhase 4 ports check --parse-only; other language commands remain staged for later phases.\n";
     return output.str();
 }
 
@@ -101,6 +151,9 @@ CommandResult dispatch(const std::vector<std::string>& args) {
     const CommandInfo* command = find_command(command_name);
     if (command == nullptr) {
         return {kUsageExitCode, "", format_simple_error("W0004", "unknown command \"" + command_name + "\"")};
+    }
+    if (command_name == "check") {
+        return parse_only_check(std::vector<std::string>(args.begin() + 1, args.end()));
     }
     if (!command->ported) {
         return {kDiagnosticExitCode, "", format_simple_error("W0001", "command \"" + command_name + "\" is not ported in this phase")};

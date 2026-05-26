@@ -406,7 +406,7 @@ Update this table at the end of every porting phase.
 | 1. Conformance Oracle | Complete | Dual-compiler harness records current behavior from the reference compiler |
 | 2. Runtime Extraction | Complete | Generated C links against `runtime/walk_runtime.c` with current tests passing |
 | 3. C++ Skeleton | Complete | `make walk` builds a C++ `walk` that supports version/help and test harness entrypoints |
-| 4. Lexer, Parser, AST | Not started | C++ frontend parses current pass fixtures and rejects fail syntax fixtures |
+| 4. Lexer, Parser, AST | Complete | C++ frontend parses current pass fixtures and rejects fail syntax fixtures |
 | 5. Semantic Checker | Not started | C++ checker matches current type, name, module, and warning diagnostics |
 | 6. C Backend | Not started | C++ compiler emits C that passes native behavior and snapshot checks |
 | 7. CLI, Project, Package | Not started | C++ `walk` supports current command surface and project/package tests |
@@ -850,7 +850,7 @@ Phase completion prompt:
 
 ## Phase 4: Lexer, Parser, AST
 
-Status: Not started
+Status: Complete
 
 Goal: port source loading, lexing, indentation handling, parsing, and AST
 construction to C++.
@@ -928,6 +928,22 @@ Exit proof:
 make test
 WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --parse
 go test -count=1 ./...
+```
+
+Completed on 2026-05-26:
+
+```text
+compiler/lex/ now tokenizes names, numbers, strings, comments, symbols, and indentation-aware source lines with tabs rejected.
+compiler/ast/ now defines arena-owned AST nodes for current statements, expressions, type annotations, interpolation parts, calls, indexing, fields, arrays, input, do, and defer.
+compiler/parse/ now constructs C++ ASTs for current pass fixtures, rejects parser syntax failures, and reports source-ranged diagnostics.
+walk-cpp check --parse-only parses a source file without delegating to the Go reference compiler.
+tests/conformance/run.sh --parse compares reference check accept/reject behavior with C++ parse-only behavior for all pass fixtures and syntax-error fail fixtures.
+make test passed and reported C++ compiler tests passed
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --parse passed with 20 pass fixtures and 2 syntax fail fixtures
+go test -count=1 ./... passed
+scripts/release.sh v5.14-cpp-parser <temp>/release passed with 8 checksummed artifacts
+the current-host walk-cpp release artifact reported v5.14-cpp-parser and passed check --parse-only tests/pass/hello.walk
+WALK_INSTALL_DIR=<temp>/bin scripts/install-local.sh v5.14-cpp-parser passed and installed temp walk, walk-cpp, runtime source, and walktop without touching the normal local install
 ```
 
 Phase completion prompt:

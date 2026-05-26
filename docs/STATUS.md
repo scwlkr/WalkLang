@@ -8,8 +8,8 @@ reference compiler to the permanent systems architecture: C++ compiler core, C
 runtime and platform layer, C backend, optional assembly leaf routines, and no
 final Go or JavaScript implementation footprint. Phase 1, the conformance
 oracle, is complete. Phase 2, runtime extraction, is complete. Phase 3, the C++
-skeleton, is complete. The next porting step is Phase 4, lexer, parser, and AST
-construction.
+skeleton, is complete. Phase 4, lexer, parser, and AST construction, is
+complete. The next porting step is Phase 5, semantic checking.
 
 `v5.14.1` is the single project version for the compiler, tooling, docs,
 release artifacts, and implemented language surface. Feature maturity is
@@ -42,7 +42,7 @@ through `term` APIs, and is installed by the normal local install flow beside
 `walk`. Native builds now link generated C with the external Walk runtime source
 under `runtime/`; release artifacts include a runtime source archive, and source
 install copies that runtime beside the installed compiler. Source install and
-release artifact generation now also build the current-host `walk-cpp` skeleton
+release artifact generation now also build the current-host `walk-cpp`
 candidate, which is not yet a replacement for the Go reference compiler.
 
 Systems compiler port state on 2026-05-26: Phase 1 now records the current
@@ -60,10 +60,12 @@ keeps `walk emit-c` inspectable through a link comment instead of embedding the
 runtime body in every emitted file. Phase 3 adds the permanent C++ compiler
 skeleton under `compiler/`, a top-level `Makefile`, command dispatch for the
 planned CLI surface, `WALK_VERSION` embedding, source loading support,
-deterministic diagnostics, and a C++ unit-test harness. The C++ candidate builds
-as `build/walk-cpp`; for this phase only `version` and `help` are implemented,
-and every other recognized command returns a `not ported in this phase`
-diagnostic without delegating to the Go reference compiler.
+deterministic diagnostics, and a C++ unit-test harness. Phase 4 adds the C++
+lexer, indentation handling, parser, AST arena, and `walk-cpp check
+--parse-only`. The C++ candidate builds as `build/walk-cpp`; only `version`,
+`help`, and parse-only checking are implemented so far, and unported command
+surfaces still return a `not ported in this phase` diagnostic without
+delegating to the Go reference compiler.
 
 Phase 1 conformance oracle verification on 2026-05-26:
 
@@ -112,6 +114,26 @@ shasum -a 256 -c SHA256SUMS passed for all 8 artifacts
 WALK_INSTALL_DIR=<temp>/bin scripts/install-local.sh v5.14-cpp-skeleton passed and installed temp walk, walk-cpp, runtime source, and walktop without touching the normal local install
 git diff --check passed
 language-accounting impact checked: active C++ source is now present under compiler/ and tests/cpp/ while Go remains as the reference compiler until the final removal phase
+```
+
+Phase 4 lexer/parser/AST verification on 2026-05-26:
+
+```text
+make test passed and reported C++ compiler tests passed
+make walk WALK_VERSION=v5.14.1-phase4-dev passed
+./build/walk-cpp check --parse-only tests/pass/hello.walk passed
+./build/walk-cpp check --parse-only tests/fail/bad_indent.walk failed with a source-ranged syntax diagnostic
+./build/walk-cpp check --parse-only tests/fail/top_break.walk failed with a source-ranged syntax diagnostic
+./build/walk-cpp check tests/pass/hello.walk still returned the expected not-ported diagnostic without --parse-only
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --parse passed and reported 20 pass fixtures plus 2 syntax fail fixtures
+go test -count=1 ./... passed
+scripts/release.sh v5.14-cpp-parser <temp>/release produced 5 walk artifacts, 1 current-host walk-cpp parser artifact, 1 runtime source archive, 1 current-host walktop artifact, and SHA256SUMS
+shasum -a 256 -c SHA256SUMS passed for all 8 artifacts
+the current-host walk-cpp release artifact reported v5.14-cpp-parser and passed check --parse-only tests/pass/hello.walk
+the current-host walktop release artifact passed --once --fixture tools/walktop/testdata/basic
+WALK_INSTALL_DIR=<temp>/bin scripts/install-local.sh v5.14-cpp-parser passed and installed temp walk, walk-cpp, runtime source, and walktop without touching the normal local install
+the temp installed walk-cpp passed check --parse-only tests/pass/hello.walk
+language-accounting impact checked: Phase 4 adds active C++ lexer, parser, AST, and tests while Go and JavaScript remain until their later removal phases
 ```
 
 Last release verification on 2026-05-26:
@@ -167,7 +189,7 @@ git diff --cached --check passed
 ```
 
 Known local state: no unrelated playground edits are present in the current
-Phase 3 C++ skeleton worktree.
+Phase 4 lexer/parser worktree.
 
 Standard platform implementation on 2026-05-26: WalkLang's intended product
 shape is recorded as one general-use language with one standard platform in one
@@ -245,5 +267,5 @@ WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported com
 git diff --check -- . ':(exclude)playground/hangman.walk' ':(exclude)playground/hangman-v2.walk' passed
 ```
 
-Next: begin Phase 4 in `docs/SYSTEMS_COMPILER_PORT_PLAN.md` by porting source
-loading, lexing, indentation handling, parsing, and AST construction to C++.
+Next: begin Phase 5 in `docs/SYSTEMS_COMPILER_PORT_PLAN.md` by porting semantic
+checking, type rules, modules, warnings, and check diagnostics to C++.

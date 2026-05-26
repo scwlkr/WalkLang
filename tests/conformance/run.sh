@@ -7,7 +7,7 @@ expected_dir="$repo_root/tests/conformance/expected"
 tmp_root="$repo_root/tests/conformance/tmp"
 
 usage() {
-    echo "usage: WALK_REF=<path> [WALK_CANDIDATE=<path>] tests/conformance/run.sh --record|--verify" >&2
+    echo "usage: WALK_REF=<path> [WALK_CANDIDATE=<path>] tests/conformance/run.sh --record|--verify|--parse" >&2
 }
 
 if [ "$#" -ne 1 ]; then
@@ -17,7 +17,7 @@ fi
 
 action="$1"
 case "$action" in
-    --record|--verify)
+    --record|--verify|--parse)
         ;;
     *)
         usage
@@ -47,6 +47,10 @@ walk_ref="$(resolve_tool "$WALK_REF")"
 walk_candidate=""
 if [ "${WALK_CANDIDATE:-}" != "" ]; then
     walk_candidate="$(resolve_tool "$WALK_CANDIDATE")"
+fi
+if [ "$action" = "--parse" ] && [ "$walk_candidate" = "" ]; then
+    echo "WALK_CANDIDATE is required for --parse" >&2
+    exit 2
 fi
 
 mkdir -p "$expected_dir" "$tmp_root"
@@ -153,6 +157,34 @@ run_case() {
     status_class "$code" >"$status_file"
 }
 
+run_parse_case() {
+    compiler="$1"
+    label="$2"
+    id="$3"
+    source="$4"
+    cwd="$5"
+    parse_only="$6"
+
+    base="$(actual_base "$label" "$id")"
+    mkdir -p "$(dirname -- "$base")"
+    stdout_file="$base.stdout"
+    stderr_file="$base.stderr"
+    status_file="$base.status"
+    rm -f "$stdout_file" "$stderr_file" "$status_file"
+
+    set +e
+    if [ "$parse_only" = "yes" ]; then
+        (cd "$repo_root/$cwd" && "$compiler" check --parse-only "$source") >"$stdout_file" 2>"$stderr_file"
+        code=$?
+    else
+        (cd "$repo_root/$cwd" && "$compiler" check --warnings=error "$source") >"$stdout_file" 2>"$stderr_file"
+        code=$?
+    fi
+    set -e
+
+    status_class "$code" >"$status_file"
+}
+
 validate_kind_status() {
     kind="$1"
     id="$2"
@@ -235,6 +267,40 @@ verify_case_for() {
     fi
 }
 
+is_parse_case() {
+    id="$1"
+    kind="$2"
+    case "$kind" in
+        pass)
+            return 0
+            ;;
+        fail)
+            expected_stderr="$(expected_base "$id").stderr"
+            if [ -f "$expected_stderr" ] && grep -q 'syntax error:' "$expected_stderr"; then
+                return 0
+            fi
+            return 1
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+verify_parse_case_for() {
+    compiler="$1"
+    label="$2"
+    id="$3"
+    kind="$4"
+    source="$5"
+    cwd="$6"
+    parse_only="$7"
+
+    run_parse_case "$compiler" "$label" "$id" "$source" "$cwd" "$parse_only"
+    actual_prefix="$(actual_base "$label" "$id")"
+    validate_kind_status "$kind" "$id" "$actual_prefix.status"
+}
+
 manifest_sources_for_kind() {
     kind="$1"
     awk -F '\t' -v kind="$kind" 'NF && $1 !~ /^#/ && $2 == kind { print $4 }' "$manifest" | sort -u
@@ -309,6 +375,23 @@ while IFS="$tab" read -r id kind mode source cwd stdin_key native; do
         exit 1
     fi
 
+    if [ "$action" = "--parse" ]; then
+        if ! is_parse_case "$id" "$kind"; then
+            continue
+        fi
+        verify_parse_case_for "$walk_ref" reference "$id" "$kind" "$source" "$cwd" no
+        verify_parse_case_for "$walk_candidate" candidate "$id" "$kind" "$source" "$cwd" yes
+        case "$kind" in
+            pass)
+                pass_ok=$((pass_ok + 1))
+                ;;
+            fail)
+                fail_ok=$((fail_ok + 1))
+                ;;
+        esac
+        continue
+    fi
+
     case "$action" in
         --record)
             record_case "$id" "$kind" "$mode" "$source" "$cwd" "$stdin_key"
@@ -346,6 +429,13 @@ while IFS="$tab" read -r id kind mode source cwd stdin_key native; do
         native_ok=$((native_ok + 1))
     fi
 done <"$manifest"
+
+if [ "$action" = "--parse" ]; then
+    echo "conformance parse: $pass_ok pass fixtures ok"
+    echo "conformance parse: $fail_ok syntax fail fixtures ok"
+    echo "conformance parse: ok"
+    exit 0
+fi
 
 echo "conformance: $pass_ok pass fixtures ok"
 echo "conformance: $fail_ok fail fixtures ok"

@@ -20,6 +20,9 @@ CPPFLAGS += -Icompiler -DWALK_VERSION=\"$(WALK_VERSION)\"
 WALK_CPP_SOURCES := \
 	compiler/main.cpp \
 	compiler/cli/command.cpp \
+	compiler/ast/ast.cpp \
+	compiler/lex/lexer.cpp \
+	compiler/parse/parser.cpp \
 	compiler/support/diagnostic.cpp \
 	compiler/support/source_file.cpp
 
@@ -27,7 +30,12 @@ WALK_CPP_OBJECTS := $(WALK_CPP_SOURCES:%.cpp=$(CPP_BUILD_DIR)/%.o)
 
 TEST_CPP_SOURCES := \
 	tests/cpp/test_main.cpp \
+	tests/cpp/lexer_tests.cpp \
+	tests/cpp/parser_tests.cpp \
 	compiler/cli/command.cpp \
+	compiler/ast/ast.cpp \
+	compiler/lex/lexer.cpp \
+	compiler/parse/parser.cpp \
 	compiler/support/diagnostic.cpp \
 	compiler/support/source_file.cpp
 

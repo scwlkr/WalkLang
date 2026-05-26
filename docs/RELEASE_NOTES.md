@@ -7,13 +7,15 @@
 - Phase 1 systems compiler port conformance oracle under `tests/conformance/`, with a manifest, recorded reference outputs, generated-C snapshot oracle artifacts, and a shell runner that supports `WALK_REF` plus future `WALK_CANDIDATE` comparison.
 - Phase 2 runtime extraction with `runtime/walk_runtime.h`, `runtime/walk_runtime.c`, host platform C files, and direct C runtime tests for allocation, strings, arrays, process, files, terminal helpers, and runtime errors.
 - Phase 3 C++ compiler skeleton under `compiler/`, with `make walk`, `make test`, C++ command dispatch, version/help behavior, deterministic diagnostics, source loading support, and a C++ unit-test harness.
+- Phase 4 C++ frontend pieces under `compiler/lex/`, `compiler/parse/`, and `compiler/ast/`, with tokenization, indentation handling, AST arena ownership, parser diagnostics, and `walk-cpp check --parse-only`.
 
 ### Changed
 
 - `scripts/stress-compatibility.sh` now verifies the recorded conformance oracle before running the older compatibility stress checks.
 - Generated C now includes `walk_runtime.h` and calls the stable `walk_rt_*` runtime ABI instead of embedding helper bodies in every output file.
 - Native builds now link emitted C with the Walk runtime and platform source files, and release artifacts include a runtime source archive for installed compilers.
-- `scripts/install-local.sh` and `scripts/release.sh` now build a current-host `walk-cpp` skeleton artifact beside the Go reference `walk` while the port is in progress.
+- `scripts/install-local.sh` and `scripts/release.sh` now build a current-host `walk-cpp` candidate artifact beside the Go reference `walk` while the port is in progress.
+- `tests/conformance/run.sh` now supports `--parse` to compare reference compiler syntax accept/reject behavior with the C++ parse-only candidate.
 
 ## v5.14.1 - Systems Compiler Port Contract
 

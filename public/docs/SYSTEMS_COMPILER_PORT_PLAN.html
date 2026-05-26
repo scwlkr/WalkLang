@@ -268,7 +268,7 @@ windows/amd64</code></pre>
 <p>No phase can mark complete while it regresses a row already ported.</p>
 <h2 id="status-board">Status Board</h2>
 <p>Update this table at the end of every porting phase.</p>
-<p>| Phase | Status | Required exit proof | | --- | --- | --- | | 0. Port Contract | Complete | This document exists, is linked, and generated docs build | | 1. Conformance Oracle | Complete | Dual-compiler harness records current behavior from the reference compiler | | 2. Runtime Extraction | Complete | Generated C links against <code>runtime/walk_runtime.c</code> with current tests passing | | 3. C++ Skeleton | Complete | <code>make walk</code> builds a C++ <code>walk</code> that supports version/help and test harness entrypoints | | 4. Lexer, Parser, AST | Not started | C++ frontend parses current pass fixtures and rejects fail syntax fixtures | | 5. Semantic Checker | Not started | C++ checker matches current type, name, module, and warning diagnostics | | 6. C Backend | Not started | C++ compiler emits C that passes native behavior and snapshot checks | | 7. CLI, Project, Package | Not started | C++ <code>walk</code> supports current command surface and project/package tests | | 8. Runtime Module Parity | Not started | Draft runtime modules pass native tests through the C runtime | | 9. Tooling Parity | Not started | Formatter, docs generator, debug map, LSP, and REPL pass parity checks | | 10. Standard Platform Parity | Not started | <code>walktop</code> builds, tests, runs, installs, and releases through C++ <code>walk</code> | | 11. Remove Go And JavaScript | Not started | No Go or JavaScript source remains; docs/site still build | | 12. Final Release Gate | Not started | C++/C release artifacts, checksums, install, docs, and language breakdown are verified |</p>
+<p>| Phase | Status | Required exit proof | | --- | --- | --- | | 0. Port Contract | Complete | This document exists, is linked, and generated docs build | | 1. Conformance Oracle | Complete | Dual-compiler harness records current behavior from the reference compiler | | 2. Runtime Extraction | Complete | Generated C links against <code>runtime/walk_runtime.c</code> with current tests passing | | 3. C++ Skeleton | Complete | <code>make walk</code> builds a C++ <code>walk</code> that supports version/help and test harness entrypoints | | 4. Lexer, Parser, AST | Complete | C++ frontend parses current pass fixtures and rejects fail syntax fixtures | | 5. Semantic Checker | Not started | C++ checker matches current type, name, module, and warning diagnostics | | 6. C Backend | Not started | C++ compiler emits C that passes native behavior and snapshot checks | | 7. CLI, Project, Package | Not started | C++ <code>walk</code> supports current command surface and project/package tests | | 8. Runtime Module Parity | Not started | Draft runtime modules pass native tests through the C runtime | | 9. Tooling Parity | Not started | Formatter, docs generator, debug map, LSP, and REPL pass parity checks | | 10. Standard Platform Parity | Not started | <code>walktop</code> builds, tests, runs, installs, and releases through C++ <code>walk</code> | | 11. Remove Go And JavaScript | Not started | No Go or JavaScript source remains; docs/site still build | | 12. Final Release Gate | Not started | C++/C release artifacts, checksums, install, docs, and language breakdown are verified |</p>
 <p>Status values:</p>
 <pre><code class="language-text">Not started
 In progress
@@ -521,7 +521,7 @@ scripts/check-docs-site.sh passed</code></pre>
 <p>Phase completion prompt:</p>
 <pre><code class="language-text">/goal Complete Phase 3 in docs/SYSTEMS_COMPILER_PORT_PLAN.md. Add the C++ compiler skeleton, Makefile, command dispatch, version/help behavior, source/diagnostic support, and C++ test harness without delegating commands to the reference compiler. Update docs/status, run the required proof, commit the result, and preserve unrelated playground edits.</code></pre>
 <h2 id="phase-4-lexer-parser-ast">Phase 4: Lexer, Parser, AST</h2>
-<p>Status: Not started</p>
+<p>Status: Complete</p>
 <p>Goal: port source loading, lexing, indentation handling, parsing, and AST construction to C++.</p>
 <p>Files to create:</p>
 <pre><code class="language-text">compiler/lex/token.h
@@ -574,6 +574,18 @@ null</code></pre>
 <pre><code class="language-bash">make test
 WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --parse
 go test -count=1 ./...</code></pre>
+<p>Completed on 2026-05-26:</p>
+<pre><code class="language-text">compiler/lex/ now tokenizes names, numbers, strings, comments, symbols, and indentation-aware source lines with tabs rejected.
+compiler/ast/ now defines arena-owned AST nodes for current statements, expressions, type annotations, interpolation parts, calls, indexing, fields, arrays, input, do, and defer.
+compiler/parse/ now constructs C++ ASTs for current pass fixtures, rejects parser syntax failures, and reports source-ranged diagnostics.
+walk-cpp check --parse-only parses a source file without delegating to the Go reference compiler.
+tests/conformance/run.sh --parse compares reference check accept/reject behavior with C++ parse-only behavior for all pass fixtures and syntax-error fail fixtures.
+make test passed and reported C++ compiler tests passed
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --parse passed with 20 pass fixtures and 2 syntax fail fixtures
+go test -count=1 ./... passed
+scripts/release.sh v5.14-cpp-parser &lt;temp&gt;/release passed with 8 checksummed artifacts
+the current-host walk-cpp release artifact reported v5.14-cpp-parser and passed check --parse-only tests/pass/hello.walk
+WALK_INSTALL_DIR=&lt;temp&gt;/bin scripts/install-local.sh v5.14-cpp-parser passed and installed temp walk, walk-cpp, runtime source, and walktop without touching the normal local install</code></pre>
 <p>Phase completion prompt:</p>
 <pre><code class="language-text">/goal Complete Phase 4 in docs/SYSTEMS_COMPILER_PORT_PLAN.md. Port lexer, indentation handling, parser, and AST construction to C++. Prove parser parity against the conformance oracle for current pass/fail syntax fixtures, update docs/status and the phase board, commit the result, and preserve unrelated playground edits.</code></pre>
 <h2 id="phase-5-semantic-checker">Phase 5: Semantic Checker</h2>

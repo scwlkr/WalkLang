@@ -47,7 +47,7 @@ void test_version_command() {
 void test_help_command_lists_phase_commands() {
     const walk::cli::CommandResult result = walk::cli::dispatch({"help"});
     expect_eq_int("help exit", result.exit_code, 0);
-    expect_true("help header", result.stdout_text.find("WalkLang C++ compiler skeleton") != std::string::npos, "missing skeleton header");
+    expect_true("help header", result.stdout_text.find("WalkLang C++ compiler") != std::string::npos, "missing compiler header");
     for (const std::string& command : {"version", "help", "check", "emit-c", "run", "build", "test", "fmt", "clean", "init", "package", "docs", "debug-map", "lsp", "repl"}) {
         expect_true("help command " + command, result.stdout_text.find(command) != std::string::npos, "missing command");
     }
@@ -58,7 +58,7 @@ void test_unported_command_is_diagnostic_not_delegation() {
     const walk::cli::CommandResult result = walk::cli::dispatch({"check", "examples/hello.walk"});
     expect_eq_int("unported exit", result.exit_code, 1);
     expect_eq("unported stdout", result.stdout_text, "");
-    expect_eq("unported stderr", result.stderr_text, "error[W0001]: command \"check\" is not ported in this phase\n");
+    expect_eq("unported stderr", result.stderr_text, "error[W0001]: command \"check\" is not ported in this phase without --parse-only\n");
 }
 
 void test_unknown_command_is_usage_error() {
@@ -115,6 +115,9 @@ void test_diagnostic_set_sorts_deterministically() {
 
 }  // namespace
 
+int run_lexer_tests();
+int run_parser_tests();
+
 int main() {
     test_version_command();
     test_help_command_lists_phase_commands();
@@ -123,11 +126,13 @@ int main() {
     test_source_file_loading_and_positions();
     test_diagnostic_formatting_with_source();
     test_diagnostic_set_sorts_deterministically();
+    failures += run_lexer_tests();
+    failures += run_parser_tests();
 
     if (failures != 0) {
-        std::cerr << failures << " C++ skeleton test(s) failed\n";
+        std::cerr << failures << " C++ compiler test(s) failed\n";
         return 1;
     }
-    std::cout << "C++ skeleton tests passed\n";
+    std::cout << "C++ compiler tests passed\n";
     return 0;
 }

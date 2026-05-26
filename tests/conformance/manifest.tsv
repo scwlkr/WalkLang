@@ -1,4 +1,5 @@
 # id	kind	mode	source	cwd	stdin	native
+# --parse uses all kind=pass rows plus kind=fail rows whose expected stderr contains "syntax error:".
 pass/arrays	pass	run	tests/pass/arrays.walk	.	-	yes
 pass/calc	pass	run	tests/pass/calc.walk	.	-	yes
 pass/control_flow	pass	run	tests/pass/control_flow.walk	.	-	yes
