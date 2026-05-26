@@ -1,0 +1,20 @@
+imp: file
+imp: path
+
+var: note = path.join('tests/conformance/tmp', 'runtime-module-file.txt')
+do: file.write(note, 'alpha')
+do: file.append(note, ' beta')
+out: file.exists(note)
+out: file.read(note)
+var: read = file.try_read(note)
+out: read.ok
+out: read.value
+out: read.error
+var: missing = file.try_read(path.join('tests/conformance/tmp', 'missing-runtime-module-file.txt'))
+out: missing.ok
+out: missing.value
+out: missing.error
+var: bad_write = file.try_write('', 'nope')
+out: bad_write.ok
+out: bad_write.value
+out: bad_write.error

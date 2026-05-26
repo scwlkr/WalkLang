@@ -11,7 +11,7 @@ id	kind	mode	source	cwd	stdin	native
 ```
 
 - `id` is the stable expected-artifact key under `expected/`.
-- `kind` is `pass`, `fail`, `compat`, `snapshot`, or `walktop`.
+- `kind` is `pass`, `fail`, `compat`, `runtime`, `snapshot`, or `walktop`.
 - `mode` selects the reference command shape.
 - `source` is the fixture or fixture group covered by the row.
 - `cwd` is the working directory for project-mode rows, or `.`.
@@ -28,8 +28,8 @@ WALK_REF=$PWD/build/walk-ref tests/conformance/run.sh --record
 ```
 
 Recording validates that the manifest still covers every current pass fixture,
-fail fixture, compatibility fixture, snapshot fixture, and walktop fixture
-group before writing expected output.
+fail fixture, compatibility fixture, runtime-module fixture, snapshot fixture,
+and walktop fixture group before writing expected output.
 
 `tests/fail/private_math.walk` is a support module imported by
 `tests/fail/private_module_func.walk`, not a failing entry fixture. The oracle
@@ -67,7 +67,10 @@ WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformanc
 WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --fail-diagnostics
 WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --emit-c
 WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --native
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --runtime-modules
 ```
 
 `--emit-c` covers generated-C snapshot rows. `--native` covers rows marked
 `native=yes`, including current pass, compatibility, and walktop native proofs.
+`--runtime-modules` covers draft runtime-module rows for `io`, `parse`,
+`process`, `file`, `dir`, `path`, `json`, `term`, `http`, and `html`.

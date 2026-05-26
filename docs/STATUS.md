@@ -10,8 +10,9 @@ final Go or JavaScript implementation footprint. Phase 1, the conformance
 oracle, is complete. Phase 2, runtime extraction, is complete. Phase 3, the C++
 skeleton, is complete. Phase 4, lexer, parser, and AST construction, is
 complete. Phase 5, semantic checking, is complete. Phase 6, the C backend, is
-complete. Phase 7, CLI project and package workflows, is complete. The next
-porting step is Phase 8, runtime module parity.
+complete. Phase 7, CLI project and package workflows, is complete. Phase 8,
+runtime module parity, is complete. The next porting step is Phase 9, tooling
+parity.
 
 `v5.14.1` is the single project version for the compiler, tooling, docs,
 release artifacts, and implemented language surface. Feature maturity is
@@ -50,11 +51,12 @@ candidate, which is not yet a replacement for the Go reference compiler.
 Systems compiler port state on 2026-05-26: Phase 1 now records the current
 reference compiler as an executable conformance oracle under
 `tests/conformance/`. The manifest covers 20 pass fixtures, 52 fail fixtures, 4
-compatibility fixtures, 3 generated-C snapshot fixtures, and 4 `walktop` fixture
-groups. The runner records expected behavior with `WALK_REF=... --record`,
-verifies it with `--verify`, and can compare a future `WALK_CANDIDATE` against
-the same expected artifacts. `scripts/stress-compatibility.sh` now invokes the
-conformance verifier before the older compatibility stress checks. Phase 2 now
+compatibility fixtures, 11 runtime-module fixtures, 3 generated-C snapshot
+fixtures, and 4 `walktop` fixture groups. The runner records expected behavior
+with `WALK_REF=... --record`, verifies it with `--verify`, and can compare a
+future `WALK_CANDIDATE` against the same expected artifacts.
+`scripts/stress-compatibility.sh` now invokes the conformance verifier before
+the older compatibility stress checks. Phase 2 now
 extracts the generated helper layer into `runtime/walk_runtime.h`,
 `runtime/walk_runtime.c`, and host platform files under `runtime/platform/`.
 Generated C includes `walk_runtime.h`, calls stable `walk_rt_*` helpers, and
@@ -75,10 +77,14 @@ mode and local package workflows under `compiler/project/` and
 `compiler/package/`, including `walk.toml` parsing, project `init`, `fmt`,
 `clean`, `check`, `build`, `test`, local package `init`, `resolve`, `publish`,
 `walk.lock`, package cache checksums, and install/release hooks for using
-`build/walk-cpp` as the build driver. The C++ candidate builds as
-`build/walk-cpp`; later docs/debug-map/LSP/REPL commands still return a
-`not ported in this phase` diagnostic without delegating to the Go reference
-compiler.
+`build/walk-cpp` as the build driver. Phase 8 adds runtime-module conformance
+fixtures under `tests/runtime_modules/`, direct C runtime tests for draft result
+data helpers and HTTP result boundaries, and a `--runtime-modules` conformance
+gate that proves draft `io`, `parse`, `process`, `file`, `dir`, `path`, `json`,
+`term`, `http`, and `html` through the C runtime and C++ compiler. The C++
+candidate builds as `build/walk-cpp`; later docs/debug-map/LSP/REPL commands
+still return a `not ported in this phase` diagnostic without delegating to the
+Go reference compiler.
 
 Phase 1 conformance oracle verification on 2026-05-26:
 
@@ -208,6 +214,22 @@ the temp installed walk-cpp reported v5.14-cpp-project-package and passed projec
 git diff --check passed
 git diff --cached --check passed
 language-accounting impact checked: Phase 7 adds active C++ project/package workflow source and tests while Go and JavaScript remain until their later removal phases
+```
+
+Phase 8 runtime module parity verification on 2026-05-26:
+
+```text
+make test passed and reported C++ compiler tests passed
+go build -trimpath -ldflags "-X main.version=dev" -o build/walk-ref ./cmd/walk passed
+make walk passed and built build/walk-cpp
+go test -count=1 ./... passed
+WALK_REF=$PWD/build/walk-ref tests/conformance/run.sh --record passed with 11 runtime module fixtures and 36 native executions
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --runtime-modules passed and reported conformance runtime modules: 11 fixtures ok
+WALK_BIN=$PWD/build/walk-cpp scripts/stress-compatibility.sh passed and reported compatibility stress ok
+WALK_RELEASE_BUILD_BIN=build/walk-cpp scripts/release.sh v5.14-cpp-runtime-modules <temp>/release produced 5 walk artifacts, 1 current-host walk-cpp runtime-module artifact, 1 runtime source archive, 1 current-host walktop artifact, and SHA256SUMS
+shasum -a 256 -c SHA256SUMS passed for all 8 artifacts
+WALK_INSTALL_DIR=<temp>/bin WALK_BUILD_BIN=build/walk-cpp scripts/install-local.sh v5.14-cpp-runtime-modules passed and installed temp walk, walk-cpp, runtime source, and walktop without touching the normal local install
+the temp installed walk-cpp reported v5.14-cpp-runtime-modules and passed runtime-module conformance with WALK_RUNTIME_DIR pointed at the temp runtime install
 ```
 
 Last release verification on 2026-05-26:
@@ -341,5 +363,6 @@ WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported com
 git diff --check -- . ':(exclude)playground/hangman.walk' ':(exclude)playground/hangman-v2.walk' passed
 ```
 
-Next: begin Phase 8 in `docs/SYSTEMS_COMPILER_PORT_PLAN.md` by proving draft
-runtime modules through the C runtime and C++ compiler.
+Next: begin Phase 9 in `docs/SYSTEMS_COMPILER_PORT_PLAN.md` by porting
+formatter, docs generation, static-site generation, debug-map, LSP, and REPL
+tooling to the C++ toolchain.

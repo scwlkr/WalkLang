@@ -1,0 +1,9 @@
+imp: path
+
+var: joined = path.join('alpha', 'beta.txt')
+out: joined
+out: path.base(joined)
+out: path.ext(joined)
+out: path.join('', 'leaf')
+out: path.base('/tmp/walk')
+out: path.ext('archive.tar.gz')

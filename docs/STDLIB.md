@@ -32,6 +32,12 @@ and tested, but they are not compatibility-protected as stable features.
 Draft APIs may expose draft result structs. They are documented here so current
 compiler behavior is visible, but they are not part of the stable feature set.
 
+Draft runtime-module proof surface: `tests/runtime_modules/` records native
+fixtures for `io`, `parse`, `process`, `file`, `dir`, `path`, `json`, `term`,
+`http`, and `html`. `tests/conformance/run.sh --runtime-modules` compares the
+reference compiler and `walk-cpp` against those fixtures, and
+`tests/runtime/runtime_test.go` covers the C runtime helpers directly.
+
 Stable APIs in this document are pure expression calls unless an entry says
 otherwise. Invalid argument counts, argument types, or effect placement are
 compiler diagnostics. Runtime failures named below are part of the documented

@@ -7,7 +7,7 @@ expected_dir="$repo_root/tests/conformance/expected"
 tmp_root="$repo_root/tests/conformance/tmp"
 
 usage() {
-    echo "usage: WALK_REF=<path> [WALK_CANDIDATE=<path>] tests/conformance/run.sh --record|--verify|--parse|--check|--fail-diagnostics|--emit-c|--native|--project|--package" >&2
+    echo "usage: WALK_REF=<path> [WALK_CANDIDATE=<path>] tests/conformance/run.sh --record|--verify|--parse|--check|--fail-diagnostics|--emit-c|--native|--runtime-modules|--project|--package" >&2
 }
 
 if [ "$#" -ne 1 ]; then
@@ -17,7 +17,7 @@ fi
 
 action="$1"
 case "$action" in
-    --record|--verify|--parse|--check|--fail-diagnostics|--emit-c|--native|--project|--package)
+    --record|--verify|--parse|--check|--fail-diagnostics|--emit-c|--native|--runtime-modules|--project|--package)
         ;;
     *)
         usage
@@ -51,11 +51,11 @@ walk_candidate=""
 if [ "${WALK_CANDIDATE:-}" != "" ]; then
     walk_candidate="$(resolve_tool "$WALK_CANDIDATE")"
 fi
-if { [ "$action" = "--parse" ] || [ "$action" = "--check" ] || [ "$action" = "--fail-diagnostics" ] || [ "$action" = "--emit-c" ] || [ "$action" = "--native" ] || [ "$action" = "--project" ] || [ "$action" = "--package" ]; } && [ "$walk_candidate" = "" ]; then
+if { [ "$action" = "--parse" ] || [ "$action" = "--check" ] || [ "$action" = "--fail-diagnostics" ] || [ "$action" = "--emit-c" ] || [ "$action" = "--native" ] || [ "$action" = "--runtime-modules" ] || [ "$action" = "--project" ] || [ "$action" = "--package" ]; } && [ "$walk_candidate" = "" ]; then
     echo "WALK_CANDIDATE is required for $action" >&2
     exit 2
 fi
-if { [ "$action" = "--check" ] || [ "$action" = "--emit-c" ] || [ "$action" = "--native" ] || [ "$action" = "--project" ] || [ "$action" = "--package" ]; } && [ "$walk_ref" = "" ]; then
+if { [ "$action" = "--check" ] || [ "$action" = "--emit-c" ] || [ "$action" = "--native" ] || [ "$action" = "--runtime-modules" ] || [ "$action" = "--project" ] || [ "$action" = "--package" ]; } && [ "$walk_ref" = "" ]; then
     echo "WALK_REF is required for $action" >&2
     exit 2
 fi
@@ -94,6 +94,10 @@ stdin_command() {
             ;;
         compat/stable/input)
             printf '  Walker \n\nLine\r\nFinal'
+            return 0
+            ;;
+        runtime/io)
+            printf 'first line\nrest body'
             return 0
             ;;
         *)
@@ -412,6 +416,13 @@ check_coverage() {
         exit 1
     fi
 
+    find "$repo_root/tests/runtime_modules" -type f -name '*.walk' | sed "s#^$repo_root/##" | sort >"$expected"
+    manifest_sources_for_kind runtime >"$actual"
+    if ! diff -u "$expected" "$actual"; then
+        echo "runtime module fixture manifest coverage mismatch" >&2
+        exit 1
+    fi
+
     find "$repo_root/tests/snapshots" -type f -name '*.c' |
         sed "s#^$repo_root/tests/snapshots/#tests/pass/#" |
         sed 's#\.c$#.walk#' |
@@ -439,6 +450,7 @@ native_ok=0
 compat_ok=0
 snapshot_ok=0
 walktop_ok=0
+runtime_ok=0
 
 check_coverage
 
@@ -616,6 +628,9 @@ while IFS="$tab" read -r id kind mode source cwd stdin_key native; do
             compat)
                 compat_ok=$((compat_ok + 1))
                 ;;
+            runtime)
+                runtime_ok=$((runtime_ok + 1))
+                ;;
             walktop)
                 walktop_ok=$((walktop_ok + 1))
                 ;;
@@ -655,11 +670,24 @@ while IFS="$tab" read -r id kind mode source cwd stdin_key native; do
             compat)
                 compat_ok=$((compat_ok + 1))
                 ;;
+            runtime)
+                runtime_ok=$((runtime_ok + 1))
+                ;;
             walktop)
                 walktop_ok=$((walktop_ok + 1))
                 ;;
         esac
         native_ok=$((native_ok + 1))
+        continue
+    fi
+
+    if [ "$action" = "--runtime-modules" ]; then
+        if [ "$kind" != "runtime" ]; then
+            continue
+        fi
+        verify_case_for "$walk_ref" reference "$id" "$kind" "$mode" "$source" "$cwd" "$stdin_key"
+        verify_case_for "$walk_candidate" candidate "$id" "$kind" "$mode" "$source" "$cwd" "$stdin_key"
+        runtime_ok=$((runtime_ok + 1))
         continue
     fi
 
@@ -684,6 +712,9 @@ while IFS="$tab" read -r id kind mode source cwd stdin_key native; do
             ;;
         compat)
             compat_ok=$((compat_ok + 1))
+            ;;
+        runtime)
+            runtime_ok=$((runtime_ok + 1))
             ;;
         snapshot)
             snapshot_ok=$((snapshot_ok + 1))
@@ -712,6 +743,7 @@ if [ "$action" = "--check" ]; then
     echo "conformance check: $pass_ok pass fixtures ok"
     echo "conformance check: $fail_ok fail fixtures ok"
     echo "conformance check: $compat_ok compat fixtures ok"
+    echo "conformance check: $runtime_ok runtime module fixtures ok"
     echo "conformance check: $walktop_ok walktop fixtures ok"
     echo "conformance check: ok"
     exit 0
@@ -732,9 +764,16 @@ fi
 if [ "$action" = "--native" ]; then
     echo "conformance native: $pass_ok pass fixtures ok"
     echo "conformance native: $compat_ok compat fixtures ok"
+    echo "conformance native: $runtime_ok runtime module fixtures ok"
     echo "conformance native: $walktop_ok walktop fixtures ok"
     echo "conformance native: $native_ok native executions ok"
     echo "conformance native: ok"
+    exit 0
+fi
+
+if [ "$action" = "--runtime-modules" ]; then
+    echo "conformance runtime modules: $runtime_ok fixtures ok"
+    echo "conformance runtime modules: ok"
     exit 0
 fi
 
@@ -742,6 +781,7 @@ echo "conformance: $pass_ok pass fixtures ok"
 echo "conformance: $fail_ok fail fixtures ok"
 echo "conformance: $native_ok native executions ok"
 echo "conformance: $compat_ok compat fixtures ok"
+echo "conformance: $runtime_ok runtime module fixtures ok"
 echo "conformance: $snapshot_ok snapshot fixtures ok"
 echo "conformance: $walktop_ok walktop fixtures ok"
 echo "conformance: ok"

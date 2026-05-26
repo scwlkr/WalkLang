@@ -69,6 +69,8 @@
 <li>Phase 5 C++ semantic checker under <code>compiler/sema/</code>, with type checking, scope/name resolution, module/export resolution, built-in signatures, warning handling, and normal <code>walk-cpp check</code>.</li>
 <li>Phase 6 C++ backend pieces under <code>compiler/ir/</code> and <code>compiler/codegen/c/</code>, with typed IR lowering, deterministic C emission, runtime-backed native builds, and C++ candidate <code>emit-c</code>, <code>build</code>, <code>run</code>, and <code>test</code>.</li>
 <li>Phase 7 C++ project and package workflow pieces under <code>compiler/project/</code> and <code>compiler/package/</code>, with <code>walk.toml</code> parsing, project <code>init/fmt/clean/check/build/test</code>, local package <code>init/resolve/publish</code>, <code>walk.lock</code>, package cache verification, and preserved package checksums.</li>
+<li>Phase 8 runtime-module conformance fixtures under <code>tests/runtime_modules/</code>, covering draft <code>io</code>, <code>parse</code>, <code>process</code>, <code>file</code>, <code>dir</code>, <code>path</code>, <code>json</code>, <code>term</code>, <code>http</code>, and <code>html</code> through native C runtime execution.</li>
+<li>Direct C runtime tests for draft result data helpers, JSON/HTML helpers, stdin reads, and HTTP recoverable result boundaries against a local loopback server.</li>
 </ul>
 <h3 id="changed">Changed</h3>
 <ul>
@@ -80,6 +82,7 @@
 <li><code>tests/conformance/run.sh</code> now supports <code>--check</code> and <code>--fail-diagnostics</code> to compare C++ semantic check behavior and exact fail diagnostics against the reference oracle.</li>
 <li><code>tests/conformance/run.sh</code> now supports <code>--emit-c</code> and <code>--native</code> to compare generated C snapshots and native behavior between the reference compiler and <code>walk-cpp</code>.</li>
 <li><code>tests/conformance/run.sh</code> now supports <code>--project</code> and <code>--package</code> to prove project lifecycle and package lock/cache behavior against the reference compiler and <code>walk-cpp</code>.</li>
+<li><code>tests/conformance/run.sh</code> now supports <code>--runtime-modules</code> to prove draft runtime module parity against the reference compiler and <code>walk-cpp</code>.</li>
 <li><code>scripts/stress-compatibility.sh</code> now keeps backend compatibility checks active for staged <code>walk-cpp</code> candidates while skipping later-phase formatter/project lifecycle checks only when the candidate advertises those commands as not ported.</li>
 <li><code>scripts/install-local.sh</code> and <code>scripts/release.sh</code> can use <code>build/walk-cpp</code> as the WalkLang build driver through <code>WALK_BUILD_BIN</code> and <code>WALK_RELEASE_BUILD_BIN</code>.</li>
 </ul>

@@ -1,0 +1,14 @@
+imp: parse
+
+var: parsed = parse.int('42')
+var: invalid = parse.int('x')
+var: ratio = parse.float('2.5')
+var: flag = parse.bool('false')
+out: parsed.ok
+out: parsed.value
+out: invalid.ok
+out: invalid.error
+out: ratio.ok
+out: ratio.value
+out: flag.ok
+out: flag.value

@@ -94,6 +94,8 @@ path separator, cwd, chdir, and temporary-path behavior.
 
 The helper layer keeps compiler-emitted code predictable without exposing
 pointers, allocation calls, or runtime ownership to WalkLang source.
+Phase 8 proves the draft runtime families through both native C runtime tests
+and `walk-cpp` conformance fixtures under `tests/runtime_modules/`.
 
 ## Memory Model
 
@@ -158,6 +160,9 @@ instead of linking a C TLS library into generated output. This keeps release
 cross-builds portable while the API remains draft. Programs that use `http`
 need `curl` available on `PATH`; missing backend, DNS, TLS, timeout, HTTP
 status, and size-limit failures are returned through `HttpResult` values.
+The Phase 8 C runtime tests use a local loopback HTTP server for success and
+HTTP-status cases, while conformance fixtures keep empty-method and empty-URL
+failure results deterministic for both the reference compiler and `walk-cpp`.
 
 Rich runtimes stay outside the core runtime layer:
 

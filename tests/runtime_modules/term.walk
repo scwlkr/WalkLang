@@ -1,0 +1,14 @@
+imp: io
+imp: term
+
+out: term.is_tty()
+out: term.width()
+out: term.height()
+do: term.color('red')
+do: io.write('red')
+do: term.reset()
+do: io.write_line('-done')
+var: key = term.read_key()
+out: key.ok
+out: key.value
+out: key.error

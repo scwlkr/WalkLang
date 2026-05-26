@@ -1,0 +1,15 @@
+imp: array
+imp: dir
+imp: file
+imp: path
+
+var: scratch = path.join('tests/conformance/tmp', 'runtime-module-dir')
+if: file.exists(scratch)
+    do: dir.delete(scratch)
+do: dir.make(scratch)
+out: file.exists(scratch)
+do: dir.delete(scratch)
+out: file.exists(scratch)
+var: entries = dir.list('tests/runtime_modules')
+out: > array.len(entries) 0
+out: array.contains(entries, 'dir.walk')

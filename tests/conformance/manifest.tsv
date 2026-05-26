@@ -76,6 +76,17 @@ compat/input	compat	run	tests/compat/stable/input.walk	.	compat/stable/input	yes
 compat/math_extra	compat	check	tests/compat/stable/math_extra.walk	.	-	no
 compat/stable	compat	run	tests/compat/stable/stable.walk	.	-	yes
 compat/tests	compat	test	tests/compat/stable/tests.walk	.	-	yes
+runtime/dir	runtime	run	tests/runtime_modules/dir.walk	.	-	yes
+runtime/effects	runtime	run	tests/runtime_modules/effects.walk	.	-	yes
+runtime/file	runtime	run	tests/runtime_modules/file.walk	.	-	yes
+runtime/html	runtime	run	tests/runtime_modules/html.walk	.	-	yes
+runtime/http	runtime	run	tests/runtime_modules/http.walk	.	-	yes
+runtime/io	runtime	run	tests/runtime_modules/io.walk	.	runtime/io	yes
+runtime/json	runtime	run	tests/runtime_modules/json.walk	.	-	yes
+runtime/parse	runtime	run	tests/runtime_modules/parse.walk	.	-	yes
+runtime/path	runtime	run	tests/runtime_modules/path.walk	.	-	yes
+runtime/process	runtime	run	tests/runtime_modules/process.walk	.	-	yes
+runtime/term	runtime	run	tests/runtime_modules/term.walk	.	-	yes
 snapshot/explicit_systems_defer	snapshot	emit-c	tests/pass/explicit_systems_defer.walk	.	-	no
 snapshot/functions	snapshot	emit-c	tests/pass/functions.walk	.	-	no
 snapshot/hello	snapshot	emit-c	tests/pass/hello.walk	.	-	no

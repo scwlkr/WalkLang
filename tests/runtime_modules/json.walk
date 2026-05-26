@@ -1,0 +1,17 @@
+imp: json
+
+var: escaped = json.stringify('hi "walk"\n')
+out: escaped
+var: parsed = json.parse(' {{ "name" : "walk", "items" : [1, true, null] }} ')
+out: parsed.ok
+out: parsed.value
+out: parsed.error
+var: invalid = json.parse('{{bad')
+out: invalid.ok
+out: invalid.value
+out: invalid.error
+do: json.write('tests/conformance/tmp/runtime-module.json', parsed.value)
+var: loaded = json.read('tests/conformance/tmp/runtime-module.json')
+out: loaded.ok
+out: loaded.value
+out: == loaded.error ''

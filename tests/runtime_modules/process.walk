@@ -1,0 +1,22 @@
+imp: array
+imp: process
+
+out: process.arg_count()
+var: args = process.args()
+out: array.len(args)
+var: shell = process.run_shell('printf process-ok')
+out: shell.ok
+out: shell.status
+out: shell.stdout
+out: shell.error
+var: output_args = ['-c', 'printf output-ok']
+var: output = process.output('/bin/sh', output_args)
+out: output.ok
+out: output.status
+out: output.value
+out: output.error
+var: empty_args array[string] = []
+var: missing = process.run('', empty_args)
+out: missing.ok
+out: missing.status
+out: missing.error

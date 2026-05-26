@@ -1,0 +1,11 @@
+imp: io
+
+var: first = io.read_line()
+var: rest = io.read_all()
+out: first.ok
+out: first.value
+out: first.error
+out: rest.ok
+out: rest.value
+do: io.write('joined')
+do: io.write_line('-line')

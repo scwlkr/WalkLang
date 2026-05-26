@@ -1,0 +1,6 @@
+imp: html
+
+out: html.escape('<tag & "quote">')
+out: html.h1('Walk <Lang>')
+out: html.p('copy & text')
+out: html.button('Go')

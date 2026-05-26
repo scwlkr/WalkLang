@@ -112,7 +112,7 @@ http.request(method, url, body) -&gt; HttpResult</code></pre>
 <li>async/event-loop APIs</li>
 </ul>
 <h2 id="testing-policy">Testing Policy</h2>
-<p>Network tests must not depend on public network availability. Compiler/runtime tests use local loopback HTTP servers and skip only when the draft runtime backend dependency, <code>curl</code>, is unavailable.</p>
+<p>Network tests must not depend on public network availability. Compiler/runtime tests use local loopback HTTP servers and skip only when the draft runtime backend dependency, <code>curl</code>, is unavailable. The systems compiler Phase 8 runtime-module conformance fixture also covers deterministic HTTP failure result data for empty method and empty URL inputs through both the reference compiler and <code>walk-cpp</code>.</p>
 </article>
 <footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
 </div>

@@ -93,7 +93,7 @@ walk run main.walk --release</code></pre>
 runtime/platform/walk_platform_posix.c or runtime/platform/walk_platform_windows.c</code></pre>
 <p><code>walk emit-c</code> stays useful as an inspection format by emitting a short comment that names the runtime C files required for a native build.</p>
 <p>The runtime header defines Walk scalar aliases, runtime-owned array structs, draft result structs, and helper entrypoints for printing, strings, arrays, files, directories, paths, processes, JSON, terminal helpers, HTTP, and HTML. The platform layer contains host-specific terminal, file-existence, directory, path separator, cwd, chdir, and temporary-path behavior.</p>
-<p>The helper layer keeps compiler-emitted code predictable without exposing pointers, allocation calls, or runtime ownership to WalkLang source.</p>
+<p>The helper layer keeps compiler-emitted code predictable without exposing pointers, allocation calls, or runtime ownership to WalkLang source. Phase 8 proves the draft runtime families through both native C runtime tests and <code>walk-cpp</code> conformance fixtures under <code>tests/runtime_modules/</code>.</p>
 <h2 id="memory-model">Memory Model</h2>
 <p>WalkLang still has no source-level memory management.</p>
 <pre><code class="language-text">no malloc syntax
@@ -123,7 +123,7 @@ JSON text validation
 terminal UX helpers
 HTTP client helpers
 HTML text helpers</code></pre>
-<p>Draft HTTP deliberately delegates to the system <code>curl</code> executable at runtime instead of linking a C TLS library into generated output. This keeps release cross-builds portable while the API remains draft. Programs that use <code>http</code> need <code>curl</code> available on <code>PATH</code>; missing backend, DNS, TLS, timeout, HTTP status, and size-limit failures are returned through <code>HttpResult</code> values.</p>
+<p>Draft HTTP deliberately delegates to the system <code>curl</code> executable at runtime instead of linking a C TLS library into generated output. This keeps release cross-builds portable while the API remains draft. Programs that use <code>http</code> need <code>curl</code> available on <code>PATH</code>; missing backend, DNS, TLS, timeout, HTTP status, and size-limit failures are returned through <code>HttpResult</code> values. The Phase 8 C runtime tests use a local loopback HTTP server for success and HTTP-status cases, while conformance fixtures keep empty-method and empty-URL failure results deterministic for both the reference compiler and <code>walk-cpp</code>.</p>
 <p>Rich runtimes stay outside the core runtime layer:</p>
 <pre><code class="language-text">web server runtime
 native graphics

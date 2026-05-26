@@ -1,0 +1,12 @@
+imp: io
+
+func: choose(flag bool) int
+    defer: do io.write_line('outer')
+    if: flag
+        defer: do io.write_line('inner')
+        return: 9
+    return: 4
+
+do: io.write('phase')
+do: io.write_line('-8')
+out: choose(true)

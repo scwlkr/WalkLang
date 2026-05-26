@@ -1,0 +1,12 @@
+imp: http
+
+var: empty = http.get('')
+out: empty.ok
+out: empty.status
+out: empty.body
+out: empty.error
+var: bad_method = http.request('', 'http://127.0.0.1/', '')
+out: bad_method.ok
+out: bad_method.status
+out: bad_method.body
+out: bad_method.error

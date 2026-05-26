@@ -410,7 +410,7 @@ Update this table at the end of every porting phase.
 | 5. Semantic Checker | Complete | C++ checker matches current type, name, module, and warning diagnostics |
 | 6. C Backend | Complete | C++ compiler emits C that passes native behavior and snapshot checks |
 | 7. CLI, Project, Package | Complete | C++ `walk` supports current command surface and project/package tests |
-| 8. Runtime Module Parity | Not started | Draft runtime modules pass native tests through the C runtime |
+| 8. Runtime Module Parity | Complete | Draft runtime modules pass native tests through the C runtime |
 | 9. Tooling Parity | Not started | Formatter, docs generator, debug map, LSP, and REPL pass parity checks |
 | 10. Standard Platform Parity | Not started | `walktop` builds, tests, runs, installs, and releases through C++ `walk` |
 | 11. Remove Go And JavaScript | Not started | No Go or JavaScript source remains; docs/site still build |
@@ -1153,7 +1153,7 @@ Phase completion prompt:
 
 ## Phase 7: CLI, Project, Package
 
-Status: Not started
+Status: Complete
 
 Goal: make the C++ compiler own the user-facing project and package workflows.
 
@@ -1244,7 +1244,7 @@ Phase completion prompt:
 
 ## Phase 8: Runtime Module Parity
 
-Status: Not started
+Status: Complete
 
 Goal: prove every current draft runtime module through the C runtime and C++
 compiler.
@@ -1296,6 +1296,33 @@ Exit proof:
 make test
 WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --runtime-modules
 WALK_BIN=$PWD/build/walk-cpp scripts/stress-compatibility.sh
+```
+
+Completed on 2026-05-26:
+
+```text
+compiler/sema/builtins.cpp now carries the current draft runtime module
+signatures for io, parse, process, file, dir, path, json, term, http, and html
+with their draft result structs and effect markers.
+compiler/codegen/c/ maps draft builtin calls to the walk_rt_* C runtime ABI,
+including effect calls used by do: and deferred cleanups used by defer:.
+tests/runtime_modules/ adds native runtime-module fixtures for io, parse,
+process, file, dir, path, json, term, http, html, and do:/defer: effect
+ordering.
+tests/conformance/run.sh now supports --runtime-modules and records 11 runtime
+module fixtures under tests/conformance/expected/runtime/.
+tests/runtime/runtime_test.go now directly proves C runtime result data helpers,
+stdin read helpers, JSON/HTML helpers, and HTTP recoverable result boundaries
+against a local loopback server when curl is available.
+make test passed and reported C++ compiler tests passed
+go test -count=1 ./... passed
+WALK_REF=$PWD/build/walk-ref tests/conformance/run.sh --record passed with 11
+runtime module fixtures and 36 native executions
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --runtime-modules passed with 11 fixtures
+WALK_BIN=$PWD/build/walk-cpp scripts/stress-compatibility.sh passed and reported
+compatibility stress ok
+WALK_RELEASE_BUILD_BIN=build/walk-cpp scripts/release.sh v5.14-cpp-runtime-modules <temp>/release passed with 8 checksummed artifacts
+WALK_INSTALL_DIR=<temp>/bin WALK_BUILD_BIN=build/walk-cpp scripts/install-local.sh v5.14-cpp-runtime-modules passed, and the temp walk-cpp passed runtime-module conformance with WALK_RUNTIME_DIR pointed at the temp runtime install
 ```
 
 Phase completion prompt:

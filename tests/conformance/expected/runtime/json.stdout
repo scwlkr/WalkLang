@@ -1,0 +1,10 @@
+"hi \"walk\"\n"
+true
+{"name":"walk","items":[1,true,null]}
+
+false
+
+invalid json
+true
+{"name":"walk","items":[1,true,null]}
+true
