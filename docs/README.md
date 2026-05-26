@@ -33,11 +33,11 @@ these docs explain how to install, learn, use, verify, and evolve WalkLang.
 
 ## Current Version
 
-WalkLang is currently `v5.14.0`. That single project version covers the
+WalkLang is currently `v5.14.1`. That single project version covers the
 compiler, tooling, backend, release artifacts, docs, and implemented language
 surface.
 
-Features inside `v5.14.0` use maturity labels:
+Features inside `v5.14.1` use maturity labels:
 
 - stable: core syntax, diagnostics, modules, tests, and standard-library helpers
 - draft: `do:`, `defer:`, `io`, `parse`, `process`, `file`, `dir`, `path`,

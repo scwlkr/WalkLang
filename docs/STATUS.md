@@ -1,6 +1,6 @@
 # WalkLang Status
 
-Current WalkLang version: `v5.14.0`.
+Current WalkLang version: `v5.14.1`.
 
 Current architecture direction on 2026-05-26: `docs/SYSTEMS_COMPILER_PORT_PLAN.md`
 is now the accepted execution contract for porting WalkLang from the current
@@ -9,7 +9,7 @@ runtime and platform layer, C backend, optional assembly leaf routines, and no
 final Go or JavaScript implementation footprint. The next porting step is Phase
 1, the conformance oracle.
 
-`v5.14.0` is the single project version for the compiler, tooling, docs,
+`v5.14.1` is the single project version for the compiler, tooling, docs,
 release artifacts, and implemented language surface. Feature maturity is
 described with status labels instead of separate version lines.
 
@@ -30,14 +30,38 @@ standard platform
   WalkLang-built tool
 ```
 
-Current release state: `v5.14.0` ships `walktop` under `tools/walktop/` as a
-real WalkLang project and standalone native command. `walktop` supports
-`--once`, `--frames 5`, and `--fixture tools/walktop/testdata/basic`, uses OS
-commands for live data, uses deterministic fixture mode for tests, renders a
-compact color-forward dashboard through `term` APIs, and is installed by the
-normal local install flow beside `walk`.
+Current release state: `v5.14.1` publishes the systems compiler port contract
+in `docs/SYSTEMS_COMPILER_PORT_PLAN.md` and keeps `walktop` under
+`tools/walktop/` as a real WalkLang project and standalone native command.
+`walktop` supports `--once`, `--frames 5`, and
+`--fixture tools/walktop/testdata/basic`, uses OS commands for live data, uses
+deterministic fixture mode for tests, renders a compact color-forward dashboard
+through `term` APIs, and is installed by the normal local install flow beside
+`walk`.
 
-Last full release verification on 2026-05-26:
+Last release verification on 2026-05-26:
+
+```text
+scripts/build-docs-site.sh passed
+scripts/check-docs-site.sh passed
+go test -count=1 ./... passed
+go build -trimpath -ldflags "-X main.version=v5.14.1" -o build/walk ./cmd/walk passed
+./build/walk version reported v5.14.1
+WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported compatibility stress ok
+scripts/release.sh v5.14.1 <temp>/release produced 5 walk artifacts, 1 current-host walktop artifact, and SHA256SUMS
+shasum -a 256 -c SHA256SUMS passed for all 6 artifacts
+the Darwin arm64 walk release artifact reported v5.14.1
+the Darwin arm64 walktop release artifact passed --once --fixture tools/walktop/testdata/basic
+scripts/install-local.sh v5.14.1 refreshed the local walk and walktop install
+walk version reported v5.14.1
+command -v walktop reported ~/.local/bin/walktop
+NO_COLOR=1 walktop --once --fixture tools/walktop/testdata/basic matched the deterministic dashboard
+NO_COLOR=1 walktop --once passed live OS-command mode on the local Darwin host
+git diff --check -- . ':(exclude)playground/hangman.walk' ':(exclude)playground/hangman-v2.walk' passed
+git diff --cached --check passed
+```
+
+Previous full release verification for `v5.14.0` on 2026-05-26:
 
 ```text
 go test -count=1 ./... passed
@@ -88,7 +112,7 @@ NO_COLOR=1 ./build/walktop --once passed live local OS-command mode
 
 Version-language cleanup baseline on 2026-05-26: current-facing docs moved to
 the single project version model during the `v5.13.1` cleanup. The current
-project version is `v5.14.0`; historical version numbers remain in release
+project version is `v5.14.1`; historical version numbers remain in release
 notes and migration history. `CONTEXT.md` records the resolved terms **Project
 Version**, **Feature Status**, and **Historical Version Reference**.
 
@@ -122,7 +146,7 @@ git diff --cached --check passed
 active-code search found no old developer-facing milestone path or test-name labels outside release notes, migration history, and deprecated docs
 ```
 
-Docs alignment cleanup on 2026-05-26: active docs now match the `v5.14.0`
+Docs alignment cleanup on 2026-05-26: active docs now match the `v5.14.1`
 project version, current verification scripts, current `route_ranker` smoke
 output, current editor-tooling wording, planned-only matrix API status, and live
 hosted-docs HTTPS behavior.

@@ -70,7 +70,7 @@ are generated artifacts. The final absence of Go and JavaScript must be real.
 
 ## Current Baseline
 
-Current project version at plan creation: `v5.14.0`.
+Current project version at plan creation: `v5.14.1`.
 
 Current implementation shape:
 
@@ -82,14 +82,14 @@ Current proof surface to preserve:
 
 ```text
 go test -count=1 ./...
-go build -trimpath -ldflags "-X main.version=v5.14.0" -o build/walk ./cmd/walk
+go build -trimpath -ldflags "-X main.version=v5.14.1" -o build/walk ./cmd/walk
 ./build/walk version
 ./build/walk check --warnings=error tests/pass/walk_tests.walk
 WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh
 scripts/build-docs-site.sh
 scripts/check-docs-site.sh
-scripts/release.sh v5.14.0 <out-dir>
-scripts/install-local.sh v5.14.0
+scripts/release.sh v5.14.1 <out-dir>
+scripts/install-local.sh v5.14.1
 NO_COLOR=1 walktop --once --fixture tools/walktop/testdata/basic
 ```
 
@@ -616,7 +616,7 @@ conformance: ok
 Exit proof:
 
 ```bash
-go build -trimpath -ldflags "-X main.version=v5.14.0" -o build/walk-ref ./cmd/walk
+go build -trimpath -ldflags "-X main.version=v5.14.1" -o build/walk-ref ./cmd/walk
 WALK_REF=$PWD/build/walk-ref tests/conformance/run.sh --record
 WALK_REF=$PWD/build/walk-ref tests/conformance/run.sh --verify
 WALK_BIN=$PWD/build/walk-ref scripts/stress-compatibility.sh
@@ -704,7 +704,7 @@ Exit proof:
 
 ```bash
 go test -count=1 ./...
-go build -trimpath -ldflags "-X main.version=v5.14.0" -o build/walk ./cmd/walk
+go build -trimpath -ldflags "-X main.version=v5.14.1" -o build/walk ./cmd/walk
 WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh
 scripts/build-docs-site.sh
 scripts/check-docs-site.sh

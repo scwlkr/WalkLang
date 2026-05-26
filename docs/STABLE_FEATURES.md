@@ -198,7 +198,7 @@ go test ./cmd/walk -run TestStableCompatibilitySuite
 Build release CLI artifacts:
 
 ```bash
-scripts/release.sh v5.14.0
+scripts/release.sh v5.14.1
 ```
 
 ## Project Mode

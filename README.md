@@ -38,15 +38,15 @@ out: add(2, 3)
 
 ## Current Version
 
-WalkLang is currently `v5.14.0`.
+WalkLang is currently `v5.14.1`.
 
-`v5.14.0` covers the compiler, tooling, docs, release artifacts, and
+`v5.14.1` covers the compiler, tooling, docs, release artifacts, and
 implemented language surface. Features inside a release are labeled `stable`,
 `draft`, `experimental`, or `planned` when their maturity matters.
 
-This release ships the first CLI standard-platform slice: `walktop`, an
-official standalone WalkLang-built system monitor installed by the normal local
-install flow.
+This release publishes the systems compiler port contract while preserving the
+first CLI standard-platform slice: `walktop`, an official standalone
+WalkLang-built system monitor installed by the normal local install flow.
 
 ## What Works Today
 

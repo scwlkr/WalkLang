@@ -2,7 +2,50 @@
 
 ## Unreleased
 
-- Added `docs/SYSTEMS_COMPILER_PORT_PLAN.md` as the execution contract for porting WalkLang from the current reference compiler to the permanent C++ core, C runtime, C backend, and optional assembly architecture.
+No unreleased changes yet.
+
+## v5.14.1 - Systems Compiler Port Contract
+
+Date: 2026-05-26
+
+v5.14.1 publishes the accepted systems compiler port contract for moving
+WalkLang to a permanent C++ compiler core, C runtime, C backend, and optional
+assembly architecture.
+
+### Added
+
+- `docs/SYSTEMS_COMPILER_PORT_PLAN.md`, the execution contract for the port.
+- Generated docs-site navigation for the systems compiler port plan.
+- Phase-by-phase prompts, status gates, verification commands, feature
+  preservation requirements, and final no-Go/no-JavaScript language-accounting
+  gates.
+
+### Changed
+
+- Current-facing docs now identify `v5.14.1` as the current project version.
+- CI release artifact naming now targets `v5.14.1`.
+
+### Notes
+
+- This release does not replace the current reference compiler. It publishes the
+  port contract and keeps the current WalkLang feature surface intact.
+- The next implementation step is Phase 1 in
+  `docs/SYSTEMS_COMPILER_PORT_PLAN.md`: the conformance oracle.
+
+### Breaking Changes
+
+None.
+
+### Upgrade
+
+Regenerate docs, install locally, and produce release artifacts with:
+
+```bash
+scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/install-local.sh v5.14.1
+scripts/release.sh v5.14.1 dist
+```
 
 ## v5.14.0 - CLI Standard Platform And walktop
 

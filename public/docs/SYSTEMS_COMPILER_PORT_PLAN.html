@@ -85,19 +85,19 @@ build/release glue: minimal shell and Makefile only where needed</code></pre>
 <p>1. <code>walk</code> is built from C++ and C source. 2. The compiler frontend, semantic checker, package/project system, formatter, docs generator, debug map, REPL, LSP server, and release tooling no longer depend on Go. 3. The Walk runtime is a C library with a stable internal ABI used by generated C. 4. Generated C remains deterministic, inspectable, snapshot-tested, and native compiler friendly. 5. <code>walktop</code> builds from WalkLang source through the C++ compiler and ships as a standalone native command. 6. All current stable, draft, and experimental WalkLang features are either preserved or explicitly redesigned in this document before implementation. The default requirement is preservation. 7. No <code>.go</code>, <code>go.mod</code>, or <code>go.sum</code> files remain in the final repository. 8. No JavaScript files remain in the final docs/site surface. 9. GitHub language breakdown for the active source has no Go and no JavaScript. 10. Release artifacts are built by the new C++/C toolchain and verified through the same public commands users run.</p>
 <p>Do not satisfy the language-breakdown goal with Linguist overrides that hide active compiler source. Mark generated artifacts as generated only when they are generated artifacts. The final absence of Go and JavaScript must be real.</p>
 <h2 id="current-baseline">Current Baseline</h2>
-<p>Current project version at plan creation: <code>v5.14.0</code>.</p>
+<p>Current project version at plan creation: <code>v5.14.1</code>.</p>
 <p>Current implementation shape:</p>
 <pre><code class="language-text">.walk source -&gt; Go reference compiler -&gt; generated C -&gt; native executable</code></pre>
 <p>Current proof surface to preserve:</p>
 <pre><code class="language-text">go test -count=1 ./...
-go build -trimpath -ldflags &#34;-X main.version=v5.14.0&#34; -o build/walk ./cmd/walk
+go build -trimpath -ldflags &#34;-X main.version=v5.14.1&#34; -o build/walk ./cmd/walk
 ./build/walk version
 ./build/walk check --warnings=error tests/pass/walk_tests.walk
 WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh
 scripts/build-docs-site.sh
 scripts/check-docs-site.sh
-scripts/release.sh v5.14.0 &lt;out-dir&gt;
-scripts/install-local.sh v5.14.0
+scripts/release.sh v5.14.1 &lt;out-dir&gt;
+scripts/install-local.sh v5.14.1
 NO_COLOR=1 walktop --once --fixture tools/walktop/testdata/basic</code></pre>
 <p>The port must replace these proofs with C++/C equivalents before deleting the reference compiler.</p>
 <h2 id="architecture-decision">Architecture Decision</h2>
@@ -368,7 +368,7 @@ conformance: N native executions ok
 conformance: ok</code></pre>
 <p>7. Keep the runner shell-based or C++-based. Do not add Python, Node, or Go. 8. Add docs explaining how to refresh expected output from the reference compiler.</p>
 <p>Exit proof:</p>
-<pre><code class="language-bash">go build -trimpath -ldflags &#34;-X main.version=v5.14.0&#34; -o build/walk-ref ./cmd/walk
+<pre><code class="language-bash">go build -trimpath -ldflags &#34;-X main.version=v5.14.1&#34; -o build/walk-ref ./cmd/walk
 WALK_REF=$PWD/build/walk-ref tests/conformance/run.sh --record
 WALK_REF=$PWD/build/walk-ref tests/conformance/run.sh --verify
 WALK_BIN=$PWD/build/walk-ref scripts/stress-compatibility.sh
@@ -426,7 +426,7 @@ walk_rt_html_*</code></pre>
 </ul>
 <p>Exit proof:</p>
 <pre><code class="language-bash">go test -count=1 ./...
-go build -trimpath -ldflags &#34;-X main.version=v5.14.0&#34; -o build/walk ./cmd/walk
+go build -trimpath -ldflags &#34;-X main.version=v5.14.1&#34; -o build/walk ./cmd/walk
 WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh
 scripts/build-docs-site.sh
 scripts/check-docs-site.sh

@@ -59,9 +59,9 @@
 <div class="page">
 <article class="doc">
 <h1 id="walklang-status">WalkLang Status</h1>
-<p>Current WalkLang version: <code>v5.14.0</code>.</p>
+<p>Current WalkLang version: <code>v5.14.1</code>.</p>
 <p>Current architecture direction on 2026-05-26: <code>docs/SYSTEMS_COMPILER_PORT_PLAN.md</code> is now the accepted execution contract for porting WalkLang from the current reference compiler to the permanent systems architecture: C++ compiler core, C runtime and platform layer, C backend, optional assembly leaf routines, and no final Go or JavaScript implementation footprint. The next porting step is Phase 1, the conformance oracle.</p>
-<p><code>v5.14.0</code> is the single project version for the compiler, tooling, docs, release artifacts, and implemented language surface. Feature maturity is described with status labels instead of separate version lines.</p>
+<p><code>v5.14.1</code> is the single project version for the compiler, tooling, docs, release artifacts, and implemented language surface. Feature maturity is described with status labels instead of separate version lines.</p>
 <p>Current feature status:</p>
 <pre><code class="language-text">stable
   core syntax, diagnostics, modules, tests, project tooling, and standard-library helpers
@@ -75,8 +75,26 @@ experimental
 standard platform
   CLI standard-platform slice with `walktop` as the first official standalone
   WalkLang-built tool</code></pre>
-<p>Current release state: <code>v5.14.0</code> ships <code>walktop</code> under <code>tools/walktop/</code> as a real WalkLang project and standalone native command. <code>walktop</code> supports <code>--once</code>, <code>--frames 5</code>, and <code>--fixture tools/walktop/testdata/basic</code>, uses OS commands for live data, uses deterministic fixture mode for tests, renders a compact color-forward dashboard through <code>term</code> APIs, and is installed by the normal local install flow beside <code>walk</code>.</p>
-<p>Last full release verification on 2026-05-26:</p>
+<p>Current release state: <code>v5.14.1</code> publishes the systems compiler port contract in <code>docs/SYSTEMS_COMPILER_PORT_PLAN.md</code> and keeps <code>walktop</code> under <code>tools/walktop/</code> as a real WalkLang project and standalone native command. <code>walktop</code> supports <code>--once</code>, <code>--frames 5</code>, and <code>--fixture tools/walktop/testdata/basic</code>, uses OS commands for live data, uses deterministic fixture mode for tests, renders a compact color-forward dashboard through <code>term</code> APIs, and is installed by the normal local install flow beside <code>walk</code>.</p>
+<p>Last release verification on 2026-05-26:</p>
+<pre><code class="language-text">scripts/build-docs-site.sh passed
+scripts/check-docs-site.sh passed
+go test -count=1 ./... passed
+go build -trimpath -ldflags &#34;-X main.version=v5.14.1&#34; -o build/walk ./cmd/walk passed
+./build/walk version reported v5.14.1
+WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported compatibility stress ok
+scripts/release.sh v5.14.1 &lt;temp&gt;/release produced 5 walk artifacts, 1 current-host walktop artifact, and SHA256SUMS
+shasum -a 256 -c SHA256SUMS passed for all 6 artifacts
+the Darwin arm64 walk release artifact reported v5.14.1
+the Darwin arm64 walktop release artifact passed --once --fixture tools/walktop/testdata/basic
+scripts/install-local.sh v5.14.1 refreshed the local walk and walktop install
+walk version reported v5.14.1
+command -v walktop reported ~/.local/bin/walktop
+NO_COLOR=1 walktop --once --fixture tools/walktop/testdata/basic matched the deterministic dashboard
+NO_COLOR=1 walktop --once passed live OS-command mode on the local Darwin host
+git diff --check -- . &#39;:(exclude)playground/hangman.walk&#39; &#39;:(exclude)playground/hangman-v2.walk&#39; passed
+git diff --cached --check passed</code></pre>
+<p>Previous full release verification for <code>v5.14.0</code> on 2026-05-26:</p>
 <pre><code class="language-text">go test -count=1 ./... passed
 go build -trimpath -ldflags &#34;-X main.version=v5.14.0&#34; -o build/walk ./cmd/walk passed
 ./build/walk version reported v5.14.0
@@ -108,7 +126,7 @@ git diff --cached --check passed</code></pre>
 ../../build/walk test --warnings=error in tools/walktop passed 4 WalkLang tests
 NO_COLOR=1 ./build/walktop --once --fixture tools/walktop/testdata/basic passed
 NO_COLOR=1 ./build/walktop --once passed live local OS-command mode</code></pre>
-<p>Version-language cleanup baseline on 2026-05-26: current-facing docs moved to the single project version model during the <code>v5.13.1</code> cleanup. The current project version is <code>v5.14.0</code>; historical version numbers remain in release notes and migration history. <code>CONTEXT.md</code> records the resolved terms **Project Version**, **Feature Status**, and **Historical Version Reference**.</p>
+<p>Version-language cleanup baseline on 2026-05-26: current-facing docs moved to the single project version model during the <code>v5.13.1</code> cleanup. The current project version is <code>v5.14.1</code>; historical version numbers remain in release notes and migration history. <code>CONTEXT.md</code> records the resolved terms **Project Version**, **Feature Status**, and **Historical Version Reference**.</p>
 <p>Version-language cleanup verification on 2026-05-26:</p>
 <pre><code class="language-text">go test ./cmd/walk -run &#39;TestStableCompatibilitySuite|TestCurrentReleaseDocsArePresent&#39; -count=1 passed
 go test ./scripts -run TestSidebarUsesTopicNavigationInsteadOfVersionMilestones -count=1 passed
@@ -126,7 +144,7 @@ go test -count=1 ./... passed
 git diff --check -- . &#39;:(exclude)playground/hangman.walk&#39; &#39;:(exclude)playground/hangman-v2.walk&#39; passed
 git diff --cached --check passed
 active-code search found no old developer-facing milestone path or test-name labels outside release notes, migration history, and deprecated docs</code></pre>
-<p>Docs alignment cleanup on 2026-05-26: active docs now match the <code>v5.14.0</code> project version, current verification scripts, current <code>route_ranker</code> smoke output, current editor-tooling wording, planned-only matrix API status, and live hosted-docs HTTPS behavior.</p>
+<p>Docs alignment cleanup on 2026-05-26: active docs now match the <code>v5.14.1</code> project version, current verification scripts, current <code>route_ranker</code> smoke output, current editor-tooling wording, planned-only matrix API status, and live hosted-docs HTTPS behavior.</p>
 <p>Hosted docs state checked on 2026-05-26:</p>
 <pre><code class="language-text">https://walklang.wlkrlabs.com/docs/ returned HTTP/2 200
 http://walklang.wlkrlabs.com/docs/ returned 301 to https://walklang.wlkrlabs.com/docs/</code></pre>

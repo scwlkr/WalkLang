@@ -65,22 +65,22 @@ source install for local development</code></pre>
 <p>Use <code>walk version</code> after either path. The reported version should match the release or local build label you installed.</p>
 <h2 id="release-artifact-install">Release Artifact Install</h2>
 <p>Release artifacts are produced by <code>scripts/release.sh</code> and named:</p>
-<pre><code class="language-text">walk-v5.14.0-darwin-arm64
-walk-v5.14.0-darwin-amd64
-walk-v5.14.0-linux-amd64
-walk-v5.14.0-linux-arm64
-walk-v5.14.0-windows-amd64.exe
-walktop-v5.14.0-&lt;release-host-os&gt;-&lt;release-host-arch&gt;
+<pre><code class="language-text">walk-v5.14.1-darwin-arm64
+walk-v5.14.1-darwin-amd64
+walk-v5.14.1-linux-amd64
+walk-v5.14.1-linux-arm64
+walk-v5.14.1-windows-amd64.exe
+walktop-v5.14.1-&lt;release-host-os&gt;-&lt;release-host-arch&gt;
 SHA256SUMS</code></pre>
 <p><code>scripts/release.sh</code> cross-builds the <code>walk</code> compiler artifacts and builds one current-host <code>walktop</code> artifact from WalkLang source. Source install always builds the local <code>walktop</code> binary.</p>
 <p>Install on macOS or Linux:</p>
 <pre><code class="language-bash">mkdir -p ~/.local/bin
-cp walk-v5.14.0-&lt;os&gt;-&lt;arch&gt; ~/.local/bin/walk
-cp walktop-v5.14.0-&lt;os&gt;-&lt;arch&gt; ~/.local/bin/walktop
+cp walk-v5.14.1-&lt;os&gt;-&lt;arch&gt; ~/.local/bin/walk
+cp walktop-v5.14.1-&lt;os&gt;-&lt;arch&gt; ~/.local/bin/walktop
 chmod +x ~/.local/bin/walk ~/.local/bin/walktop
 walk version
 NO_COLOR=1 walktop --once</code></pre>
-<p>Install on Windows by placing <code>walk-v5.14.0-windows-amd64.exe</code> somewhere on <code>PATH</code> as <code>walk.exe</code>, then run:</p>
+<p>Install on Windows by placing <code>walk-v5.14.1-windows-amd64.exe</code> somewhere on <code>PATH</code> as <code>walk.exe</code>, then run:</p>
 <pre><code class="language-powershell">walk version</code></pre>
 <p>Verify checksums before installing:</p>
 <pre><code class="language-bash">shasum -a 256 -c SHA256SUMS</code></pre>
@@ -116,7 +116,7 @@ Score:
 28</code></pre>
 <h2 id="build-release-artifacts-locally">Build Release Artifacts Locally</h2>
 <p>Maintainers can produce the release artifact set with:</p>
-<pre><code class="language-bash">scripts/release.sh v5.14.0 dist</code></pre>
+<pre><code class="language-bash">scripts/release.sh v5.14.1 dist</code></pre>
 <p>The command writes the compiler platform binaries, the current-host <code>walktop</code> binary, and <code>dist/SHA256SUMS</code>.</p>
 </article>
 <footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>

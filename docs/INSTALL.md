@@ -14,12 +14,12 @@ Use `walk version` after either path. The reported version should match the rele
 Release artifacts are produced by `scripts/release.sh` and named:
 
 ```text
-walk-v5.14.0-darwin-arm64
-walk-v5.14.0-darwin-amd64
-walk-v5.14.0-linux-amd64
-walk-v5.14.0-linux-arm64
-walk-v5.14.0-windows-amd64.exe
-walktop-v5.14.0-<release-host-os>-<release-host-arch>
+walk-v5.14.1-darwin-arm64
+walk-v5.14.1-darwin-amd64
+walk-v5.14.1-linux-amd64
+walk-v5.14.1-linux-arm64
+walk-v5.14.1-windows-amd64.exe
+walktop-v5.14.1-<release-host-os>-<release-host-arch>
 SHA256SUMS
 ```
 
@@ -31,14 +31,14 @@ Install on macOS or Linux:
 
 ```bash
 mkdir -p ~/.local/bin
-cp walk-v5.14.0-<os>-<arch> ~/.local/bin/walk
-cp walktop-v5.14.0-<os>-<arch> ~/.local/bin/walktop
+cp walk-v5.14.1-<os>-<arch> ~/.local/bin/walk
+cp walktop-v5.14.1-<os>-<arch> ~/.local/bin/walktop
 chmod +x ~/.local/bin/walk ~/.local/bin/walktop
 walk version
 NO_COLOR=1 walktop --once
 ```
 
-Install on Windows by placing `walk-v5.14.0-windows-amd64.exe` somewhere on
+Install on Windows by placing `walk-v5.14.1-windows-amd64.exe` somewhere on
 `PATH` as `walk.exe`, then run:
 
 ```powershell
@@ -113,7 +113,7 @@ Score:
 Maintainers can produce the release artifact set with:
 
 ```bash
-scripts/release.sh v5.14.0 dist
+scripts/release.sh v5.14.1 dist
 ```
 
 The command writes the compiler platform binaries, the current-host `walktop`
