@@ -1,10 +1,14 @@
 #include "cli/command.h"
 
 #include "codegen/c/c_emitter.h"
+#include "debug_map/debug_map.h"
+#include "docs/api_docs.h"
+#include "docs/sitegen.h"
 #include "ir/lower.h"
 #include "package/package.h"
 #include "parse/parser.h"
 #include "project/project.h"
+#include "repl/repl.h"
 #include "sema/checker.h"
 #include "sema/modules.h"
 #include "support/diagnostic.h"
@@ -91,6 +95,23 @@ struct RunArgs {
     WarningMode warning_mode = WarningMode::Default;
     std::string source_path;
     NativeOptions native;
+};
+
+struct DocsArgs {
+    std::string source_path;
+    std::string output_path;
+    std::string format = "markdown";
+    bool strict = false;
+};
+
+struct DebugMapArgs {
+    std::string source_path;
+    std::string output_path;
+};
+
+struct SitegenArgs {
+    std::string docs_dir = "docs";
+    std::string public_dir = "public";
 };
 
 struct ProjectBuildArgs {
@@ -391,6 +412,106 @@ std::optional<RunArgs> parse_run_like_args(const std::vector<std::string>& args,
     return parsed;
 }
 
+std::optional<DocsArgs> parse_docs_args(const std::vector<std::string>& args, CommandResult& error) {
+    DocsArgs parsed;
+    const std::string usage = "usage: walk-cpp docs [--strict] [--format markdown|json] [-o output] [source.walk]";
+    for (std::size_t index = 0; index < args.size(); ++index) {
+        const std::string& arg = args[index];
+        if (arg == "-o" || arg == "--output") {
+            if (index + 1 >= args.size()) {
+                error = {kUsageExitCode, "", format_simple_error("W0005", usage)};
+                return std::nullopt;
+            }
+            parsed.output_path = args[index + 1];
+            ++index;
+            continue;
+        }
+        if (arg == "--format") {
+            if (index + 1 >= args.size()) {
+                error = {kUsageExitCode, "", format_simple_error("W0005", usage)};
+                return std::nullopt;
+            }
+            parsed.format = args[index + 1];
+            if (parsed.format != "markdown" && parsed.format != "json") {
+                error = {kUsageExitCode, "", format_simple_error("W0005", "docs format must be markdown or json")};
+                return std::nullopt;
+            }
+            ++index;
+            continue;
+        }
+        if (arg == "--strict") {
+            parsed.strict = true;
+            continue;
+        }
+        if (!arg.empty() && arg[0] == '-') {
+            error = {kUsageExitCode, "", format_simple_error("W0005", usage)};
+            return std::nullopt;
+        }
+        if (!parsed.source_path.empty()) {
+            error = {kUsageExitCode, "", format_simple_error("W0005", usage)};
+            return std::nullopt;
+        }
+        parsed.source_path = arg;
+    }
+    return parsed;
+}
+
+std::optional<DebugMapArgs> parse_debug_map_args(const std::vector<std::string>& args, CommandResult& error) {
+    DebugMapArgs parsed;
+    const std::string usage = "usage: walk-cpp debug-map [-o output.json] [source.walk]";
+    for (std::size_t index = 0; index < args.size(); ++index) {
+        const std::string& arg = args[index];
+        if (arg == "-o" || arg == "--output") {
+            if (index + 1 >= args.size()) {
+                error = {kUsageExitCode, "", format_simple_error("W0005", usage)};
+                return std::nullopt;
+            }
+            parsed.output_path = args[index + 1];
+            ++index;
+            continue;
+        }
+        if (!arg.empty() && arg[0] == '-') {
+            error = {kUsageExitCode, "", format_simple_error("W0005", usage)};
+            return std::nullopt;
+        }
+        if (!parsed.source_path.empty()) {
+            error = {kUsageExitCode, "", format_simple_error("W0005", usage)};
+            return std::nullopt;
+        }
+        parsed.source_path = arg;
+    }
+    return parsed;
+}
+
+std::optional<SitegenArgs> parse_sitegen_args(const std::vector<std::string>& args, CommandResult& error) {
+    SitegenArgs parsed;
+    const std::string usage = "usage: walk-cpp sitegen [-docs docs-dir] [-public public-dir]";
+    for (std::size_t index = 0; index < args.size(); ++index) {
+        const std::string& arg = args[index];
+        if (arg == "-docs" || arg == "--docs") {
+            if (index + 1 >= args.size()) {
+                error = {kUsageExitCode, "", format_simple_error("W0005", usage)};
+                return std::nullopt;
+            }
+            parsed.docs_dir = args[index + 1];
+            ++index;
+            continue;
+        }
+        if (arg == "-public" || arg == "--public") {
+            if (index + 1 >= args.size()) {
+                error = {kUsageExitCode, "", format_simple_error("W0005", usage)};
+                return std::nullopt;
+            }
+            parsed.public_dir = args[index + 1];
+            ++index;
+            continue;
+        }
+        error = {kUsageExitCode, "", format_simple_error("W0005", usage)};
+        return std::nullopt;
+    }
+    return parsed;
+}
+
 bool use_project_build(const std::vector<std::string>& args) {
     if (args.empty()) {
         return true;
@@ -557,6 +678,33 @@ Result<std::vector<std::string>> project_search_dirs_with_packages(const project
     return Result<std::vector<std::string>>::success(path_strings(dirs));
 }
 
+Result<std::filesystem::path> source_path_or_project_entry(const std::string& source_path) {
+    if (!source_path.empty()) {
+        return Result<std::filesystem::path>::success(std::filesystem::absolute(source_path).lexically_normal());
+    }
+    Result<project::ProjectConfig> config = project::load_project_config_from_cwd();
+    if (!config.ok()) {
+        return Result<std::filesystem::path>::failure(config.error());
+    }
+    Result<std::filesystem::path> entry = project::project_path(config.value(), config.value().entry);
+    if (!entry.ok()) {
+        return entry;
+    }
+    return Result<std::filesystem::path>::success(std::filesystem::absolute(entry.value()).lexically_normal());
+}
+
+std::vector<std::string> tooling_search_dirs_for_source(const std::filesystem::path& source_path) {
+    Result<project::ProjectConfig> config = project::load_project_config_from_cwd();
+    if (!config.ok()) {
+        return {};
+    }
+    Result<std::vector<std::string>> dirs = project_search_dirs_with_packages(config.value(), source_path);
+    if (!dirs.ok()) {
+        return {};
+    }
+    return dirs.take_value();
+}
+
 std::string shell_quote(const std::string& value) {
     std::string out = "'";
     for (const char ch : value) {
@@ -719,6 +867,11 @@ Result<void> build_c(const std::string& c_code, const std::string& c_path, const
 
 int run_passthrough(const std::string& executable) {
     return std::system(shell_quote(executable).c_str());
+}
+
+int run_capture(const std::string& executable, const std::filesystem::path& stdout_path, const std::filesystem::path& stderr_path) {
+    const std::string command = shell_quote(executable) + " > " + shell_quote(stdout_path.string()) + " 2> " + shell_quote(stderr_path.string());
+    return std::system(command.c_str());
 }
 
 CommandResult init_command(const std::vector<std::string>& args) {
@@ -1122,6 +1275,79 @@ CommandResult check_command(const std::vector<std::string>& args) {
     return {0, "ok\n", *warnings};
 }
 
+CommandResult docs_command(const std::vector<std::string>& args) {
+    CommandResult parse_error{0, "", ""};
+    const std::optional<DocsArgs> parsed = parse_docs_args(args, parse_error);
+    if (!parsed) {
+        return parse_error;
+    }
+    Result<std::filesystem::path> source_path = source_path_or_project_entry(parsed->source_path);
+    if (!source_path.ok()) {
+        return {kDiagnosticExitCode, "", format_simple_error("W8001", source_path.error())};
+    }
+    Result<docs::ToolingAnalysis> analysis = docs::analyze_file(source_path.value().string(), tooling_search_dirs_for_source(source_path.value()));
+    if (!analysis.ok()) {
+        return {kDiagnosticExitCode, "", analysis.error()};
+    }
+    docs::DocsIndex index = docs::generate_index(source_path.value().string(), analysis.value());
+    if (parsed->strict) {
+        Result<void> valid = docs::validate_index(index);
+        if (!valid.ok()) {
+            return {kDiagnosticExitCode, "", format_simple_error("W8002", valid.error())};
+        }
+    }
+    Result<std::string> rendered = docs::render_index(index, parsed->format);
+    if (!rendered.ok()) {
+        return {kUsageExitCode, "", format_simple_error("W0005", rendered.error())};
+    }
+    if (parsed->output_path.empty()) {
+        return {0, rendered.value(), ""};
+    }
+    Result<void> written = write_file(parsed->output_path, rendered.value());
+    if (!written.ok()) {
+        return {kDiagnosticExitCode, "", format_simple_error("W8003", written.error())};
+    }
+    return {0, "", ""};
+}
+
+CommandResult debug_map_command(const std::vector<std::string>& args) {
+    CommandResult parse_error{0, "", ""};
+    const std::optional<DebugMapArgs> parsed = parse_debug_map_args(args, parse_error);
+    if (!parsed) {
+        return parse_error;
+    }
+    Result<std::filesystem::path> source_path = source_path_or_project_entry(parsed->source_path);
+    if (!source_path.ok()) {
+        return {kDiagnosticExitCode, "", format_simple_error("W8101", source_path.error())};
+    }
+    Result<docs::ToolingAnalysis> analysis = docs::analyze_file(source_path.value().string(), tooling_search_dirs_for_source(source_path.value()));
+    if (!analysis.ok()) {
+        return {kDiagnosticExitCode, "", analysis.error()};
+    }
+    const std::string rendered = debug_map::render_debug_map_json(source_path.value().string(), analysis.value());
+    if (parsed->output_path.empty()) {
+        return {0, rendered, ""};
+    }
+    Result<void> written = write_file(parsed->output_path, rendered);
+    if (!written.ok()) {
+        return {kDiagnosticExitCode, "", format_simple_error("W8102", written.error())};
+    }
+    return {0, "", ""};
+}
+
+CommandResult sitegen_command(const std::vector<std::string>& args) {
+    CommandResult parse_error{0, "", ""};
+    const std::optional<SitegenArgs> parsed = parse_sitegen_args(args, parse_error);
+    if (!parsed) {
+        return parse_error;
+    }
+    Result<void> built = docs::build_site(parsed->docs_dir, parsed->public_dir);
+    if (!built.ok()) {
+        return {kDiagnosticExitCode, "", format_simple_error("W8201", built.error())};
+    }
+    return {0, "", ""};
+}
+
 }  // namespace
 
 std::vector<CommandInfo> command_table() {
@@ -1137,10 +1363,11 @@ std::vector<CommandInfo> command_table() {
         {"clean", "remove project build outputs", true},
         {"init", "create a WalkLang project", true},
         {"package", "manage local packages", true},
-        {"docs", "not ported in this phase", false},
-        {"debug-map", "not ported in this phase", false},
-        {"lsp", "not ported in this phase", false},
-        {"repl", "not ported in this phase", false},
+        {"docs", "generate API reference docs", true},
+        {"debug-map", "emit source symbol map JSON", true},
+        {"lsp", "run the stdio language server", true},
+        {"repl", "start the expression REPL", true},
+        {"sitegen", "generate the static docs site", true},
     };
 }
 
@@ -1158,7 +1385,7 @@ std::string help_text() {
         }
         output << command.summary << "\n";
     }
-    output << "\nPhase 7 ports project mode and local package workflows; docs, debug-map, lsp, and repl remain staged for later phases.\n";
+    output << "\nPhase 9 ports formatter, docs, debug-map, LSP, REPL, and static docs-site generation to the C++ toolchain.\n";
     return output.str();
 }
 
@@ -1215,11 +1442,89 @@ CommandResult dispatch(const std::vector<std::string>& args) {
     if (command_name == "package") {
         return package_command(std::vector<std::string>(args.begin() + 1, args.end()));
     }
+    if (command_name == "docs") {
+        return docs_command(std::vector<std::string>(args.begin() + 1, args.end()));
+    }
+    if (command_name == "debug-map") {
+        return debug_map_command(std::vector<std::string>(args.begin() + 1, args.end()));
+    }
+    if (command_name == "sitegen") {
+        return sitegen_command(std::vector<std::string>(args.begin() + 1, args.end()));
+    }
+    if (command_name == "lsp") {
+        if (args.size() != 1) {
+            return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk-cpp lsp")};
+        }
+        return {0, "", ""};
+    }
+    if (command_name == "repl") {
+        if (args.size() != 1) {
+            return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk-cpp repl")};
+        }
+        return {0, "", ""};
+    }
     if (!command->ported) {
         return {kDiagnosticExitCode, "", format_simple_error("W0001", "command \"" + command_name + "\" is not ported in this phase")};
     }
 
     return {0, "", ""};
+}
+
+int run_repl(std::istream& input, std::ostream& output, std::ostream& error) {
+    std::string line;
+    for (;;) {
+        output << "walk> ";
+        output.flush();
+        if (!std::getline(input, line)) {
+            return input.eof() ? 0 : 1;
+        }
+        const std::string trimmed = [&] {
+            const std::size_t start = line.find_first_not_of(" \t\r\n");
+            if (start == std::string::npos) {
+                return std::string();
+            }
+            const std::size_t end = line.find_last_not_of(" \t\r\n");
+            return line.substr(start, end - start + 1);
+        }();
+        if (trimmed.empty()) {
+            continue;
+        }
+        if (trimmed == ":quit" || trimmed == ":exit") {
+            return 0;
+        }
+
+        const std::filesystem::path dir = temp_dir("walk-cpp-repl");
+        const std::filesystem::path source_path = dir / "repl.walk";
+        const std::filesystem::path exe_path = dir / "repl";
+        const std::filesystem::path stdout_path = dir / "stdout.txt";
+        const std::filesystem::path stderr_path = dir / "stderr.txt";
+        Result<void> source_written = write_file(source_path.string(), repl::source_for_expression(trimmed));
+        if (!source_written.ok()) {
+            error << format_simple_error("W8301", source_written.error());
+            std::filesystem::remove_all(dir);
+            continue;
+        }
+        CommandResult compile_error;
+        std::optional<CompiledC> compiled = compile_file_to_c(source_path.string(), false, WarningMode::Default, compile_error);
+        if (!compiled) {
+            error << compile_error.stderr_text;
+            std::filesystem::remove_all(dir);
+            continue;
+        }
+        Result<void> built = build_c(compiled->c_code, (dir / "repl.c").string(), exe_path.string(), {});
+        if (!built.ok()) {
+            error << format_simple_error("W5003", built.error());
+            std::filesystem::remove_all(dir);
+            continue;
+        }
+        if (run_capture(exe_path.string(), stdout_path, stderr_path) != 0) {
+            error << read_text_file(stderr_path);
+            std::filesystem::remove_all(dir);
+            continue;
+        }
+        output << read_text_file(stdout_path);
+        std::filesystem::remove_all(dir);
+    }
 }
 
 }  // namespace walk::cli

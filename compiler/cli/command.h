@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <istream>
+#include <ostream>
 #include <vector>
 
 namespace walk::cli {
@@ -20,5 +22,6 @@ struct CommandResult {
 std::vector<CommandInfo> command_table();
 std::string help_text();
 CommandResult dispatch(const std::vector<std::string>& args);
+int run_repl(std::istream& input, std::ostream& output, std::ostream& error);
 
 }  // namespace walk::cli

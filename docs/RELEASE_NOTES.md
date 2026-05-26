@@ -13,6 +13,7 @@
 - Phase 7 C++ project and package workflow pieces under `compiler/project/` and `compiler/package/`, with `walk.toml` parsing, project `init/fmt/clean/check/build/test`, local package `init/resolve/publish`, `walk.lock`, package cache verification, and preserved package checksums.
 - Phase 8 runtime-module conformance fixtures under `tests/runtime_modules/`, covering draft `io`, `parse`, `process`, `file`, `dir`, `path`, `json`, `term`, `http`, and `html` through native C runtime execution.
 - Direct C runtime tests for draft result data helpers, JSON/HTML helpers, stdin reads, and HTTP recoverable result boundaries against a local loopback server.
+- Phase 9 C++ tooling pieces under `compiler/format/`, `compiler/docs/`, `compiler/debug_map/`, `compiler/lsp/`, and `compiler/repl/`, with C++ tests for formatter, docs/site generation, LSP, and REPL behavior.
 
 ### Changed
 
@@ -25,8 +26,10 @@
 - `tests/conformance/run.sh` now supports `--emit-c` and `--native` to compare generated C snapshots and native behavior between the reference compiler and `walk-cpp`.
 - `tests/conformance/run.sh` now supports `--project` and `--package` to prove project lifecycle and package lock/cache behavior against the reference compiler and `walk-cpp`.
 - `tests/conformance/run.sh` now supports `--runtime-modules` to prove draft runtime module parity against the reference compiler and `walk-cpp`.
+- `tests/conformance/run.sh` now supports `--tooling` to prove formatter, docs, debug-map, LSP, and REPL behavior against the reference compiler and `walk-cpp`.
 - `scripts/stress-compatibility.sh` now keeps backend compatibility checks active for staged `walk-cpp` candidates while skipping later-phase formatter/project lifecycle checks only when the candidate advertises those commands as not ported.
 - `scripts/install-local.sh` and `scripts/release.sh` can use `build/walk-cpp` as the WalkLang build driver through `WALK_BUILD_BIN` and `WALK_RELEASE_BUILD_BIN`.
+- `scripts/build-docs-site.sh` now builds and uses `build/walk-cpp` by default, and the old Go site generator under `scripts/sitegen.go` has been removed.
 
 ## v5.14.1 - Systems Compiler Port Contract
 

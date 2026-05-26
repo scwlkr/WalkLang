@@ -23,12 +23,18 @@ WALK_CPP_SOURCES := \
 	compiler/ast/ast.cpp \
 	compiler/codegen/c/c_emitter.cpp \
 	compiler/codegen/c/name_mangle.cpp \
+	compiler/debug_map/debug_map.cpp \
+	compiler/docs/api_docs.cpp \
+	compiler/docs/sitegen.cpp \
+	compiler/format/format.cpp \
 	compiler/ir/ir.cpp \
 	compiler/ir/lower.cpp \
 	compiler/lex/lexer.cpp \
+	compiler/lsp/server.cpp \
 	compiler/package/package.cpp \
 	compiler/parse/parser.cpp \
 	compiler/project/project.cpp \
+	compiler/repl/repl.cpp \
 	compiler/sema/builtins.cpp \
 	compiler/sema/checker.cpp \
 	compiler/sema/modules.cpp \
@@ -49,16 +55,26 @@ TEST_CPP_SOURCES := \
 	tests/cpp/package_tests.cpp \
 	tests/cpp/parser_tests.cpp \
 	tests/cpp/project_tests.cpp \
+	tests/cpp/format_tests.cpp \
+	tests/cpp/docs_tests.cpp \
+	tests/cpp/lsp_tests.cpp \
+	tests/cpp/repl_tests.cpp \
 	compiler/cli/command.cpp \
 	compiler/ast/ast.cpp \
 	compiler/codegen/c/c_emitter.cpp \
 	compiler/codegen/c/name_mangle.cpp \
+	compiler/debug_map/debug_map.cpp \
+	compiler/docs/api_docs.cpp \
+	compiler/docs/sitegen.cpp \
+	compiler/format/format.cpp \
 	compiler/ir/ir.cpp \
 	compiler/ir/lower.cpp \
 	compiler/lex/lexer.cpp \
+	compiler/lsp/server.cpp \
 	compiler/package/package.cpp \
 	compiler/parse/parser.cpp \
 	compiler/project/project.cpp \
+	compiler/repl/repl.cpp \
 	compiler/sema/builtins.cpp \
 	compiler/sema/checker.cpp \
 	compiler/sema/modules.cpp \

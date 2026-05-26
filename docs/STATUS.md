@@ -11,8 +11,8 @@ oracle, is complete. Phase 2, runtime extraction, is complete. Phase 3, the C++
 skeleton, is complete. Phase 4, lexer, parser, and AST construction, is
 complete. Phase 5, semantic checking, is complete. Phase 6, the C backend, is
 complete. Phase 7, CLI project and package workflows, is complete. Phase 8,
-runtime module parity, is complete. The next porting step is Phase 9, tooling
-parity.
+runtime module parity, is complete. Phase 9, tooling parity, is complete. The
+next porting step is Phase 10, standard platform parity.
 
 `v5.14.1` is the single project version for the compiler, tooling, docs,
 release artifacts, and implemented language surface. Feature maturity is
@@ -82,9 +82,13 @@ fixtures under `tests/runtime_modules/`, direct C runtime tests for draft result
 data helpers and HTTP result boundaries, and a `--runtime-modules` conformance
 gate that proves draft `io`, `parse`, `process`, `file`, `dir`, `path`, `json`,
 `term`, `http`, and `html` through the C runtime and C++ compiler. The C++
-candidate builds as `build/walk-cpp`; later docs/debug-map/LSP/REPL commands
-still return a `not ported in this phase` diagnostic without delegating to the
-Go reference compiler.
+candidate builds as `build/walk-cpp`. Phase 9 ports formatter ownership under
+`compiler/format/`, API docs and static site generation under `compiler/docs/`,
+debug-map output under `compiler/debug_map/`, stdio LSP initialization,
+diagnostics, and formatting under `compiler/lsp/`, and the expression REPL
+wrapper under `compiler/repl/`. `scripts/build-docs-site.sh` now uses the C++
+toolchain by default, and the Go site generator under `scripts/sitegen.go` has
+been removed.
 
 Phase 1 conformance oracle verification on 2026-05-26:
 
@@ -232,6 +236,32 @@ WALK_INSTALL_DIR=<temp>/bin WALK_BUILD_BIN=build/walk-cpp scripts/install-local.
 the temp installed walk-cpp reported v5.14-cpp-runtime-modules and passed runtime-module conformance with WALK_RUNTIME_DIR pointed at the temp runtime install
 ```
 
+Phase 9 tooling parity verification on 2026-05-26:
+
+```text
+make test passed and reported C++ compiler tests passed
+make walk WALK_VERSION=v5.14.1-phase9-dev passed
+./build/walk-cpp version reported v5.14.1-phase9-dev
+./build/walk-cpp help listed docs, debug-map, lsp, repl, and sitegen as ported commands
+./build/walk-cpp fmt tests/pass/hello.walk printed formatted Walk source
+./build/walk-cpp docs --strict generated Markdown and JSON API docs for examples/stable.walk
+./build/walk-cpp debug-map generated JSON symbols for examples/stable.walk
+printf '+ 1 2\n:quit\n' | ./build/walk-cpp repl printed 3 through the C++ compile/native execution path
+scripts/build-docs-site.sh passed using build/walk-cpp
+scripts/check-docs-site.sh passed
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --tooling passed and reported formatter, docs, debug-map, LSP, and REPL ok
+WALK_BIN=$PWD/build/walk-cpp scripts/stress-compatibility.sh passed and reported compatibility stress ok
+WALK_RELEASE_BUILD_BIN=build/walk-cpp scripts/release.sh v5.14-cpp-tooling <temp>/release produced 5 walk artifacts, 1 current-host walk-cpp tooling artifact, 1 runtime source archive, 1 current-host walktop artifact, and SHA256SUMS
+shasum -a 256 -c SHA256SUMS passed for all 8 artifacts
+the current-host walk-cpp release artifact reported v5.14-cpp-tooling and listed docs, debug-map, lsp, repl, and sitegen as ported commands
+WALK_INSTALL_DIR=<temp>/bin WALK_BUILD_BIN=build/walk-cpp scripts/install-local.sh v5.14-cpp-tooling passed and installed temp walk, walk-cpp, runtime source, and walktop without touching the normal local install
+the temp installed walk-cpp reported v5.14-cpp-tooling and passed tooling conformance
+WALK_BUILD_BIN=build/walk-cpp scripts/install-local.sh v5.14.1 refreshed the normal local walk, walk-cpp, runtime source, and walktop install
+the installed walk and walk-cpp reported v5.14.1
+WALK_REF=~/.local/bin/walk WALK_CANDIDATE=~/.local/bin/walk-cpp WALK_RUNTIME_DIR=~/.local/lib/walk/runtime tests/conformance/run.sh --tooling passed
+NO_COLOR=1 walktop --once --fixture tools/walktop/testdata/basic passed after the local refresh
+```
+
 Last release verification on 2026-05-26:
 
 ```text
@@ -365,6 +395,6 @@ WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported com
 git diff --check -- . ':(exclude)playground/hangman.walk' ':(exclude)playground/hangman-v2.walk' passed
 ```
 
-Next: begin Phase 9 in `docs/SYSTEMS_COMPILER_PORT_PLAN.md` by porting
-formatter, docs generation, static-site generation, debug-map, LSP, and REPL
-tooling to the C++ toolchain.
+Next: begin Phase 10 in `docs/SYSTEMS_COMPILER_PORT_PLAN.md` by proving
+`walktop` and the first standard-platform slice through C++ check/test/build,
+fixture/live, install, and release-script paths.

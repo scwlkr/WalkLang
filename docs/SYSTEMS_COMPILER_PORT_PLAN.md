@@ -411,7 +411,7 @@ Update this table at the end of every porting phase.
 | 6. C Backend | Complete | C++ compiler emits C that passes native behavior and snapshot checks |
 | 7. CLI, Project, Package | Complete | C++ `walk` supports current command surface and project/package tests |
 | 8. Runtime Module Parity | Complete | Draft runtime modules pass native tests through the C runtime |
-| 9. Tooling Parity | Not started | Formatter, docs generator, debug map, LSP, and REPL pass parity checks |
+| 9. Tooling Parity | Complete | Formatter, docs generator, debug map, LSP, and REPL pass parity checks |
 | 10. Standard Platform Parity | Not started | `walktop` builds, tests, runs, installs, and releases through C++ `walk` |
 | 11. Remove Go And JavaScript | Not started | No Go or JavaScript source remains; docs/site still build |
 | 12. Final Release Gate | Not started | C++/C release artifacts, checksums, install, docs, and language breakdown are verified |
@@ -1333,7 +1333,7 @@ Phase completion prompt:
 
 ## Phase 9: Tooling Parity
 
-Status: Not started
+Status: Complete
 
 Goal: port the non-build developer tools that make WalkLang feel complete.
 
@@ -1388,6 +1388,33 @@ scripts/build-docs-site.sh
 scripts/check-docs-site.sh
 WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --tooling
 WALK_BIN=$PWD/build/walk-cpp scripts/stress-compatibility.sh
+```
+
+Completed on 2026-05-26:
+
+```text
+compiler/format/ now owns the C++ source formatter used by single-file and
+project formatting.
+compiler/docs/ now owns structured-comment API docs generation plus the static
+HTML/CSS docs-site generator previously implemented by scripts/sitegen.go.
+compiler/debug_map/ now emits deterministic source symbol maps from the C++
+tooling analysis path.
+compiler/lsp/ now runs a stdio LSP server through the C++ executable and
+preserves initialize, diagnostics, and formatting behavior.
+compiler/repl/ now wraps expressions and walk-cpp repl compiles them through
+the C++ pipeline before native execution.
+tests/conformance/run.sh now supports --tooling for Go-reference versus
+C++-candidate formatter, docs, debug-map, LSP, and REPL proof.
+scripts/build-docs-site.sh now builds and uses build/walk-cpp by default for
+reference docs and site generation.
+scripts/sitegen.go and its Go-only site generator test were removed.
+make test passed and reported C++ compiler tests passed
+scripts/build-docs-site.sh passed
+scripts/check-docs-site.sh passed
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --tooling passed
+WALK_BIN=$PWD/build/walk-cpp scripts/stress-compatibility.sh passed and reported compatibility stress ok
+WALK_RELEASE_BUILD_BIN=build/walk-cpp scripts/release.sh v5.14-cpp-tooling <temp>/release passed with 8 checksummed artifacts
+WALK_INSTALL_DIR=<temp>/bin WALK_BUILD_BIN=build/walk-cpp scripts/install-local.sh v5.14-cpp-tooling passed, and the temp walk-cpp passed tooling conformance
 ```
 
 Phase completion prompt:

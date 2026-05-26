@@ -5,7 +5,12 @@ walk_bin="${WALK_BIN:-$PWD/build/walk}"
 
 mkdir -p "$(dirname "$walk_bin")" docs/reference
 
-go build -o "$walk_bin" ./cmd/walk
+if [ "${WALK_BIN:-}" = "" ]; then
+    walk_bin="$PWD/build/walk-cpp"
+    make -s walk WALK_VERSION="${WALK_VERSION:-dev}"
+elif [ ! -x "$walk_bin" ]; then
+    make -s walk WALK_VERSION="${WALK_VERSION:-dev}"
+fi
 "$walk_bin" docs --strict -o docs/reference/api.md examples/stable.walk
 "$walk_bin" docs --strict --format json -o docs/reference/api.json examples/stable.walk
-go run ./scripts/sitegen.go -docs docs -public public
+"$walk_bin" sitegen -docs docs -public public

@@ -141,6 +141,10 @@ int run_module_tests();
 int run_emitter_tests();
 int run_project_tests();
 int run_package_tests();
+int run_format_tests();
+int run_docs_tests();
+int run_lsp_tests();
+int run_repl_tests();
 
 int main() {
     test_version_command();
@@ -158,6 +162,10 @@ int main() {
     failures += run_emitter_tests();
     failures += run_project_tests();
     failures += run_package_tests();
+    failures += run_format_tests();
+    failures += run_docs_tests();
+    failures += run_lsp_tests();
+    failures += run_repl_tests();
 
     if (failures != 0) {
         std::cerr << failures << " C++ compiler test(s) failed\n";

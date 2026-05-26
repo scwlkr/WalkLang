@@ -71,6 +71,7 @@
 <li>Phase 7 C++ project and package workflow pieces under <code>compiler/project/</code> and <code>compiler/package/</code>, with <code>walk.toml</code> parsing, project <code>init/fmt/clean/check/build/test</code>, local package <code>init/resolve/publish</code>, <code>walk.lock</code>, package cache verification, and preserved package checksums.</li>
 <li>Phase 8 runtime-module conformance fixtures under <code>tests/runtime_modules/</code>, covering draft <code>io</code>, <code>parse</code>, <code>process</code>, <code>file</code>, <code>dir</code>, <code>path</code>, <code>json</code>, <code>term</code>, <code>http</code>, and <code>html</code> through native C runtime execution.</li>
 <li>Direct C runtime tests for draft result data helpers, JSON/HTML helpers, stdin reads, and HTTP recoverable result boundaries against a local loopback server.</li>
+<li>Phase 9 C++ tooling pieces under <code>compiler/format/</code>, <code>compiler/docs/</code>, <code>compiler/debug_map/</code>, <code>compiler/lsp/</code>, and <code>compiler/repl/</code>, with C++ tests for formatter, docs/site generation, LSP, and REPL behavior.</li>
 </ul>
 <h3 id="changed">Changed</h3>
 <ul>
@@ -83,8 +84,10 @@
 <li><code>tests/conformance/run.sh</code> now supports <code>--emit-c</code> and <code>--native</code> to compare generated C snapshots and native behavior between the reference compiler and <code>walk-cpp</code>.</li>
 <li><code>tests/conformance/run.sh</code> now supports <code>--project</code> and <code>--package</code> to prove project lifecycle and package lock/cache behavior against the reference compiler and <code>walk-cpp</code>.</li>
 <li><code>tests/conformance/run.sh</code> now supports <code>--runtime-modules</code> to prove draft runtime module parity against the reference compiler and <code>walk-cpp</code>.</li>
+<li><code>tests/conformance/run.sh</code> now supports <code>--tooling</code> to prove formatter, docs, debug-map, LSP, and REPL behavior against the reference compiler and <code>walk-cpp</code>.</li>
 <li><code>scripts/stress-compatibility.sh</code> now keeps backend compatibility checks active for staged <code>walk-cpp</code> candidates while skipping later-phase formatter/project lifecycle checks only when the candidate advertises those commands as not ported.</li>
 <li><code>scripts/install-local.sh</code> and <code>scripts/release.sh</code> can use <code>build/walk-cpp</code> as the WalkLang build driver through <code>WALK_BUILD_BIN</code> and <code>WALK_RELEASE_BUILD_BIN</code>.</li>
+<li><code>scripts/build-docs-site.sh</code> now builds and uses <code>build/walk-cpp</code> by default, and the old Go site generator under <code>scripts/sitegen.go</code> has been removed.</li>
 </ul>
 <h2 id="v5-14-1-systems-compiler-port-contract">v5.14.1 - Systems Compiler Port Contract</h2>
 <p>Date: 2026-05-26</p>

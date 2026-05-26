@@ -48,6 +48,10 @@ Build the site and generated reference artifacts with:
 scripts/build-docs-site.sh
 ```
 
+The script builds and uses the C++ `walk-cpp` candidate by default for
+structured API docs and static site generation. The previous Go site generator
+has been removed.
+
 Check that generated artifacts are fresh and that static links resolve with:
 
 ```bash

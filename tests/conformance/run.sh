@@ -7,7 +7,7 @@ expected_dir="$repo_root/tests/conformance/expected"
 tmp_root="$repo_root/tests/conformance/tmp"
 
 usage() {
-    echo "usage: WALK_REF=<path> [WALK_CANDIDATE=<path>] tests/conformance/run.sh --record|--verify|--parse|--check|--fail-diagnostics|--emit-c|--native|--runtime-modules|--project|--package" >&2
+    echo "usage: WALK_REF=<path> [WALK_CANDIDATE=<path>] tests/conformance/run.sh --record|--verify|--parse|--check|--fail-diagnostics|--emit-c|--native|--runtime-modules|--project|--package|--tooling" >&2
 }
 
 if [ "$#" -ne 1 ]; then
@@ -17,7 +17,7 @@ fi
 
 action="$1"
 case "$action" in
-    --record|--verify|--parse|--check|--fail-diagnostics|--emit-c|--native|--runtime-modules|--project|--package)
+    --record|--verify|--parse|--check|--fail-diagnostics|--emit-c|--native|--runtime-modules|--project|--package|--tooling)
         ;;
     *)
         usage
@@ -51,11 +51,11 @@ walk_candidate=""
 if [ "${WALK_CANDIDATE:-}" != "" ]; then
     walk_candidate="$(resolve_tool "$WALK_CANDIDATE")"
 fi
-if { [ "$action" = "--parse" ] || [ "$action" = "--check" ] || [ "$action" = "--fail-diagnostics" ] || [ "$action" = "--emit-c" ] || [ "$action" = "--native" ] || [ "$action" = "--runtime-modules" ] || [ "$action" = "--project" ] || [ "$action" = "--package" ]; } && [ "$walk_candidate" = "" ]; then
+if { [ "$action" = "--parse" ] || [ "$action" = "--check" ] || [ "$action" = "--fail-diagnostics" ] || [ "$action" = "--emit-c" ] || [ "$action" = "--native" ] || [ "$action" = "--runtime-modules" ] || [ "$action" = "--project" ] || [ "$action" = "--package" ] || [ "$action" = "--tooling" ]; } && [ "$walk_candidate" = "" ]; then
     echo "WALK_CANDIDATE is required for $action" >&2
     exit 2
 fi
-if { [ "$action" = "--check" ] || [ "$action" = "--emit-c" ] || [ "$action" = "--native" ] || [ "$action" = "--runtime-modules" ] || [ "$action" = "--project" ] || [ "$action" = "--package" ]; } && [ "$walk_ref" = "" ]; then
+if { [ "$action" = "--check" ] || [ "$action" = "--emit-c" ] || [ "$action" = "--native" ] || [ "$action" = "--runtime-modules" ] || [ "$action" = "--project" ] || [ "$action" = "--package" ] || [ "$action" = "--tooling" ]; } && [ "$walk_ref" = "" ]; then
     echo "WALK_REF is required for $action" >&2
     exit 2
 fi
@@ -571,6 +571,82 @@ EOF
     grep -q 'cache does not match walk.lock' "$root/corrupt.err"
 }
 
+write_lsp_message() {
+    body="$1"
+    length="$(printf '%s' "$body" | wc -c | tr -d ' ')"
+    printf 'Content-Length: %s\r\n\r\n%s' "$length" "$body"
+}
+
+run_tooling_conformance_for() {
+    compiler="$1"
+    label="$2"
+    root="$work_dir/tooling-$label"
+    rm -rf "$root"
+    mkdir -p "$root"
+
+    cat >"$root/main.walk" <<'EOF'
+/// Summary: Doubles an integer.
+/// Params:
+/// - x: value to multiply
+/// Returns: the doubled value.
+/// Example:
+/// ```walk
+/// out: double(4)
+/// ```
+/// Since: current
+func: double(x int) int
+    return: * x 2
+
+/// Summary: Exposes double from this module.
+/// Example:
+/// ```walk
+/// exp: double
+/// ```
+/// Since: current
+exp: double
+
+out: double(4)
+EOF
+    printf 'out:+ 1 2\n' >"$root/messy.walk"
+
+    (cd "$root" && "$compiler" fmt messy.walk) >"$root/fmt.out" 2>"$root/fmt.err"
+    printf 'out: + 1 2\n' >"$root/fmt.expected"
+    compare_file "$root/fmt.expected" "$root/fmt.out" "$label tooling fmt stdout"
+    : >"$root/empty.expected"
+    compare_file "$root/empty.expected" "$root/fmt.err" "$label tooling fmt stderr"
+
+    (cd "$root" && "$compiler" docs --strict -o api.md main.walk) >"$root/docs.out" 2>"$root/docs.err"
+    grep -q 'func double(x int) int' "$root/api.md"
+    grep -q 'Doubles an integer.' "$root/api.md"
+    compare_file "$root/empty.expected" "$root/docs.err" "$label tooling docs stderr"
+
+    (cd "$root" && "$compiler" docs --strict --format json -o api.json main.walk) >"$root/docs-json.out" 2>"$root/docs-json.err"
+    grep -q '"name": "double"' "$root/api.json"
+    grep -q '"summary": "Doubles an integer."' "$root/api.json"
+    compare_file "$root/empty.expected" "$root/docs-json.err" "$label tooling docs json stderr"
+
+    (cd "$root" && "$compiler" debug-map -o debug.json main.walk) >"$root/debug.out" 2>"$root/debug.err"
+    grep -q '"name": "double"' "$root/debug.json"
+    grep -q '"kind": "function"' "$root/debug.json"
+    compare_file "$root/empty.expected" "$root/debug.err" "$label tooling debug stderr"
+
+    uri="file://$root/bad.walk"
+    {
+        write_lsp_message '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}'
+        write_lsp_message '{"jsonrpc":"2.0","method":"textDocument/didOpen","params":{"textDocument":{"uri":"'"$uri"'","languageId":"walk","version":1,"text":"var: age int = '\''old'\''\n"}}}'
+        write_lsp_message '{"jsonrpc":"2.0","id":2,"method":"textDocument/formatting","params":{"textDocument":{"uri":"'"$uri"'"}}}'
+    } | "$compiler" lsp >"$root/lsp.out" 2>"$root/lsp.err"
+    grep -q '"documentFormattingProvider":true' "$root/lsp.out"
+    grep -q 'type error: age is int, got string' "$root/lsp.out"
+    grep -q "var: age int = '\\\\'old\\\\''\\\\n" "$root/lsp.out" || grep -q "var: age int = 'old'\\\\n" "$root/lsp.out"
+    compare_file "$root/empty.expected" "$root/lsp.err" "$label tooling lsp stderr"
+
+    printf '+ 1 2\n:quit\n' | "$compiler" repl >"$root/repl.out" 2>"$root/repl.err"
+    grep -q 'walk> ' "$root/repl.out"
+    grep -q 'walk> 3' "$root/repl.out"
+    compare_file "$root/empty.expected" "$root/repl.err" "$label tooling repl stderr"
+}
+
 if [ "$action" = "--project" ]; then
     run_project_conformance_for "$walk_ref" reference
     run_project_conformance_for "$walk_candidate" candidate
@@ -582,6 +658,16 @@ if [ "$action" = "--package" ]; then
     run_package_conformance_for "$walk_ref" reference
     run_package_conformance_for "$walk_candidate" candidate
     echo "conformance package: ok"
+    exit 0
+fi
+
+if [ "$action" = "--tooling" ]; then
+    run_tooling_conformance_for "$walk_ref" reference
+    run_tooling_conformance_for "$walk_candidate" candidate
+    compare_file "$work_dir/tooling-reference/fmt.out" "$work_dir/tooling-candidate/fmt.out" "candidate tooling fmt stdout"
+    compare_file "$work_dir/tooling-reference/api.md" "$work_dir/tooling-candidate/api.md" "candidate tooling docs markdown"
+    compare_file "$work_dir/tooling-reference/api.json" "$work_dir/tooling-candidate/api.json" "candidate tooling docs json"
+    echo "conformance tooling: fmt docs debug-map lsp repl ok"
     exit 0
 fi
 

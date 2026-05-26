@@ -160,17 +160,17 @@ The normal source install flow builds and installs `walktop` beside `walk`.
 The systems compiler port builds a candidate executable named `walk-cpp`:
 
 ```bash
-make walk WALK_VERSION=v5.14-cpp-skeleton
+make walk WALK_VERSION=v5.14.1-phase9-dev
 ./build/walk-cpp version
 ./build/walk-cpp help
 make test
 ```
 
-In the Phase 3 skeleton, `walk-cpp` intentionally supports only `version` and
-`help`. Recognized commands such as `check`, `emit-c`, `run`, `build`, `test`,
-`fmt`, `clean`, `init`, `package`, `docs`, `debug-map`, `lsp`, and `repl`
-return a `not ported in this phase` diagnostic. They do not shell out to the Go
-reference compiler.
+As of Phase 9 of the systems compiler port, `walk-cpp` supports the current
+compiler, project/package, formatter, docs, debug-map, LSP initialize/
+diagnostics/formatting, REPL, and static docs-site generation paths without
+shelling out to the Go reference compiler. The Go reference compiler remains in
+the repository until the final removal phase.
 
 ## Non-Goals
 
