@@ -60,7 +60,7 @@
 <article class="doc">
 <h1 id="walklang-status">WalkLang Status</h1>
 <p>Current WalkLang version: <code>v5.14.1</code>.</p>
-<p>Current architecture direction on 2026-05-26: <code>docs/SYSTEMS_COMPILER_PORT_PLAN.md</code> is now the accepted execution contract for porting WalkLang from the current reference compiler to the permanent systems architecture: C++ compiler core, C runtime and platform layer, C backend, optional assembly leaf routines, and no final Go or JavaScript implementation footprint. Phase 1, the conformance oracle, is complete. Phase 2, runtime extraction, is complete. Phase 3, the C++ skeleton, is complete. Phase 4, lexer, parser, and AST construction, is complete. Phase 5, semantic checking, is complete. The next porting step is Phase 6, the C backend.</p>
+<p>Current architecture direction on 2026-05-26: <code>docs/SYSTEMS_COMPILER_PORT_PLAN.md</code> is now the accepted execution contract for porting WalkLang from the current reference compiler to the permanent systems architecture: C++ compiler core, C runtime and platform layer, C backend, optional assembly leaf routines, and no final Go or JavaScript implementation footprint. Phase 1, the conformance oracle, is complete. Phase 2, runtime extraction, is complete. Phase 3, the C++ skeleton, is complete. Phase 4, lexer, parser, and AST construction, is complete. Phase 5, semantic checking, is complete. Phase 6, the C backend, is complete. The next porting step is Phase 7, CLI project and package workflows.</p>
 <p><code>v5.14.1</code> is the single project version for the compiler, tooling, docs, release artifacts, and implemented language surface. Feature maturity is described with status labels instead of separate version lines.</p>
 <p>Current feature status:</p>
 <pre><code class="language-text">stable
@@ -76,7 +76,7 @@ standard platform
   CLI standard-platform slice with `walktop` as the first official standalone
   WalkLang-built tool</code></pre>
 <p>Current release state: <code>v5.14.1</code> publishes the systems compiler port contract in <code>docs/SYSTEMS_COMPILER_PORT_PLAN.md</code> and keeps <code>walktop</code> under <code>tools/walktop/</code> as a real WalkLang project and standalone native command. <code>walktop</code> supports <code>--once</code>, <code>--frames 5</code>, and <code>--fixture tools/walktop/testdata/basic</code>, uses OS commands for live data, uses deterministic fixture mode for tests, renders a compact color-forward dashboard through <code>term</code> APIs, and is installed by the normal local install flow beside <code>walk</code>. Native builds now link generated C with the external Walk runtime source under <code>runtime/</code>; release artifacts include a runtime source archive, and source install copies that runtime beside the installed compiler. Source install and release artifact generation now also build the current-host <code>walk-cpp</code> candidate, which is not yet a replacement for the Go reference compiler.</p>
-<p>Systems compiler port state on 2026-05-26: Phase 1 now records the current reference compiler as an executable conformance oracle under <code>tests/conformance/</code>. The manifest covers 20 pass fixtures, 52 fail fixtures, 4 compatibility fixtures, 3 generated-C snapshot fixtures, and 4 <code>walktop</code> fixture groups. The runner records expected behavior with <code>WALK_REF=... --record</code>, verifies it with <code>--verify</code>, and can compare a future <code>WALK_CANDIDATE</code> against the same expected artifacts. <code>scripts/stress-compatibility.sh</code> now invokes the conformance verifier before the older compatibility stress checks. Phase 2 now extracts the generated helper layer into <code>runtime/walk_runtime.h</code>, <code>runtime/walk_runtime.c</code>, and host platform files under <code>runtime/platform/</code>. Generated C includes <code>walk_runtime.h</code>, calls stable <code>walk_rt_*</code> helpers, and keeps <code>walk emit-c</code> inspectable through a link comment instead of embedding the runtime body in every emitted file. Phase 3 adds the permanent C++ compiler skeleton under <code>compiler/</code>, a top-level <code>Makefile</code>, command dispatch for the planned CLI surface, <code>WALK_VERSION</code> embedding, source loading support, deterministic diagnostics, and a C++ unit-test harness. Phase 4 adds the C++ lexer, indentation handling, parser, AST arena, and <code>walk-cpp check --parse-only</code>. Phase 5 adds the C++ semantic checker under <code>compiler/sema/</code>, including deterministic scope lookup, type rules, builtin signatures, module loading, export checks, warnings, and exact fail diagnostic parity for normal <code>walk-cpp check</code>. The C++ candidate builds as <code>build/walk-cpp</code>; <code>version</code>, <code>help</code>, <code>check --parse-only</code>, and normal source-file <code>check</code> are implemented so far, and unported command surfaces still return a <code>not ported in this phase</code> diagnostic without delegating to the Go reference compiler.</p>
+<p>Systems compiler port state on 2026-05-26: Phase 1 now records the current reference compiler as an executable conformance oracle under <code>tests/conformance/</code>. The manifest covers 20 pass fixtures, 52 fail fixtures, 4 compatibility fixtures, 3 generated-C snapshot fixtures, and 4 <code>walktop</code> fixture groups. The runner records expected behavior with <code>WALK_REF=... --record</code>, verifies it with <code>--verify</code>, and can compare a future <code>WALK_CANDIDATE</code> against the same expected artifacts. <code>scripts/stress-compatibility.sh</code> now invokes the conformance verifier before the older compatibility stress checks. Phase 2 now extracts the generated helper layer into <code>runtime/walk_runtime.h</code>, <code>runtime/walk_runtime.c</code>, and host platform files under <code>runtime/platform/</code>. Generated C includes <code>walk_runtime.h</code>, calls stable <code>walk_rt_*</code> helpers, and keeps <code>walk emit-c</code> inspectable through a link comment instead of embedding the runtime body in every emitted file. Phase 3 adds the permanent C++ compiler skeleton under <code>compiler/</code>, a top-level <code>Makefile</code>, command dispatch for the planned CLI surface, <code>WALK_VERSION</code> embedding, source loading support, deterministic diagnostics, and a C++ unit-test harness. Phase 4 adds the C++ lexer, indentation handling, parser, AST arena, and <code>walk-cpp check --parse-only</code>. Phase 5 adds the C++ semantic checker under <code>compiler/sema/</code>, including deterministic scope lookup, type rules, builtin signatures, module loading, export checks, warnings, and exact fail diagnostic parity for normal <code>walk-cpp check</code>. Phase 6 adds typed IR lowering under <code>compiler/ir/</code>, deterministic C emission under <code>compiler/codegen/c/</code>, C++ candidate <code>emit-c</code>, source-file <code>build</code>, <code>run</code>, and <code>test</code>, plus the current <code>walktop</code> project-test shape needed for native conformance. The C++ candidate builds as <code>build/walk-cpp</code>; later project/package/tooling commands still return a <code>not ported in this phase</code> diagnostic without delegating to the Go reference compiler.</p>
 <p>Phase 1 conformance oracle verification on 2026-05-26:</p>
 <pre><code class="language-text">go build -trimpath -ldflags &#34;-X main.version=v5.14.1&#34; -o build/walk-ref ./cmd/walk passed
 WALK_REF=$PWD/build/walk-ref tests/conformance/run.sh --record passed
@@ -143,6 +143,25 @@ shasum -a 256 -c SHA256SUMS passed for all 8 artifacts
 the current-host walk-cpp release artifact reported v5.14-cpp-sema and passed check --warnings=error tests/pass/hello.walk
 the current-host walktop release artifact passed --once --fixture tools/walktop/testdata/basic
 language-accounting impact checked: Phase 5 adds active C++ semantic-checker source and tests while Go and JavaScript remain until their later removal phases</code></pre>
+<p>Phase 6 C backend verification on 2026-05-26:</p>
+<pre><code class="language-text">make test passed and reported C++ compiler tests passed
+make walk WALK_VERSION=v5.14.1-phase6-dev passed
+./build/walk-cpp emit-c --warnings=error tests/pass/hello.walk -o build/phase6-hello.c matched tests/snapshots/hello.c
+./build/walk-cpp run --warnings=error tests/pass/hello.walk printed hello, 3, and true
+./build/walk-cpp test --warnings=error tests/pass/walk_tests.walk passed with 2 tests
+cd tools/walktop &amp;&amp; ../../build/walk-cpp test --warnings=error passed with 4 tests
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --emit-c passed with 3 snapshot fixtures
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --native passed with 20 pass fixtures, 3 compat fixtures, 2 walktop fixtures, and 25 native executions
+WALK_BIN=$PWD/build/walk-cpp scripts/stress-compatibility.sh passed and reported compatibility stress ok; the script explicitly skipped later-phase fmt/project lifecycle checks because walk-cpp still advertises those commands as not ported
+go test -count=1 ./... passed
+scripts/build-docs-site.sh passed
+scripts/check-docs-site.sh passed after staging generated docs
+scripts/release.sh v5.14-cpp-backend &lt;temp&gt;/release produced 5 walk artifacts, 1 current-host walk-cpp backend artifact, 1 runtime source archive, 1 current-host walktop artifact, and SHA256SUMS
+shasum -a 256 -c SHA256SUMS passed for all 8 artifacts
+the current-host walk-cpp release artifact reported v5.14-cpp-backend and emitted C matching tests/snapshots/hello.c
+git diff --check passed
+git diff --cached --check passed
+language-accounting impact checked: Phase 6 adds active C++ IR and C backend source and tests while Go and JavaScript remain until their later removal phases</code></pre>
 <p>Last release verification on 2026-05-26:</p>
 <pre><code class="language-text">scripts/build-docs-site.sh passed
 scripts/check-docs-site.sh passed
@@ -187,7 +206,7 @@ command -v walktop reported ~/.local/bin/walktop
 NO_COLOR=1 walktop --once --fixture tools/walktop/testdata/basic matched the deterministic dashboard
 git diff --check -- . &#39;:(exclude)playground/hangman.walk&#39; &#39;:(exclude)playground/hangman-v2.walk&#39; passed
 git diff --cached --check passed</code></pre>
-<p>Known local state: no unrelated playground edits are present in the current Phase 5 semantic-checker worktree.</p>
+<p>Known local state: no unrelated playground edits are present in the current Phase 6 C-backend worktree.</p>
 <p>Standard platform implementation on 2026-05-26: WalkLang&#39;s intended product shape is recorded as one general-use language with one standard platform in one monorepo. <code>CONTEXT.md</code> records the standard-platform vocabulary, <code>docs/adr/</code> records the monorepo decision, and <code>docs/STANDARD_PLATFORM.md</code> records the CLI-first implementation path. The first standard platform area is CLI. The first official standalone WalkLang-built tool is <code>walktop</code>, a release-quality system monitor installed by the normal local WalkLang install flow.</p>
 <p>Focused standard platform verification on 2026-05-26:</p>
 <pre><code class="language-text">go test ./cmd/walk -run TestWalktop -count=1 passed
@@ -223,7 +242,7 @@ scripts/check-docs-site.sh passed
 go test -count=1 ./... passed
 WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported compatibility stress ok
 git diff --check -- . &#39;:(exclude)playground/hangman.walk&#39; &#39;:(exclude)playground/hangman-v2.walk&#39; passed</code></pre>
-<p>Next: begin Phase 6 in <code>docs/SYSTEMS_COMPILER_PORT_PLAN.md</code> by porting typed IR lowering and deterministic C code generation to C++.</p>
+<p>Next: begin Phase 7 in <code>docs/SYSTEMS_COMPILER_PORT_PLAN.md</code> by porting CLI project and package workflows to C++.</p>
 </article>
 <footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
 </div>

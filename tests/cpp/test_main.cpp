@@ -138,6 +138,7 @@ int run_lexer_tests();
 int run_parser_tests();
 int run_checker_tests();
 int run_module_tests();
+int run_emitter_tests();
 
 int main() {
     test_version_command();
@@ -152,6 +153,7 @@ int main() {
     failures += run_parser_tests();
     failures += run_checker_tests();
     failures += run_module_tests();
+    failures += run_emitter_tests();
 
     if (failures != 0) {
         std::cerr << failures << " C++ compiler test(s) failed\n";

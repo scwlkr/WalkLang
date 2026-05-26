@@ -8,6 +8,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace walk::sema {
 
@@ -30,5 +31,6 @@ struct ProgramBundle {
 };
 
 [[nodiscard]] ProgramBundle load_program_with_modules(const std::string& source_path);
+[[nodiscard]] ProgramBundle load_program_with_modules_and_search_dirs(const std::string& source_path, const std::vector<std::string>& search_dirs);
 
 }  // namespace walk::sema

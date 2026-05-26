@@ -9,8 +9,8 @@ runtime and platform layer, C backend, optional assembly leaf routines, and no
 final Go or JavaScript implementation footprint. Phase 1, the conformance
 oracle, is complete. Phase 2, runtime extraction, is complete. Phase 3, the C++
 skeleton, is complete. Phase 4, lexer, parser, and AST construction, is
-complete. Phase 5, semantic checking, is complete. The next porting step is
-Phase 6, the C backend.
+complete. Phase 5, semantic checking, is complete. Phase 6, the C backend, is
+complete. The next porting step is Phase 7, CLI project and package workflows.
 
 `v5.14.1` is the single project version for the compiler, tooling, docs,
 release artifacts, and implemented language surface. Feature maturity is
@@ -66,10 +66,13 @@ lexer, indentation handling, parser, AST arena, and `walk-cpp check
 --parse-only`. Phase 5 adds the C++ semantic checker under `compiler/sema/`,
 including deterministic scope lookup, type rules, builtin signatures, module
 loading, export checks, warnings, and exact fail diagnostic parity for normal
-`walk-cpp check`. The C++ candidate builds as `build/walk-cpp`; `version`,
-`help`, `check --parse-only`, and normal source-file `check` are implemented so
-far, and unported command surfaces still return a `not ported in this phase`
-diagnostic without delegating to the Go reference compiler.
+`walk-cpp check`. Phase 6 adds typed IR lowering under `compiler/ir/`,
+deterministic C emission under `compiler/codegen/c/`, C++ candidate `emit-c`,
+source-file `build`, `run`, and `test`, plus the current `walktop`
+project-test shape needed for native conformance. The C++ candidate builds as
+`build/walk-cpp`; later project/package/tooling commands still return a
+`not ported in this phase` diagnostic without delegating to the Go reference
+compiler.
 
 Phase 1 conformance oracle verification on 2026-05-26:
 
@@ -157,6 +160,29 @@ the current-host walktop release artifact passed --once --fixture tools/walktop/
 language-accounting impact checked: Phase 5 adds active C++ semantic-checker source and tests while Go and JavaScript remain until their later removal phases
 ```
 
+Phase 6 C backend verification on 2026-05-26:
+
+```text
+make test passed and reported C++ compiler tests passed
+make walk WALK_VERSION=v5.14.1-phase6-dev passed
+./build/walk-cpp emit-c --warnings=error tests/pass/hello.walk -o build/phase6-hello.c matched tests/snapshots/hello.c
+./build/walk-cpp run --warnings=error tests/pass/hello.walk printed hello, 3, and true
+./build/walk-cpp test --warnings=error tests/pass/walk_tests.walk passed with 2 tests
+cd tools/walktop && ../../build/walk-cpp test --warnings=error passed with 4 tests
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --emit-c passed with 3 snapshot fixtures
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --native passed with 20 pass fixtures, 3 compat fixtures, 2 walktop fixtures, and 25 native executions
+WALK_BIN=$PWD/build/walk-cpp scripts/stress-compatibility.sh passed and reported compatibility stress ok; the script explicitly skipped later-phase fmt/project lifecycle checks because walk-cpp still advertises those commands as not ported
+go test -count=1 ./... passed
+scripts/build-docs-site.sh passed
+scripts/check-docs-site.sh passed after staging generated docs
+scripts/release.sh v5.14-cpp-backend <temp>/release produced 5 walk artifacts, 1 current-host walk-cpp backend artifact, 1 runtime source archive, 1 current-host walktop artifact, and SHA256SUMS
+shasum -a 256 -c SHA256SUMS passed for all 8 artifacts
+the current-host walk-cpp release artifact reported v5.14-cpp-backend and emitted C matching tests/snapshots/hello.c
+git diff --check passed
+git diff --cached --check passed
+language-accounting impact checked: Phase 6 adds active C++ IR and C backend source and tests while Go and JavaScript remain until their later removal phases
+```
+
 Last release verification on 2026-05-26:
 
 ```text
@@ -210,7 +236,7 @@ git diff --cached --check passed
 ```
 
 Known local state: no unrelated playground edits are present in the current
-Phase 5 semantic-checker worktree.
+Phase 6 C-backend worktree.
 
 Standard platform implementation on 2026-05-26: WalkLang's intended product
 shape is recorded as one general-use language with one standard platform in one
@@ -288,5 +314,5 @@ WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported com
 git diff --check -- . ':(exclude)playground/hangman.walk' ':(exclude)playground/hangman-v2.walk' passed
 ```
 
-Next: begin Phase 6 in `docs/SYSTEMS_COMPILER_PORT_PLAN.md` by porting typed
-IR lowering and deterministic C code generation to C++.
+Next: begin Phase 7 in `docs/SYSTEMS_COMPILER_PORT_PLAN.md` by porting CLI
+project and package workflows to C++.

@@ -70,8 +70,35 @@ std::optional<std::filesystem::path> find_module_path(const std::string& module,
     return std::nullopt;
 }
 
+std::vector<std::filesystem::path> append_search_dir(std::vector<std::filesystem::path> existing, const std::vector<std::string>& dirs) {
+    std::set<std::string> seen;
+    std::vector<std::filesystem::path> result;
+    result.reserve(existing.size() + dirs.size());
+    auto add = [&](std::filesystem::path dir) {
+        if (dir.empty()) {
+            return;
+        }
+        std::filesystem::path clean = std::filesystem::absolute(std::move(dir)).lexically_normal();
+        std::string key = clean.string();
+        if (seen.count(key) != 0) {
+            return;
+        }
+        seen.insert(std::move(key));
+        result.push_back(std::move(clean));
+    };
+    for (std::filesystem::path& dir : existing) {
+        add(std::move(dir));
+    }
+    for (const std::string& dir : dirs) {
+        add(dir);
+    }
+    return result;
+}
+
 class Loader {
 public:
+    explicit Loader(std::vector<std::string> search_dirs) : search_dirs_(append_search_dir({}, search_dirs)) {}
+
     bool load_imports(ast::Program& program, const std::filesystem::path& base_dir, ProgramBundle& bundle) {
         for (ast::Import* import : imports(program)) {
             if (is_builtin_module(import->module)) {
@@ -84,7 +111,7 @@ public:
             if (bundle.modules.find(import->module) != bundle.modules.end()) {
                 continue;
             }
-            const std::optional<std::filesystem::path> module_path = find_module_path(import->module, base_dir);
+            const std::optional<std::filesystem::path> module_path = find_module_path_in_search(import->module, base_dir);
             if (!module_path) {
                 add_module_error(bundle.diagnostics, import->range, "module error: module " + import->module + " not found at " + (base_dir / (import->module + ".walk")).string());
                 return false;
@@ -118,7 +145,19 @@ public:
     }
 
 private:
+    std::optional<std::filesystem::path> find_module_path_in_search(const std::string& module, const std::filesystem::path& base_dir) const {
+        std::vector<std::filesystem::path> dirs = append_search_dir({base_dir}, {});
+        dirs.insert(dirs.end(), search_dirs_.begin(), search_dirs_.end());
+        for (const std::filesystem::path& dir : dirs) {
+            if (std::optional<std::filesystem::path> found = find_module_path(module, dir)) {
+                return found;
+            }
+        }
+        return std::nullopt;
+    }
+
     std::set<std::string> loading_;
+    std::vector<std::filesystem::path> search_dirs_;
 };
 
 }  // namespace
@@ -127,7 +166,7 @@ bool ProgramBundle::ok() const {
     return source != nullptr && parsed.ok() && !diagnostics.has_errors();
 }
 
-ProgramBundle load_program_with_modules(const std::string& source_path) {
+ProgramBundle load_program_with_modules_and_search_dirs(const std::string& source_path, const std::vector<std::string>& search_dirs) {
     ProgramBundle bundle;
     Result<SourceFile> loaded = SourceFile::load(source_path);
     if (!loaded.ok()) {
@@ -140,9 +179,13 @@ ProgramBundle load_program_with_modules(const std::string& source_path) {
         bundle.diagnostics = bundle.parsed.diagnostics;
         return bundle;
     }
-    Loader loader;
+    Loader loader(search_dirs);
     loader.load_imports(*bundle.parsed.program, std::filesystem::path(source_path).parent_path(), bundle);
     return bundle;
+}
+
+ProgramBundle load_program_with_modules(const std::string& source_path) {
+    return load_program_with_modules_and_search_dirs(source_path, {});
 }
 
 }  // namespace walk::sema

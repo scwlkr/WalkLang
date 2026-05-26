@@ -55,3 +55,19 @@ tests/conformance/run.sh --verify
 The runner compares stdout, stderr, success/failure status, and generated C for
 snapshot rows. It intentionally ignores temp-path stdout from `emit-c` because
 the generated C content is the contract for those rows.
+
+## Candidate Slices
+
+The systems port can verify staged C++ candidate surfaces without requiring
+every later command to be ported at once:
+
+```bash
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --parse
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --check
+WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --fail-diagnostics
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --emit-c
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --native
+```
+
+`--emit-c` covers generated-C snapshot rows. `--native` covers rows marked
+`native=yes`, including current pass, compatibility, and walktop native proofs.

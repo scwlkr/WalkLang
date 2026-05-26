@@ -20,6 +20,18 @@ WalkLang source still follows the same pipeline:
 .walk -> generated C + Walk C runtime -> native executable
 ```
 
+During the systems compiler port, the C++ candidate now uses the same backend
+shape for source-file builds:
+
+```text
+.walk -> C++ parser/checker -> typed IR -> generated C + Walk C runtime -> native executable
+```
+
+`walk-cpp emit-c`, `walk-cpp build`, `walk-cpp run`, and source-file
+`walk-cpp test` are implemented through that C++ IR and C emitter. Later
+project, package, formatter, docs, LSP, and REPL workflows remain staged for
+their own port phases.
+
 ## Build Modes
 
 Builds have an explicit mode. Debug is the default and emits native compiler
@@ -122,6 +134,8 @@ and a link comment. Emitted source statements include comments like:
 ```
 
 These comments do not change runtime behavior. They make emitted functions and `main` easier to inspect while preserving predictable C output and snapshot coverage.
+The C++ emitter preserves this format for the current snapshot fixtures so
+generated-C diffs stay deterministic during the port.
 
 ## Draft Runtime Backends
 

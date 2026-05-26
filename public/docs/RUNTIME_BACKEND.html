@@ -68,6 +68,9 @@ debuggable
 readable enough to inspect</code></pre>
 <p>WalkLang source still follows the same pipeline:</p>
 <pre><code class="language-text">.walk -&gt; generated C + Walk C runtime -&gt; native executable</code></pre>
+<p>During the systems compiler port, the C++ candidate now uses the same backend shape for source-file builds:</p>
+<pre><code class="language-text">.walk -&gt; C++ parser/checker -&gt; typed IR -&gt; generated C + Walk C runtime -&gt; native executable</code></pre>
+<p><code>walk-cpp emit-c</code>, <code>walk-cpp build</code>, <code>walk-cpp run</code>, and source-file <code>walk-cpp test</code> are implemented through that C++ IR and C emitter. Later project, package, formatter, docs, LSP, and REPL workflows remain staged for their own port phases.</p>
 <h2 id="build-modes">Build Modes</h2>
 <p>Builds have an explicit mode. Debug is the default and emits native compiler flags suitable for inspection:</p>
 <pre><code class="language-bash">walk build main.walk -o build/main --mode debug
@@ -109,7 +112,7 @@ out: got[0]</code></pre>
 <h2 id="generated-c-inspectability">Generated C Inspectability</h2>
 <p>Generated C starts with a short backend comment, a <code>walk_runtime.h</code> include, and a link comment. Emitted source statements include comments like:</p>
 <pre><code class="language-c">/* source: main.walk:6:1 */</code></pre>
-<p>These comments do not change runtime behavior. They make emitted functions and <code>main</code> easier to inspect while preserving predictable C output and snapshot coverage.</p>
+<p>These comments do not change runtime behavior. They make emitted functions and <code>main</code> easier to inspect while preserving predictable C output and snapshot coverage. The C++ emitter preserves this format for the current snapshot fixtures so generated-C diffs stay deterministic during the port.</p>
 <h2 id="draft-runtime-backends">Draft Runtime Backends</h2>
 <p>Draft IO helpers grow the C runtime without changing the stable feature set.</p>
 <p>Current draft runtime families include:</p>

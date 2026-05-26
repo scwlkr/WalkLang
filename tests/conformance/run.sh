@@ -7,7 +7,7 @@ expected_dir="$repo_root/tests/conformance/expected"
 tmp_root="$repo_root/tests/conformance/tmp"
 
 usage() {
-    echo "usage: WALK_REF=<path> [WALK_CANDIDATE=<path>] tests/conformance/run.sh --record|--verify|--parse|--check|--fail-diagnostics" >&2
+    echo "usage: WALK_REF=<path> [WALK_CANDIDATE=<path>] tests/conformance/run.sh --record|--verify|--parse|--check|--fail-diagnostics|--emit-c|--native" >&2
 }
 
 if [ "$#" -ne 1 ]; then
@@ -17,7 +17,7 @@ fi
 
 action="$1"
 case "$action" in
-    --record|--verify|--parse|--check|--fail-diagnostics)
+    --record|--verify|--parse|--check|--fail-diagnostics|--emit-c|--native)
         ;;
     *)
         usage
@@ -51,12 +51,12 @@ walk_candidate=""
 if [ "${WALK_CANDIDATE:-}" != "" ]; then
     walk_candidate="$(resolve_tool "$WALK_CANDIDATE")"
 fi
-if { [ "$action" = "--parse" ] || [ "$action" = "--check" ] || [ "$action" = "--fail-diagnostics" ]; } && [ "$walk_candidate" = "" ]; then
+if { [ "$action" = "--parse" ] || [ "$action" = "--check" ] || [ "$action" = "--fail-diagnostics" ] || [ "$action" = "--emit-c" ] || [ "$action" = "--native" ]; } && [ "$walk_candidate" = "" ]; then
     echo "WALK_CANDIDATE is required for $action" >&2
     exit 2
 fi
-if [ "$action" = "--check" ] && [ "$walk_ref" = "" ]; then
-    echo "WALK_REF is required for --check" >&2
+if { [ "$action" = "--check" ] || [ "$action" = "--emit-c" ] || [ "$action" = "--native" ]; } && [ "$walk_ref" = "" ]; then
+    echo "WALK_REF is required for $action" >&2
     exit 2
 fi
 
@@ -501,6 +501,37 @@ while IFS="$tab" read -r id kind mode source cwd stdin_key native; do
         continue
     fi
 
+    if [ "$action" = "--emit-c" ]; then
+        if [ "$mode" != "emit-c" ]; then
+            continue
+        fi
+        verify_case_for "$walk_ref" reference "$id" "$kind" "$mode" "$source" "$cwd" "$stdin_key"
+        verify_case_for "$walk_candidate" candidate "$id" "$kind" "$mode" "$source" "$cwd" "$stdin_key"
+        snapshot_ok=$((snapshot_ok + 1))
+        continue
+    fi
+
+    if [ "$action" = "--native" ]; then
+        if [ "$native" != "yes" ]; then
+            continue
+        fi
+        verify_case_for "$walk_ref" reference "$id" "$kind" "$mode" "$source" "$cwd" "$stdin_key"
+        verify_case_for "$walk_candidate" candidate "$id" "$kind" "$mode" "$source" "$cwd" "$stdin_key"
+        case "$kind" in
+            pass)
+                pass_ok=$((pass_ok + 1))
+                ;;
+            compat)
+                compat_ok=$((compat_ok + 1))
+                ;;
+            walktop)
+                walktop_ok=$((walktop_ok + 1))
+                ;;
+        esac
+        native_ok=$((native_ok + 1))
+        continue
+    fi
+
     case "$action" in
         --record)
             record_case "$id" "$kind" "$mode" "$source" "$cwd" "$stdin_key"
@@ -558,6 +589,21 @@ fi
 if [ "$action" = "--fail-diagnostics" ]; then
     echo "conformance fail diagnostics: $fail_ok fail fixtures ok"
     echo "conformance fail diagnostics: ok"
+    exit 0
+fi
+
+if [ "$action" = "--emit-c" ]; then
+    echo "conformance emit-c: $snapshot_ok snapshot fixtures ok"
+    echo "conformance emit-c: ok"
+    exit 0
+fi
+
+if [ "$action" = "--native" ]; then
+    echo "conformance native: $pass_ok pass fixtures ok"
+    echo "conformance native: $compat_ok compat fixtures ok"
+    echo "conformance native: $walktop_ok walktop fixtures ok"
+    echo "conformance native: $native_ok native executions ok"
+    echo "conformance native: ok"
     exit 0
 fi
 

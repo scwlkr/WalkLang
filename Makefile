@@ -21,6 +21,10 @@ WALK_CPP_SOURCES := \
 	compiler/main.cpp \
 	compiler/cli/command.cpp \
 	compiler/ast/ast.cpp \
+	compiler/codegen/c/c_emitter.cpp \
+	compiler/codegen/c/name_mangle.cpp \
+	compiler/ir/ir.cpp \
+	compiler/ir/lower.cpp \
 	compiler/lex/lexer.cpp \
 	compiler/parse/parser.cpp \
 	compiler/sema/builtins.cpp \
@@ -36,11 +40,16 @@ WALK_CPP_OBJECTS := $(WALK_CPP_SOURCES:%.cpp=$(CPP_BUILD_DIR)/%.o)
 TEST_CPP_SOURCES := \
 	tests/cpp/test_main.cpp \
 	tests/cpp/checker_tests.cpp \
+	tests/cpp/emitter_tests.cpp \
 	tests/cpp/lexer_tests.cpp \
 	tests/cpp/module_tests.cpp \
 	tests/cpp/parser_tests.cpp \
 	compiler/cli/command.cpp \
 	compiler/ast/ast.cpp \
+	compiler/codegen/c/c_emitter.cpp \
+	compiler/codegen/c/name_mangle.cpp \
+	compiler/ir/ir.cpp \
+	compiler/ir/lower.cpp \
 	compiler/lex/lexer.cpp \
 	compiler/parse/parser.cpp \
 	compiler/sema/builtins.cpp \

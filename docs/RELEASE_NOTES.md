@@ -9,6 +9,7 @@
 - Phase 3 C++ compiler skeleton under `compiler/`, with `make walk`, `make test`, C++ command dispatch, version/help behavior, deterministic diagnostics, source loading support, and a C++ unit-test harness.
 - Phase 4 C++ frontend pieces under `compiler/lex/`, `compiler/parse/`, and `compiler/ast/`, with tokenization, indentation handling, AST arena ownership, parser diagnostics, and `walk-cpp check --parse-only`.
 - Phase 5 C++ semantic checker under `compiler/sema/`, with type checking, scope/name resolution, module/export resolution, built-in signatures, warning handling, and normal `walk-cpp check`.
+- Phase 6 C++ backend pieces under `compiler/ir/` and `compiler/codegen/c/`, with typed IR lowering, deterministic C emission, runtime-backed native builds, and C++ candidate `emit-c`, `build`, `run`, and `test`.
 
 ### Changed
 
@@ -18,6 +19,8 @@
 - `scripts/install-local.sh` and `scripts/release.sh` now build a current-host `walk-cpp` candidate artifact beside the Go reference `walk` while the port is in progress.
 - `tests/conformance/run.sh` now supports `--parse` to compare reference compiler syntax accept/reject behavior with the C++ parse-only candidate.
 - `tests/conformance/run.sh` now supports `--check` and `--fail-diagnostics` to compare C++ semantic check behavior and exact fail diagnostics against the reference oracle.
+- `tests/conformance/run.sh` now supports `--emit-c` and `--native` to compare generated C snapshots and native behavior between the reference compiler and `walk-cpp`.
+- `scripts/stress-compatibility.sh` now keeps backend compatibility checks active for staged `walk-cpp` candidates while skipping later-phase formatter/project lifecycle checks only when the candidate advertises those commands as not ported.
 
 ## v5.14.1 - Systems Compiler Port Contract
 

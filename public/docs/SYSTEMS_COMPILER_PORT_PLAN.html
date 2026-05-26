@@ -652,7 +652,7 @@ the current-host walktop release artifact passed --once --fixture tools/walktop/
 <p>Phase completion prompt:</p>
 <pre><code class="language-text">/goal Complete Phase 5 in docs/SYSTEMS_COMPILER_PORT_PLAN.md. Port semantic checking, type rules, modules, warnings, and diagnostics to C++. Prove check/fail parity against the conformance oracle, update docs/status and the phase board, commit the result, and preserve unrelated playground edits.</code></pre>
 <h2 id="phase-6-c-backend">Phase 6: C Backend</h2>
-<p>Status: Not started</p>
+<p>Status: Complete</p>
 <p>Goal: port typed IR lowering and C code generation to C++.</p>
 <p>Files to create:</p>
 <pre><code class="language-text">compiler/ir/ir.h
@@ -685,6 +685,26 @@ WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformanc
 WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --native
 WALK_BIN=$PWD/build/walk-cpp scripts/stress-compatibility.sh
 go test -count=1 ./...</code></pre>
+<p>Completed on 2026-05-26:</p>
+<pre><code class="language-text">compiler/ir/ now defines a typed lowered IR independent from the parser AST, and compiler/ir/lower.cpp lowers checked programs and modules into it.
+compiler/codegen/c/ now emits deterministic C from IR, preserves source comments, preserves module symbol names such as module__symbol, instantiates simple generic functions, and targets runtime/walk_runtime.h plus walk_rt_* calls.
+walk-cpp emit-c writes deterministic generated C through the C++ backend without delegating to the Go reference compiler.
+walk-cpp build links emitted C with runtime/walk_runtime.c and the host platform source file.
+walk-cpp run and walk-cpp test compile through the C++ backend and execute native binaries.
+walk-cpp test also supports the current walktop project-test shape needed for native conformance by discovering tests under walk.toml projects and using project source search dirs.
+tests/conformance/run.sh now supports --emit-c and --native for C++ candidate parity checks.
+scripts/stress-compatibility.sh keeps backend compatibility checks active for staged walk-cpp candidates and skips later-phase fmt/project lifecycle checks only when the candidate help advertises those commands as not ported.
+make test passed and reported C++ compiler tests passed
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --emit-c passed with 3 snapshot fixtures
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --native passed with 20 pass fixtures, 3 compat fixtures, 2 walktop fixtures, and 25 native executions
+WALK_BIN=$PWD/build/walk-cpp scripts/stress-compatibility.sh passed and reported compatibility stress ok with later-phase fmt/project lifecycle checks skipped for staged walk-cpp
+go test -count=1 ./... passed
+scripts/build-docs-site.sh passed
+scripts/check-docs-site.sh passed after staging generated docs
+scripts/release.sh v5.14-cpp-backend &lt;temp&gt;/release passed with 8 checksummed artifacts
+the current-host walk-cpp release artifact reported v5.14-cpp-backend and emitted C matching tests/snapshots/hello.c
+git diff --check passed
+git diff --cached --check passed</code></pre>
 <p>Phase completion prompt:</p>
 <pre><code class="language-text">/goal Complete Phase 6 in docs/SYSTEMS_COMPILER_PORT_PLAN.md. Port typed IR lowering and C code generation to C++, wire emit-c/build/run/test, preserve deterministic generated C and native behavior, prove parity with the conformance oracle and compatibility stress, update docs/status and the phase board, commit the result, and preserve unrelated playground edits.</code></pre>
 <h2 id="phase-7-cli-project-package">Phase 7: CLI, Project, Package</h2>
