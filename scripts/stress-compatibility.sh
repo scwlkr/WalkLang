@@ -55,8 +55,7 @@ command_is_ported() {
     return 0
 }
 
-go test ./cmd/walk -run TestStableCompatibilitySuite
-go test ./...
+make -s test
 
 "$walk_bin" check --warnings=error examples/stable.walk
 "$walk_bin" emit-c examples/stable.walk -o "$work_dir/stable.c"

@@ -5,10 +5,7 @@ walk_bin="${WALK_BIN:-$PWD/build/walk}"
 
 mkdir -p "$(dirname "$walk_bin")" docs/reference
 
-if [ "${WALK_BIN:-}" = "" ]; then
-    walk_bin="$PWD/build/walk-cpp"
-    make -s walk WALK_VERSION="${WALK_VERSION:-dev}"
-elif [ ! -x "$walk_bin" ]; then
+if [ ! -x "$walk_bin" ]; then
     make -s walk WALK_VERSION="${WALK_VERSION:-dev}"
 fi
 "$walk_bin" docs --strict -o docs/reference/api.md examples/stable.walk

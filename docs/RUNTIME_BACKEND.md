@@ -20,17 +20,15 @@ WalkLang source still follows the same pipeline:
 .walk -> generated C + Walk C runtime -> native executable
 ```
 
-During the systems compiler port, the C++ candidate now uses the same backend
-shape for source-file builds:
+The C++/C compiler uses the same backend shape for source-file builds:
 
 ```text
 .walk -> C++ parser/checker -> typed IR -> generated C + Walk C runtime -> native executable
 ```
 
-`walk-cpp emit-c`, `walk-cpp build`, `walk-cpp run`, and source-file
-`walk-cpp test` are implemented through that C++ IR and C emitter. Later
-project, package, formatter, docs, LSP, and REPL workflows remain staged for
-their own port phases.
+`walk emit-c`, `walk build`, `walk run`, and `walk test` are implemented
+through that C++ IR and C emitter. Project, package, formatter, docs, LSP, and
+REPL workflows also run through the same C++/C toolchain.
 
 ## Build Modes
 
@@ -94,8 +92,8 @@ path separator, cwd, chdir, and temporary-path behavior.
 
 The helper layer keeps compiler-emitted code predictable without exposing
 pointers, allocation calls, or runtime ownership to WalkLang source.
-Phase 8 proves the draft runtime families through both native C runtime tests
-and `walk-cpp` conformance fixtures under `tests/runtime_modules/`.
+Phase 11 proves the draft runtime families through native conformance fixtures
+under `tests/runtime_modules/`.
 
 ## Memory Model
 
@@ -160,9 +158,8 @@ instead of linking a C TLS library into generated output. This keeps release
 cross-builds portable while the API remains draft. Programs that use `http`
 need `curl` available on `PATH`; missing backend, DNS, TLS, timeout, HTTP
 status, and size-limit failures are returned through `HttpResult` values.
-The Phase 8 C runtime tests use a local loopback HTTP server for success and
-HTTP-status cases, while conformance fixtures keep empty-method and empty-URL
-failure results deterministic for both the reference compiler and `walk-cpp`.
+Conformance fixtures keep empty-method and empty-URL failure results
+deterministic for the active C++/C `walk` compiler.
 
 Rich runtimes stay outside the core runtime layer:
 

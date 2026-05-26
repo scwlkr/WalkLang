@@ -10,7 +10,7 @@ examples, tests, documentation, generated reference docs, and release tooling.
 WalkLang compiles `.walk` source through generated C into native executables:
 
 ```text
-.walk source -> Go compiler -> generated C -> native executable
+.walk source -> C++ compiler -> generated C + Walk C runtime -> native executable
 ```
 
 A small WalkLang program looks like this:
@@ -38,15 +38,16 @@ out: add(2, 3)
 
 ## Current Version
 
-WalkLang is currently `v5.14.1`.
+WalkLang is currently `v6.0.0-port-candidate`.
 
-`v5.14.1` covers the compiler, tooling, docs, release artifacts, and
-implemented language surface. Features inside a release are labeled `stable`,
+`v6.0.0-port-candidate` promotes the C++/C systems compiler port to the
+repo-local `walk` binary and removes the Go reference implementation and
+JavaScript docs assets. Features inside a release are labeled `stable`,
 `draft`, `experimental`, or `planned` when their maturity matters.
 
-This release publishes the systems compiler port contract while preserving the
-first CLI standard-platform slice: `walktop`, an official standalone
-WalkLang-built system monitor installed by the normal local install flow.
+The first CLI standard-platform slice remains `walktop`, an official
+standalone WalkLang-built system monitor installed by the normal local install
+flow.
 
 ## What Works Today
 

@@ -106,14 +106,14 @@ Before shipping a docs pass:
 
 ```bash
 git diff --check
-go test -count=1 ./...
+make test
 ```
 
 For docs that mention generated API output, also prove the command works against
 a real source file:
 
 ```bash
-go build -o build/walk ./cmd/walk
+make walk
 ./build/walk docs --strict -o build/api.md examples/stable.walk
 ./build/walk docs --strict --format json -o build/api.json examples/stable.walk
 scripts/check-docs-site.sh

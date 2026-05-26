@@ -6,17 +6,16 @@
 <title>WalkLang Stable Feature Notes - WalkLang</title>
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <link rel="stylesheet" href="../assets/site.css">
-<script defer src="../assets/site.js"></script>
 </head>
 <body>
 <div class="shell">
 <aside class="sidebar">
 <a class="brand" href="../index.html"><img src="../assets/icon.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>
-<form class="doc-search" role="search" data-site-root="../" data-search-index="../docs/search.json">
-<label for="doc-search-input">Search docs</label>
-<input id="doc-search-input" type="search" autocomplete="off" placeholder="try push or array.push">
-<div class="search-results" id="doc-search-results" aria-live="polite"></div>
-</form>
+<nav class="doc-shortcuts" aria-label="Docs shortcuts">
+<a href="INSTALL.html">Install</a>
+<a href="reference/api.html">API Reference</a>
+<a href="STATUS.html">Status</a>
+</nav>
 <nav class="nav" aria-label="Documentation">
 <h2>Start</h2>
 <a href="index.html">Documentation</a>
@@ -150,9 +149,9 @@ testing.assert(bool) -&gt; bool</code></pre>
 <h2 id="diagnostics-and-warnings">Diagnostics And Warnings</h2>
 <p>The CLI prints the stable diagnostic first line, followed by source snippets, caret locations, and focused suggestions when obvious.</p>
 <p>The checker emits warnings for shadowing outer names and unreachable statements.</p>
-<pre><code class="language-bash">go run ./cmd/walk check examples/stable.walk
-go run ./cmd/walk check --warnings=off examples/stable.walk
-go run ./cmd/walk check --warnings=error examples/stable.walk</code></pre>
+<pre><code class="language-bash">walk check examples/stable.walk
+walk check --warnings=off examples/stable.walk
+walk check --warnings=error examples/stable.walk</code></pre>
 <h2 id="build-flow">Build Flow</h2>
 <p>Native builds still go through generated C and <code>cc</code>.</p>
 <p>Install the local CLI first:</p>
@@ -165,7 +164,7 @@ walk version</code></pre>
 <p>Run the compatibility stress path:</p>
 <pre><code class="language-bash">scripts/stress-compatibility.sh</code></pre>
 <p>Run the focused stable compatibility suite:</p>
-<pre><code class="language-bash">go test ./cmd/walk -run TestStableCompatibilitySuite</code></pre>
+<pre><code class="language-bash">make conformance</code></pre>
 <p>Build release CLI artifacts:</p>
 <pre><code class="language-bash">scripts/release.sh v5.14.1</code></pre>
 <h2 id="project-mode">Project Mode</h2>
@@ -178,7 +177,8 @@ walk fmt
 walk clean</code></pre>
 <p>Project mode is defined in <code>docs/PROJECTS.md</code>.</p>
 <p>Run conformance:</p>
-<pre><code class="language-bash">go test ./...</code></pre>
+<pre><code class="language-bash">make test
+make conformance</code></pre>
 </article>
 <footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
 </div>

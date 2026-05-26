@@ -77,6 +77,6 @@ Not included yet:
 Network tests must not depend on public network availability. Compiler/runtime
 tests use local loopback HTTP servers and skip only when the draft runtime
 backend dependency, `curl`, is unavailable.
-The systems compiler Phase 8 runtime-module conformance fixture also covers
+The systems compiler runtime-module conformance fixture also covers
 deterministic HTTP failure result data for empty method and empty URL inputs
-through both the reference compiler and `walk-cpp`.
+through the active C++/C `walk` compiler.

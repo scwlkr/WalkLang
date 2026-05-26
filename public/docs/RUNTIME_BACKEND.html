@@ -6,17 +6,16 @@
 <title>WalkLang Runtime and Backend Maturity - WalkLang</title>
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <link rel="stylesheet" href="../assets/site.css">
-<script defer src="../assets/site.js"></script>
 </head>
 <body>
 <div class="shell">
 <aside class="sidebar">
 <a class="brand" href="../index.html"><img src="../assets/icon.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>
-<form class="doc-search" role="search" data-site-root="../" data-search-index="../docs/search.json">
-<label for="doc-search-input">Search docs</label>
-<input id="doc-search-input" type="search" autocomplete="off" placeholder="try push or array.push">
-<div class="search-results" id="doc-search-results" aria-live="polite"></div>
-</form>
+<nav class="doc-shortcuts" aria-label="Docs shortcuts">
+<a href="INSTALL.html">Install</a>
+<a href="reference/api.html">API Reference</a>
+<a href="STATUS.html">Status</a>
+</nav>
 <nav class="nav" aria-label="Documentation">
 <h2>Start</h2>
 <a href="index.html">Documentation</a>
@@ -68,9 +67,9 @@ debuggable
 readable enough to inspect</code></pre>
 <p>WalkLang source still follows the same pipeline:</p>
 <pre><code class="language-text">.walk -&gt; generated C + Walk C runtime -&gt; native executable</code></pre>
-<p>During the systems compiler port, the C++ candidate now uses the same backend shape for source-file builds:</p>
+<p>The C++/C compiler uses the same backend shape for source-file builds:</p>
 <pre><code class="language-text">.walk -&gt; C++ parser/checker -&gt; typed IR -&gt; generated C + Walk C runtime -&gt; native executable</code></pre>
-<p><code>walk-cpp emit-c</code>, <code>walk-cpp build</code>, <code>walk-cpp run</code>, and source-file <code>walk-cpp test</code> are implemented through that C++ IR and C emitter. Later project, package, formatter, docs, LSP, and REPL workflows remain staged for their own port phases.</p>
+<p><code>walk emit-c</code>, <code>walk build</code>, <code>walk run</code>, and <code>walk test</code> are implemented through that C++ IR and C emitter. Project, package, formatter, docs, LSP, and REPL workflows also run through the same C++/C toolchain.</p>
 <h2 id="build-modes">Build Modes</h2>
 <p>Builds have an explicit mode. Debug is the default and emits native compiler flags suitable for inspection:</p>
 <pre><code class="language-bash">walk build main.walk -o build/main --mode debug
@@ -93,7 +92,7 @@ walk run main.walk --release</code></pre>
 runtime/platform/walk_platform_posix.c or runtime/platform/walk_platform_windows.c</code></pre>
 <p><code>walk emit-c</code> stays useful as an inspection format by emitting a short comment that names the runtime C files required for a native build.</p>
 <p>The runtime header defines Walk scalar aliases, runtime-owned array structs, draft result structs, and helper entrypoints for printing, strings, arrays, files, directories, paths, processes, JSON, terminal helpers, HTTP, and HTML. The platform layer contains host-specific terminal, file-existence, directory, path separator, cwd, chdir, and temporary-path behavior.</p>
-<p>The helper layer keeps compiler-emitted code predictable without exposing pointers, allocation calls, or runtime ownership to WalkLang source. Phase 8 proves the draft runtime families through both native C runtime tests and <code>walk-cpp</code> conformance fixtures under <code>tests/runtime_modules/</code>.</p>
+<p>The helper layer keeps compiler-emitted code predictable without exposing pointers, allocation calls, or runtime ownership to WalkLang source. Phase 11 proves the draft runtime families through native conformance fixtures under <code>tests/runtime_modules/</code>.</p>
 <h2 id="memory-model">Memory Model</h2>
 <p>WalkLang still has no source-level memory management.</p>
 <pre><code class="language-text">no malloc syntax
@@ -123,7 +122,7 @@ JSON text validation
 terminal UX helpers
 HTTP client helpers
 HTML text helpers</code></pre>
-<p>Draft HTTP deliberately delegates to the system <code>curl</code> executable at runtime instead of linking a C TLS library into generated output. This keeps release cross-builds portable while the API remains draft. Programs that use <code>http</code> need <code>curl</code> available on <code>PATH</code>; missing backend, DNS, TLS, timeout, HTTP status, and size-limit failures are returned through <code>HttpResult</code> values. The Phase 8 C runtime tests use a local loopback HTTP server for success and HTTP-status cases, while conformance fixtures keep empty-method and empty-URL failure results deterministic for both the reference compiler and <code>walk-cpp</code>.</p>
+<p>Draft HTTP deliberately delegates to the system <code>curl</code> executable at runtime instead of linking a C TLS library into generated output. This keeps release cross-builds portable while the API remains draft. Programs that use <code>http</code> need <code>curl</code> available on <code>PATH</code>; missing backend, DNS, TLS, timeout, HTTP status, and size-limit failures are returned through <code>HttpResult</code> values. Conformance fixtures keep empty-method and empty-URL failure results deterministic for the active C++/C <code>walk</code> compiler.</p>
 <p>Rich runtimes stay outside the core runtime layer:</p>
 <pre><code class="language-text">web server runtime
 native graphics

@@ -62,13 +62,13 @@ treat it as draft, experimental, or planned according to the labels in
 Run the focused stable compatibility suite with:
 
 ```bash
-go test ./cmd/walk -run TestStableCompatibilitySuite
+make conformance
 ```
 
-The full repository test command also runs it:
+The full repository test flow also runs compiler unit tests:
 
 ```bash
-go test ./...
+make test
 ```
 
 The suite covers representative stable programs, test syntax, user-module exports, stable stdlib APIs, and selected stable diagnostic first lines.

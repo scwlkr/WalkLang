@@ -6,17 +6,16 @@
 <title>WalkLang Docs Style Guide - WalkLang</title>
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <link rel="stylesheet" href="../assets/site.css">
-<script defer src="../assets/site.js"></script>
 </head>
 <body>
 <div class="shell">
 <aside class="sidebar">
 <a class="brand" href="../index.html"><img src="../assets/icon.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>
-<form class="doc-search" role="search" data-site-root="../" data-search-index="../docs/search.json">
-<label for="doc-search-input">Search docs</label>
-<input id="doc-search-input" type="search" autocomplete="off" placeholder="try push or array.push">
-<div class="search-results" id="doc-search-results" aria-live="polite"></div>
-</form>
+<nav class="doc-shortcuts" aria-label="Docs shortcuts">
+<a href="INSTALL.html">Install</a>
+<a href="reference/api.html">API Reference</a>
+<a href="STATUS.html">Status</a>
+</nav>
 <nav class="nav" aria-label="Documentation">
 <h2>Start</h2>
 <a href="index.html">Documentation</a>
@@ -127,9 +126,9 @@ scripts/check-docs-site.sh</code></pre>
 <h2 id="docs-qa">Docs QA</h2>
 <p>Before shipping a docs pass:</p>
 <pre><code class="language-bash">git diff --check
-go test -count=1 ./...</code></pre>
+make test</code></pre>
 <p>For docs that mention generated API output, also prove the command works against a real source file:</p>
-<pre><code class="language-bash">go build -o build/walk ./cmd/walk
+<pre><code class="language-bash">make walk
 ./build/walk docs --strict -o build/api.md examples/stable.walk
 ./build/walk docs --strict --format json -o build/api.json examples/stable.walk
 scripts/check-docs-site.sh</code></pre>

@@ -6,17 +6,16 @@
 <title>Draft Networking - WalkLang</title>
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <link rel="stylesheet" href="../assets/site.css">
-<script defer src="../assets/site.js"></script>
 </head>
 <body>
 <div class="shell">
 <aside class="sidebar">
 <a class="brand" href="../index.html"><img src="../assets/icon.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>
-<form class="doc-search" role="search" data-site-root="../" data-search-index="../docs/search.json">
-<label for="doc-search-input">Search docs</label>
-<input id="doc-search-input" type="search" autocomplete="off" placeholder="try push or array.push">
-<div class="search-results" id="doc-search-results" aria-live="polite"></div>
-</form>
+<nav class="doc-shortcuts" aria-label="Docs shortcuts">
+<a href="INSTALL.html">Install</a>
+<a href="reference/api.html">API Reference</a>
+<a href="STATUS.html">Status</a>
+</nav>
 <nav class="nav" aria-label="Documentation">
 <h2>Start</h2>
 <a href="index.html">Documentation</a>
@@ -112,7 +111,7 @@ http.request(method, url, body) -&gt; HttpResult</code></pre>
 <li>async/event-loop APIs</li>
 </ul>
 <h2 id="testing-policy">Testing Policy</h2>
-<p>Network tests must not depend on public network availability. Compiler/runtime tests use local loopback HTTP servers and skip only when the draft runtime backend dependency, <code>curl</code>, is unavailable. The systems compiler Phase 8 runtime-module conformance fixture also covers deterministic HTTP failure result data for empty method and empty URL inputs through both the reference compiler and <code>walk-cpp</code>.</p>
+<p>Network tests must not depend on public network availability. Compiler/runtime tests use local loopback HTTP servers and skip only when the draft runtime backend dependency, <code>curl</code>, is unavailable. The systems compiler runtime-module conformance fixture also covers deterministic HTTP failure result data for empty method and empty URL inputs through the active C++/C <code>walk</code> compiler.</p>
 </article>
 <footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
 </div>

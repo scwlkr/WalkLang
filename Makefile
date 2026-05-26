@@ -11,8 +11,7 @@ OUT ?= dist
 
 BUILD_DIR := build
 CPP_BUILD_DIR := $(BUILD_DIR)/cpp/$(subst /,_,$(WALK_VERSION))
-WALK_CPP := $(BUILD_DIR)/walk-cpp
-WALK_REF := $(BUILD_DIR)/walk-ref
+WALK := $(BUILD_DIR)/walk
 CPP_TEST_TMP := $(BUILD_DIR)/cpp-tests
 
 CPPFLAGS += -Icompiler -DWALK_VERSION=\"$(WALK_VERSION)\"
@@ -85,13 +84,13 @@ TEST_CPP_SOURCES := \
 	compiler/support/toml_like.cpp
 
 TEST_CPP_OBJECTS := $(TEST_CPP_SOURCES:%.cpp=$(CPP_BUILD_DIR)/%.o)
-TEST_CPP_BIN := $(CPP_BUILD_DIR)/walk-cpp-tests
+TEST_CPP_BIN := $(CPP_BUILD_DIR)/walk-tests
 
 .PHONY: walk test conformance docs check-docs release install-local clean
 
-walk: $(WALK_CPP)
+walk: $(WALK)
 
-$(WALK_CPP): $(WALK_CPP_OBJECTS)
+$(WALK): $(WALK_CPP_OBJECTS)
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $^ -o $@
 
@@ -106,9 +105,8 @@ $(TEST_CPP_BIN): $(TEST_CPP_OBJECTS)
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $^ -o $@
 
-conformance:
-	go build -trimpath -ldflags "-X main.version=$(WALK_VERSION)" -o $(WALK_REF) ./cmd/walk
-	WALK_REF=$$PWD/$(WALK_REF) tests/conformance/run.sh --verify
+conformance: walk
+	WALK_REF=$$PWD/$(WALK) tests/conformance/run.sh --verify
 
 docs:
 	scripts/build-docs-site.sh
@@ -124,4 +122,4 @@ install-local:
 	scripts/install-local.sh "$(VERSION)"
 
 clean:
-	rm -rf $(BUILD_DIR)/cpp $(CPP_TEST_TMP) $(WALK_CPP)
+	rm -rf $(BUILD_DIR)/cpp $(CPP_TEST_TMP) $(WALK)

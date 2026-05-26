@@ -1,23 +1,18 @@
 # WalkLang Status
 
-Current WalkLang version: `v5.14.1`.
+Current WalkLang version: `v6.0.0-port-candidate`.
 
 Current architecture direction on 2026-05-26: `docs/SYSTEMS_COMPILER_PORT_PLAN.md`
-is now the accepted execution contract for porting WalkLang from the current
-reference compiler to the permanent systems architecture: C++ compiler core, C
-runtime and platform layer, C backend, optional assembly leaf routines, and no
-final Go or JavaScript implementation footprint. Phase 1, the conformance
-oracle, is complete. Phase 2, runtime extraction, is complete. Phase 3, the C++
-skeleton, is complete. Phase 4, lexer, parser, and AST construction, is
-complete. Phase 5, semantic checking, is complete. Phase 6, the C backend, is
-complete. Phase 7, CLI project and package workflows, is complete. Phase 8,
-runtime module parity, is complete. Phase 9, tooling parity, is complete. Phase
-10, standard platform parity, is complete. The next porting step is Phase 11,
-remove Go and JavaScript.
+is the accepted execution contract for the systems architecture: C++ compiler
+core, C runtime and platform layer, C backend, optional assembly leaf routines,
+and no final Go or JavaScript implementation footprint. Phases 1 through 11 are
+complete. The next porting step is Phase 12, the final C++/C release gate.
 
-`v5.14.1` is the single project version for the compiler, tooling, docs,
-release artifacts, and implemented language surface. Feature maturity is
-described with status labels instead of separate version lines.
+`v6.0.0-port-candidate` promotes the C++/C compiler to the repo-local `walk`
+binary, removes the Go reference implementation and Go module metadata, removes
+JavaScript source files, and keeps the current language surface verified against
+the recorded conformance oracle. Feature maturity is described with status
+labels instead of separate version lines.
 
 Current feature status:
 
@@ -36,63 +31,50 @@ standard platform
   WalkLang-built tool
 ```
 
-Current release state: `v5.14.1` publishes the systems compiler port contract
-in `docs/SYSTEMS_COMPILER_PORT_PLAN.md` and keeps `walktop` under
+Current release state: `v6.0.0-port-candidate` is not the final public v6
+release. It is the Phase 11 source state that proves `walk` builds from C++/C,
+the docs site is static HTML/CSS without JavaScript assets, and repo-local
+install/release packaging no longer depends on Go. `walktop` remains under
 `tools/walktop/` as a real WalkLang project and standalone native command.
-`walktop` supports `--once`, `--frames 5`, and
-`--fixture tools/walktop/testdata/basic`, uses OS commands for live data, uses
-deterministic fixture mode for tests, renders a compact color-forward dashboard
-through `term` APIs, and is installed by the normal local install flow beside
-`walk`. Native builds now link generated C with the external Walk runtime source
-under `runtime/`; release artifacts include a runtime source archive, and source
-install copies that runtime beside the installed compiler. Source install and
-release artifact generation now also build the current-host `walk-cpp`
-candidate and use that candidate to build `walktop` by default. `walk-cpp` is
-not yet a replacement for the Go reference compiler.
 
-Systems compiler port state on 2026-05-26: Phase 1 now records the current
-reference compiler as an executable conformance oracle under
-`tests/conformance/`. The manifest covers 20 pass fixtures, 52 fail fixtures, 4
-compatibility fixtures, 11 runtime-module fixtures, 3 generated-C snapshot
-fixtures, and 4 `walktop` fixture groups. The runner records expected behavior
-with `WALK_REF=... --record`, verifies it with `--verify`, and can compare a
-future `WALK_CANDIDATE` against the same expected artifacts.
-`scripts/stress-compatibility.sh` now invokes the conformance verifier before
-the older compatibility stress checks. Phase 2 now
-extracts the generated helper layer into `runtime/walk_runtime.h`,
-`runtime/walk_runtime.c`, and host platform files under `runtime/platform/`.
-Generated C includes `walk_runtime.h`, calls stable `walk_rt_*` helpers, and
-keeps `walk emit-c` inspectable through a link comment instead of embedding the
-runtime body in every emitted file. Phase 3 adds the permanent C++ compiler
-skeleton under `compiler/`, a top-level `Makefile`, command dispatch for the
-planned CLI surface, `WALK_VERSION` embedding, source loading support,
-deterministic diagnostics, and a C++ unit-test harness. Phase 4 adds the C++
-lexer, indentation handling, parser, AST arena, and `walk-cpp check
---parse-only`. Phase 5 adds the C++ semantic checker under `compiler/sema/`,
-including deterministic scope lookup, type rules, builtin signatures, module
-loading, export checks, warnings, and exact fail diagnostic parity for normal
-`walk-cpp check`. Phase 6 adds typed IR lowering under `compiler/ir/`,
-deterministic C emission under `compiler/codegen/c/`, C++ candidate `emit-c`,
-source-file `build`, `run`, and `test`, plus the current `walktop`
-project-test shape needed for native conformance. Phase 7 adds C++ project
-mode and local package workflows under `compiler/project/` and
-`compiler/package/`, including `walk.toml` parsing, project `init`, `fmt`,
-`clean`, `check`, `build`, `test`, local package `init`, `resolve`, `publish`,
-`walk.lock`, package cache checksums, and install/release hooks for using
-`build/walk-cpp` as the build driver. Phase 8 adds runtime-module conformance
-fixtures under `tests/runtime_modules/`, direct C runtime tests for draft result
-data helpers and HTTP result boundaries, and a `--runtime-modules` conformance
-gate that proves draft `io`, `parse`, `process`, `file`, `dir`, `path`, `json`,
-`term`, `http`, and `html` through the C runtime and C++ compiler. The C++
-candidate builds as `build/walk-cpp`. Phase 9 ports formatter ownership under
-`compiler/format/`, API docs and static site generation under `compiler/docs/`,
-debug-map output under `compiler/debug_map/`, stdio LSP initialization,
-diagnostics, and formatting under `compiler/lsp/`, and the expression REPL
-wrapper under `compiler/repl/`. `scripts/build-docs-site.sh` now uses the C++
-toolchain by default, and the Go site generator under `scripts/sitegen.go` has
-been removed. Phase 10 proves the first standard-platform slice through the C++
-candidate: `walktop` checks, tests, builds, fixture-runs, live-runs, installs,
-and releases through `walk-cpp` by default.
+Systems compiler port state on 2026-05-26: `tests/conformance/` preserves the
+recorded oracle that was captured before the reference compiler was removed.
+The manifest covers 20 pass fixtures, 52 fail fixtures, 4 compatibility
+fixtures, 11 runtime-module fixtures, 3 generated-C snapshot fixtures, and 4
+`walktop` fixture groups. `make conformance` now builds the active C++/C
+`build/walk` binary and verifies it against those recorded artifacts.
+
+Phase 11 pre-removal parity proof on 2026-05-26:
+
+```text
+make clean passed
+make walk WALK_VERSION=v6.0.0-port-candidate passed
+go build -trimpath -ldflags "-X main.version=v5.14.1" -o build/walk-ref ./cmd/walk passed before Go removal
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --check passed
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --native passed
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --runtime-modules passed
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --project passed
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --package passed
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --tooling passed
+```
+
+Phase 11 removal verification on 2026-05-26:
+
+```text
+make clean passed
+make walk WALK_VERSION=v6.0.0-port-candidate passed
+make test WALK_VERSION=v6.0.0-port-candidate passed
+make conformance WALK_VERSION=v6.0.0-port-candidate passed with 20 pass fixtures, 52 fail fixtures, 36 native executions, 4 compat fixtures, 11 runtime module fixtures, 3 snapshot fixtures, and 4 walktop fixture groups
+scripts/build-docs-site.sh passed
+scripts/check-docs-site.sh passed after staging generated docs
+WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported compatibility stress ok
+make release VERSION=v6.0.0-port-candidate OUT=<temp>/release passed and produced current-host walk, runtime, walktop, and SHA256SUMS artifacts
+shasum -a 256 -c <temp>/release/SHA256SUMS passed
+WALK_INSTALL_DIR=<temp>/bin scripts/install-local.sh v6.0.0-port-candidate passed, installed walk/runtime/walktop, and verified walktop fixture mode
+git ls-files '*.go' 'go.mod' 'go.sum' returned empty
+git ls-files '*.js' returned empty
+find . -path ./.git -prune -o \( -name '*.go' -o -name 'go.mod' -o -name 'go.sum' -o -name '*.js' \) -print returned empty
+```
 
 Phase 1 conformance oracle verification on 2026-05-26:
 
@@ -426,6 +408,6 @@ WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported com
 git diff --check -- . ':(exclude)playground/hangman.walk' ':(exclude)playground/hangman-v2.walk' passed
 ```
 
-Next: begin Phase 11 in `docs/SYSTEMS_COMPILER_PORT_PLAN.md` by removing the
-Go reference compiler and JavaScript site assets only after the completed
-Phase 10 C++/C standard-platform proof stays green.
+Next: complete Phase 12 in `docs/SYSTEMS_COMPILER_PORT_PLAN.md` by cutting the
+first fully C++/C release, verifying install and release artifacts, publishing
+the GitHub release, and confirming public language accounting.

@@ -24,13 +24,6 @@ struct DocPage {
     bool hide_from_nav = false;
 };
 
-struct SearchSection {
-    std::string heading;
-    int level = 0;
-    std::string anchor;
-    std::vector<std::string> lines;
-};
-
 std::string read_file(const std::filesystem::path& path) {
     std::ifstream input(path, std::ios::binary);
     std::ostringstream text;
@@ -248,13 +241,14 @@ std::vector<std::string> sorted_groups(const std::vector<DocPage>& pages) {
     return result;
 }
 
-std::string render_search(const std::string& current) {
-    const std::string root = asset_prefix_for(current);
-    return "<form class=\"doc-search\" role=\"search\" data-site-root=\"" + root + "\" data-search-index=\"" + root + "docs/search.json\">\n"
-        "<label for=\"doc-search-input\">Search docs</label>\n"
-        "<input id=\"doc-search-input\" type=\"search\" autocomplete=\"off\" placeholder=\"try push or array.push\">\n"
-        "<div class=\"search-results\" id=\"doc-search-results\" aria-live=\"polite\"></div>\n"
-        "</form>\n";
+std::string render_shortcuts(const std::string& current) {
+    std::ostringstream out;
+    out << "<nav class=\"doc-shortcuts\" aria-label=\"Docs shortcuts\">\n";
+    out << "<a href=\"" << rel_url(current, "docs/INSTALL.html") << "\">Install</a>\n";
+    out << "<a href=\"" << rel_url(current, "docs/reference/api.html") << "\">API Reference</a>\n";
+    out << "<a href=\"" << rel_url(current, "docs/STATUS.html") << "\">Status</a>\n";
+    out << "</nav>\n";
+    return out.str();
 }
 
 std::string render_sidebar(const std::string& current, const std::vector<DocPage>& pages) {
@@ -262,7 +256,7 @@ std::string render_sidebar(const std::string& current, const std::vector<DocPage
     out << "<aside class=\"sidebar\">\n";
     out << "<a class=\"brand\" href=\"" << rel_url(current, "index.html") << "\"><img src=\"" << asset_prefix_for(current)
         << "assets/icon.svg\" alt=\"\"><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>\n";
-    out << render_search(current);
+    out << render_shortcuts(current);
     out << "<nav class=\"nav\" aria-label=\"Documentation\">\n";
     for (const std::string& group : sorted_groups(pages)) {
         out << "<h2>" << html_escape(group) << "</h2>\n";
@@ -451,7 +445,6 @@ std::string layout(const std::string& current, const std::string& title, const s
     out << "<title>" << html_escape(title) << " - WalkLang</title>\n";
     out << "<link rel=\"icon\" type=\"image/svg+xml\" href=\"" << asset_prefix << "favicon.svg\">\n";
     out << "<link rel=\"stylesheet\" href=\"" << asset_prefix << "assets/site.css\">\n";
-    out << "<script defer src=\"" << asset_prefix << "assets/site.js\"></script>\n";
     out << "</head>\n<body>\n";
     out << "<div class=\"shell\">\n";
     out << render_sidebar(current, pages);
@@ -509,206 +502,6 @@ std::string render_reference_index(const std::string& current, const std::vector
     body << tile("Raw Markdown", "Generated Markdown artifact.", raw) << "\n";
     body << "</div>\n</article>";
     return layout(current, "Reference", pages, body.str());
-}
-
-std::string clean_search_text(std::string source) {
-    static const std::regex link_re(R"(\[([^\]]+)\]\(([^)]+)\))");
-    source = std::regex_replace(source, link_re, "$1");
-    for (const std::string& token : {"`", "\\", "#", "*", "[", "]"}) {
-        std::size_t pos = 0;
-        while ((pos = source.find(token, pos)) != std::string::npos) {
-            source.erase(pos, token.size());
-        }
-    }
-    for (char& ch : source) {
-        if (ch == '_' || ch == '(' || ch == ')' || ch == '{' || ch == '}') {
-            ch = ' ';
-        }
-    }
-    std::istringstream input(source);
-    std::ostringstream out;
-    std::string word;
-    bool first = true;
-    while (input >> word) {
-        if (!first) {
-            out << ' ';
-        }
-        out << word;
-        first = false;
-    }
-    return out.str();
-}
-
-bool summary_metadata_line(const std::string& line) {
-    for (const std::string& prefix : {"Date:", "Status:", "Stability:", "Effect status:"}) {
-        if (starts_with(line, prefix)) {
-            return true;
-        }
-    }
-    return false;
-}
-
-std::string clean_summary_line(std::string line, bool in_code) {
-    if (starts_with(line, "- ")) {
-        line = trim(line.substr(2));
-    }
-    if (starts_with(line, "> ")) {
-        line = line.substr(2);
-    }
-    line = trim(line);
-    if (in_code) {
-        return line;
-    }
-    return clean_search_text(line);
-}
-
-std::vector<std::string> summary_candidates(const std::vector<std::string>& lines, bool include_code) {
-    std::vector<std::string> result;
-    bool in_code = false;
-    for (const std::string& line : lines) {
-        const std::string trimmed = trim(line);
-        if (starts_with(trimmed, "```")) {
-            in_code = !in_code;
-            continue;
-        }
-        if (trimmed.empty() || starts_with(trimmed, "---")) {
-            continue;
-        }
-        if (in_code && !include_code) {
-            continue;
-        }
-        if (!include_code && summary_metadata_line(trimmed)) {
-            continue;
-        }
-        const std::string cleaned = clean_summary_line(trimmed, in_code);
-        if (cleaned.empty()) {
-            continue;
-        }
-        result.push_back(cleaned);
-        if (result.size() >= 2) {
-            break;
-        }
-    }
-    return result;
-}
-
-std::string shorten_summary(const std::string& text, std::size_t limit) {
-    if (text.size() <= limit) {
-        return text;
-    }
-    std::size_t cut = text.rfind(' ', limit == 0 ? 0 : limit - 1);
-    if (cut == std::string::npos || cut < 80) {
-        cut = limit;
-    }
-    return trim(text.substr(0, cut)) + "...";
-}
-
-std::string search_summary(const std::vector<std::string>& lines) {
-    std::vector<std::string> prose = summary_candidates(lines, false);
-    if (prose.empty()) {
-        prose = summary_candidates(lines, true);
-    }
-    if (prose.empty()) {
-        return "Open this section in the WalkLang docs.";
-    }
-    std::ostringstream joined;
-    for (std::size_t index = 0; index < prose.size(); ++index) {
-        if (index != 0) {
-            joined << ' ';
-        }
-        joined << prose[index];
-    }
-    return shorten_summary(joined.str(), 210);
-}
-
-std::vector<SearchSection> search_sections(const std::string& source) {
-    std::vector<SearchSection> sections;
-    SearchSection current;
-    bool in_code = false;
-    auto flush = [&] {
-        if (current.heading.empty() && current.lines.empty()) {
-            return;
-        }
-        sections.push_back(current);
-    };
-    for (const std::string& line : split_lines(source)) {
-        const std::string trimmed = trim(line);
-        if (starts_with(trimmed, "```")) {
-            in_code = !in_code;
-            current.lines.push_back(line);
-            continue;
-        }
-        if (!in_code) {
-            int level = 0;
-            std::string heading_text;
-            if (heading(trimmed, level, heading_text)) {
-                flush();
-                current = {heading_text, level, slug(heading_text), {}};
-                continue;
-            }
-        }
-        current.lines.push_back(line);
-    }
-    flush();
-    if (sections.empty()) {
-        return std::vector<SearchSection>{{"", 0, "", {source}}};
-    }
-    return sections;
-}
-
-std::string search_text(const std::string& title, const SearchSection& section) {
-    std::ostringstream joined;
-    joined << title << ' ' << section.heading;
-    for (const std::string& line : section.lines) {
-        joined << ' ' << line;
-    }
-    return clean_search_text(joined.str());
-}
-
-Result<std::string> search_index_json(const std::vector<DocPage>& pages) {
-    struct Entry {
-        std::string title;
-        std::string section;
-        std::string group;
-        std::string url;
-        std::string summary;
-        std::string text;
-        int level;
-    };
-    std::vector<Entry> entries;
-    for (const DocPage& page : pages) {
-        const std::string source = read_file(page.source);
-        const std::string title = page.title.empty() ? markdown_title(source) : page.title;
-        for (const SearchSection& section : search_sections(source)) {
-            std::string section_title = section.heading;
-            if (section_title.empty()) {
-                section_title = title;
-            }
-            std::string url = std::filesystem::path(page.output).generic_string();
-            if (!section.anchor.empty()) {
-                url += "#" + section.anchor;
-            }
-            entries.push_back({title, section_title, page.group, url, search_summary(section.lines), search_text(title, section), section.level});
-        }
-    }
-    std::ostringstream out;
-    out << "[\n";
-    for (std::size_t index = 0; index < entries.size(); ++index) {
-        const Entry& entry = entries[index];
-        out << "  {\n";
-        out << "    \"title\": \"" << json_escape(entry.title) << "\",\n";
-        if (!entry.section.empty()) {
-            out << "    \"section\": \"" << json_escape(entry.section) << "\",\n";
-        }
-        out << "    \"group\": \"" << json_escape(entry.group) << "\",\n";
-        out << "    \"url\": \"" << json_escape(entry.url) << "\",\n";
-        out << "    \"summary\": \"" << json_escape(entry.summary) << "\",\n";
-        out << "    \"text\": \"" << json_escape(entry.text) << "\",\n";
-        out << "    \"level\": " << entry.level << "\n";
-        out << "  }" << (index + 1 == entries.size() ? "\n" : ",\n");
-    }
-    out << "]\n";
-    return Result<std::string>::success(out.str());
 }
 
 bool external_or_anchor(const std::string& href) {
@@ -792,7 +585,6 @@ Result<void> build_site(const std::string& docs_dir, const std::string& public_d
              {"icon_WalkLang.svg", std::filesystem::path(public_dir) / "assets" / "icon.svg"},
              {"icon_WalkLang.svg", std::filesystem::path(public_dir) / "favicon.svg"},
              {std::filesystem::path("site") / "assets" / "site.css", std::filesystem::path(public_dir) / "assets" / "site.css"},
-             {std::filesystem::path("site") / "assets" / "site.js", std::filesystem::path(public_dir) / "assets" / "site.js"},
          }) {
         Result<void> copied = copy_asset(copy.first, copy.second);
         if (!copied.ok()) {
@@ -826,15 +618,6 @@ Result<void> build_site(const std::string& docs_dir, const std::string& public_d
             return copied;
         }
     }
-    Result<std::string> search = search_index_json(pages);
-    if (!search.ok()) {
-        return Result<void>::failure(search.error());
-    }
-    Result<void> search_written = write_file(std::filesystem::path(public_dir) / "docs" / "search.json", search.value());
-    if (!search_written.ok()) {
-        return search_written;
-    }
-
     for (const DocPage& page : pages) {
         const std::string source = read_file(page.source);
         std::string title = page.title;

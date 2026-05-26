@@ -6,17 +6,16 @@
 <title>WalkLang Standard Library - WalkLang</title>
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <link rel="stylesheet" href="../assets/site.css">
-<script defer src="../assets/site.js"></script>
 </head>
 <body>
 <div class="shell">
 <aside class="sidebar">
 <a class="brand" href="../index.html"><img src="../assets/icon.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>
-<form class="doc-search" role="search" data-site-root="../" data-search-index="../docs/search.json">
-<label for="doc-search-input">Search docs</label>
-<input id="doc-search-input" type="search" autocomplete="off" placeholder="try push or array.push">
-<div class="search-results" id="doc-search-results" aria-live="polite"></div>
-</form>
+<nav class="doc-shortcuts" aria-label="Docs shortcuts">
+<a href="INSTALL.html">Install</a>
+<a href="reference/api.html">API Reference</a>
+<a href="STATUS.html">Status</a>
+</nav>
 <nav class="nav" aria-label="Documentation">
 <h2>Start</h2>
 <a href="index.html">Documentation</a>
@@ -74,9 +73,9 @@ testing</code></pre>
 <p>No other built-in module is stable.</p>
 <p>The current compiler also includes draft <code>io</code>, <code>parse</code>, <code>process</code>, <code>file</code>, <code>dir</code>, <code>path</code>, <code>json</code>, <code>term</code>, <code>http</code>, and <code>html</code> modules. They are importable and tested, but they are not compatibility-protected as stable features.</p>
 <p>Draft APIs may expose draft result structs. They are documented here so current compiler behavior is visible, but they are not part of the stable feature set.</p>
-<p>Draft runtime-module proof surface: <code>tests/runtime_modules/</code> records native fixtures for <code>io</code>, <code>parse</code>, <code>process</code>, <code>file</code>, <code>dir</code>, <code>path</code>, <code>json</code>, <code>term</code>, <code>http</code>, and <code>html</code>. <code>tests/conformance/run.sh --runtime-modules</code> compares the reference compiler and <code>walk-cpp</code> against those fixtures, and <code>tests/runtime/runtime_test.go</code> covers the C runtime helpers directly.</p>
+<p>Draft runtime-module proof surface: <code>tests/runtime_modules/</code> records native fixtures for <code>io</code>, <code>parse</code>, <code>process</code>, <code>file</code>, <code>dir</code>, <code>path</code>, <code>json</code>, <code>term</code>, <code>http</code>, and <code>html</code>. <code>tests/conformance/run.sh --runtime-modules</code> preserved Go-reference parity before removal, and <code>make conformance</code> now verifies the active C++/C <code>walk</code> compiler against the recorded oracle artifacts.</p>
 <p>Stable APIs in this document are pure expression calls unless an entry says otherwise. Invalid argument counts, argument types, or effect placement are compiler diagnostics. Runtime failures named below are part of the documented behavior for valid programs at runtime.</p>
-<p>Proof surface: stable APIs are covered by <code>tests/pass/stdlib.walk</code>, <code>tests/pass/walk_tests.walk</code>, compatibility fixtures, <code>cmd/walk/compatibility_test.go</code>, and <code>cmd/walk/conformance_test.go</code>.</p>
+<p>Proof surface: stable APIs are covered by <code>tests/pass/stdlib.walk</code>, <code>tests/pass/walk_tests.walk</code>, compatibility fixtures, <code>tests/cpp/</code>, and <code>tests/conformance/</code>.</p>
 <p>---</p>
 <h2 id="math">math</h2>
 <h3 id="math-sqrt-number-float">math.sqrt(number) -&gt; float</h3>

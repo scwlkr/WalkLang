@@ -6,17 +6,16 @@
 <title>ARCHITECTURE.md - WalkLang</title>
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <link rel="stylesheet" href="../assets/site.css">
-<script defer src="../assets/site.js"></script>
 </head>
 <body>
 <div class="shell">
 <aside class="sidebar">
 <a class="brand" href="../index.html"><img src="../assets/icon.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>
-<form class="doc-search" role="search" data-site-root="../" data-search-index="../docs/search.json">
-<label for="doc-search-input">Search docs</label>
-<input id="doc-search-input" type="search" autocomplete="off" placeholder="try push or array.push">
-<div class="search-results" id="doc-search-results" aria-live="polite"></div>
-</form>
+<nav class="doc-shortcuts" aria-label="Docs shortcuts">
+<a href="INSTALL.html">Install</a>
+<a href="reference/api.html">API Reference</a>
+<a href="STATUS.html">Status</a>
+</nav>
 <nav class="nav" aria-label="Documentation">
 <h2>Start</h2>
 <a href="index.html">Documentation</a>
@@ -66,7 +65,7 @@ Optional explicit types: yes</code></pre>
 <h2 id="walklang-architecture">WalkLang Architecture</h2>
 <p>WalkLang is a compiled, general-purpose language for readable native programs on any OS.</p>
 <pre><code class="language-text">main.walk -&gt; lexer -&gt; parser -&gt; typed IR -&gt; generated C + Walk C runtime -&gt; native executable</code></pre>
-<p>The active systems port keeps the Go compiler as the reference oracle while the C++ candidate takes over one surface at a time. As of Phase 6, <code>walk-cpp</code> can check source files, lower checked programs to typed IR, emit deterministic C, link that C with the Walk runtime, and run source-file tests natively. The remaining project/package/tooling surfaces are intentionally later phases, not hidden delegation paths.</p>
+<p>The active compiler is the C++/C systems port. It checks source files, lowers checked programs to typed IR, emits deterministic C, links that C with the Walk runtime, and runs source-file, project, package, docs, LSP, REPL, and <code>walktop</code> workflows without a Go reference implementation.</p>
 <p>Example:</p>
 <pre><code class="language-walk"># main.walk
 out: &#39;hello&#39;</code></pre>

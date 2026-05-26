@@ -1,7 +1,7 @@
 # Overview
 
 WalkLang is a compiled, indentation-based language with obvious, deterministic syntax.
-Compiler target: `.walk` → Go compiler → C backend → native executable
+Compiler target: `.walk` → C++ compiler → generated C + Walk C runtime → native executable
 
 # General Guide
 

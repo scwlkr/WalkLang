@@ -6,17 +6,16 @@
 <title>WalkLang Explicit Systems Track - WalkLang</title>
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <link rel="stylesheet" href="../assets/site.css">
-<script defer src="../assets/site.js"></script>
 </head>
 <body>
 <div class="shell">
 <aside class="sidebar">
 <a class="brand" href="../index.html"><img src="../assets/icon.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>
-<form class="doc-search" role="search" data-site-root="../" data-search-index="../docs/search.json">
-<label for="doc-search-input">Search docs</label>
-<input id="doc-search-input" type="search" autocomplete="off" placeholder="try push or array.push">
-<div class="search-results" id="doc-search-results" aria-live="polite"></div>
-</form>
+<nav class="doc-shortcuts" aria-label="Docs shortcuts">
+<a href="INSTALL.html">Install</a>
+<a href="reference/api.html">API Reference</a>
+<a href="STATUS.html">Status</a>
+</nav>
 <nav class="nav" aria-label="Documentation">
 <h2>Start</h2>
 <a href="index.html">Documentation</a>
@@ -257,14 +256,16 @@ walk run --release</code></pre>
 <p>Do not split this into separate defer/result/package/build-mode phases. If the slice becomes too large to finish safely, stop before partial implementation, record the blocker in this file, and leave tests/docs showing the exact boundary.</p>
 <h2 id="verification-gate">Verification Gate</h2>
 <p>Minimum commands before this track can be marked complete:</p>
-<pre><code class="language-bash">go test -count=1 ./...
-go build -trimpath -ldflags &#34;-X main.version=&lt;version&gt;&#34; -o build/walk ./cmd/walk
+<pre><code class="language-bash">make clean
+make walk WALK_VERSION=&lt;version&gt;
+make test
+make conformance WALK_VERSION=&lt;version&gt;
 ./build/walk version
 ./build/walk check --warnings=error tests/pass/walk_tests.walk
 WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh
 scripts/build-docs-site.sh
 scripts/check-docs-site.sh
-scripts/release.sh &lt;version&gt; &lt;temp&gt;/release
+make release VERSION=&lt;version&gt; OUT=&lt;temp&gt;/release
 wc -l &lt;temp&gt;/release/SHA256SUMS
 git diff --check</code></pre>
 <p>Also run focused tests added for this track and record their exact names in <code>docs/STATUS.md</code>.</p>

@@ -166,7 +166,7 @@ bool parse_warning_arg(const std::vector<std::string>& args, std::size_t& index,
 }
 
 std::string check_usage() {
-    return "usage: walk-cpp check [--parse-only] [--warnings=off|default|error] <source.walk>";
+    return "usage: walk check [--parse-only] [--warnings=off|default|error] <source.walk>";
 }
 
 std::optional<CheckArgs> parse_check_args(const std::vector<std::string>& args, CommandResult& error) {
@@ -218,19 +218,19 @@ std::optional<CheckArgs> parse_check_args(const std::vector<std::string>& args, 
 }
 
 std::string emit_usage() {
-    return "usage: walk-cpp emit-c [--warnings=off|default|error] <source.walk> -o <output.c>";
+    return "usage: walk emit-c [--warnings=off|default|error] <source.walk> -o <output.c>";
 }
 
 std::string build_usage() {
-    return "usage: walk-cpp build [--mode debug|release] [--warnings=off|default|error] [--cc <cc>] [--cflag <flag>] <source.walk> -o <output>";
+    return "usage: walk build [--mode debug|release] [--warnings=off|default|error] [--cc <cc>] [--cflag <flag>] <source.walk> -o <output>";
 }
 
 std::string run_usage() {
-    return "usage: walk-cpp run [--mode debug|release] [--warnings=off|default|error] [--cc <cc>] [--cflag <flag>] <source.walk>";
+    return "usage: walk run [--mode debug|release] [--warnings=off|default|error] [--cc <cc>] [--cflag <flag>] <source.walk>";
 }
 
 std::string test_usage() {
-    return "usage: walk-cpp test [--warnings=off|default|error] [--cc <cc>] [--cflag <flag>] <source.walk>";
+    return "usage: walk test [--warnings=off|default|error] [--cc <cc>] [--cflag <flag>] <source.walk>";
 }
 
 std::optional<bool> parse_build_mode_value(const std::string& value) {
@@ -414,7 +414,7 @@ std::optional<RunArgs> parse_run_like_args(const std::vector<std::string>& args,
 
 std::optional<DocsArgs> parse_docs_args(const std::vector<std::string>& args, CommandResult& error) {
     DocsArgs parsed;
-    const std::string usage = "usage: walk-cpp docs [--strict] [--format markdown|json] [-o output] [source.walk]";
+    const std::string usage = "usage: walk docs [--strict] [--format markdown|json] [-o output] [source.walk]";
     for (std::size_t index = 0; index < args.size(); ++index) {
         const std::string& arg = args[index];
         if (arg == "-o" || arg == "--output") {
@@ -458,7 +458,7 @@ std::optional<DocsArgs> parse_docs_args(const std::vector<std::string>& args, Co
 
 std::optional<DebugMapArgs> parse_debug_map_args(const std::vector<std::string>& args, CommandResult& error) {
     DebugMapArgs parsed;
-    const std::string usage = "usage: walk-cpp debug-map [-o output.json] [source.walk]";
+    const std::string usage = "usage: walk debug-map [-o output.json] [source.walk]";
     for (std::size_t index = 0; index < args.size(); ++index) {
         const std::string& arg = args[index];
         if (arg == "-o" || arg == "--output") {
@@ -485,7 +485,7 @@ std::optional<DebugMapArgs> parse_debug_map_args(const std::vector<std::string>&
 
 std::optional<SitegenArgs> parse_sitegen_args(const std::vector<std::string>& args, CommandResult& error) {
     SitegenArgs parsed;
-    const std::string usage = "usage: walk-cpp sitegen [-docs docs-dir] [-public public-dir]";
+    const std::string usage = "usage: walk sitegen [-docs docs-dir] [-public public-dir]";
     for (std::size_t index = 0; index < args.size(); ++index) {
         const std::string& arg = args[index];
         if (arg == "-docs" || arg == "--docs") {
@@ -556,7 +556,7 @@ bool use_project_check_like(const std::vector<std::string>& args) {
 
 std::optional<ProjectBuildArgs> parse_project_build_args(const std::vector<std::string>& args, CommandResult& error) {
     ProjectBuildArgs parsed;
-    const std::string usage = "usage: walk-cpp build [--mode debug|release] [--warnings=off|default|error] [--cc <cc>] [--cflag <flag>]";
+    const std::string usage = "usage: walk build [--mode debug|release] [--warnings=off|default|error] [--cc <cc>] [--cflag <flag>]";
     for (std::size_t index = 0; index < args.size(); ++index) {
         if (parse_warning_arg(args, index, parsed.warning_mode, error, usage) || parse_native_arg(args, index, parsed.native, error, usage)) {
             if (error.exit_code != 0) {
@@ -572,7 +572,7 @@ std::optional<ProjectBuildArgs> parse_project_build_args(const std::vector<std::
 
 std::optional<WarningMode> parse_project_check_args(const std::vector<std::string>& args, CommandResult& error, const std::string& command) {
     WarningMode mode = WarningMode::Default;
-    const std::string usage = "usage: walk-cpp " + command + " [--warnings=off|default|error]";
+    const std::string usage = "usage: walk " + command + " [--warnings=off|default|error]";
     for (std::size_t index = 0; index < args.size(); ++index) {
         if (parse_warning_arg(args, index, mode, error, usage)) {
             if (error.exit_code != 0) {
@@ -855,7 +855,7 @@ Result<void> build_c(const std::string& c_code, const std::string& c_path, const
     for (const std::string& arg : argv) {
         command << " " << shell_quote(arg);
     }
-    const std::filesystem::path log = temp_dir("walk-cpp-cc") / "cc.log";
+    const std::filesystem::path log = temp_dir("walk-cc") / "cc.log";
     command << " > " << shell_quote(log.string()) << " 2>&1";
     const int code = std::system(command.str().c_str());
     if (code != 0) {
@@ -876,7 +876,7 @@ int run_capture(const std::string& executable, const std::filesystem::path& stdo
 
 CommandResult init_command(const std::vector<std::string>& args) {
     if (args.size() != 1) {
-        return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk-cpp init <project-name>")};
+        return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk init <project-name>")};
     }
     Result<std::filesystem::path> created = project::init_project(args[0]);
     if (!created.ok()) {
@@ -887,7 +887,7 @@ CommandResult init_command(const std::vector<std::string>& args) {
 
 CommandResult clean_command(const std::vector<std::string>& args) {
     if (!args.empty()) {
-        return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk-cpp clean")};
+        return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk clean")};
     }
     Result<project::ProjectConfig> config = project::load_project_config_from_cwd();
     if (!config.ok()) {
@@ -1008,7 +1008,7 @@ CommandResult project_test_command(const std::vector<std::string>& args) {
             return compile_error;
         }
         warning_stderr += compiled->warning_stderr;
-        const std::filesystem::path dir = temp_dir("walk-cpp-project-test");
+        const std::filesystem::path dir = temp_dir("walk-project-test");
         const std::filesystem::path exe = dir / "tests";
         Result<void> built = build_c(compiled->c_code, (dir / "tests.c").string(), exe.string(), {});
         if (!built.ok()) {
@@ -1033,7 +1033,7 @@ CommandResult fmt_command(const std::vector<std::string>& args) {
             continue;
         }
         if (!source_path.empty()) {
-            return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk-cpp fmt [-w] <source.walk>")};
+            return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk fmt [-w] <source.walk>")};
         }
         source_path = arg;
     }
@@ -1079,13 +1079,13 @@ CommandResult fmt_command(const std::vector<std::string>& args) {
 
 CommandResult package_command(const std::vector<std::string>& args) {
     if (args.empty()) {
-        return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk-cpp package <init|resolve|publish>")};
+        return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk package <init|resolve|publish>")};
     }
     const std::string& subcommand = args.front();
     const std::vector<std::string> rest(args.begin() + 1, args.end());
     if (subcommand == "init") {
         if (rest.size() != 1) {
-            return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk-cpp package init <package-name>")};
+            return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk package init <package-name>")};
         }
         Result<std::filesystem::path> created = package::init_package(rest[0]);
         if (!created.ok()) {
@@ -1095,7 +1095,7 @@ CommandResult package_command(const std::vector<std::string>& args) {
     }
     if (subcommand == "resolve") {
         if (rest.size() != 1) {
-            return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk-cpp package resolve <registry-dir>")};
+            return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk package resolve <registry-dir>")};
         }
         Result<project::ProjectConfig> config = project::load_project_config_from_cwd();
         if (!config.ok()) {
@@ -1116,7 +1116,7 @@ CommandResult package_command(const std::vector<std::string>& args) {
     }
     if (subcommand == "publish") {
         if (rest.size() != 1) {
-            return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk-cpp package publish <registry-dir>")};
+            return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk package publish <registry-dir>")};
         }
         Result<project::ProjectConfig> config = project::load_project_config_from_cwd();
         if (!config.ok()) {
@@ -1199,7 +1199,7 @@ CommandResult run_command(const std::vector<std::string>& args) {
     if (!compiled) {
         return compile_error;
     }
-    const std::filesystem::path dir = temp_dir("walk-cpp-run");
+    const std::filesystem::path dir = temp_dir("walk-run");
     const std::string stem = std::filesystem::path(parsed->source_path).stem().empty() ? "program" : std::filesystem::path(parsed->source_path).stem().string();
     const std::filesystem::path exe = dir / stem;
     Result<void> built = build_c(compiled->c_code, (dir / (stem + ".c")).string(), exe.string(), parsed->native);
@@ -1229,7 +1229,7 @@ CommandResult test_command(const std::vector<std::string>& args) {
     if (!compiled) {
         return compile_error;
     }
-    const std::filesystem::path dir = temp_dir("walk-cpp-test");
+    const std::filesystem::path dir = temp_dir("walk-test");
     const std::filesystem::path exe = dir / "tests";
     Result<void> built = build_c(compiled->c_code, (dir / "tests.c").string(), exe.string(), parsed->native);
     if (!built.ok()) {
@@ -1374,7 +1374,7 @@ std::vector<CommandInfo> command_table() {
 std::string help_text() {
     std::ostringstream output;
     output << "WalkLang C++ compiler\n";
-    output << "usage: walk-cpp <command> [args]\n\n";
+    output << "usage: walk <command> [args]\n\n";
     output << "commands:\n";
     for (const CommandInfo& command : command_table()) {
         output << "  " << command.name;
@@ -1397,13 +1397,13 @@ CommandResult dispatch(const std::vector<std::string>& args) {
     const std::string& command_name = args.front();
     if (is_help_alias(command_name)) {
         if (args.size() != 1) {
-            return {kUsageExitCode, "", format_simple_error("W0002", "usage: walk-cpp help")};
+            return {kUsageExitCode, "", format_simple_error("W0002", "usage: walk help")};
         }
         return {0, help_text(), ""};
     }
     if (is_version_alias(command_name)) {
         if (args.size() != 1) {
-            return {kUsageExitCode, "", format_simple_error("W0003", "usage: walk-cpp version")};
+            return {kUsageExitCode, "", format_simple_error("W0003", "usage: walk version")};
         }
         return {0, std::string(kWalkVersion) + "\n", ""};
     }
@@ -1453,13 +1453,13 @@ CommandResult dispatch(const std::vector<std::string>& args) {
     }
     if (command_name == "lsp") {
         if (args.size() != 1) {
-            return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk-cpp lsp")};
+            return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk lsp")};
         }
         return {0, "", ""};
     }
     if (command_name == "repl") {
         if (args.size() != 1) {
-            return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk-cpp repl")};
+            return {kUsageExitCode, "", format_simple_error("W0005", "usage: walk repl")};
         }
         return {0, "", ""};
     }
@@ -1493,7 +1493,7 @@ int run_repl(std::istream& input, std::ostream& output, std::ostream& error) {
             return 0;
         }
 
-        const std::filesystem::path dir = temp_dir("walk-cpp-repl");
+        const std::filesystem::path dir = temp_dir("walk-repl");
         const std::filesystem::path source_path = dir / "repl.walk";
         const std::filesystem::path exe_path = dir / "repl";
         const std::filesystem::path stdout_path = dir / "stdout.txt";

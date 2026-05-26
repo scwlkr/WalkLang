@@ -5,7 +5,6 @@ repo_root="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
 install_dir="${WALK_INSTALL_DIR:-"$HOME/.local/bin"}"
 version="${WALK_VERSION:-${1:-local}}"
 binary="$install_dir/walk"
-cpp_binary="$install_dir/walk-cpp"
 tool_binary="$install_dir/walktop"
 work_dir="$(mktemp -d "${TMPDIR:-/tmp}/walklang-install.XXXXXX")"
 
@@ -19,16 +18,11 @@ install_root="$(CDPATH= cd -- "$install_dir/.." && pwd)"
 runtime_install_dir="${WALK_RUNTIME_INSTALL_DIR:-"$install_root/lib/walk/runtime"}"
 
 cd "$repo_root"
-go build -trimpath -ldflags "-X main.version=$version" -o "$binary" ./cmd/walk
-
+make -s walk WALK_VERSION="$version"
+cp build/walk "$binary"
+chmod +x "$binary"
 echo "$binary"
 "$binary" version
-
-make -s walk WALK_VERSION="$version"
-cp build/walk-cpp "$cpp_binary"
-chmod +x "$cpp_binary"
-echo "$cpp_binary"
-"$cpp_binary" version
 
 mkdir -p "$runtime_install_dir/platform"
 cp runtime/walk_runtime.h "$runtime_install_dir/walk_runtime.h"
@@ -38,7 +32,7 @@ cp runtime/platform/walk_platform_posix.c "$runtime_install_dir/platform/walk_pl
 cp runtime/platform/walk_platform_windows.c "$runtime_install_dir/platform/walk_platform_windows.c"
 echo "$runtime_install_dir"
 
-build_driver="${WALK_BUILD_BIN:-$cpp_binary}"
+build_driver="${WALK_BUILD_BIN:-$binary}"
 WALK_RUNTIME_DIR="$runtime_install_dir" "$build_driver" build --mode release --warnings=error tools/walktop/src/main.walk -o "$work_dir/walktop" >/dev/null
 cp "$work_dir/walktop" "$tool_binary"
 chmod +x "$tool_binary"

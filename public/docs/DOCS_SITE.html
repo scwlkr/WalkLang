@@ -6,17 +6,16 @@
 <title>WalkLang Public Docs And Reference Site - WalkLang</title>
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <link rel="stylesheet" href="../assets/site.css">
-<script defer src="../assets/site.js"></script>
 </head>
 <body>
 <div class="shell">
 <aside class="sidebar">
 <a class="brand" href="../index.html"><img src="../assets/icon.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>
-<form class="doc-search" role="search" data-site-root="../" data-search-index="../docs/search.json">
-<label for="doc-search-input">Search docs</label>
-<input id="doc-search-input" type="search" autocomplete="off" placeholder="try push or array.push">
-<div class="search-results" id="doc-search-results" aria-live="polite"></div>
-</form>
+<nav class="doc-shortcuts" aria-label="Docs shortcuts">
+<a href="INSTALL.html">Install</a>
+<a href="reference/api.html">API Reference</a>
+<a href="STATUS.html">Status</a>
+</nav>
 <nav class="nav" aria-label="Documentation">
 <h2>Start</h2>
 <a href="index.html">Documentation</a>
@@ -71,6 +70,7 @@ public/docs/index.html
 public/docs/reference/api.html
 public/docs/reference/api.md
 public/docs/reference/api.json</code></pre>
+<p>The site is static HTML/CSS. It does not ship JavaScript assets.</p>
 <p><code>public/CNAME</code> sets the custom domain to <code>walklang.wlkrlabs.com</code> for static hosts that honor CNAME files.</p>
 <p>HTTPS is the public scheme for the custom domain, and HTTP redirects to HTTPS. <code>docs/STATUS.md</code> records the latest checked live HTTP/HTTPS state.</p>
 <h2 id="reference-generation">Reference Generation</h2>
@@ -79,7 +79,7 @@ public/docs/reference/api.json</code></pre>
 examples/math_extra.walk</code></pre>
 <p>Build the site and generated reference artifacts with:</p>
 <pre><code class="language-bash">scripts/build-docs-site.sh</code></pre>
-<p>The script builds and uses the C++ <code>walk-cpp</code> candidate by default for structured API docs and static site generation. The previous Go site generator has been removed.</p>
+<p>The script builds and uses the C++/C <code>walk</code> compiler by default for structured API docs and static site generation. The previous Go site generator and JavaScript search asset have been removed.</p>
 <p>Check that generated artifacts are fresh and that static links resolve with:</p>
 <pre><code class="language-bash">scripts/check-docs-site.sh</code></pre>
 <h2 id="public-path-safety">Public Path Safety</h2>

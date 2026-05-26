@@ -6,17 +6,16 @@
 <title>WalkLang Official Install Instructions - WalkLang</title>
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <link rel="stylesheet" href="../assets/site.css">
-<script defer src="../assets/site.js"></script>
 </head>
 <body>
 <div class="shell">
 <aside class="sidebar">
 <a class="brand" href="../index.html"><img src="../assets/icon.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>
-<form class="doc-search" role="search" data-site-root="../" data-search-index="../docs/search.json">
-<label for="doc-search-input">Search docs</label>
-<input id="doc-search-input" type="search" autocomplete="off" placeholder="try push or array.push">
-<div class="search-results" id="doc-search-results" aria-live="polite"></div>
-</form>
+<nav class="doc-shortcuts" aria-label="Docs shortcuts">
+<a href="INSTALL.html">Install</a>
+<a href="reference/api.html">API Reference</a>
+<a href="STATUS.html">Status</a>
+</nav>
 <nav class="nav" aria-label="Documentation">
 <h2>Start</h2>
 <a href="index.html">Documentation</a>
@@ -64,49 +63,37 @@
 source install for local development</code></pre>
 <p>Use <code>walk version</code> after either path. The reported version should match the release or local build label you installed.</p>
 <h2 id="release-artifact-install">Release Artifact Install</h2>
-<p>Release artifacts are produced by <code>scripts/release.sh</code> and named:</p>
-<pre><code class="language-text">walk-v5.14.1-darwin-arm64
-walk-v5.14.1-darwin-amd64
-walk-v5.14.1-linux-amd64
-walk-v5.14.1-linux-arm64
-walk-v5.14.1-windows-amd64.exe
-walk-cpp-v5.14.1-&lt;release-host-os&gt;-&lt;release-host-arch&gt;
-walk-runtime-v5.14.1.tar.gz
-walktop-v5.14.1-&lt;release-host-os&gt;-&lt;release-host-arch&gt;
+<p>Release artifacts are produced by <code>scripts/release.sh</code>. In the Phase 11 port candidate, the script is C++/C-only and writes current-host artifacts:</p>
+<pre><code class="language-text">walk-v6.0.0-port-candidate-&lt;host-os&gt;-&lt;host-arch&gt;
+walk-runtime-v6.0.0-port-candidate.tar.gz
+walktop-v6.0.0-port-candidate-&lt;host-os&gt;-&lt;host-arch&gt;
 SHA256SUMS</code></pre>
-<p><code>scripts/release.sh</code> cross-builds the <code>walk</code> compiler artifacts, builds one current-host <code>walk-cpp</code> port-candidate artifact, then uses that C++ compiler candidate to build one current-host <code>walktop</code> artifact from WalkLang source. It also packages the C runtime source used by native builds. Source install always installs the runtime source and builds the local <code>walk-cpp</code> and <code>walktop</code> binaries.</p>
+<p>The final v6 release gate is responsible for publishing the official cross-platform artifact set. The port-candidate release script exists to prove that repo-controlled release packaging no longer depends on Go.</p>
 <p>Install on macOS or Linux:</p>
-<pre><code class="language-bash">mkdir -p ~/.local/bin
-cp walk-v5.14.1-&lt;os&gt;-&lt;arch&gt; ~/.local/bin/walk
-cp walk-cpp-v5.14.1-&lt;os&gt;-&lt;arch&gt; ~/.local/bin/walk-cpp
-cp walktop-v5.14.1-&lt;os&gt;-&lt;arch&gt; ~/.local/bin/walktop
-mkdir -p ~/.local/lib/walk
-tar -xzf walk-runtime-v5.14.1.tar.gz -C ~/.local/lib/walk
-chmod +x ~/.local/bin/walk ~/.local/bin/walk-cpp ~/.local/bin/walktop
+<pre><code class="language-bash">mkdir -p ~/.local/bin ~/.local/lib/walk
+cp walk-v6.0.0-port-candidate-&lt;os&gt;-&lt;arch&gt; ~/.local/bin/walk
+cp walktop-v6.0.0-port-candidate-&lt;os&gt;-&lt;arch&gt; ~/.local/bin/walktop
+tar -xzf walk-runtime-v6.0.0-port-candidate.tar.gz -C ~/.local/lib/walk
+chmod +x ~/.local/bin/walk ~/.local/bin/walktop
 walk version
-walk-cpp version
 NO_COLOR=1 walktop --once</code></pre>
-<p>Install on Windows by placing <code>walk-v5.14.1-windows-amd64.exe</code> somewhere on <code>PATH</code> as <code>walk.exe</code>, then run:</p>
-<pre><code class="language-powershell">walk version</code></pre>
 <p>Verify checksums before installing:</p>
 <pre><code class="language-bash">shasum -a 256 -c SHA256SUMS</code></pre>
 <p>On systems with GNU coreutils, this also works:</p>
 <pre><code class="language-bash">sha256sum -c SHA256SUMS</code></pre>
 <h2 id="source-install">Source Install</h2>
-<p>Source installs require Go, <code>make</code>, a C++20 compiler, and a native C compiler available as <code>cc</code>.</p>
+<p>Source installs require <code>make</code>, a C++20 compiler, and a native C compiler available as <code>cc</code>.</p>
 <pre><code class="language-bash">scripts/install-local.sh local
 walk version
-walk-cpp version
 NO_COLOR=1 walktop --once --fixture tools/walktop/testdata/basic</code></pre>
-<p>By default the script writes <code>walk</code>, <code>walk-cpp</code>, and <code>walktop</code> to <code>~/.local/bin</code>. Override the install directory with:</p>
+<p>By default the script writes <code>walk</code> and <code>walktop</code> to <code>~/.local/bin</code>. Override the install directory with:</p>
 <pre><code class="language-bash">WALK_INSTALL_DIR=/path/to/bin scripts/install-local.sh local</code></pre>
 <p>The runtime source is installed to <code>../lib/walk/runtime</code> relative to the install directory. Override it with:</p>
 <pre><code class="language-bash">WALK_RUNTIME_INSTALL_DIR=/path/to/runtime scripts/install-local.sh local</code></pre>
-<p><code>walk-cpp</code> is the systems compiler port candidate. As of Phase 10 it supports the current compiler, project/package, formatter, docs, debug-map, LSP, REPL, static docs-site, and <code>walktop</code> build/test/install/release paths without delegating those paths to the Go reference compiler.</p>
-<p>Source install builds <code>walktop</code> through the installed <code>walk-cpp</code> candidate by default. Maintainers can override the WalkLang build driver for diagnostics:</p>
-<pre><code class="language-bash">WALK_BUILD_BIN=build/walk-cpp scripts/install-local.sh local</code></pre>
-<p>When running an installed <code>walk-cpp</code> from outside the source tree, set <code>WALK_RUNTIME_DIR</code> if the runtime source is not under the default local install location:</p>
-<pre><code class="language-bash">WALK_RUNTIME_DIR=~/.local/lib/walk/runtime walk-cpp build src/main.walk -o build/app</code></pre>
+<p>Source install builds <code>walktop</code> through the installed <code>walk</code> compiler by default. Maintainers can override the WalkLang build driver for diagnostics:</p>
+<pre><code class="language-bash">WALK_BUILD_BIN=build/walk scripts/install-local.sh local</code></pre>
+<p>When running an installed <code>walk</code> from outside the source tree, set <code>WALK_RUNTIME_DIR</code> if the runtime source is not under the default local install location:</p>
+<pre><code class="language-bash">WALK_RUNTIME_DIR=~/.local/lib/walk/runtime walk build src/main.walk -o build/app</code></pre>
 <h2 id="smoke-test">Smoke Test</h2>
 <p>After install:</p>
 <pre><code class="language-bash">walk run playground/route_ranker.walk
@@ -129,11 +116,11 @@ Market Mile
 Score:
 28</code></pre>
 <h2 id="build-release-artifacts-locally">Build Release Artifacts Locally</h2>
-<p>Maintainers can produce the release artifact set with:</p>
-<pre><code class="language-bash">scripts/release.sh v5.14.1 dist</code></pre>
-<p>The command writes the compiler platform binaries, the runtime source archive, the current-host <code>walk-cpp</code> port-candidate binary, the current-host <code>walktop</code> binary built by <code>walk-cpp</code>, and <code>dist/SHA256SUMS</code>.</p>
-<p>Release artifact generation builds <code>walktop</code> through <code>build/walk-cpp</code> by default. Maintainers can override the WalkLang build driver for diagnostics:</p>
-<pre><code class="language-bash">WALK_RELEASE_BUILD_BIN=build/walk-cpp scripts/release.sh v5.14.1 dist</code></pre>
+<p>Maintainers can produce the current-host port-candidate artifact set with:</p>
+<pre><code class="language-bash">make release VERSION=v6.0.0-port-candidate OUT=dist</code></pre>
+<p>The command writes the current-host <code>walk</code> compiler binary, the runtime source archive, the current-host <code>walktop</code> binary built by <code>walk</code>, and <code>dist/SHA256SUMS</code>.</p>
+<p>Release artifact generation builds <code>walktop</code> through <code>build/walk</code> by default. Maintainers can override the WalkLang build driver for diagnostics:</p>
+<pre><code class="language-bash">WALK_RELEASE_BUILD_BIN=build/walk scripts/release.sh v6.0.0-port-candidate dist</code></pre>
 </article>
 <footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
 </div>

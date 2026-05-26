@@ -98,13 +98,20 @@ void test_site_generator_writes_core_outputs() {
         fail("site generator", built.error());
         return;
     }
-    const std::vector<std::filesystem::path> expected_paths = {out / "index.html", out / "docs" / "index.html", out / "docs" / "reference" / "api.html", out / "docs" / "search.json"};
+    const std::vector<std::filesystem::path> expected_paths = {out / "index.html", out / "docs" / "index.html", out / "docs" / "reference" / "api.html"};
     for (const std::filesystem::path& path : expected_paths) {
         if (!std::filesystem::is_regular_file(path)) {
             fail("site output", "missing " + path.string());
         }
     }
-    expect_contains("site search", read_file(out / "docs" / "search.json"), "WalkLang Documentation");
+    const std::string home = read_file(out / "index.html");
+    expect_contains("site static shortcuts", home, "doc-shortcuts");
+    if (home.find("<script") != std::string::npos) {
+        fail("site scripts", "site output should not include JavaScript");
+    }
+    if (std::filesystem::exists(out / "assets" / "site.js") || std::filesystem::exists(out / "docs" / "search.json")) {
+        fail("site assets", "site output should be static HTML/CSS without JavaScript search assets");
+    }
 }
 
 }  // namespace

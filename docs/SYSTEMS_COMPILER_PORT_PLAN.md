@@ -413,7 +413,7 @@ Update this table at the end of every porting phase.
 | 8. Runtime Module Parity | Complete | Draft runtime modules pass native tests through the C runtime |
 | 9. Tooling Parity | Complete | Formatter, docs generator, debug map, LSP, and REPL pass parity checks |
 | 10. Standard Platform Parity | Complete | `walktop` builds, tests, runs, installs, and releases through C++ `walk` |
-| 11. Remove Go And JavaScript | Not started | No Go or JavaScript source remains; docs/site still build |
+| 11. Remove Go And JavaScript | Complete | No Go or JavaScript source remains; docs/site still build |
 | 12. Final Release Gate | Not started | C++/C release artifacts, checksums, install, docs, and language breakdown are verified |
 
 Status values:
@@ -1509,7 +1509,7 @@ Phase completion prompt:
 
 ## Phase 11: Remove Go And JavaScript
 
-Status: Not started
+Status: Complete
 
 Goal: remove the reference implementation and JavaScript site assets after the
 C++/C implementation proves complete parity.
@@ -1524,6 +1524,9 @@ go.sum
 scripts/sitegen.go
 site/assets/site.js
 public/assets/site.js
+public/docs/search.json
+editors/vscode/extension.js
+tests/runtime/runtime_test.go
 ```
 
 Files to modify:
@@ -1579,6 +1582,47 @@ Expected source-accounting output:
 
 ```text
 empty
+```
+
+Implementation notes:
+
+```text
+make walk now builds build/walk from C++ source.
+make conformance verifies build/walk against the recorded oracle artifacts.
+scripts/install-local.sh installs walk, runtime source, and walktop without Go.
+scripts/release.sh produces current-host C++/C port-candidate artifacts without Go.
+the docs site generator emits static HTML/CSS without JavaScript search assets.
+the VS Code package is syntax-only, so no JavaScript extension runtime remains.
+```
+
+Verification on 2026-05-26:
+
+```text
+pre-removal parity:
+make clean passed
+make walk WALK_VERSION=v6.0.0-port-candidate passed
+go build -trimpath -ldflags "-X main.version=v5.14.1" -o build/walk-ref ./cmd/walk passed before Go removal
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --check passed
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --native passed
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --runtime-modules passed
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --project passed
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --package passed
+WALK_REF=$PWD/build/walk-ref WALK_CANDIDATE=$PWD/build/walk-cpp tests/conformance/run.sh --tooling passed
+
+post-removal proof:
+make clean passed
+make walk WALK_VERSION=v6.0.0-port-candidate passed
+make test WALK_VERSION=v6.0.0-port-candidate passed
+make conformance WALK_VERSION=v6.0.0-port-candidate passed
+scripts/build-docs-site.sh passed
+scripts/check-docs-site.sh passed after staging generated docs
+WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed
+make release VERSION=v6.0.0-port-candidate OUT=<temp>/release passed
+shasum -a 256 -c <temp>/release/SHA256SUMS passed
+WALK_INSTALL_DIR=<temp>/bin scripts/install-local.sh v6.0.0-port-candidate passed
+git ls-files '*.go' 'go.mod' 'go.sum' returned empty
+git ls-files '*.js' returned empty
+find . -path ./.git -prune -o \( -name '*.go' -o -name 'go.mod' -o -name 'go.sum' -o -name '*.js' \) -print returned empty
 ```
 
 Phase completion prompt:

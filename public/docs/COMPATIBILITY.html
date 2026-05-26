@@ -6,17 +6,16 @@
 <title>WalkLang Compatibility - WalkLang</title>
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <link rel="stylesheet" href="../assets/site.css">
-<script defer src="../assets/site.js"></script>
 </head>
 <body>
 <div class="shell">
 <aside class="sidebar">
 <a class="brand" href="../index.html"><img src="../assets/icon.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>
-<form class="doc-search" role="search" data-site-root="../" data-search-index="../docs/search.json">
-<label for="doc-search-input">Search docs</label>
-<input id="doc-search-input" type="search" autocomplete="off" placeholder="try push or array.push">
-<div class="search-results" id="doc-search-results" aria-live="polite"></div>
-</form>
+<nav class="doc-shortcuts" aria-label="Docs shortcuts">
+<a href="INSTALL.html">Install</a>
+<a href="reference/api.html">API Reference</a>
+<a href="STATUS.html">Status</a>
+</nav>
 <nav class="nav" aria-label="Documentation">
 <h2>Start</h2>
 <a href="index.html">Documentation</a>
@@ -96,9 +95,9 @@ tests/snapshots/</code></pre>
 <p>If a feature is accepted by the compiler but absent from the stable surface, treat it as draft, experimental, or planned according to the labels in <code>docs/LANGUAGE_CONCEPTS.md</code>.</p>
 <h2 id="compatibility-test-suite">Compatibility Test Suite</h2>
 <p>Run the focused stable compatibility suite with:</p>
-<pre><code class="language-bash">go test ./cmd/walk -run TestStableCompatibilitySuite</code></pre>
-<p>The full repository test command also runs it:</p>
-<pre><code class="language-bash">go test ./...</code></pre>
+<pre><code class="language-bash">make conformance</code></pre>
+<p>The full repository test flow also runs compiler unit tests:</p>
+<pre><code class="language-bash">make test</code></pre>
 <p>The suite covers representative stable programs, test syntax, user-module exports, stable stdlib APIs, and selected stable diagnostic first lines.</p>
 <h2 id="draft-experimental-or-future-features">Draft, Experimental, Or Future Features</h2>
 <p>These are implemented or planned, but not compatibility-protected as stable features:</p>

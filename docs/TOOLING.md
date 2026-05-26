@@ -39,25 +39,19 @@ It contributes:
 .walk file association
 TextMate syntax highlighting
 editor indentation/comment rules
-WalkLang LSP startup through walk lsp
 ```
 
 Install the extension during local development:
 
 ```bash
 cd editors/vscode
-npm install
 npx @vscode/vsce package
 code --install-extension walklang-0.1.0.vsix
 ```
 
-The extension expects `walk` on `PATH`. Override the server binary with:
-
-```json
-{
-  "walklang.serverPath": "/absolute/path/to/walk"
-}
-```
+The VS Code package is syntax-only in the Phase 11 port candidate so the
+repository contains no JavaScript extension runtime. Run `walk lsp` manually or
+wire it through your editor's native LSP configuration.
 
 ## Neovim
 
@@ -149,30 +143,29 @@ lives under `tools/walktop/`, and it builds into its own native command instead
 of a Go-side `walk` subcommand.
 
 ```bash
-walk-cpp build --mode release --warnings=error tools/walktop/src/main.walk -o build/walktop
+walk build --mode release --warnings=error tools/walktop/src/main.walk -o build/walktop
 NO_COLOR=1 build/walktop --once --fixture tools/walktop/testdata/basic
 ```
 
 The normal source install and release-artifact flows build `walktop` through
-the C++ compiler candidate and install it beside `walk`.
+the C++/C `walk` compiler and install it beside `walk`.
 
-## C++ Compiler Candidate
+## C++/C Compiler
 
-The systems compiler port builds a candidate executable named `walk-cpp`:
+The systems compiler port now builds the repo-local `walk` executable from
+C++/C sources:
 
 ```bash
-make walk WALK_VERSION=v5.14.1-phase10-dev
-./build/walk-cpp version
-./build/walk-cpp help
+make walk WALK_VERSION=v6.0.0-port-candidate
+./build/walk version
+./build/walk help
 make test
 ```
 
-As of Phase 10 of the systems compiler port, `walk-cpp` supports the current
-compiler, project/package, formatter, docs, debug-map, LSP initialize/
+As of Phase 11 of the systems compiler port, `walk` supports the current
+compiler, project/package, formatter, docs, debug-map, LSP initialize,
 diagnostics/formatting, REPL, static docs-site generation, and `walktop`
-build/test/install/release paths without shelling out to the Go reference
-compiler for those paths. The Go reference compiler remains in the repository
-until the final removal phase.
+build/test/install/release paths without a Go reference implementation.
 
 ## Non-Goals
 

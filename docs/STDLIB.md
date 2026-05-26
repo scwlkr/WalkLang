@@ -34,9 +34,9 @@ compiler behavior is visible, but they are not part of the stable feature set.
 
 Draft runtime-module proof surface: `tests/runtime_modules/` records native
 fixtures for `io`, `parse`, `process`, `file`, `dir`, `path`, `json`, `term`,
-`http`, and `html`. `tests/conformance/run.sh --runtime-modules` compares the
-reference compiler and `walk-cpp` against those fixtures, and
-`tests/runtime/runtime_test.go` covers the C runtime helpers directly.
+`http`, and `html`. `tests/conformance/run.sh --runtime-modules` preserved
+Go-reference parity before removal, and `make conformance` now verifies the
+active C++/C `walk` compiler against the recorded oracle artifacts.
 
 Stable APIs in this document are pure expression calls unless an entry says
 otherwise. Invalid argument counts, argument types, or effect placement are
@@ -44,8 +44,8 @@ compiler diagnostics. Runtime failures named below are part of the documented
 behavior for valid programs at runtime.
 
 Proof surface: stable APIs are covered by `tests/pass/stdlib.walk`,
-`tests/pass/walk_tests.walk`, compatibility fixtures,
-`cmd/walk/compatibility_test.go`, and `cmd/walk/conformance_test.go`.
+`tests/pass/walk_tests.walk`, compatibility fixtures, `tests/cpp/`, and
+`tests/conformance/`.
 
 ---
 

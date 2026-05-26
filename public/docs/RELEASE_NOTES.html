@@ -6,17 +6,16 @@
 <title>WalkLang Release Notes - WalkLang</title>
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <link rel="stylesheet" href="../assets/site.css">
-<script defer src="../assets/site.js"></script>
 </head>
 <body>
 <div class="shell">
 <aside class="sidebar">
 <a class="brand" href="../index.html"><img src="../assets/icon.svg" alt=""><span><strong>WalkLang</strong><span>Docs and reference</span></span></a>
-<form class="doc-search" role="search" data-site-root="../" data-search-index="../docs/search.json">
-<label for="doc-search-input">Search docs</label>
-<input id="doc-search-input" type="search" autocomplete="off" placeholder="try push or array.push">
-<div class="search-results" id="doc-search-results" aria-live="polite"></div>
-</form>
+<nav class="doc-shortcuts" aria-label="Docs shortcuts">
+<a href="INSTALL.html">Install</a>
+<a href="reference/api.html">API Reference</a>
+<a href="STATUS.html">Status</a>
+</nav>
 <nav class="nav" aria-label="Documentation">
 <h2>Start</h2>
 <a href="index.html">Documentation</a>
@@ -70,16 +69,16 @@
 <li>Phase 6 C++ backend pieces under <code>compiler/ir/</code> and <code>compiler/codegen/c/</code>, with typed IR lowering, deterministic C emission, runtime-backed native builds, and C++ candidate <code>emit-c</code>, <code>build</code>, <code>run</code>, and <code>test</code>.</li>
 <li>Phase 7 C++ project and package workflow pieces under <code>compiler/project/</code> and <code>compiler/package/</code>, with <code>walk.toml</code> parsing, project <code>init/fmt/clean/check/build/test</code>, local package <code>init/resolve/publish</code>, <code>walk.lock</code>, package cache verification, and preserved package checksums.</li>
 <li>Phase 8 runtime-module conformance fixtures under <code>tests/runtime_modules/</code>, covering draft <code>io</code>, <code>parse</code>, <code>process</code>, <code>file</code>, <code>dir</code>, <code>path</code>, <code>json</code>, <code>term</code>, <code>http</code>, and <code>html</code> through native C runtime execution.</li>
-<li>Direct C runtime tests for draft result data helpers, JSON/HTML helpers, stdin reads, and HTTP recoverable result boundaries against a local loopback server.</li>
 <li>Phase 9 C++ tooling pieces under <code>compiler/format/</code>, <code>compiler/docs/</code>, <code>compiler/debug_map/</code>, <code>compiler/lsp/</code>, and <code>compiler/repl/</code>, with C++ tests for formatter, docs/site generation, LSP, and REPL behavior.</li>
 <li>Phase 10 standard-platform parity proof for <code>walktop</code>, covering C++ check/test/build, deterministic fixture mode, live OS-command mode, local install, and release artifact generation.</li>
+<li>Phase 11 C++/C compiler promotion, with <code>make walk</code> producing the repo-local <code>build/walk</code> binary from C++ sources.</li>
 </ul>
 <h3 id="changed">Changed</h3>
 <ul>
 <li><code>scripts/stress-compatibility.sh</code> now verifies the recorded conformance oracle before running the older compatibility stress checks.</li>
 <li>Generated C now includes <code>walk_runtime.h</code> and calls the stable <code>walk_rt_*</code> runtime ABI instead of embedding helper bodies in every output file.</li>
 <li>Native builds now link emitted C with the Walk runtime and platform source files, and release artifacts include a runtime source archive for installed compilers.</li>
-<li><code>scripts/install-local.sh</code> and <code>scripts/release.sh</code> now build a current-host <code>walk-cpp</code> candidate artifact beside the Go reference <code>walk</code> while the port is in progress.</li>
+<li>During staged porting, <code>scripts/install-local.sh</code> and <code>scripts/release.sh</code> built a current-host <code>walk-cpp</code> candidate artifact beside the Go reference <code>walk</code>.</li>
 <li><code>tests/conformance/run.sh</code> now supports <code>--parse</code> to compare reference compiler syntax accept/reject behavior with the C++ parse-only candidate.</li>
 <li><code>tests/conformance/run.sh</code> now supports <code>--check</code> and <code>--fail-diagnostics</code> to compare C++ semantic check behavior and exact fail diagnostics against the reference oracle.</li>
 <li><code>tests/conformance/run.sh</code> now supports <code>--emit-c</code> and <code>--native</code> to compare generated C snapshots and native behavior between the reference compiler and <code>walk-cpp</code>.</li>
@@ -87,8 +86,16 @@
 <li><code>tests/conformance/run.sh</code> now supports <code>--runtime-modules</code> to prove draft runtime module parity against the reference compiler and <code>walk-cpp</code>.</li>
 <li><code>tests/conformance/run.sh</code> now supports <code>--tooling</code> to prove formatter, docs, debug-map, LSP, and REPL behavior against the reference compiler and <code>walk-cpp</code>.</li>
 <li><code>scripts/stress-compatibility.sh</code> now keeps backend compatibility checks active for staged <code>walk-cpp</code> candidates while skipping later-phase formatter/project lifecycle checks only when the candidate advertises those commands as not ported.</li>
-<li><code>scripts/install-local.sh</code> and <code>scripts/release.sh</code> now build <code>walktop</code> through the C++ compiler candidate by default while preserving <code>WALK_BUILD_BIN</code> and <code>WALK_RELEASE_BUILD_BIN</code> overrides for diagnostics.</li>
-<li><code>scripts/build-docs-site.sh</code> now builds and uses <code>build/walk-cpp</code> by default, and the old Go site generator under <code>scripts/sitegen.go</code> has been removed.</li>
+<li><code>scripts/install-local.sh</code> and <code>scripts/release.sh</code> now build <code>walktop</code> through the C++/C <code>walk</code> compiler by default while preserving <code>WALK_BUILD_BIN</code> and <code>WALK_RELEASE_BUILD_BIN</code> overrides for diagnostics.</li>
+<li><code>scripts/build-docs-site.sh</code> now builds and uses <code>build/walk</code> by default, and the old Go site generator under <code>scripts/sitegen.go</code> has been removed.</li>
+<li><code>scripts/install-local.sh</code>, <code>scripts/release.sh</code>, CI, docs generation, and compatibility stress now run through the C++/C <code>walk</code> toolchain without Go.</li>
+<li>The docs site is now static HTML/CSS only; interactive JavaScript search has been replaced with static shortcut navigation.</li>
+<li>The VS Code package is syntax-only so the repository no longer carries a JavaScript extension runtime.</li>
+</ul>
+<h3 id="removed">Removed</h3>
+<ul>
+<li>The Go reference implementation under <code>cmd/</code> and <code>internal/</code>, Go module metadata, and remaining Go test source.</li>
+<li>JavaScript source files from the docs/site surface and editor package.</li>
 </ul>
 <h2 id="v5-14-1-systems-compiler-port-contract">v5.14.1 - Systems Compiler Port Contract</h2>
 <p>Date: 2026-05-26</p>

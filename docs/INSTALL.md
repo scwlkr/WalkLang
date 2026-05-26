@@ -7,51 +7,35 @@ release artifact install
 source install for local development
 ```
 
-Use `walk version` after either path. The reported version should match the release or local build label you installed.
+Use `walk version` after either path. The reported version should match the
+release or local build label you installed.
 
 ## Release Artifact Install
 
-Release artifacts are produced by `scripts/release.sh` and named:
+Release artifacts are produced by `scripts/release.sh`. In the Phase 11 port
+candidate, the script is C++/C-only and writes current-host artifacts:
 
 ```text
-walk-v5.14.1-darwin-arm64
-walk-v5.14.1-darwin-amd64
-walk-v5.14.1-linux-amd64
-walk-v5.14.1-linux-arm64
-walk-v5.14.1-windows-amd64.exe
-walk-cpp-v5.14.1-<release-host-os>-<release-host-arch>
-walk-runtime-v5.14.1.tar.gz
-walktop-v5.14.1-<release-host-os>-<release-host-arch>
+walk-v6.0.0-port-candidate-<host-os>-<host-arch>
+walk-runtime-v6.0.0-port-candidate.tar.gz
+walktop-v6.0.0-port-candidate-<host-os>-<host-arch>
 SHA256SUMS
 ```
 
-`scripts/release.sh` cross-builds the `walk` compiler artifacts, builds one
-current-host `walk-cpp` port-candidate artifact, then uses that C++ compiler
-candidate to build one current-host `walktop` artifact from WalkLang source. It
-also packages the C runtime source used by native builds. Source install always
-installs the runtime source and builds the local `walk-cpp` and `walktop`
-binaries.
+The final v6 release gate is responsible for publishing the official
+cross-platform artifact set. The port-candidate release script exists to prove
+that repo-controlled release packaging no longer depends on Go.
 
 Install on macOS or Linux:
 
 ```bash
-mkdir -p ~/.local/bin
-cp walk-v5.14.1-<os>-<arch> ~/.local/bin/walk
-cp walk-cpp-v5.14.1-<os>-<arch> ~/.local/bin/walk-cpp
-cp walktop-v5.14.1-<os>-<arch> ~/.local/bin/walktop
-mkdir -p ~/.local/lib/walk
-tar -xzf walk-runtime-v5.14.1.tar.gz -C ~/.local/lib/walk
-chmod +x ~/.local/bin/walk ~/.local/bin/walk-cpp ~/.local/bin/walktop
+mkdir -p ~/.local/bin ~/.local/lib/walk
+cp walk-v6.0.0-port-candidate-<os>-<arch> ~/.local/bin/walk
+cp walktop-v6.0.0-port-candidate-<os>-<arch> ~/.local/bin/walktop
+tar -xzf walk-runtime-v6.0.0-port-candidate.tar.gz -C ~/.local/lib/walk
+chmod +x ~/.local/bin/walk ~/.local/bin/walktop
 walk version
-walk-cpp version
 NO_COLOR=1 walktop --once
-```
-
-Install on Windows by placing `walk-v5.14.1-windows-amd64.exe` somewhere on
-`PATH` as `walk.exe`, then run:
-
-```powershell
-walk version
 ```
 
 Verify checksums before installing:
@@ -68,18 +52,17 @@ sha256sum -c SHA256SUMS
 
 ## Source Install
 
-Source installs require Go, `make`, a C++20 compiler, and a native C compiler
+Source installs require `make`, a C++20 compiler, and a native C compiler
 available as `cc`.
 
 ```bash
 scripts/install-local.sh local
 walk version
-walk-cpp version
 NO_COLOR=1 walktop --once --fixture tools/walktop/testdata/basic
 ```
 
-By default the script writes `walk`, `walk-cpp`, and `walktop` to
-`~/.local/bin`. Override the install directory with:
+By default the script writes `walk` and `walktop` to `~/.local/bin`. Override
+the install directory with:
 
 ```bash
 WALK_INSTALL_DIR=/path/to/bin scripts/install-local.sh local
@@ -92,24 +75,19 @@ directory. Override it with:
 WALK_RUNTIME_INSTALL_DIR=/path/to/runtime scripts/install-local.sh local
 ```
 
-`walk-cpp` is the systems compiler port candidate. As of Phase 10 it supports
-the current compiler, project/package, formatter, docs, debug-map, LSP, REPL,
-static docs-site, and `walktop` build/test/install/release paths without
-delegating those paths to the Go reference compiler.
-
-Source install builds `walktop` through the installed `walk-cpp` candidate by
+Source install builds `walktop` through the installed `walk` compiler by
 default. Maintainers can override the WalkLang build driver for diagnostics:
 
 ```bash
-WALK_BUILD_BIN=build/walk-cpp scripts/install-local.sh local
+WALK_BUILD_BIN=build/walk scripts/install-local.sh local
 ```
 
-When running an installed `walk-cpp` from outside the source tree, set
+When running an installed `walk` from outside the source tree, set
 `WALK_RUNTIME_DIR` if the runtime source is not under the default local install
 location:
 
 ```bash
-WALK_RUNTIME_DIR=~/.local/lib/walk/runtime walk-cpp build src/main.walk -o build/app
+WALK_RUNTIME_DIR=~/.local/lib/walk/runtime walk build src/main.walk -o build/app
 ```
 
 ## Smoke Test
@@ -148,19 +126,19 @@ Score:
 
 ## Build Release Artifacts Locally
 
-Maintainers can produce the release artifact set with:
+Maintainers can produce the current-host port-candidate artifact set with:
 
 ```bash
-scripts/release.sh v5.14.1 dist
+make release VERSION=v6.0.0-port-candidate OUT=dist
 ```
 
-The command writes the compiler platform binaries, the runtime source archive,
-the current-host `walk-cpp` port-candidate binary, the current-host `walktop`
-binary built by `walk-cpp`, and `dist/SHA256SUMS`.
+The command writes the current-host `walk` compiler binary, the runtime source
+archive, the current-host `walktop` binary built by `walk`, and
+`dist/SHA256SUMS`.
 
-Release artifact generation builds `walktop` through `build/walk-cpp` by
-default. Maintainers can override the WalkLang build driver for diagnostics:
+Release artifact generation builds `walktop` through `build/walk` by default.
+Maintainers can override the WalkLang build driver for diagnostics:
 
 ```bash
-WALK_RELEASE_BUILD_BIN=build/walk-cpp scripts/release.sh v5.14.1 dist
+WALK_RELEASE_BUILD_BIN=build/walk scripts/release.sh v6.0.0-port-candidate dist
 ```

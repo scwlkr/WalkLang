@@ -27,6 +27,8 @@ public/docs/reference/api.md
 public/docs/reference/api.json
 ```
 
+The site is static HTML/CSS. It does not ship JavaScript assets.
+
 `public/CNAME` sets the custom domain to `walklang.wlkrlabs.com` for static
 hosts that honor CNAME files.
 
@@ -48,9 +50,9 @@ Build the site and generated reference artifacts with:
 scripts/build-docs-site.sh
 ```
 
-The script builds and uses the C++ `walk-cpp` candidate by default for
-structured API docs and static site generation. The previous Go site generator
-has been removed.
+The script builds and uses the C++/C `walk` compiler by default for structured
+API docs and static site generation. The previous Go site generator and
+JavaScript search asset have been removed.
 
 Check that generated artifacts are fresh and that static links resolve with:
 

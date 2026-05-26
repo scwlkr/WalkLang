@@ -3,8 +3,7 @@
 WalkLang includes a local package workflow on top of project mode and user
 modules.
 
-The reference `walk` compiler and the Phase 7 `walk-cpp` port candidate both
-support this local package workflow.
+The active C++/C `walk` compiler supports this local package workflow.
 
 Packages are ordinary WalkLang projects with:
 

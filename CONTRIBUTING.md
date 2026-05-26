@@ -20,16 +20,19 @@ of presenting it as stable.
 Run the standard checks before sending changes:
 
 ```bash
-go test -count=1 ./...
-go build -o build/walk ./cmd/walk
+make clean
+make walk WALK_VERSION=dev
+make test
+make conformance
 WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh
+scripts/check-docs-site.sh
 git diff --check
 ```
 
 For release artifact work, also run:
 
 ```bash
-scripts/release.sh <version> dist
+make release VERSION=<version> OUT=dist
 ```
 
 ## Documentation

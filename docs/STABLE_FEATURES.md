@@ -156,9 +156,9 @@ The CLI prints the stable diagnostic first line, followed by source snippets, ca
 The checker emits warnings for shadowing outer names and unreachable statements.
 
 ```bash
-go run ./cmd/walk check examples/stable.walk
-go run ./cmd/walk check --warnings=off examples/stable.walk
-go run ./cmd/walk check --warnings=error examples/stable.walk
+walk check examples/stable.walk
+walk check --warnings=off examples/stable.walk
+walk check --warnings=error examples/stable.walk
 ```
 
 ## Build Flow
@@ -192,7 +192,7 @@ scripts/stress-compatibility.sh
 Run the focused stable compatibility suite:
 
 ```bash
-go test ./cmd/walk -run TestStableCompatibilitySuite
+make conformance
 ```
 
 Build release CLI artifacts:
@@ -218,5 +218,6 @@ Project mode is defined in `docs/PROJECTS.md`.
 Run conformance:
 
 ```bash
-go test ./...
+make test
+make conformance
 ```
