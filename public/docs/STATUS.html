@@ -43,6 +43,7 @@
 <h2>Project</h2>
 <a href="ARCHITECTURE.html">Architecture</a>
 <a href="DESIGN_RULES.html">Design Rules</a>
+<a href="SYSTEMS_COMPILER_PORT_PLAN.html">Systems Compiler Port</a>
 <a href="STANDARD_PLATFORM.html">Standard Platform</a>
 <a href="EXPLICIT_SYSTEMS_TRACK.html">Explicit Systems Track</a>
 <a href="DOCS_STYLE_GUIDE.html">Docs Style Guide</a>
@@ -59,6 +60,7 @@
 <article class="doc">
 <h1 id="walklang-status">WalkLang Status</h1>
 <p>Current WalkLang version: <code>v5.14.0</code>.</p>
+<p>Current architecture direction on 2026-05-26: <code>docs/SYSTEMS_COMPILER_PORT_PLAN.md</code> is now the accepted execution contract for porting WalkLang from the current reference compiler to the permanent systems architecture: C++ compiler core, C runtime and platform layer, C backend, optional assembly leaf routines, and no final Go or JavaScript implementation footprint. The next porting step is Phase 1, the conformance oracle.</p>
 <p><code>v5.14.0</code> is the single project version for the compiler, tooling, docs, release artifacts, and implemented language surface. Feature maturity is described with status labels instead of separate version lines.</p>
 <p>Current feature status:</p>
 <pre><code class="language-text">stable

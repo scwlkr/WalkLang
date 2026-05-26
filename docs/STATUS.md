@@ -2,6 +2,13 @@
 
 Current WalkLang version: `v5.14.0`.
 
+Current architecture direction on 2026-05-26: `docs/SYSTEMS_COMPILER_PORT_PLAN.md`
+is now the accepted execution contract for porting WalkLang from the current
+reference compiler to the permanent systems architecture: C++ compiler core, C
+runtime and platform layer, C backend, optional assembly leaf routines, and no
+final Go or JavaScript implementation footprint. The next porting step is Phase
+1, the conformance oracle.
+
 `v5.14.0` is the single project version for the compiler, tooling, docs,
 release artifacts, and implemented language surface. Feature maturity is
 described with status labels instead of separate version lines.

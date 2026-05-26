@@ -162,6 +162,7 @@ func sitePages() []docPage {
 		{Source: "DOCS_SITE.md", Output: "docs/DOCS_SITE.html", NavTitle: "Docs Site", Group: "Reference"},
 		{Source: "ARCHITECTURE.md", Output: "docs/ARCHITECTURE.html", NavTitle: "Architecture", Group: "Project"},
 		{Source: "DESIGN_RULES.md", Output: "docs/DESIGN_RULES.html", NavTitle: "Design Rules", Group: "Project"},
+		{Source: "SYSTEMS_COMPILER_PORT_PLAN.md", Output: "docs/SYSTEMS_COMPILER_PORT_PLAN.html", NavTitle: "Systems Compiler Port", Group: "Project"},
 		{Source: "STANDARD_PLATFORM.md", Output: "docs/STANDARD_PLATFORM.html", NavTitle: "Standard Platform", Group: "Project"},
 		{Source: "EXPLICIT_SYSTEMS_TRACK.md", Output: "docs/EXPLICIT_SYSTEMS_TRACK.html", NavTitle: "Explicit Systems Track", Group: "Project"},
 		{Source: "DOCS_STYLE_GUIDE.md", Output: "docs/DOCS_STYLE_GUIDE.html", NavTitle: "Docs Style Guide", Group: "Project"},

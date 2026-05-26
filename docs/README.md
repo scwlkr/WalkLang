@@ -55,6 +55,7 @@ Features inside `v5.14.0` use maturity labels:
 ## Project Direction
 
 - [Roadmap](ROADMAP.md)
+- [Systems compiler port plan](SYSTEMS_COMPILER_PORT_PLAN.md)
 - [Standard platform](STANDARD_PLATFORM.md)
 - [Explicit systems track](EXPLICIT_SYSTEMS_TRACK.md)
 - [Design rules](DESIGN_RULES.md)

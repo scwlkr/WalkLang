@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-No unreleased changes yet.
+- Added `docs/SYSTEMS_COMPILER_PORT_PLAN.md` as the execution contract for porting WalkLang from the current reference compiler to the permanent C++ core, C runtime, C backend, and optional assembly architecture.
 
 ## v5.14.0 - CLI Standard Platform And walktop
 
