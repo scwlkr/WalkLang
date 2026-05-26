@@ -106,8 +106,8 @@ void test_project_lifecycle() {
 
     walk::cli::CommandResult init = walk::cli::dispatch({"init", project_dir.string()});
     expect_exit("project init", init, 0);
-    for (const std::filesystem::path& rel : {"walk.toml", "src/main.walk", "src/math_extra.walk", "tests/main_test.walk"}) {
-        expect_true("project file " + rel.string(), std::filesystem::is_regular_file(project_dir / rel), "missing file");
+    for (const char* rel : {"walk.toml", "src/main.walk", "src/math_extra.walk", "tests/main_test.walk"}) {
+        expect_true(std::string("project file ") + rel, std::filesystem::is_regular_file(project_dir / rel), "missing file");
     }
 
     {

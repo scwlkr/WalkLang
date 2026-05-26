@@ -387,12 +387,13 @@ Result<std::filesystem::path> init_project(const std::filesystem::path& raw_proj
         std::filesystem::create_directories(clean_path / "src");
         std::filesystem::create_directories(clean_path / "tests");
         std::filesystem::create_directories(clean_path / "build");
-        for (const auto& file : {
-                 std::pair<std::filesystem::path, std::string>{"walk.toml", initial_project_config(name)},
-                 {"src/main.walk", initial_main_source()},
-                 {"src/math_extra.walk", initial_module_source()},
-                 {"tests/main_test.walk", initial_test_source()},
-             }) {
+        const std::pair<std::filesystem::path, std::string> files[] = {
+            {"walk.toml", initial_project_config(name)},
+            {"src/main.walk", initial_main_source()},
+            {"src/math_extra.walk", initial_module_source()},
+            {"tests/main_test.walk", initial_test_source()},
+        };
+        for (const auto& file : files) {
             Result<void> written = write_text_file(clean_path / file.first, file.second);
             if (!written.ok()) {
                 return Result<std::filesystem::path>::failure(written.error());
