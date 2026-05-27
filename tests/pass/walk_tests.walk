@@ -21,6 +21,11 @@ test: 'stdlib works'
     assert: == 'walk'[1] 'a'
     assert: string.contains('walk', 'al')
     assert: == string.concat('walk', 'lang') 'walklang'
+    assert: == string.lower('Hi WALK') 'hi walk'
+    var: parts = string.split('a b', ' ')
+    assert: == parts[0] 'a'
+    assert: == parts[1] 'b'
+    assert: == string.replace('banana', 'na', 'NA') 'baNANA'
     assert: == random.choice(choices) 'only'
     assert: == math.pow(2, 3) 8
     assert: testing.assert(== fixed_random 2)

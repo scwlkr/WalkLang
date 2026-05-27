@@ -99,6 +99,10 @@ string
 Struct and generic types are implemented as experimental features. They are not
 part of the stable feature set.
 
+The current compiler also includes the draft collection type
+`map[string]array[string]` for explicit string-keyed tables of string arrays.
+It is not part of the stable feature set.
+
 ---
 
 ## 3. Values
@@ -122,10 +126,13 @@ var: name string? = null
 Other nullable scalar forms are not part of the stable native feature set.
 
 Array literals are homogeneous. Empty arrays need an explicit array annotation.
+The draft `map[string]array[string]` type accepts an empty `[]` literal only
+when an explicit map annotation is present.
 
 ```walk
 var: nums = [1, 2, 3]
 var: guessed array[string] = []
+var: table map[string]array[string] = []
 ```
 
 Runtime-created strings from stable `in:` and string interpolation are owned by
@@ -380,6 +387,9 @@ string.len(string) -> int
 string.at(string, int) -> string
 string.contains(string, string) -> bool
 string.concat(string, string) -> string
+string.lower(string) -> string
+string.split(string, string) -> array[string]
+string.replace(string, string, string) -> string
 array.len(array[T]) -> int
 array.contains(array[T], T) -> bool
 array.push(array[T], T) -> array[T]
@@ -402,6 +412,7 @@ file
 dir
 path
 json
+map
 term
 http
 html
@@ -504,6 +515,7 @@ file
 dir
 path
 json
+map
 term
 http
 html

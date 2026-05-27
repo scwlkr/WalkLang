@@ -25,6 +25,8 @@ std::string type_kind_name(TypeKind kind) {
         return "null";
     case TypeKind::Array:
         return "array";
+    case TypeKind::Map:
+        return "map";
     case TypeKind::Function:
         return "func";
     case TypeKind::Struct:
@@ -47,6 +49,20 @@ std::string Type::to_string() const {
             output << "?";
         }
         output << "]";
+        break;
+    case TypeKind::Map:
+        output << "map[";
+        if (key) {
+            output << key->to_string();
+        } else {
+            output << "?";
+        }
+        output << "]";
+        if (elem) {
+            output << elem->to_string();
+        } else {
+            output << "?";
+        }
         break;
     case TypeKind::Function:
         output << "func(";
@@ -87,6 +103,14 @@ Type array_of(Type elem) {
     Type type;
     type.kind = TypeKind::Array;
     type.elem = std::make_shared<Type>(std::move(elem));
+    return type;
+}
+
+Type map_of(Type key, Type value) {
+    Type type;
+    type.kind = TypeKind::Map;
+    type.key = std::make_shared<Type>(std::move(key));
+    type.elem = std::make_shared<Type>(std::move(value));
     return type;
 }
 

@@ -56,7 +56,7 @@ Current draft, experimental, or planned areas include:
 ```text
 do: effect calls (draft)
 defer: scope cleanup (draft)
-io, parse, process, file, dir, path, json, term, http, and html APIs (draft)
+io, parse, process, file, dir, path, json, map, term, http, and html APIs (draft)
 matrix APIs (planned)
 structs (experimental)
 methods (experimental)

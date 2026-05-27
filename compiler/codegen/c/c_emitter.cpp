@@ -118,6 +118,18 @@ std::vector<std::string> struct_dependencies(const ast::Type& type) {
             return {};
         }
         return struct_dependencies(*type.elem);
+    case ast::TypeKind::Map: {
+        std::vector<std::string> deps;
+        if (type.key != nullptr) {
+            std::vector<std::string> key_deps = struct_dependencies(*type.key);
+            deps.insert(deps.end(), key_deps.begin(), key_deps.end());
+        }
+        if (type.elem != nullptr) {
+            std::vector<std::string> value_deps = struct_dependencies(*type.elem);
+            deps.insert(deps.end(), value_deps.begin(), value_deps.end());
+        }
+        return deps;
+    }
     case ast::TypeKind::Function: {
         std::vector<std::string> deps;
         for (const ast::Type& param : type.params) {
@@ -141,6 +153,8 @@ bool type_contains_generic(const ast::Type& type) {
         return true;
     case ast::TypeKind::Array:
         return type.elem != nullptr && type_contains_generic(*type.elem);
+    case ast::TypeKind::Map:
+        return (type.key != nullptr && type_contains_generic(*type.key)) || (type.elem != nullptr && type_contains_generic(*type.elem));
     case ast::TypeKind::Function:
         for (const ast::Type& param : type.params) {
             if (type_contains_generic(param)) {
@@ -209,6 +223,11 @@ std::string c_value_type(const ast::Type& type) {
         return "WalkString";
     case ast::TypeKind::Struct:
         return c_struct_name(type.name);
+    case ast::TypeKind::Map:
+        if (sema::string_array_map(type)) {
+            return "WalkMapStringArrayString";
+        }
+        break;
     case ast::TypeKind::Array:
         if (type.elem == nullptr) {
             throw EmitError("internal error: array type needs element");
@@ -825,9 +844,22 @@ private:
             type = statement.annotation;
         }
         if (const auto* array = dynamic_cast<const ir::ArrayLiteral*>(statement.value.get())) {
+            if (type.kind == ast::TypeKind::Map) {
+                return emit_empty_map_decl(statement.name, type, *array, statement.mutable_binding);
+            }
             return emit_array_decl(statement.name, type, *array, statement.mutable_binding);
         }
         return {c_decl(type, statement.name, statement.mutable_binding) + " = " + emit_expression(*statement.value) + ";"};
+    }
+
+    std::vector<std::string> emit_empty_map_decl(const std::string& name, const ast::Type& type, const ir::ArrayLiteral& array, bool mutable_binding) {
+        if (!sema::string_array_map(type)) {
+            throw EmitError("internal error: empty map literal has unsupported map type");
+        }
+        if (!array.elements.empty()) {
+            throw EmitError("internal error: map literal supports only empty []");
+        }
+        return {c_decl(type, name, mutable_binding) + " = walk_rt_map_string_array_string_empty();"};
     }
 
     std::vector<std::string> emit_array_decl(const std::string& name, const ast::Type& type, const ir::ArrayLiteral& array, bool mutable_binding) {
@@ -1009,6 +1041,9 @@ private:
             if (index.target->type.kind == ast::TypeKind::String) {
                 return "walk_rt_string_at(" + target + ", " + rendered_index + ")";
             }
+            if (index.target->type.kind == ast::TypeKind::Map) {
+                return "walk_rt_map_string_array_string_get(" + target + ", " + rendered_index + ")";
+            }
             return target + ".items[" + rendered_index + "]";
         }
         case ir::ExpressionKind::FieldAccess: {
@@ -1157,6 +1192,15 @@ private:
         if (call.callee == "string.concat") {
             return "walk_rt_string_concat(" + args[0] + ", " + args[1] + ")";
         }
+        if (call.callee == "string.lower") {
+            return "walk_rt_string_lower(" + args[0] + ")";
+        }
+        if (call.callee == "string.split") {
+            return "walk_rt_string_split(" + args[0] + ", " + args[1] + ")";
+        }
+        if (call.callee == "string.replace") {
+            return "walk_rt_string_replace(" + args[0] + ", " + args[1] + ", " + args[2] + ")";
+        }
         if (call.callee == "array.len") {
             return args[0] + ".len";
         }
@@ -1171,6 +1215,24 @@ private:
                 throw EmitError("internal error: array.push needs array element type");
             }
             return "walk_rt_array_push_" + native_array_helper_suffix(*call.args[0]->type.elem) + "(" + args[0] + ", " + args[1] + ")";
+        }
+        if (call.callee == "map.empty") {
+            return "walk_rt_map_string_array_string_empty()";
+        }
+        if (call.callee == "map.has") {
+            return "walk_rt_map_string_array_string_has(" + args[0] + ", " + args[1] + ")";
+        }
+        if (call.callee == "map.get") {
+            return "walk_rt_map_string_array_string_get(" + args[0] + ", " + args[1] + ")";
+        }
+        if (call.callee == "map.set") {
+            return "walk_rt_map_string_array_string_set(" + args[0] + ", " + args[1] + ", " + args[2] + ")";
+        }
+        if (call.callee == "map.keys") {
+            return "walk_rt_map_string_array_string_keys(" + args[0] + ")";
+        }
+        if (call.callee == "map.push") {
+            return "walk_rt_map_string_array_string_push(" + args[0] + ", " + args[1] + ", " + args[2] + ")";
         }
         if (call.callee == "time.now") {
             return "(long long)time(NULL)";

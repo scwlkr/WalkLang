@@ -156,7 +156,7 @@ The systems compiler port now builds the repo-local `walk` executable from
 C++/C sources:
 
 ```bash
-make walk WALK_VERSION=v6.0.0
+make walk WALK_VERSION=v6.1.0
 ./build/walk version
 ./build/walk help
 make test

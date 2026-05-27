@@ -103,6 +103,7 @@ float
 bool
 string</code></pre>
 <p>Struct and generic types are implemented as experimental features. They are not part of the stable feature set.</p>
+<p>The current compiler also includes the draft collection type <code>map[string]array[string]</code> for explicit string-keyed tables of string arrays. It is not part of the stable feature set.</p>
 <p>---</p>
 <h2 id="3-values">3. Values</h2>
 <p>Stable literals create values of these types:</p>
@@ -114,9 +115,10 @@ null</code></pre>
 <p><code>null</code> is stable for nullable strings:</p>
 <pre><code class="language-walk">var: name string? = null</code></pre>
 <p>Other nullable scalar forms are not part of the stable native feature set.</p>
-<p>Array literals are homogeneous. Empty arrays need an explicit array annotation.</p>
+<p>Array literals are homogeneous. Empty arrays need an explicit array annotation. The draft <code>map[string]array[string]</code> type accepts an empty <code>[]</code> literal only when an explicit map annotation is present.</p>
 <pre><code class="language-walk">var: nums = [1, 2, 3]
-var: guessed array[string] = []</code></pre>
+var: guessed array[string] = []
+var: table map[string]array[string] = []</code></pre>
 <p>Runtime-created strings from stable <code>in:</code> and string interpolation are owned by the native program.</p>
 <p>---</p>
 <h2 id="4-expressions">4. Expressions</h2>
@@ -242,6 +244,9 @@ string.len(string) -&gt; int
 string.at(string, int) -&gt; string
 string.contains(string, string) -&gt; bool
 string.concat(string, string) -&gt; string
+string.lower(string) -&gt; string
+string.split(string, string) -&gt; array[string]
+string.replace(string, string, string) -&gt; string
 array.len(array[T]) -&gt; int
 array.contains(array[T], T) -&gt; bool
 array.push(array[T], T) -&gt; array[T]
@@ -258,6 +263,7 @@ file
 dir
 path
 json
+map
 term
 http
 html</code></pre>
@@ -312,6 +318,7 @@ file
 dir
 path
 json
+map
 term
 http
 html</code></pre>

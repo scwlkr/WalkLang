@@ -29,6 +29,11 @@ typedef struct { WalkInt *items; WalkSize len; } WalkArrayInt;
 typedef struct { WalkFloat *items; WalkSize len; } WalkArrayFloat;
 typedef struct { WalkBool *items; WalkSize len; } WalkArrayBool;
 typedef struct { WalkString *items; WalkSize len; } WalkArrayString;
+typedef struct {
+    WalkString key;
+    WalkArrayString value;
+} WalkMapStringArrayStringEntry;
+typedef struct { WalkMapStringArrayStringEntry *entries; WalkSize len; } WalkMapStringArrayString;
 
 typedef struct {
     WalkBool ok;
@@ -118,6 +123,9 @@ WalkInt walk_rt_string_len(WalkString value);
 WalkString walk_rt_string_at(WalkString value, WalkInt index);
 WalkBool walk_rt_string_contains(WalkString text, WalkString item);
 WalkString walk_rt_string_concat(WalkString left, WalkString right);
+WalkString walk_rt_string_lower(WalkString text);
+WalkArrayString walk_rt_string_split(WalkString text, WalkString sep);
+WalkString walk_rt_string_replace(WalkString text, WalkString from, WalkString to);
 WalkString walk_rt_format_int(WalkInt value);
 WalkString walk_rt_format_float(WalkFloat value);
 WalkString walk_rt_format_bool(WalkBool value);
@@ -137,6 +145,12 @@ WalkBool walk_rt_array_contains_int(WalkArrayInt array, WalkInt item);
 WalkBool walk_rt_array_contains_float(WalkArrayFloat array, WalkFloat item);
 WalkBool walk_rt_array_contains_bool(WalkArrayBool array, WalkBool item);
 WalkBool walk_rt_array_contains_string(WalkArrayString array, WalkString item);
+WalkMapStringArrayString walk_rt_map_string_array_string_empty(void);
+WalkBool walk_rt_map_string_array_string_has(WalkMapStringArrayString table, WalkString key);
+WalkArrayString walk_rt_map_string_array_string_get(WalkMapStringArrayString table, WalkString key);
+WalkMapStringArrayString walk_rt_map_string_array_string_set(WalkMapStringArrayString table, WalkString key, WalkArrayString value);
+WalkArrayString walk_rt_map_string_array_string_keys(WalkMapStringArrayString table);
+WalkMapStringArrayString walk_rt_map_string_array_string_push(WalkMapStringArrayString table, WalkString key, WalkString value);
 
 void walk_rt_io_write(WalkString value);
 void walk_rt_io_write_line(WalkString value);

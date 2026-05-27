@@ -15,6 +15,9 @@ bool type_equal(const ast::Type& left, const ast::Type& right) {
     switch (left.kind) {
     case ast::TypeKind::Array:
         return left.elem != nullptr && right.elem != nullptr && type_equal(*left.elem, *right.elem);
+    case ast::TypeKind::Map:
+        return left.key != nullptr && right.key != nullptr && left.elem != nullptr && right.elem != nullptr && type_equal(*left.key, *right.key) &&
+            type_equal(*left.elem, *right.elem);
     case ast::TypeKind::Function:
         if (left.params.size() != right.params.size()) {
             return false;
@@ -51,7 +54,7 @@ bool assignable(const ast::Type& source, const ast::Type& target) {
 }
 
 bool comparable(const ast::Type& left, const ast::Type& right) {
-    if (left.kind == ast::TypeKind::Struct || right.kind == ast::TypeKind::Struct) {
+    if (left.kind == ast::TypeKind::Struct || right.kind == ast::TypeKind::Struct || left.kind == ast::TypeKind::Map || right.kind == ast::TypeKind::Map) {
         return false;
     }
     if (left.kind == ast::TypeKind::Generic || right.kind == ast::TypeKind::Generic) {
@@ -84,6 +87,11 @@ bool native_array_element(const ast::Type& type) {
         (type.kind == ast::TypeKind::Int || type.kind == ast::TypeKind::Float || type.kind == ast::TypeKind::Bool || type.kind == ast::TypeKind::String);
 }
 
+bool string_array_map(const ast::Type& type) {
+    return type.kind == ast::TypeKind::Map && type.key != nullptr && type.elem != nullptr && type_equal(*type.key, ast::basic(ast::TypeKind::String)) &&
+        type.elem->kind == ast::TypeKind::Array && type.elem->elem != nullptr && type_equal(*type.elem->elem, ast::basic(ast::TypeKind::String));
+}
+
 bool interpolatable(const ast::Type& type) {
     if (type.nullable) {
         return type.kind == ast::TypeKind::String;
@@ -95,6 +103,10 @@ ast::Type nullable_string() {
     ast::Type type = ast::basic(ast::TypeKind::String);
     type.nullable = true;
     return type;
+}
+
+ast::Type string_array_map_type() {
+    return ast::map_of(ast::basic(ast::TypeKind::String), ast::array_of(ast::basic(ast::TypeKind::String)));
 }
 
 ast::Type substitute_type(const ast::Type& type, const std::map<std::string, ast::Type>& bindings) {
@@ -116,6 +128,15 @@ ast::Type substitute_type(const ast::Type& type, const std::map<std::string, ast
         }
         {
             ast::Type result = ast::array_of(substitute_type(*type.elem, bindings));
+            result.nullable = type.nullable;
+            return result;
+        }
+    case ast::TypeKind::Map:
+        if (type.key == nullptr || type.elem == nullptr) {
+            return type;
+        }
+        {
+            ast::Type result = ast::map_of(substitute_type(*type.key, bindings), substitute_type(*type.elem, bindings));
             result.nullable = type.nullable;
             return result;
         }

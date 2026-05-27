@@ -18,6 +18,11 @@ out: 'walk'[2]
 out: string.contains('walk', 'al')
 out: string.contains('walk', 'zz')
 out: string.concat('walk', 'lang')
+out: string.lower('Hi WALK')
+var: parts = string.split('a b', ' ')
+out: parts[0]
+out: parts[1]
+out: string.replace('banana', 'na', 'NA')
 out: array.len(nums)
 out: array.len(letters)
 out: array.contains(letters, 'd')

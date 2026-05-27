@@ -124,7 +124,7 @@ string
 string?
 array[T]
 func(T...) R</code></pre>
-<p><code>void</code> is an internal function return marker, not a value type. Struct and generic types exist as experimental features unless promoted by a later stable feature decision.</p>
+<p><code>void</code> is an internal function return marker, not a value type. Struct and generic types exist as experimental features unless promoted by a later stable feature decision. <code>map[string]array[string]</code> exists as a draft collection type for the current compiler; it is not stable.</p>
 <h3 id="expression">Expression</h3>
 <p>An expression is syntax that the checker assigns a type to. Most expressions produce values. Effect calls are typed too, but effect calls may only be used where the language allows them, such as under the draft <code>do:</code> statement.</p>
 <p>Examples:</p>
@@ -164,7 +164,7 @@ draft built-in module
 user module
 package module</code></pre>
 <h3 id="collection">Collection</h3>
-<p>A collection is a value that contains other values. Stable collections are arrays. Struct values are experimental data-modeling values. Maps, sets, and tuples are not current WalkLang concepts.</p>
+<p>A collection is a value that contains other values. Stable collections are arrays. Struct values are experimental data-modeling values. Draft maps are string-keyed tables with <code>array[string]</code> values. Sets and tuples are not current WalkLang concepts.</p>
 <h3 id="error">Error</h3>
 <p>Use diagnostic for compiler-reported errors and warnings. Use runtime failure for native program failures after compilation. Do not use error loosely when the doc means warning, failed assertion, recoverable result data, or runtime stop.</p>
 <h3 id="recoverable-result-data">Recoverable Result Data</h3>

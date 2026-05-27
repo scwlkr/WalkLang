@@ -17,6 +17,7 @@ enum class TypeKind {
     String,
     Null,
     Array,
+    Map,
     Function,
     Struct,
     Generic,
@@ -26,6 +27,7 @@ struct Type {
     TypeKind kind = TypeKind::Invalid;
     std::string name;
     bool nullable = false;
+    std::shared_ptr<Type> key;
     std::shared_ptr<Type> elem;
     std::vector<Type> params;
     std::shared_ptr<Type> return_type;
@@ -35,6 +37,7 @@ struct Type {
 
 [[nodiscard]] Type basic(TypeKind kind);
 [[nodiscard]] Type array_of(Type elem);
+[[nodiscard]] Type map_of(Type key, Type value);
 [[nodiscard]] Type function_type(std::vector<Type> params, Type return_type);
 [[nodiscard]] Type struct_type(std::string name);
 [[nodiscard]] Type generic_type(std::string name);

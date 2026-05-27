@@ -15,8 +15,10 @@ namespace walk::sema {
 [[nodiscard]] bool is_numeric(const ast::Type& type);
 [[nodiscard]] bool contains_kind(const std::vector<ast::Type>& types, ast::TypeKind kind);
 [[nodiscard]] bool native_array_element(const ast::Type& type);
+[[nodiscard]] bool string_array_map(const ast::Type& type);
 [[nodiscard]] bool interpolatable(const ast::Type& type);
 [[nodiscard]] ast::Type nullable_string();
+[[nodiscard]] ast::Type string_array_map_type();
 [[nodiscard]] ast::Type substitute_type(const ast::Type& type, const std::map<std::string, ast::Type>& bindings);
 
 }  // namespace walk::sema

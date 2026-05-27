@@ -90,6 +90,8 @@ static WALK_UNUSED WalkSize walk_rt_random_index(WalkSize len) {
     return (WalkSize)(walk_rt_random_next() % (unsigned long long)len);
 }
 
+static WALK_UNUSED WalkString walk_rt_copy_string(const char *value);
+
 WalkInt walk_rt_string_len(WalkString value) {
     return value == NULL ? 0 : (WalkInt)strlen(value);
 }
@@ -121,6 +123,96 @@ WalkString walk_rt_string_concat(WalkString left, WalkString right) {
     memcpy(out, left, left_len);
     memcpy(out + left_len, right, right_len);
     out[left_len + right_len] = '\0';
+    return out;
+}
+
+WalkString walk_rt_string_lower(WalkString text) {
+    if (text == NULL) { text = ""; }
+    size_t len = strlen(text);
+    char *out = (char *)malloc(len + 1);
+    if (out == NULL) { walk_rt_panic("out of memory"); }
+    for (size_t i = 0; i < len; i++) {
+        char ch = text[i];
+        out[i] = (ch >= 'A' && ch <= 'Z') ? (char)(ch - 'A' + 'a') : ch;
+    }
+    out[len] = '\0';
+    return out;
+}
+
+WalkArrayString walk_rt_string_split(WalkString text, WalkString sep) {
+    if (text == NULL) { text = ""; }
+    if (sep == NULL) { sep = ""; }
+    size_t sep_len = strlen(sep);
+    if (sep_len == 0) {
+        WalkString *items = (WalkString *)walk_rt_alloc_array(1, sizeof(WalkString));
+        items[0] = walk_rt_copy_string(text);
+        return (WalkArrayString){items, 1};
+    }
+    WalkSize count = 1;
+    const char *scan = text;
+    while ((scan = strstr(scan, sep)) != NULL) {
+        count++;
+        scan += sep_len;
+    }
+    WalkString *items = (WalkString *)walk_rt_alloc_array(count, sizeof(WalkString));
+    const char *start = text;
+    WalkSize index = 0;
+    while (true) {
+        const char *hit = strstr(start, sep);
+        size_t part_len = hit == NULL ? strlen(start) : (size_t)(hit - start);
+        char *part = (char *)malloc(part_len + 1);
+        if (part == NULL) { walk_rt_panic("out of memory"); }
+        memcpy(part, start, part_len);
+        part[part_len] = '\0';
+        items[index++] = part;
+        if (hit == NULL) { break; }
+        start = hit + sep_len;
+    }
+    return (WalkArrayString){items, count};
+}
+
+WalkString walk_rt_string_replace(WalkString text, WalkString from, WalkString to) {
+    if (text == NULL) { text = ""; }
+    if (from == NULL) { from = ""; }
+    if (to == NULL) { to = ""; }
+    size_t from_len = strlen(from);
+    if (from_len == 0) { return walk_rt_copy_string(text); }
+    size_t text_len = strlen(text);
+    size_t to_len = strlen(to);
+    WalkSize count = 0;
+    const char *scan = text;
+    while ((scan = strstr(scan, from)) != NULL) {
+        count++;
+        scan += from_len;
+    }
+    size_t out_len = text_len;
+    if (to_len >= from_len) {
+        size_t growth = to_len - from_len;
+        if (count > 0 && growth > (((size_t)-1) - out_len) / (size_t)count) { walk_rt_panic("out of memory"); }
+        out_len += growth * (size_t)count;
+    } else {
+        out_len -= (from_len - to_len) * (size_t)count;
+    }
+    char *out = (char *)malloc(out_len + 1);
+    if (out == NULL) { walk_rt_panic("out of memory"); }
+    const char *input = text;
+    char *write = out;
+    while (true) {
+        const char *hit = strstr(input, from);
+        if (hit == NULL) {
+            size_t tail_len = strlen(input);
+            memcpy(write, input, tail_len);
+            write += tail_len;
+            break;
+        }
+        size_t prefix_len = (size_t)(hit - input);
+        memcpy(write, input, prefix_len);
+        write += prefix_len;
+        memcpy(write, to, to_len);
+        write += to_len;
+        input = hit + from_len;
+    }
+    *write = '\0';
     return out;
 }
 
@@ -207,6 +299,59 @@ WalkBool walk_rt_array_contains_bool(WalkArrayBool array, WalkBool item) {
 WalkBool walk_rt_array_contains_string(WalkArrayString array, WalkString item) {
     for (WalkSize i = 0; i < array.len; i++) { if (strcmp(array.items[i], item) == 0) { return true; } }
     return false;
+}
+
+WalkMapStringArrayString walk_rt_map_string_array_string_empty(void) {
+    return (WalkMapStringArrayString){NULL, 0};
+}
+
+static WalkSize walk_rt_map_string_array_string_find(WalkMapStringArrayString table, WalkString key) {
+    if (key == NULL) { key = ""; }
+    for (WalkSize i = 0; i < table.len; i++) {
+        WalkString entry_key = table.entries[i].key == NULL ? "" : table.entries[i].key;
+        if (strcmp(entry_key, key) == 0) { return i; }
+    }
+    return -1;
+}
+
+WalkBool walk_rt_map_string_array_string_has(WalkMapStringArrayString table, WalkString key) {
+    return walk_rt_map_string_array_string_find(table, key) >= 0;
+}
+
+WalkArrayString walk_rt_map_string_array_string_get(WalkMapStringArrayString table, WalkString key) {
+    WalkSize index = walk_rt_map_string_array_string_find(table, key);
+    if (index < 0) { return (WalkArrayString){NULL, 0}; }
+    return table.entries[index].value;
+}
+
+WalkMapStringArrayString walk_rt_map_string_array_string_set(WalkMapStringArrayString table, WalkString key, WalkArrayString value) {
+    if (key == NULL) { key = ""; }
+    WalkSize found = walk_rt_map_string_array_string_find(table, key);
+    WalkSize len = found >= 0 ? table.len : table.len + 1;
+    WalkMapStringArrayStringEntry *entries = (WalkMapStringArrayStringEntry *)walk_rt_alloc_array(len, sizeof(WalkMapStringArrayStringEntry));
+    for (WalkSize i = 0; i < table.len; i++) {
+        entries[i] = table.entries[i];
+    }
+    if (found >= 0) {
+        entries[found].value = value;
+    } else {
+        entries[table.len] = (WalkMapStringArrayStringEntry){key, value};
+    }
+    return (WalkMapStringArrayString){entries, len};
+}
+
+WalkArrayString walk_rt_map_string_array_string_keys(WalkMapStringArrayString table) {
+    WalkString *items = (WalkString *)walk_rt_alloc_array(table.len, sizeof(WalkString));
+    for (WalkSize i = 0; i < table.len; i++) {
+        items[i] = table.entries[i].key;
+    }
+    return (WalkArrayString){items, table.len};
+}
+
+WalkMapStringArrayString walk_rt_map_string_array_string_push(WalkMapStringArrayString table, WalkString key, WalkString value) {
+    WalkArrayString values = walk_rt_map_string_array_string_get(table, key);
+    WalkArrayString next = walk_rt_array_push_string(values, value);
+    return walk_rt_map_string_array_string_set(table, key, next);
 }
 
 WalkInt walk_rt_array_choice_int(WalkArrayInt array) { return array.items[walk_rt_random_index(array.len)]; }

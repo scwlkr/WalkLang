@@ -166,6 +166,70 @@ void test_test_runner_program_builds_and_runs() {
     expect_eq("test runner output", read_file(out_path), "test: strings work\nok 1 tests\n");
 }
 
+void test_string_helpers_build_and_run() {
+    if (std::system("command -v cc >/dev/null 2>&1") != 0) {
+        return;
+    }
+    const std::string c_code = emit_source(
+        "imp: string\n"
+        "out: string.lower('Hi WALK')\n"
+        "var: parts = string.split('a b', ' ')\n"
+        "out: parts[0]\n"
+        "out: parts[1]\n"
+        "out: string.replace('banana', 'na', 'NA')\n");
+    const std::filesystem::path dir = std::filesystem::path("build") / "cpp-tests" / "string-helpers";
+    std::filesystem::create_directories(dir);
+    const std::filesystem::path c_path = dir / "main.c";
+    const std::filesystem::path exe_path = dir / "main";
+    const std::filesystem::path out_path = dir / "main.out";
+    build_generated_c("string helper build", c_code, c_path, exe_path);
+    const int code = std::system((shell_quote(exe_path) + " > " + shell_quote(out_path)).c_str());
+    if (code != 0) {
+        fail("string helper run", "program failed");
+        return;
+    }
+    expect_eq("string helper output", read_file(out_path), "hi walk\na\nb\nbaNANA\n");
+}
+
+void test_map_string_arrays_build_and_run() {
+    if (std::system("command -v cc >/dev/null 2>&1") != 0) {
+        return;
+    }
+    const std::string c_code = emit_source(
+        "imp: array\n"
+        "imp: map\n"
+        "var: table map[string]array[string] = []\n"
+        "out: array.len(map.keys(table))\n"
+        "var: made = map.empty()\n"
+        "out: array.len(map.keys(made))\n"
+        "table = map.push(table, 'of the', 'people')\n"
+        "table = map.push(table, 'of the', 'walk')\n"
+        "out: map.has(table, 'of the')\n"
+        "out: map.has(table, 'missing')\n"
+        "var: vals = table['of the']\n"
+        "out: array.len(vals)\n"
+        "out: vals[0]\n"
+        "out: vals[1]\n"
+        "var: other array[string] = []\n"
+        "other = array.push(other, 'value')\n"
+        "table = map.set(table, 'other', other)\n"
+        "out: map.keys(table)[1]\n"
+        "out: map.get(table, 'other')[0]\n"
+        "out: array.len(map.get(table, 'missing'))\n");
+    const std::filesystem::path dir = std::filesystem::path("build") / "cpp-tests" / "map-string-array";
+    std::filesystem::create_directories(dir);
+    const std::filesystem::path c_path = dir / "main.c";
+    const std::filesystem::path exe_path = dir / "main";
+    const std::filesystem::path out_path = dir / "main.out";
+    build_generated_c("map build", c_code, c_path, exe_path);
+    const int code = std::system((shell_quote(exe_path) + " > " + shell_quote(out_path)).c_str());
+    if (code != 0) {
+        fail("map run", "program failed");
+        return;
+    }
+    expect_eq("map output", read_file(out_path), "0\n0\ntrue\nfalse\n2\npeople\nwalk\nother\nvalue\n0\n");
+}
+
 }  // namespace
 
 int run_emitter_tests() {
@@ -173,5 +237,7 @@ int run_emitter_tests() {
     test_emit_c_for_variables_and_output();
     test_generated_c_builds_and_runs();
     test_test_runner_program_builds_and_runs();
+    test_string_helpers_build_and_run();
+    test_map_string_arrays_build_and_run();
     return failures;
 }

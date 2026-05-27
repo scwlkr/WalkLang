@@ -147,6 +147,8 @@ Use the `string` module for common string helpers.
 imp: string
 out: string.contains('walk', 'al')
 out: string.concat('walk', 'lang')
+out: string.lower('Hi WALK')
+out: string.replace('banana', 'na', 'NA')
 ```
 
 ---
@@ -460,6 +462,30 @@ out: random.choice(words)
 
 ---
 
+## Draft Maps
+
+Draft maps currently support `map[string]array[string]`. Use them for explicit
+string-keyed tables whose values are string arrays. This is a draft collection,
+not a stable feature.
+
+```walk
+imp: array
+imp: map
+
+var: table map[string]array[string] = []
+table = map.push(table, 'of the', 'people')
+table = map.push(table, 'of the', 'walk')
+
+out: map.has(table, 'of the')
+out: table['of the'][0]
+out: array.len(map.keys(table))
+```
+
+`map.set` and `map.push` return a new map value; assign the result back when
+you want to keep the change.
+
+---
+
 ## Null
 
 Use nullable string annotations when assigning `null`.
@@ -509,7 +535,7 @@ imp: geometry.core
 out: geometry.core.double(3)
 ```
 
-Draft process, IO, filesystem, JSON, terminal, HTTP, and HTML helpers are
+Draft process, IO, filesystem, JSON, map, terminal, HTTP, and HTML helpers are
 available in the current compiler, but they are draft features.
 
 ```walk

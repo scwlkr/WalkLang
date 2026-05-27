@@ -83,6 +83,7 @@ runtime/html	runtime	run	tests/runtime_modules/html.walk	.	-	yes
 runtime/http	runtime	run	tests/runtime_modules/http.walk	.	-	yes
 runtime/io	runtime	run	tests/runtime_modules/io.walk	.	runtime/io	yes
 runtime/json	runtime	run	tests/runtime_modules/json.walk	.	-	yes
+runtime/map	runtime	run	tests/runtime_modules/map.walk	.	-	yes
 runtime/parse	runtime	run	tests/runtime_modules/parse.walk	.	-	yes
 runtime/path	runtime	run	tests/runtime_modules/path.walk	.	-	yes
 runtime/process	runtime	run	tests/runtime_modules/process.walk	.	-	yes

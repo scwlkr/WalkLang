@@ -13,6 +13,11 @@ test: 'stdlib assert stays compatible'
     assert: == string.at('walk', 0) 'w'
     assert: string.contains('walk', 'al')
     assert: == string.concat('walk', 'lang') 'walklang'
+    assert: == string.lower('Hi WALK') 'hi walk'
+    var: parts = string.split('a b', ' ')
+    assert: == parts[0] 'a'
+    assert: == parts[1] 'b'
+    assert: == string.replace('banana', 'na', 'NA') 'baNANA'
     assert: array.contains(letters, 'w')
     assert: == random.choice(choices) 'stable'
     assert: == 'length {wordLength}' 'length 4'

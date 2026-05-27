@@ -59,7 +59,8 @@ std::set<std::string> type_param_set(const std::vector<std::string>& params) {
 }
 
 bool reserved_type_name(const std::string& name) {
-    return name == "void" || name == "int" || name == "float" || name == "bool" || name == "string" || name == "null" || name == "array" || name == "func";
+    return name == "void" || name == "int" || name == "float" || name == "bool" || name == "string" || name == "null" || name == "array" || name == "map" ||
+        name == "func";
 }
 
 bool reserved_value_name(const std::string& name) {
@@ -79,6 +80,18 @@ std::vector<std::string> struct_type_dependencies(const ast::Type& type) {
             return {};
         }
         return struct_type_dependencies(*type.elem);
+    case ast::TypeKind::Map: {
+        std::vector<std::string> deps;
+        if (type.key != nullptr) {
+            std::vector<std::string> key_deps = struct_type_dependencies(*type.key);
+            deps.insert(deps.end(), key_deps.begin(), key_deps.end());
+        }
+        if (type.elem != nullptr) {
+            std::vector<std::string> value_deps = struct_type_dependencies(*type.elem);
+            deps.insert(deps.end(), value_deps.begin(), value_deps.end());
+        }
+        return deps;
+    }
     case ast::TypeKind::Function: {
         std::vector<std::string> deps;
         for (const ast::Type& param : type.params) {
@@ -603,8 +616,16 @@ private:
             return false;
         }
         ast::Type value_type;
-        if (auto* array = dynamic_cast<ast::ArrayLiteral*>(statement.value); array != nullptr && statement.annotation.kind == ast::TypeKind::Array) {
-            if (!check_array_literal_as(*array, statement.annotation, value_type)) {
+        if (auto* array = dynamic_cast<ast::ArrayLiteral*>(statement.value); array != nullptr && known_type(statement.annotation)) {
+            if (statement.annotation.kind == ast::TypeKind::Array) {
+                if (!check_array_literal_as(*array, statement.annotation, value_type)) {
+                    return false;
+                }
+            } else if (statement.annotation.kind == ast::TypeKind::Map) {
+                if (!check_empty_map_literal_as(*array, statement.annotation, value_type)) {
+                    return false;
+                }
+            } else if (!check_expression(statement.value, value_type)) {
                 return false;
             }
         } else if (!check_expression(statement.value, value_type)) {
@@ -805,6 +826,15 @@ private:
             if (!check_expression(index->target, target_type) || !check_expression(index->index, index_type)) {
                 return false;
             }
+            if (target_type.kind == ast::TypeKind::Map && target_type.key != nullptr && target_type.elem != nullptr) {
+                if (!assignable(index_type, *target_type.key)) {
+                    add_error(*diagnostics_, index->index->range, "type error: map index must be " + target_type.key->to_string() + ", got " + index_type.to_string());
+                    return false;
+                }
+                out = *target_type.elem;
+                expression->type = out;
+                return true;
+            }
             if (!type_equal(index_type, ast::basic(ast::TypeKind::Int))) {
                 add_error(*diagnostics_, index->index->range, "type error: index must be int, got " + index_type.to_string());
                 return false;
@@ -819,7 +849,7 @@ private:
                 expression->type = out;
                 return true;
             }
-            add_error(*diagnostics_, index->range, "type error: index target must be array or string, got " + target_type.to_string());
+            add_error(*diagnostics_, index->range, "type error: index target must be array, map, or string, got " + target_type.to_string());
             return false;
         }
         if (auto* field = dynamic_cast<ast::FieldAccess*>(expression)) {
@@ -1096,11 +1126,15 @@ private:
             out = ast::basic(ast::TypeKind::Float);
             return true;
         }
-        if (qualified == "string.len" || qualified == "string.at" || qualified == "string.contains" || qualified == "string.concat") {
+        if (qualified == "string.len" || qualified == "string.at" || qualified == "string.contains" || qualified == "string.concat" ||
+            qualified == "string.lower" || qualified == "string.split" || qualified == "string.replace") {
             return check_string_builtin(call, qualified, out);
         }
         if (qualified == "array.len" || qualified == "array.contains" || qualified == "array.push") {
             return check_array_builtin(call, qualified, out);
+        }
+        if (qualified == "map.empty" || qualified == "map.has" || qualified == "map.get" || qualified == "map.set" || qualified == "map.keys" || qualified == "map.push") {
+            return check_map_builtin(call, qualified, out);
         }
         if (qualified == "time.now") {
             if (!expect_arg_count(call, "time.now", 0)) {
@@ -1203,8 +1237,25 @@ private:
             out = ast::basic(ast::TypeKind::String);
             return true;
         }
-        const std::string name = qualified == "string.contains" ? "string.contains" : "string.concat";
-        if (!expect_arg_count(call, name, 2)) {
+        if (qualified == "string.lower") {
+            if (!expect_arg_count(call, "string.lower", 1)) {
+                return false;
+            }
+            ast::Type arg_type;
+            if (!check_expression(call.args[0], arg_type)) {
+                return false;
+            }
+            if (arg_type.kind != ast::TypeKind::String) {
+                add_error(*diagnostics_, call.args[0]->range, "type error: string.lower needs string arg, got " + arg_type.to_string());
+                return false;
+            }
+            out = ast::basic(ast::TypeKind::String);
+            return true;
+        }
+        const std::string name =
+            qualified == "string.contains" ? "string.contains" : qualified == "string.concat" ? "string.concat" : qualified == "string.split" ? "string.split" : "string.replace";
+        const std::size_t want_args = qualified == "string.replace" ? 3 : 2;
+        if (!expect_arg_count(call, name, want_args)) {
             return false;
         }
         for (std::size_t index = 0; index < call.args.size(); ++index) {
@@ -1220,7 +1271,13 @@ private:
                 return false;
             }
         }
-        out = qualified == "string.contains" ? ast::basic(ast::TypeKind::Bool) : ast::basic(ast::TypeKind::String);
+        if (qualified == "string.contains") {
+            out = ast::basic(ast::TypeKind::Bool);
+        } else if (qualified == "string.split") {
+            out = ast::array_of(ast::basic(ast::TypeKind::String));
+        } else {
+            out = ast::basic(ast::TypeKind::String);
+        }
         return true;
     }
 
@@ -1265,6 +1322,75 @@ private:
             return false;
         }
         out = qualified == "array.contains" ? ast::basic(ast::TypeKind::Bool) : array_type;
+        return true;
+    }
+
+    bool check_map_builtin(ast::Call& call, const std::string& qualified, ast::Type& out) {
+        if (qualified == "map.empty") {
+            if (!expect_arg_count(call, "map.empty", 0)) {
+                return false;
+            }
+            out = string_array_map_type();
+            return true;
+        }
+        if (qualified == "map.keys") {
+            if (!expect_arg_count(call, "map.keys", 1)) {
+                return false;
+            }
+            ast::Type table_type;
+            if (!check_expression(call.args[0], table_type)) {
+                return false;
+            }
+            if (!string_array_map(table_type)) {
+                add_error(*diagnostics_, call.args[0]->range, "type error: map.keys needs map[string]array[string], got " + table_type.to_string());
+                return false;
+            }
+            out = ast::array_of(ast::basic(ast::TypeKind::String));
+            return true;
+        }
+        const std::string name = qualified;
+        const std::size_t want_args = qualified == "map.set" || qualified == "map.push" ? 3 : 2;
+        if (!expect_arg_count(call, name, want_args)) {
+            return false;
+        }
+        ast::Type table_type;
+        if (!check_expression(call.args[0], table_type)) {
+            return false;
+        }
+        if (!string_array_map(table_type)) {
+            add_error(*diagnostics_, call.args[0]->range, "type error: " + name + " needs map[string]array[string], got " + table_type.to_string());
+            return false;
+        }
+        ast::Type key_type;
+        if (!check_expression(call.args[1], key_type)) {
+            return false;
+        }
+        if (!type_equal(key_type, ast::basic(ast::TypeKind::String))) {
+            add_error(*diagnostics_, call.args[1]->range, "type error: arg 2 to " + name + " must be string, got " + key_type.to_string());
+            return false;
+        }
+        if (qualified == "map.has") {
+            out = ast::basic(ast::TypeKind::Bool);
+            return true;
+        }
+        if (qualified == "map.get") {
+            out = *table_type.elem;
+            return true;
+        }
+        ast::Type value_type;
+        if (!check_expression(call.args[2], value_type)) {
+            return false;
+        }
+        if (qualified == "map.set") {
+            if (!assignable(value_type, *table_type.elem)) {
+                add_error(*diagnostics_, call.args[2]->range, "type error: arg 3 to map.set is " + table_type.elem->to_string() + ", got " + value_type.to_string());
+                return false;
+            }
+        } else if (!type_equal(value_type, ast::basic(ast::TypeKind::String))) {
+            add_error(*diagnostics_, call.args[2]->range, "type error: arg 3 to map.push must be string, got " + value_type.to_string());
+            return false;
+        }
+        out = table_type;
         return true;
     }
 
@@ -1471,6 +1597,19 @@ private:
         return true;
     }
 
+    bool check_empty_map_literal_as(ast::ArrayLiteral& array, const ast::Type& expected, ast::Type& out) {
+        if (!string_array_map(expected)) {
+            add_error(*diagnostics_, array.range, "type error: empty map literal needs map[string]array[string], got " + expected.to_string());
+            return false;
+        }
+        if (!array.elements.empty()) {
+            add_error(*diagnostics_, array.range, "type error: map literal supports only empty []");
+            return false;
+        }
+        out = expected;
+        return true;
+    }
+
     bool lookup_field(const ast::Type& target_type, const std::string& field_name, const SourceRange& range, ast::StructField& out) {
         if (target_type.kind != ast::TypeKind::Struct) {
             add_error(*diagnostics_, range, "type error: field access needs struct, got " + target_type.to_string());
@@ -1555,6 +1694,27 @@ private:
                 return false;
             }
             return validate_type(*type.elem, range);
+        case ast::TypeKind::Map:
+            if (type.nullable) {
+                add_error(*diagnostics_, range, "type error: map type cannot be nullable");
+                return false;
+            }
+            if (type.key == nullptr || type.elem == nullptr) {
+                add_error(*diagnostics_, range, "type error: map type needs key and value types");
+                return false;
+            }
+            if (!validate_type(*type.key, range) || !validate_type(*type.elem, range)) {
+                return false;
+            }
+            if (!type_equal(*type.key, ast::basic(ast::TypeKind::String))) {
+                add_error(*diagnostics_, range, "type error: map key type must be string, got " + type.key->to_string());
+                return false;
+            }
+            if (type.elem->kind != ast::TypeKind::Array || type.elem->elem == nullptr || !type_equal(*type.elem->elem, ast::basic(ast::TypeKind::String))) {
+                add_error(*diagnostics_, range, "type error: map value type must be array[string], got " + type.elem->to_string());
+                return false;
+            }
+            return true;
         case ast::TypeKind::Function:
             for (const ast::Type& param : type.params) {
                 if (!validate_type(param, range)) {

@@ -26,15 +26,16 @@ testing
 No other built-in module is stable.
 
 The current compiler also includes draft `io`, `parse`, `process`, `file`,
-`dir`, `path`, `json`, `term`, `http`, and `html` modules. They are importable
-and tested, but they are not compatibility-protected as stable features.
+`dir`, `path`, `json`, `map`, `term`, `http`, and `html` modules. They are
+importable and tested, but they are not compatibility-protected as stable
+features.
 
 Draft APIs may expose draft result structs. They are documented here so current
 compiler behavior is visible, but they are not part of the stable feature set.
 
 Draft runtime-module proof surface: `tests/runtime_modules/` records native
-fixtures for `io`, `parse`, `process`, `file`, `dir`, `path`, `json`, `term`,
-`http`, and `html`. `tests/conformance/run.sh --runtime-modules` preserved
+fixtures for `io`, `parse`, `process`, `file`, `dir`, `path`, `json`, `map`,
+`term`, `http`, and `html`. `tests/conformance/run.sh --runtime-modules` preserved
 Go-reference parity before removal, and `make conformance` now verifies the
 active C++/C `walk` compiler against the recorded oracle artifacts.
 
@@ -130,6 +131,46 @@ Allocation failure runtime-stops with `walk runtime error: out of memory`.
 ```walk
 imp: string
 out: string.concat('walk', 'lang')
+```
+
+### string.lower(string) -> string
+
+Stability: stable. Effect status: pure expression.
+
+Returns a new string with ASCII `A` through `Z` converted to `a` through `z`.
+Non-ASCII bytes and all other characters are left unchanged. Allocation failure
+runtime-stops with `walk runtime error: out of memory`.
+
+```walk
+imp: string
+out: string.lower('Hi WALK')
+```
+
+### string.split(string, string) -> array[string]
+
+Stability: stable. Effect status: pure expression.
+
+Returns a new array of string pieces split on the exact separator string.
+Splitting on an empty separator returns an array containing the original text.
+Allocation failure runtime-stops with `walk runtime error: out of memory`.
+
+```walk
+imp: string
+var: parts = string.split('a b', ' ')
+out: parts[0]
+```
+
+### string.replace(string, string, string) -> string
+
+Stability: stable. Effect status: pure expression.
+
+Returns a new string with every non-overlapping match of `from` replaced by
+`to`. Replacing an empty `from` string returns a copy of the original text.
+Allocation failure runtime-stops with `walk runtime error: out of memory`.
+
+```walk
+imp: string
+out: string.replace('banana', 'na', 'NA')
 ```
 
 ---
@@ -239,6 +280,82 @@ test: 'works'
 ```
 
 `testing.assert` itself does not print or stop a program. The `assert:` statement owns test failure reporting.
+
+---
+
+## Draft map
+
+Draft `map` supports the PicoNet-oriented `map[string]array[string]` type. It is
+explicit, insertion-ordered, and value-returning: `map.set` and `map.push`
+return a new map value instead of mutating in place.
+
+Current draft limits:
+
+```text
+key type: string
+value type: array[string]
+empty literal: [] only with an explicit map[string]array[string] annotation
+missing map.get key: empty array[string]
+```
+
+```walk
+imp: map
+imp: array
+
+var: table map[string]array[string] = []
+table = map.push(table, 'of the', 'people')
+table = map.push(table, 'of the', 'walk')
+
+out: map.has(table, 'of the')
+out: table['of the'][0]
+out: array.len(map.keys(table))
+```
+
+### map.empty() -> map[string]array[string]
+
+Stability: draft. Effect status: pure expression.
+
+Returns an empty draft string-array map. Use an explicit annotation when the
+type needs to be visible at the binding site.
+
+### map.has(map[string]array[string], string) -> bool
+
+Stability: draft. Effect status: pure expression.
+
+Returns `true` when the map contains the key.
+
+### map.get(map[string]array[string], string) -> array[string]
+
+Stability: draft. Effect status: pure expression.
+
+Returns the array stored for the key. Missing keys return an empty
+`array[string]`.
+
+Map index lookup is equivalent:
+
+```walk
+out: table['of the'][0]
+```
+
+### map.set(map[string]array[string], string, array[string]) -> map[string]array[string]
+
+Stability: draft. Effect status: pure expression.
+
+Returns a map with the key set to the supplied array. Existing keys keep their
+position in `map.keys`; new keys append to the insertion order.
+
+### map.keys(map[string]array[string]) -> array[string]
+
+Stability: draft. Effect status: pure expression.
+
+Returns keys in insertion order.
+
+### map.push(map[string]array[string], string, string) -> map[string]array[string]
+
+Stability: draft. Effect status: pure expression.
+
+Returns a map with the string appended to the key's array. Missing keys are
+created with a one-item array.
 
 ---
 

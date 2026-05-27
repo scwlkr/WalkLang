@@ -38,14 +38,13 @@ out: add(2, 3)
 
 ## Current Version
 
-WalkLang is currently `v6.0.0`.
+WalkLang is currently `v6.1.0`.
 
-`v6.0.0` is the first completed C++/C systems compiler release. The repo-local
-`walk` binary is built from C++ sources, generated programs link with the Walk
-C runtime, and the repository no longer carries the former Go reference
-implementation or JavaScript docs assets. Features inside a release are
-labeled `stable`, `draft`, `experimental`, or `planned` when their maturity
-matters.
+`v6.1.0` adds PicoNet-oriented string and draft map tooling on top of the
+completed C++/C systems compiler. The repo-local `walk` binary is built from
+C++ sources, generated programs link with the Walk C runtime, and features
+inside a release are labeled `stable`, `draft`, `experimental`, or `planned`
+when their maturity matters.
 
 The first CLI standard-platform slice remains `walktop`, an official
 standalone WalkLang-built system monitor installed by the normal local install
@@ -57,7 +56,7 @@ flow.
 - Stable syntax, diagnostics, modules, tests, and standard-library helpers are
   documented and compatibility-tested.
 - Draft `do:`, `defer:`, `io`, `parse`, `process`, `file`, `dir`, `path`,
-  `json`, `term`, `http`, and `html` helpers are implemented for current
+  `json`, `map`, `term`, `http`, and `html` helpers are implemented for current
   compiler experiments.
 - Experimental structs, methods, and simple generic functions are implemented
   for current compiler experiments.

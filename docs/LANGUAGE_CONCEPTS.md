@@ -133,7 +133,8 @@ func(T...) R
 
 `void` is an internal function return marker, not a value type. Struct and
 generic types exist as experimental features unless promoted by a later stable
-feature decision.
+feature decision. `map[string]array[string]` exists as a draft collection type
+for the current compiler; it is not stable.
 
 ### Expression
 
@@ -218,8 +219,9 @@ package module
 ### Collection
 
 A collection is a value that contains other values. Stable collections are
-arrays. Struct values are experimental data-modeling values. Maps, sets, and
-tuples are not current WalkLang concepts.
+arrays. Struct values are experimental data-modeling values. Draft maps are
+string-keyed tables with `array[string]` values. Sets and tuples are not current
+WalkLang concepts.
 
 ### Error
 

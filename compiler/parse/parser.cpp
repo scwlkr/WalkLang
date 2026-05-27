@@ -686,6 +686,25 @@ ast::Type Parser::Cursor::parse_type() {
         }
         return result;
     }
+    if (token->value == "map") {
+        if (!expect_symbol("[")) {
+            return {};
+        }
+        ast::Type key = parse_type();
+        if (parser_.failed() || !expect_symbol("]")) {
+            return {};
+        }
+        ast::Type value = parse_type();
+        if (parser_.failed()) {
+            return {};
+        }
+        ast::Type result = ast::map_of(std::move(key), std::move(value));
+        if (peek() != nullptr && peek()->value == "?") {
+            advance();
+            result.nullable = true;
+        }
+        return result;
+    }
     if (token->value == "func") {
         if (!expect_symbol("(")) {
             return {};

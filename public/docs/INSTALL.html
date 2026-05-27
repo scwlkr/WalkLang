@@ -63,17 +63,17 @@
 source install for local development</code></pre>
 <p>Use <code>walk version</code> after either path. The reported version should match the release or local build label you installed.</p>
 <h2 id="release-artifact-install">Release Artifact Install</h2>
-<p>Release artifacts are produced by <code>scripts/release.sh</code>. The v6.0.0 release path is C++/C-only and writes current-host artifacts:</p>
-<pre><code class="language-text">walk-v6.0.0-&lt;host-os&gt;-&lt;host-arch&gt;
-walk-runtime-v6.0.0.tar.gz
-walktop-v6.0.0-&lt;host-os&gt;-&lt;host-arch&gt;
+<p>Release artifacts are produced by <code>scripts/release.sh</code>. The v6.1.0 release path is C++/C-only and writes current-host artifacts:</p>
+<pre><code class="language-text">walk-v6.1.0-&lt;host-os&gt;-&lt;host-arch&gt;
+walk-runtime-v6.1.0.tar.gz
+walktop-v6.1.0-&lt;host-os&gt;-&lt;host-arch&gt;
 SHA256SUMS</code></pre>
 <p>The release script builds <code>walk</code> from C++ sources, packages the C runtime source, builds <code>walktop</code> through the newly built <code>walk</code>, and checksums each artifact.</p>
 <p>Install on macOS or Linux:</p>
 <pre><code class="language-bash">mkdir -p ~/.local/bin ~/.local/lib/walk
-cp walk-v6.0.0-&lt;os&gt;-&lt;arch&gt; ~/.local/bin/walk
-cp walktop-v6.0.0-&lt;os&gt;-&lt;arch&gt; ~/.local/bin/walktop
-tar -xzf walk-runtime-v6.0.0.tar.gz -C ~/.local/lib/walk
+cp walk-v6.1.0-&lt;os&gt;-&lt;arch&gt; ~/.local/bin/walk
+cp walktop-v6.1.0-&lt;os&gt;-&lt;arch&gt; ~/.local/bin/walktop
+tar -xzf walk-runtime-v6.1.0.tar.gz -C ~/.local/lib/walk
 chmod +x ~/.local/bin/walk ~/.local/bin/walktop
 walk version
 NO_COLOR=1 walktop --once</code></pre>
@@ -117,10 +117,10 @@ Score:
 28</code></pre>
 <h2 id="build-release-artifacts-locally">Build Release Artifacts Locally</h2>
 <p>Maintainers can produce the current-host release artifact set with:</p>
-<pre><code class="language-bash">make release VERSION=v6.0.0 OUT=dist</code></pre>
+<pre><code class="language-bash">make release VERSION=v6.1.0 OUT=dist</code></pre>
 <p>The command writes the current-host <code>walk</code> compiler binary, the runtime source archive, the current-host <code>walktop</code> binary built by <code>walk</code>, and <code>dist/SHA256SUMS</code>.</p>
 <p>Release artifact generation builds <code>walktop</code> through <code>build/walk</code> by default. Maintainers can override the WalkLang build driver for diagnostics:</p>
-<pre><code class="language-bash">WALK_RELEASE_BUILD_BIN=build/walk scripts/release.sh v6.0.0 dist</code></pre>
+<pre><code class="language-bash">WALK_RELEASE_BUILD_BIN=build/walk scripts/release.sh v6.1.0 dist</code></pre>
 </article>
 <footer class="footer">Generated from repository docs and structured WalkLang source comments.</footer>
 </div>

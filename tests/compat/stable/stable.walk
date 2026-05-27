@@ -17,6 +17,7 @@ var: choices = ['stable']
 letters = array.push(letters, 'W')
 var: word = 'walk'
 var: wordLength = string.len(word)
+var: stableParts = string.split('a b', ' ')
 out: math_extra.cube(3)
 out: add(2, 3)
 out: math.sqrt(9)
@@ -26,6 +27,10 @@ out: string.at('walk', 1)
 out: 'walk'[2]
 out: string.contains('walk', 'al')
 out: string.concat('walk', 'lang')
+out: string.lower('Hi WALK')
+out: stableParts[0]
+out: stableParts[1]
+out: string.replace('banana', 'na', 'NA')
 out: array.len(nums)
 out: array.len(letters)
 out: array.contains(letters, 'W')

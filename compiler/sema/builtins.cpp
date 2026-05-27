@@ -143,7 +143,7 @@ const BuiltinFunction* lookup_qualified_builtin(const std::string& qualified) {
 }
 
 bool is_builtin_module(const std::string& name) {
-    if (name == "math" || name == "string" || name == "array" || name == "time" || name == "random" || name == "testing") {
+    if (name == "math" || name == "string" || name == "array" || name == "time" || name == "random" || name == "testing" || name == "map") {
         return true;
     }
     for (const BuiltinFunction& builtin : functions()) {

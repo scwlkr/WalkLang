@@ -31,6 +31,8 @@ std::string type_kind_signature(ast::TypeKind kind) {
         return "null";
     case ast::TypeKind::Array:
         return "array";
+    case ast::TypeKind::Map:
+        return "map";
     case ast::TypeKind::Function:
         return "func";
     case ast::TypeKind::Struct:
@@ -59,6 +61,13 @@ std::string type_signature(const ast::Type& type) {
             out = "array_unknown";
         } else {
             out = "array_" + type_signature(*type.elem);
+        }
+        break;
+    case ast::TypeKind::Map:
+        if (type.key == nullptr || type.elem == nullptr) {
+            out = "map_unknown";
+        } else {
+            out = "map_" + type_signature(*type.key) + "_to_" + type_signature(*type.elem);
         }
         break;
     case ast::TypeKind::Function: {

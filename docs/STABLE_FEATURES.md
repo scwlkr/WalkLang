@@ -101,6 +101,8 @@ imp: random
 var: words = ['dog', 'cat']
 out: string.contains('dog', 'o')
 out: string.concat('walk', 'lang')
+out: string.lower('Hi WALK')
+out: string.replace('banana', 'na', 'NA')
 out: random.choice(words)
 ```
 
@@ -140,6 +142,9 @@ string.len(string) -> int
 string.at(string, int) -> string
 string.contains(string, string) -> bool
 string.concat(string, string) -> string
+string.lower(string) -> string
+string.split(string, string) -> array[string]
+string.replace(string, string, string) -> string
 array.len(array[T]) -> int
 array.contains(array[T], T) -> bool
 array.push(array[T], T) -> array[T]

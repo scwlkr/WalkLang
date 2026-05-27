@@ -77,6 +77,10 @@ l
 true
 false
 walklang
+hi walk
+a
+b
+baNANA
 3
 2
 true

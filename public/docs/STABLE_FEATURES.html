@@ -112,6 +112,8 @@ imp: random
 var: words = [&#39;dog&#39;, &#39;cat&#39;]
 out: string.contains(&#39;dog&#39;, &#39;o&#39;)
 out: string.concat(&#39;walk&#39;, &#39;lang&#39;)
+out: string.lower(&#39;Hi WALK&#39;)
+out: string.replace(&#39;banana&#39;, &#39;na&#39;, &#39;NA&#39;)
 out: random.choice(words)</code></pre>
 <h2 id="module-rules">Module Rules</h2>
 <p>User modules are sibling <code>.walk</code> files imported by bare name.</p>
@@ -139,6 +141,9 @@ string.len(string) -&gt; int
 string.at(string, int) -&gt; string
 string.contains(string, string) -&gt; bool
 string.concat(string, string) -&gt; string
+string.lower(string) -&gt; string
+string.split(string, string) -&gt; array[string]
+string.replace(string, string, string) -&gt; string
 array.len(array[T]) -&gt; int
 array.contains(array[T], T) -&gt; bool
 array.push(array[T], T) -&gt; array[T]

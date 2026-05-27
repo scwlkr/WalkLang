@@ -60,6 +60,36 @@
 <h1 id="walklang-release-notes">WalkLang Release Notes</h1>
 <h2 id="unreleased">Unreleased</h2>
 <p>No unreleased changes.</p>
+<h2 id="v6-1-0-piconet-string-and-map-tooling">v6.1.0 - PicoNet String And Map Tooling</h2>
+<p>Date: 2026-05-26</p>
+<p>v6.1.0 adds the small language and standard-library surface PicoNet needed without changing WalkLang&#39;s explicit design: stable string cleanup helpers and a draft string-array map for visible, namespaced table operations.</p>
+<h3 id="added">Added</h3>
+<ul>
+<li>Stable <code>string.lower(text)</code>, <code>string.split(text, sep)</code>, and <code>string.replace(text, from, to)</code> helpers.</li>
+<li>Draft <code>map[string]array[string]</code> type syntax.</li>
+<li>Draft <code>map</code> module with <code>map.empty</code>, <code>map.has</code>, <code>map.get</code>, <code>map.set</code>, <code>map.keys</code>, and <code>map.push</code>.</li>
+<li>Draft map index lookup, so <code>table[&#39;of the&#39;]</code> returns the key&#39;s <code>array[string]</code>.</li>
+<li>Native runtime/conformance fixture coverage for draft map behavior.</li>
+</ul>
+<h3 id="changed">Changed</h3>
+<ul>
+<li><code>scripts/install-local.sh</code> now replaces installed <code>walk</code> and <code>walktop</code> binaries atomically from its temp directory before verifying them.</li>
+</ul>
+<h3 id="notes">Notes</h3>
+<ul>
+<li><code>string.lower</code> is ASCII-only by design for this MVP.</li>
+<li>Draft maps currently support only <code>string</code> keys and <code>array[string]</code> values.</li>
+<li>Missing <code>map.get</code> keys return an empty <code>array[string]</code>.</li>
+<li><code>map.set</code> and <code>map.push</code> return a new map value; assign the result back to keep the change.</li>
+</ul>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<p>None.</p>
+<h3 id="upgrade">Upgrade</h3>
+<p>Regenerate docs, install locally, and produce release artifacts with:</p>
+<pre><code class="language-bash">scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/install-local.sh v6.1.0
+scripts/release.sh v6.1.0 dist</code></pre>
 <h2 id="v6-0-0-systems-compiler-port">v6.0.0 - Systems Compiler Port</h2>
 <p>Date: 2026-05-26</p>
 <p>v6.0.0 ships the completed systems compiler port. <code>walk</code> is now built from C++ sources, Walk programs still compile through generated C and the Walk C runtime, and the former Go reference implementation plus JavaScript docs assets are removed from the active repository.</p>

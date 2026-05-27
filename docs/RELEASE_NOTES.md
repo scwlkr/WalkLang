@@ -4,6 +4,48 @@
 
 No unreleased changes.
 
+## v6.1.0 - PicoNet String And Map Tooling
+
+Date: 2026-05-26
+
+v6.1.0 adds the small language and standard-library surface PicoNet needed
+without changing WalkLang's explicit design: stable string cleanup helpers and
+a draft string-array map for visible, namespaced table operations.
+
+### Added
+
+- Stable `string.lower(text)`, `string.split(text, sep)`, and `string.replace(text, from, to)` helpers.
+- Draft `map[string]array[string]` type syntax.
+- Draft `map` module with `map.empty`, `map.has`, `map.get`, `map.set`, `map.keys`, and `map.push`.
+- Draft map index lookup, so `table['of the']` returns the key's `array[string]`.
+- Native runtime/conformance fixture coverage for draft map behavior.
+
+### Changed
+
+- `scripts/install-local.sh` now replaces installed `walk` and `walktop` binaries atomically from its temp directory before verifying them.
+
+### Notes
+
+- `string.lower` is ASCII-only by design for this MVP.
+- Draft maps currently support only `string` keys and `array[string]` values.
+- Missing `map.get` keys return an empty `array[string]`.
+- `map.set` and `map.push` return a new map value; assign the result back to keep the change.
+
+### Breaking Changes
+
+None.
+
+### Upgrade
+
+Regenerate docs, install locally, and produce release artifacts with:
+
+```bash
+scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/install-local.sh v6.1.0
+scripts/release.sh v6.1.0 dist
+```
+
 ## v6.0.0 - Systems Compiler Port
 
 Date: 2026-05-26

@@ -1,0 +1,26 @@
+imp: array
+imp: map
+
+var: table map[string]array[string] = []
+out: array.len(map.keys(table))
+var: made = map.empty()
+out: array.len(map.keys(made))
+
+table = map.push(table, 'of the', 'people')
+table = map.push(table, 'of the', 'walk')
+
+out: map.has(table, 'of the')
+out: map.has(table, 'missing')
+
+var: vals = table['of the']
+out: array.len(vals)
+out: vals[0]
+out: vals[1]
+
+var: other array[string] = []
+other = array.push(other, 'value')
+table = map.set(table, 'other', other)
+
+out: map.keys(table)[1]
+out: map.get(table, 'other')[0]
+out: array.len(map.get(table, 'missing'))

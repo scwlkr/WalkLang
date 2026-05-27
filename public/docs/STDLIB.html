@@ -71,9 +71,9 @@ time
 random
 testing</code></pre>
 <p>No other built-in module is stable.</p>
-<p>The current compiler also includes draft <code>io</code>, <code>parse</code>, <code>process</code>, <code>file</code>, <code>dir</code>, <code>path</code>, <code>json</code>, <code>term</code>, <code>http</code>, and <code>html</code> modules. They are importable and tested, but they are not compatibility-protected as stable features.</p>
+<p>The current compiler also includes draft <code>io</code>, <code>parse</code>, <code>process</code>, <code>file</code>, <code>dir</code>, <code>path</code>, <code>json</code>, <code>map</code>, <code>term</code>, <code>http</code>, and <code>html</code> modules. They are importable and tested, but they are not compatibility-protected as stable features.</p>
 <p>Draft APIs may expose draft result structs. They are documented here so current compiler behavior is visible, but they are not part of the stable feature set.</p>
-<p>Draft runtime-module proof surface: <code>tests/runtime_modules/</code> records native fixtures for <code>io</code>, <code>parse</code>, <code>process</code>, <code>file</code>, <code>dir</code>, <code>path</code>, <code>json</code>, <code>term</code>, <code>http</code>, and <code>html</code>. <code>tests/conformance/run.sh --runtime-modules</code> preserved Go-reference parity before removal, and <code>make conformance</code> now verifies the active C++/C <code>walk</code> compiler against the recorded oracle artifacts.</p>
+<p>Draft runtime-module proof surface: <code>tests/runtime_modules/</code> records native fixtures for <code>io</code>, <code>parse</code>, <code>process</code>, <code>file</code>, <code>dir</code>, <code>path</code>, <code>json</code>, <code>map</code>, <code>term</code>, <code>http</code>, and <code>html</code>. <code>tests/conformance/run.sh --runtime-modules</code> preserved Go-reference parity before removal, and <code>make conformance</code> now verifies the active C++/C <code>walk</code> compiler against the recorded oracle artifacts.</p>
 <p>Stable APIs in this document are pure expression calls unless an entry says otherwise. Invalid argument counts, argument types, or effect placement are compiler diagnostics. Runtime failures named below are part of the documented behavior for valid programs at runtime.</p>
 <p>Proof surface: stable APIs are covered by <code>tests/pass/stdlib.walk</code>, <code>tests/pass/walk_tests.walk</code>, compatibility fixtures, <code>tests/cpp/</code>, and <code>tests/conformance/</code>.</p>
 <p>---</p>
@@ -112,6 +112,22 @@ out: string.contains(&#39;walk&#39;, &#39;al&#39;)</code></pre>
 <p>Returns a new string made from the left string followed by the right string. Allocation failure runtime-stops with <code>walk runtime error: out of memory</code>.</p>
 <pre><code class="language-walk">imp: string
 out: string.concat(&#39;walk&#39;, &#39;lang&#39;)</code></pre>
+<h3 id="string-lower-string-string">string.lower(string) -&gt; string</h3>
+<p>Stability: stable. Effect status: pure expression.</p>
+<p>Returns a new string with ASCII <code>A</code> through <code>Z</code> converted to <code>a</code> through <code>z</code>. Non-ASCII bytes and all other characters are left unchanged. Allocation failure runtime-stops with <code>walk runtime error: out of memory</code>.</p>
+<pre><code class="language-walk">imp: string
+out: string.lower(&#39;Hi WALK&#39;)</code></pre>
+<h3 id="string-split-string-string-array-string">string.split(string, string) -&gt; array[string]</h3>
+<p>Stability: stable. Effect status: pure expression.</p>
+<p>Returns a new array of string pieces split on the exact separator string. Splitting on an empty separator returns an array containing the original text. Allocation failure runtime-stops with <code>walk runtime error: out of memory</code>.</p>
+<pre><code class="language-walk">imp: string
+var: parts = string.split(&#39;a b&#39;, &#39; &#39;)
+out: parts[0]</code></pre>
+<h3 id="string-replace-string-string-string-string">string.replace(string, string, string) -&gt; string</h3>
+<p>Stability: stable. Effect status: pure expression.</p>
+<p>Returns a new string with every non-overlapping match of <code>from</code> replaced by <code>to</code>. Replacing an empty <code>from</code> string returns a copy of the original text. Allocation failure runtime-stops with <code>walk runtime error: out of memory</code>.</p>
+<pre><code class="language-walk">imp: string
+out: string.replace(&#39;banana&#39;, &#39;na&#39;, &#39;NA&#39;)</code></pre>
 <p>---</p>
 <h2 id="array">array</h2>
 <h3 id="array-len-array-t-int">array.len(array[T]) -&gt; int</h3>
@@ -163,6 +179,44 @@ out: random.choice(words)</code></pre>
 test: &#39;works&#39;
     assert: testing.assert(true)</code></pre>
 <p><code>testing.assert</code> itself does not print or stop a program. The <code>assert:</code> statement owns test failure reporting.</p>
+<p>---</p>
+<h2 id="draft-map">Draft map</h2>
+<p>Draft <code>map</code> supports the PicoNet-oriented <code>map[string]array[string]</code> type. It is explicit, insertion-ordered, and value-returning: <code>map.set</code> and <code>map.push</code> return a new map value instead of mutating in place.</p>
+<p>Current draft limits:</p>
+<pre><code class="language-text">key type: string
+value type: array[string]
+empty literal: [] only with an explicit map[string]array[string] annotation
+missing map.get key: empty array[string]</code></pre>
+<pre><code class="language-walk">imp: map
+imp: array
+
+var: table map[string]array[string] = []
+table = map.push(table, &#39;of the&#39;, &#39;people&#39;)
+table = map.push(table, &#39;of the&#39;, &#39;walk&#39;)
+
+out: map.has(table, &#39;of the&#39;)
+out: table[&#39;of the&#39;][0]
+out: array.len(map.keys(table))</code></pre>
+<h3 id="map-empty-map-string-array-string">map.empty() -&gt; map[string]array[string]</h3>
+<p>Stability: draft. Effect status: pure expression.</p>
+<p>Returns an empty draft string-array map. Use an explicit annotation when the type needs to be visible at the binding site.</p>
+<h3 id="map-has-map-string-array-string-string-bool">map.has(map[string]array[string], string) -&gt; bool</h3>
+<p>Stability: draft. Effect status: pure expression.</p>
+<p>Returns <code>true</code> when the map contains the key.</p>
+<h3 id="map-get-map-string-array-string-string-array-string">map.get(map[string]array[string], string) -&gt; array[string]</h3>
+<p>Stability: draft. Effect status: pure expression.</p>
+<p>Returns the array stored for the key. Missing keys return an empty <code>array[string]</code>.</p>
+<p>Map index lookup is equivalent:</p>
+<pre><code class="language-walk">out: table[&#39;of the&#39;][0]</code></pre>
+<h3 id="map-set-map-string-array-string-string-array-string-map-string-array-string">map.set(map[string]array[string], string, array[string]) -&gt; map[string]array[string]</h3>
+<p>Stability: draft. Effect status: pure expression.</p>
+<p>Returns a map with the key set to the supplied array. Existing keys keep their position in <code>map.keys</code>; new keys append to the insertion order.</p>
+<h3 id="map-keys-map-string-array-string-array-string">map.keys(map[string]array[string]) -&gt; array[string]</h3>
+<p>Stability: draft. Effect status: pure expression.</p>
+<p>Returns keys in insertion order.</p>
+<h3 id="map-push-map-string-array-string-string-string-map-string-array-string">map.push(map[string]array[string], string, string) -&gt; map[string]array[string]</h3>
+<p>Stability: draft. Effect status: pure expression.</p>
+<p>Returns a map with the string appended to the key&#39;s array. Missing keys are created with a one-item array.</p>
 <p>---</p>
 <h2 id="draft-io">Draft io</h2>
 <p>Use draft <code>io</code> output functions with <code>do:</code> because they are effects. Draft <code>io</code> read functions are expressions because they return result values.</p>

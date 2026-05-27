@@ -33,8 +33,10 @@ runtime_install_dir="${WALK_RUNTIME_INSTALL_DIR:-"$install_root/lib/walk/runtime
 cd "$repo_root"
 assert_no_removed_port_sources
 make -s walk WALK_VERSION="$version"
-cp build/walk "$binary"
-chmod +x "$binary"
+tmp_binary="$work_dir/walk"
+cp build/walk "$tmp_binary"
+chmod +x "$tmp_binary"
+mv "$tmp_binary" "$binary"
 echo "$binary"
 "$binary" version
 
@@ -48,8 +50,8 @@ echo "$runtime_install_dir"
 
 build_driver="${WALK_BUILD_BIN:-$binary}"
 WALK_RUNTIME_DIR="$runtime_install_dir" "$build_driver" build --mode release --warnings=error tools/walktop/src/main.walk -o "$work_dir/walktop" >/dev/null
-cp "$work_dir/walktop" "$tool_binary"
-chmod +x "$tool_binary"
+chmod +x "$work_dir/walktop"
+mv "$work_dir/walktop" "$tool_binary"
 NO_COLOR=1 "$tool_binary" --once --fixture "$repo_root/tools/walktop/testdata/basic" >/dev/null
 echo "$tool_binary"
 

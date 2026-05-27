@@ -55,11 +55,51 @@ void test_rejects_type_mismatch() {
     expect_true("type mismatch diagnostic", result.diagnostics.format().find("type error: x is int, got string") != std::string::npos, "missing type mismatch");
 }
 
+void test_accepts_new_string_helpers() {
+    walk::sema::CheckResult result = check_text(
+        "imp: string\n"
+        "var: lowered = string.lower('Hi')\n"
+        "var: parts = string.split('a b', ' ')\n"
+        "var: replaced = string.replace('abc', 'b', 'x')\n"
+        "out: lowered\n"
+        "out: parts[1]\n"
+        "out: replaced\n");
+    expect_true("new string helpers ok", result.ok(), result.diagnostics.format());
+}
+
+void test_accepts_string_array_maps() {
+    walk::sema::CheckResult result = check_text(
+        "imp: array\n"
+        "imp: map\n"
+        "var: table map[string]array[string] = []\n"
+        "table = map.push(table, 'of the', 'people')\n"
+        "table = map.push(table, 'of the', 'walk')\n"
+        "var: values = table['of the']\n"
+        "var: keys = map.keys(table)\n"
+        "out: map.has(table, 'of the')\n"
+        "out: array.len(values)\n"
+        "out: map.get(table, 'of the')[1]\n"
+        "out: keys[0]\n");
+    expect_true("string array maps ok", result.ok(), result.diagnostics.format());
+}
+
+void test_rejects_unsupported_map_key_type() {
+    walk::sema::CheckResult result = check_text(
+        "imp: map\n"
+        "var: table map[int]array[string] = []\n"
+        "out: map.has(table, 1)\n");
+    expect_true("unsupported map key rejects", !result.ok(), "unsupported map key unexpectedly passed");
+    expect_true("unsupported map key diagnostic", result.diagnostics.format().find("type error: map key type must be string") != std::string::npos, "missing map key diagnostic");
+}
+
 }  // namespace
 
 int run_checker_tests() {
     failures = 0;
     test_shadowing_produces_warning();
     test_rejects_type_mismatch();
+    test_accepts_new_string_helpers();
+    test_accepts_string_array_maps();
+    test_rejects_unsupported_map_key_type();
     return failures;
 }

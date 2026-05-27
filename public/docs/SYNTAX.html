@@ -130,7 +130,9 @@ out: &#39;the secret word is {secretWordLength} characters long&#39;</code></pre
 <p>Use the <code>string</code> module for common string helpers.</p>
 <pre><code class="language-walk">imp: string
 out: string.contains(&#39;walk&#39;, &#39;al&#39;)
-out: string.concat(&#39;walk&#39;, &#39;lang&#39;)</code></pre>
+out: string.concat(&#39;walk&#39;, &#39;lang&#39;)
+out: string.lower(&#39;Hi WALK&#39;)
+out: string.replace(&#39;banana&#39;, &#39;na&#39;, &#39;NA&#39;)</code></pre>
 <p>---</p>
 <h2 id="variables-and-constants">Variables And Constants</h2>
 <p><code>var:</code> creates a mutable binding.</p>
@@ -285,6 +287,20 @@ out: array.contains(guessed, &#39;w&#39;)</code></pre>
 var: words = [&#39;dog&#39;, &#39;cat&#39;]
 out: random.choice(words)</code></pre>
 <p>---</p>
+<h2 id="draft-maps">Draft Maps</h2>
+<p>Draft maps currently support <code>map[string]array[string]</code>. Use them for explicit string-keyed tables whose values are string arrays. This is a draft collection, not a stable feature.</p>
+<pre><code class="language-walk">imp: array
+imp: map
+
+var: table map[string]array[string] = []
+table = map.push(table, &#39;of the&#39;, &#39;people&#39;)
+table = map.push(table, &#39;of the&#39;, &#39;walk&#39;)
+
+out: map.has(table, &#39;of the&#39;)
+out: table[&#39;of the&#39;][0]
+out: array.len(map.keys(table))</code></pre>
+<p><code>map.set</code> and <code>map.push</code> return a new map value; assign the result back when you want to keep the change.</p>
+<p>---</p>
 <h2 id="null">Null</h2>
 <p>Use nullable string annotations when assigning <code>null</code>.</p>
 <pre><code class="language-walk">var: email string? = null
@@ -310,7 +326,7 @@ out: calc.square(5)</code></pre>
 <p>Package module example:</p>
 <pre><code class="language-walk">imp: geometry.core
 out: geometry.core.double(3)</code></pre>
-<p>Draft process, IO, filesystem, JSON, terminal, HTTP, and HTML helpers are available in the current compiler, but they are draft features.</p>
+<p>Draft process, IO, filesystem, JSON, map, terminal, HTTP, and HTML helpers are available in the current compiler, but they are draft features.</p>
 <pre><code class="language-walk">imp: process
 
 out: process.arg_count()
