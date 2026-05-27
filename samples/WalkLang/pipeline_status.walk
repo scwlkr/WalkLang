@@ -1,0 +1,36 @@
+# GitHub Linguist sample - release pipeline status
+
+imp: array
+
+struct: Check
+    name string
+    passed bool
+    duration int
+
+func: status_word(check Check) string
+    if: check.passed
+        return: 'passed'
+    return: 'failed'
+
+func: slowest_index(checks array[Check]) int
+    var: index = 0
+    var: slowest = 0
+    var: i = 0
+    while: < i array.len(checks)
+        if: > checks[i].duration slowest
+            index = i
+            slowest = checks[i].duration
+        i = + i 1
+    return: index
+
+var: checks = [Check('parser', true, 18), Check('checker', true, 31), Check('runtime', true, 44), Check('docs', false, 12)]
+var: passed = 0
+
+for: check in checks
+    if: check.passed
+        passed = + passed 1
+    out: '{check.name}: {status_word(check)} in {check.duration}ms'
+
+var: slowest = checks[slowest_index(checks)]
+out: 'summary: {passed}/{array.len(checks)} checks passed'
+out: 'slowest: {slowest.name}'

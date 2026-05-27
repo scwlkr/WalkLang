@@ -1,0 +1,30 @@
+# GitHub Linguist sample - route ranking
+
+struct: Route
+    name string
+    distance int
+    shade int
+    coffee int
+    difficulty int
+
+func: route_score(route Route) int
+    var: shade_points = * route.shade 3
+    var: coffee_points = * route.coffee 6
+    var: distance_penalty = * route.distance 4
+    var: difficulty_penalty = * route.difficulty 7
+    var: comfort = + 25 shade_points coffee_points
+    var: penalty = + distance_penalty difficulty_penalty
+    return: - comfort penalty
+
+var: routes = [Route('River Loop', 4, 9, 2, 3), Route('Market Mile', 2, 3, 5, 4), Route('Hilltop Cut', 3, 6, 1, 8), Route('Library Lane', 1, 7, 3, 10)]
+var: best = routes[0]
+var: best_score = route_score(best)
+
+for: route in routes
+    var: current_score = route_score(route)
+    if: > current_score best_score
+        best = route
+        best_score = current_score
+
+out: 'best route: {best.name}'
+out: 'score: {best_score}'

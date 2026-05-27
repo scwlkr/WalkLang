@@ -1,0 +1,4 @@
+# Draft grammar reference for a future github-linguist/linguist pull request.
+# Local source grammar: editors/vscode/syntaxes/walk.tmLanguage.json
+vendor/grammars/WalkLang:
+- source.walk

@@ -458,6 +458,26 @@ WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported com
 git diff --check -- . ':(exclude)playground/hangman.walk' ':(exclude)playground/hangman-v2.walk' passed
 ```
 
+GitHub Linguist recognition prep on 2026-05-26: WalkLang now has local,
+copy-ready recognition prep files without opening an upstream PR. The staged
+metadata records `.walk` as the extension, `WalkLang` as the language name,
+`source.walk` as the TextMate scope, and `#000088` as the language color.
+Representative `.walk` samples live under `samples/WalkLang/`; draft upstream
+snippets live under `linguist/`; and `.gitattributes` has a future-facing
+WalkLang classification override. The upstream PR remains intentionally held
+until public GitHub usage is broad enough for Linguist review.
+
+GitHub Linguist prep verification on 2026-05-26:
+
+```text
+./build/walk check --warnings=error samples/WalkLang/route_ranker.walk passed
+./build/walk check --warnings=error samples/WalkLang/pipeline_status.walk passed
+ruby YAML validation for linguist/languages.yml and linguist/grammars.yml passed
+scripts/build-docs-site.sh passed
+scripts/check-docs-site.sh reported the expected generated STATUS page update plus pre-existing icon asset drift from icon_WalkLang.svg
+git diff --check -- .gitattributes docs/GITHUB_LINGUIST.md docs/STATUS.md linguist/languages.yml linguist/grammars.yml samples/WalkLang passed
+```
+
 Next: post-release maintenance should keep the C++/C compiler, C runtime,
 static docs surface, release artifacts, local install flow, and GitHub language
 accounting aligned with the v6 systems architecture.

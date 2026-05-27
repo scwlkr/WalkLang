@@ -1,0 +1,12 @@
+# Draft entry for a future github-linguist/linguist pull request.
+# Do not add language_id here; Linguist generates it with script/update-ids.
+---
+WalkLang:
+  type: programming
+  color: "#000088"
+  aliases:
+  - walk
+  extensions:
+  - ".walk"
+  tm_scope: source.walk
+  ace_mode: text
