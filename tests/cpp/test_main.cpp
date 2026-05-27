@@ -87,6 +87,28 @@ void test_unknown_command_is_usage_error() {
     expect_eq("unknown stderr", result.stderr_text, "error[W0004]: unknown command \"unknown\"\n");
 }
 
+void test_run_command_passes_program_args_after_delimiter() {
+    const std::filesystem::path dir = std::filesystem::path("build") / "cpp-tests";
+    std::filesystem::create_directories(dir);
+    const std::filesystem::path path = dir / "run_args.walk";
+    {
+        std::ofstream output(path, std::ios::binary);
+        output << "imp: process\n";
+        output << "var: args = process.args()\n";
+        output << "if: != process.arg_count() 2\n";
+        output << "    do: process.exit(1)\n";
+        output << "if: != args[0] 'alpha'\n";
+        output << "    do: process.exit(2)\n";
+        output << "if: != args[1] 'two words'\n";
+        output << "    do: process.exit(3)\n";
+    }
+
+    const walk::cli::CommandResult result = walk::cli::dispatch({"run", "--warnings=error", path.string(), "--", "alpha", "two words"});
+    expect_eq_int("run args exit", result.exit_code, 0);
+    expect_eq("run args stdout", result.stdout_text, "");
+    expect_eq("run args stderr", result.stderr_text, "");
+}
+
 void test_source_file_loading_and_positions() {
     const std::filesystem::path dir = std::filesystem::path("build") / "cpp-tests";
     std::filesystem::create_directories(dir);
@@ -152,6 +174,7 @@ int main() {
     test_unported_command_is_diagnostic_not_delegation();
     test_check_warnings_error_mode();
     test_unknown_command_is_usage_error();
+    test_run_command_passes_program_args_after_delimiter();
     test_source_file_loading_and_positions();
     test_diagnostic_formatting_with_source();
     test_diagnostic_set_sorts_deterministically();

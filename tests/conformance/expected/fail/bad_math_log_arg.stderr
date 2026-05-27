@@ -1,0 +1,4 @@
+tests/fail/bad_math_log_arg.walk:2:15: type error: math.log needs numeric arg, got string
+
+out: math.log('x')
+              ^

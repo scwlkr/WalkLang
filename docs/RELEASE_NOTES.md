@@ -4,6 +4,42 @@
 
 No unreleased changes.
 
+## v6.2.0 - Native Numeric Runtime Helpers
+
+Date: 2026-05-26
+
+v6.2.0 adds the small numeric and CLI runtime pieces needed by WalkLang-native
+ML-style programs without adding an external ML library or broad serialization
+surface.
+
+### Added
+
+- Stable `math.exp(number) -> float`.
+- Stable `math.log(number) -> float`.
+- Stable `random.float(number, number) -> float`, returning uniform floats in `[min, max)` and returning `min` when `max < min`.
+- A documented Marsaglia polar recipe for normal sampling instead of a frozen first-party `random.normal` API.
+- `walk run <source.walk> -- <program args>` passthrough to the compiled temporary executable.
+
+### Notes
+
+- `random.float` uses the same runtime-owned process PRNG as `random.int` and `random.choice`; WalkLang still does not expose manual seeding.
+- Binary numeric serialization and dense-array persistence remain future standard-platform design work.
+
+### Breaking Changes
+
+None.
+
+### Upgrade
+
+Regenerate docs, install locally, and produce release artifacts with:
+
+```bash
+scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/install-local.sh v6.2.0
+scripts/release.sh v6.2.0 dist
+```
+
 ## v6.1.0 - PicoNet String And Map Tooling
 
 Date: 2026-05-26

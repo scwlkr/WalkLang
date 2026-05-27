@@ -239,6 +239,8 @@ random
 testing</code></pre>
 <p>Stable built-in functions:</p>
 <pre><code class="language-text">math.sqrt(number) -&gt; float
+math.exp(number) -&gt; float
+math.log(number) -&gt; float
 math.pow(number, number) -&gt; float
 string.len(string) -&gt; int
 string.at(string, int) -&gt; string
@@ -252,6 +254,7 @@ array.contains(array[T], T) -&gt; bool
 array.push(array[T], T) -&gt; array[T]
 time.now() -&gt; int
 random.int(int, int) -&gt; int
+random.float(number, number) -&gt; float
 random.choice(array[T]) -&gt; T
 testing.assert(bool) -&gt; bool</code></pre>
 <p><code>array.contains</code>, <code>array.push</code>, and <code>random.choice</code> are stable for arrays whose elements are <code>int</code>, <code>float</code>, <code>bool</code>, or <code>string</code>.</p>

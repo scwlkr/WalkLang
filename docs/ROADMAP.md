@@ -489,6 +489,8 @@ Stable first:
 
 ```text
 math.sqrt
+math.exp
+math.log
 math.pow
 
 string.len
@@ -498,6 +500,7 @@ array.len
 time.now
 
 random.int
+random.float
 
 testing.assert
 ```

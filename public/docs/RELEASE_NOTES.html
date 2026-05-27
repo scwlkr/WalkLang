@@ -60,6 +60,30 @@
 <h1 id="walklang-release-notes">WalkLang Release Notes</h1>
 <h2 id="unreleased">Unreleased</h2>
 <p>No unreleased changes.</p>
+<h2 id="v6-2-0-native-numeric-runtime-helpers">v6.2.0 - Native Numeric Runtime Helpers</h2>
+<p>Date: 2026-05-26</p>
+<p>v6.2.0 adds the small numeric and CLI runtime pieces needed by WalkLang-native ML-style programs without adding an external ML library or broad serialization surface.</p>
+<h3 id="added">Added</h3>
+<ul>
+<li>Stable <code>math.exp(number) -&gt; float</code>.</li>
+<li>Stable <code>math.log(number) -&gt; float</code>.</li>
+<li>Stable <code>random.float(number, number) -&gt; float</code>, returning uniform floats in <code>[min, max)</code> and returning <code>min</code> when <code>max &lt; min</code>.</li>
+<li>A documented Marsaglia polar recipe for normal sampling instead of a frozen first-party <code>random.normal</code> API.</li>
+<li><code>walk run &lt;source.walk&gt; -- &lt;program args&gt;</code> passthrough to the compiled temporary executable.</li>
+</ul>
+<h3 id="notes">Notes</h3>
+<ul>
+<li><code>random.float</code> uses the same runtime-owned process PRNG as <code>random.int</code> and <code>random.choice</code>; WalkLang still does not expose manual seeding.</li>
+<li>Binary numeric serialization and dense-array persistence remain future standard-platform design work.</li>
+</ul>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<p>None.</p>
+<h3 id="upgrade">Upgrade</h3>
+<p>Regenerate docs, install locally, and produce release artifacts with:</p>
+<pre><code class="language-bash">scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/install-local.sh v6.2.0
+scripts/release.sh v6.2.0 dist</code></pre>
 <h2 id="v6-1-0-piconet-string-and-map-tooling">v6.1.0 - PicoNet String And Map Tooling</h2>
 <p>Date: 2026-05-26</p>
 <p>v6.1.0 adds the small language and standard-library surface PicoNet needed without changing WalkLang&#39;s explicit design: stable string cleanup helpers and a draft string-array map for visible, namespaced table operations.</p>

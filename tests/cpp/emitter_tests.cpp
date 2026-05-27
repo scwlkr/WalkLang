@@ -191,6 +191,31 @@ void test_string_helpers_build_and_run() {
     expect_eq("string helper output", read_file(out_path), "hi walk\na\nb\nbaNANA\n");
 }
 
+void test_numeric_ml_helpers_build_and_run() {
+    if (std::system("command -v cc >/dev/null 2>&1") != 0) {
+        return;
+    }
+    const std::string c_code = emit_source(
+        "imp: math\n"
+        "imp: random\n"
+        "out: math.exp(0)\n"
+        "out: math.log(1)\n"
+        "out: random.float(4, 4)\n"
+        "out: random.float(5, 2)\n");
+    const std::filesystem::path dir = std::filesystem::path("build") / "cpp-tests" / "numeric-ml-helpers";
+    std::filesystem::create_directories(dir);
+    const std::filesystem::path c_path = dir / "main.c";
+    const std::filesystem::path exe_path = dir / "main";
+    const std::filesystem::path out_path = dir / "main.out";
+    build_generated_c("numeric ml helper build", c_code, c_path, exe_path);
+    const int code = std::system((shell_quote(exe_path) + " > " + shell_quote(out_path)).c_str());
+    if (code != 0) {
+        fail("numeric ml helper run", "program failed");
+        return;
+    }
+    expect_eq("numeric ml helper output", read_file(out_path), "1\n0\n4\n5\n");
+}
+
 void test_map_string_arrays_build_and_run() {
     if (std::system("command -v cc >/dev/null 2>&1") != 0) {
         return;
@@ -238,6 +263,7 @@ int run_emitter_tests() {
     test_generated_c_builds_and_runs();
     test_test_runner_program_builds_and_runs();
     test_string_helpers_build_and_run();
+    test_numeric_ml_helpers_build_and_run();
     test_map_string_arrays_build_and_run();
     return failures;
 }

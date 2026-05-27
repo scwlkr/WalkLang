@@ -1,0 +1,4 @@
+tests/fail/bad_random_float_arg.walk:2:19: type error: random.float args must be numeric, got string
+
+out: random.float('low', 1)
+                  ^

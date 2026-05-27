@@ -1,3 +1,4 @@
 test: arithmetic works
 test: stdlib works
-ok 2 tests
+test: random float stays bounded and varies
+ok 3 tests

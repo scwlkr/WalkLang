@@ -1177,6 +1177,12 @@ private:
         if (call.callee == "math.sqrt") {
             return "sqrt(" + join(args, ", ") + ")";
         }
+        if (call.callee == "math.exp") {
+            return "exp(" + join(args, ", ") + ")";
+        }
+        if (call.callee == "math.log") {
+            return "log(" + join(args, ", ") + ")";
+        }
         if (call.callee == "math.pow") {
             return "pow(" + join(args, ", ") + ")";
         }
@@ -1239,6 +1245,9 @@ private:
         }
         if (call.callee == "random.int") {
             return "walk_rt_random_int(" + join(args, ", ") + ")";
+        }
+        if (call.callee == "random.float") {
+            return "walk_rt_random_float(" + join(args, ", ") + ")";
         }
         if (call.callee == "random.choice") {
             if (call.args[0]->type.elem == nullptr) {

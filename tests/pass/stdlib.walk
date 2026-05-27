@@ -12,6 +12,8 @@ letters = array.push(letters, 'd')
 letters = array.push(letters, 'o')
 out: math.sqrt(9)
 out: math.pow(2, 3)
+out: math.exp(0)
+out: math.log(1)
 out: string.len('walk')
 out: string.at('walk', 1)
 out: 'walk'[2]
@@ -29,5 +31,7 @@ out: array.contains(letters, 'd')
 out: array.contains(letters, 'g')
 out: > time.now() 0
 out: fixed_random
+out: random.float(4, 4)
+out: random.float(5, 2)
 out: random.choice(choices)
 out: testing.assert(== fixed_random 7)

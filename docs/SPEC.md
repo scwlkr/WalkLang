@@ -382,6 +382,8 @@ Stable built-in functions:
 
 ```text
 math.sqrt(number) -> float
+math.exp(number) -> float
+math.log(number) -> float
 math.pow(number, number) -> float
 string.len(string) -> int
 string.at(string, int) -> string
@@ -395,6 +397,7 @@ array.contains(array[T], T) -> bool
 array.push(array[T], T) -> array[T]
 time.now() -> int
 random.int(int, int) -> int
+random.float(number, number) -> float
 random.choice(array[T]) -> T
 testing.assert(bool) -> bool
 ```

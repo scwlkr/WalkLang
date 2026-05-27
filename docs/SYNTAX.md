@@ -460,6 +460,13 @@ var: words = ['dog', 'cat']
 out: random.choice(words)
 ```
 
+Use `random.float(min, max)` for uniform decimal samples in `[min, max)`.
+
+```walk
+imp: random
+out: random.float(0, 1)
+```
+
 ---
 
 ## Draft Maps
@@ -508,6 +515,8 @@ package modules.
 ```walk
 imp: math
 out: math.sqrt(9)
+out: math.exp(1)
+out: math.log(1)
 ```
 
 User module example:

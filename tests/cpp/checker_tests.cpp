@@ -83,6 +83,19 @@ void test_accepts_string_array_maps() {
     expect_true("string array maps ok", result.ok(), result.diagnostics.format());
 }
 
+void test_accepts_numeric_ml_helpers() {
+    walk::sema::CheckResult result = check_text(
+        "imp: math\n"
+        "imp: random\n"
+        "var: e = math.exp(0)\n"
+        "var: l = math.log(1)\n"
+        "var: f = random.float(0, 1)\n"
+        "out: e\n"
+        "out: l\n"
+        "out: f\n");
+    expect_true("numeric ml helpers ok", result.ok(), result.diagnostics.format());
+}
+
 void test_rejects_unsupported_map_key_type() {
     walk::sema::CheckResult result = check_text(
         "imp: map\n"
@@ -90,6 +103,26 @@ void test_rejects_unsupported_map_key_type() {
         "out: map.has(table, 1)\n");
     expect_true("unsupported map key rejects", !result.ok(), "unsupported map key unexpectedly passed");
     expect_true("unsupported map key diagnostic", result.diagnostics.format().find("type error: map key type must be string") != std::string::npos, "missing map key diagnostic");
+}
+
+void test_rejects_invalid_numeric_ml_helper_args() {
+    walk::sema::CheckResult exp_result = check_text(
+        "imp: math\n"
+        "out: math.exp('x')\n");
+    expect_true("bad math exp rejects", !exp_result.ok(), "bad math exp unexpectedly passed");
+    expect_true("bad math exp diagnostic", exp_result.diagnostics.format().find("type error: math.exp needs numeric arg, got string") != std::string::npos, "missing math.exp diagnostic");
+
+    walk::sema::CheckResult log_result = check_text(
+        "imp: math\n"
+        "out: math.log('x')\n");
+    expect_true("bad math log rejects", !log_result.ok(), "bad math log unexpectedly passed");
+    expect_true("bad math log diagnostic", log_result.diagnostics.format().find("type error: math.log needs numeric arg, got string") != std::string::npos, "missing math.log diagnostic");
+
+    walk::sema::CheckResult float_result = check_text(
+        "imp: random\n"
+        "out: random.float('low', 1)\n");
+    expect_true("bad random float rejects", !float_result.ok(), "bad random float unexpectedly passed");
+    expect_true("bad random float diagnostic", float_result.diagnostics.format().find("type error: random.float args must be numeric, got string") != std::string::npos, "missing random.float diagnostic");
 }
 
 }  // namespace
@@ -100,6 +133,8 @@ int run_checker_tests() {
     test_rejects_type_mismatch();
     test_accepts_new_string_helpers();
     test_accepts_string_array_maps();
+    test_accepts_numeric_ml_helpers();
     test_rejects_unsupported_map_key_type();
+    test_rejects_invalid_numeric_ml_helper_args();
     return failures;
 }

@@ -1,4 +1,5 @@
 imp: math_extra
+imp: math
 imp: string
 imp: array
 imp: random
@@ -20,6 +21,10 @@ test: 'stdlib assert stays compatible'
     assert: == string.replace('banana', 'na', 'NA') 'baNANA'
     assert: array.contains(letters, 'w')
     assert: == random.choice(choices) 'stable'
+    assert: == math.exp(0) 1
+    assert: == math.log(1) 0
+    assert: == random.float(4, 4) 4
+    assert: == random.float(5, 2) 5
     assert: == 'length {wordLength}' 'length 4'
     assert: == 'plural {string.concat(word, 's')}' 'plural walks'
 test: 'module export stays compatible'

@@ -114,6 +114,7 @@ void walk_rt_panic(const char *message);
 void *walk_rt_alloc_array(WalkSize len, size_t item_size);
 
 WalkInt walk_rt_random_int(WalkInt min, WalkInt max);
+WalkFloat walk_rt_random_float(WalkFloat min, WalkFloat max);
 WalkInt walk_rt_array_choice_int(WalkArrayInt array);
 WalkFloat walk_rt_array_choice_float(WalkArrayFloat array);
 WalkBool walk_rt_array_choice_bool(WalkArrayBool array);

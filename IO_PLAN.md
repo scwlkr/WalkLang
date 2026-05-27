@@ -742,6 +742,7 @@ imp: random
 
 var: now = time.now()
 var: n = random.int(1, 10)
+var: f = random.float(0, 1)
 ```
 
 Recommended next additions:
@@ -750,7 +751,6 @@ Recommended next additions:
 time.sleep(seconds)
 time.millis()
 time.monotonic()
-random.float()
 random.seed(seed)
 ```
 

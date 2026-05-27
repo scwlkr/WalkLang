@@ -71,6 +71,8 @@ true"
 "$walk_bin" build tests/pass/stdlib.walk -o "$work_dir/stdlib"
 expect_output "$work_dir/stdlib" "3
 8
+1
+0
 4
 a
 l
@@ -87,6 +89,8 @@ true
 false
 true
 7
+4
+5
 fixed
 true"
 
@@ -137,7 +141,7 @@ grep -q "walk runtime error: input reached EOF" "$work_dir/failure.err"
 grep -q "ok 2 tests" "$work_dir/tests.out"
 
 "$walk_bin" test tests/pass/walk_tests.walk >"$work_dir/stdlib-tests.out"
-grep -q "ok 2 tests" "$work_dir/stdlib-tests.out"
+grep -q "ok 3 tests" "$work_dir/stdlib-tests.out"
 
 cat >"$work_dir/shadow.walk" <<'WALK'
 var: x = 1

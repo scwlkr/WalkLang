@@ -85,6 +85,12 @@ WalkInt walk_rt_random_int(WalkInt min, WalkInt max) {
     return min + (WalkInt)(walk_rt_random_next() % (unsigned long long)(max - min + 1));
 }
 
+WalkFloat walk_rt_random_float(WalkFloat min, WalkFloat max) {
+    if (max < min) { return min; }
+    const double unit = (double)(walk_rt_random_next() >> 11) * (1.0 / 9007199254740992.0);
+    return min + (max - min) * unit;
+}
+
 static WALK_UNUSED WalkSize walk_rt_random_index(WalkSize len) {
     if (len <= 0) { walk_rt_panic("random.choice on empty array"); }
     return (WalkSize)(walk_rt_random_next() % (unsigned long long)len);

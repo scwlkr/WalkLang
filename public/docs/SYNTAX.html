@@ -286,6 +286,9 @@ out: array.contains(guessed, &#39;w&#39;)</code></pre>
 <pre><code class="language-walk">imp: random
 var: words = [&#39;dog&#39;, &#39;cat&#39;]
 out: random.choice(words)</code></pre>
+<p>Use <code>random.float(min, max)</code> for uniform decimal samples in <code>[min, max)</code>.</p>
+<pre><code class="language-walk">imp: random
+out: random.float(0, 1)</code></pre>
 <p>---</p>
 <h2 id="draft-maps">Draft Maps</h2>
 <p>Draft maps currently support <code>map[string]array[string]</code>. Use them for explicit string-keyed tables whose values are string arrays. This is a draft collection, not a stable feature.</p>
@@ -312,7 +315,9 @@ if: != email null
 <h2 id="imports-and-exports">Imports And Exports</h2>
 <p>Use <code>imp:</code> to import built-in modules, sibling user modules, or current package modules.</p>
 <pre><code class="language-walk">imp: math
-out: math.sqrt(9)</code></pre>
+out: math.sqrt(9)
+out: math.exp(1)
+out: math.log(1)</code></pre>
 <p>User module example:</p>
 <pre><code class="language-walk"># calc.walk
 func: square(x int) int

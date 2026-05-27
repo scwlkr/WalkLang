@@ -43,6 +43,8 @@ fail/bad_io_read_line_arg	fail	check	tests/fail/bad_io_read_line_arg.walk	.	-	no
 fail/bad_io_write_arg	fail	check	tests/fail/bad_io_write_arg.walk	.	-	no
 fail/bad_json_parse_arg	fail	check	tests/fail/bad_json_parse_arg.walk	.	-	no
 fail/bad_json_write_as_expression	fail	check	tests/fail/bad_json_write_as_expression.walk	.	-	no
+fail/bad_math_exp_arg	fail	check	tests/fail/bad_math_exp_arg.walk	.	-	no
+fail/bad_math_log_arg	fail	check	tests/fail/bad_math_log_arg.walk	.	-	no
 fail/bad_method_arg	fail	check	tests/fail/bad_method_arg.walk	.	-	no
 fail/bad_method_receiver	fail	check	tests/fail/bad_method_receiver.walk	.	-	no
 fail/bad_parse_int_arg	fail	check	tests/fail/bad_parse_int_arg.walk	.	-	no
@@ -51,6 +53,7 @@ fail/bad_process_chdir_arg	fail	check	tests/fail/bad_process_chdir_arg.walk	.	-	
 fail/bad_process_exit_arg	fail	check	tests/fail/bad_process_exit_arg.walk	.	-	no
 fail/bad_process_run_arg	fail	check	tests/fail/bad_process_run_arg.walk	.	-	no
 fail/bad_random_choice	fail	check	tests/fail/bad_random_choice.walk	.	-	no
+fail/bad_random_float_arg	fail	check	tests/fail/bad_random_float_arg.walk	.	-	no
 fail/bad_string_at	fail	check	tests/fail/bad_string_at.walk	.	-	no
 fail/bad_string_index	fail	check	tests/fail/bad_string_index.walk	.	-	no
 fail/bad_struct_field_type	fail	check	tests/fail/bad_struct_field_type.walk	.	-	no

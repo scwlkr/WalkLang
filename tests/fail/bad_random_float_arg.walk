@@ -1,0 +1,2 @@
+imp: random
+out: random.float('low', 1)

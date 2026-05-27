@@ -1092,9 +1092,9 @@ private:
 
     bool check_core_builtin_call(ast::Call& call, const std::string& module, const std::string& name, ast::Type& out) {
         const std::string qualified = module + "." + name;
-        if (qualified == "math.sqrt") {
+        if (qualified == "math.sqrt" || qualified == "math.exp" || qualified == "math.log") {
             if (call.args.size() != 1) {
-                add_error(*diagnostics_, call.range, "type error: math.sqrt expects 1 arg, got " + std::to_string(call.args.size()));
+                add_error(*diagnostics_, call.range, "type error: " + qualified + " expects 1 arg, got " + std::to_string(call.args.size()));
                 return false;
             }
             ast::Type arg_type;
@@ -1102,7 +1102,7 @@ private:
                 return false;
             }
             if (!is_numeric(arg_type)) {
-                add_error(*diagnostics_, call.args[0]->range, "type error: math.sqrt needs numeric arg, got " + arg_type.to_string());
+                add_error(*diagnostics_, call.args[0]->range, "type error: " + qualified + " needs numeric arg, got " + arg_type.to_string());
                 return false;
             }
             out = ast::basic(ast::TypeKind::Float);
@@ -1158,6 +1158,23 @@ private:
                 }
             }
             out = ast::basic(ast::TypeKind::Int);
+            return true;
+        }
+        if (qualified == "random.float") {
+            if (!expect_arg_count(call, "random.float", 2)) {
+                return false;
+            }
+            for (ast::Expression* arg : call.args) {
+                ast::Type arg_type;
+                if (!check_expression(arg, arg_type)) {
+                    return false;
+                }
+                if (!is_numeric(arg_type)) {
+                    add_error(*diagnostics_, arg->range, "type error: random.float args must be numeric, got " + arg_type.to_string());
+                    return false;
+                }
+            }
+            out = ast::basic(ast::TypeKind::Float);
             return true;
         }
         if (qualified == "random.choice") {

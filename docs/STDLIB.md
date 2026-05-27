@@ -64,6 +64,30 @@ imp: math
 out: math.sqrt(9)
 ```
 
+### math.exp(number) -> float
+
+Stability: stable. Effect status: pure expression.
+
+Accepts `int` or `float` and returns the native C `exp` result as `float`.
+Valid numeric arguments have no WalkLang-defined runtime failure.
+
+```walk
+imp: math
+out: math.exp(1)
+```
+
+### math.log(number) -> float
+
+Stability: stable. Effect status: pure expression.
+
+Accepts `int` or `float` and returns the native C natural-log `log` result as
+`float`. Valid numeric arguments have no WalkLang-defined runtime failure.
+
+```walk
+imp: math
+out: math.log(1)
+```
+
 ### math.pow(number, number) -> float
 
 Stability: stable. Effect status: pure expression.
@@ -240,12 +264,24 @@ Stability: stable. Effect status: pure expression.
 Returns an integer in the inclusive range. If `max < min`, WalkLang returns
 `min`.
 
-`random.int` and `random.choice` use a runtime-owned PRNG seeded once per
-native process. WalkLang does not expose manual seeding.
+`random.int`, `random.float`, and `random.choice` use a runtime-owned PRNG
+seeded once per native process. WalkLang does not expose manual seeding.
 
 ```walk
 imp: random
 out: random.int(1, 10)
+```
+
+### random.float(number, number) -> float
+
+Stability: stable. Effect status: pure expression.
+
+Returns a uniform float in `[min, max)`. Arguments may be `int` or `float`. If
+`max < min`, WalkLang returns `min`.
+
+```walk
+imp: random
+out: random.float(0, 1)
 ```
 
 ### random.choice(array[T]) -> T
@@ -260,6 +296,35 @@ Returns one item from a non-empty stable native array. Calling
 imp: random
 var: words = ['dog', 'cat']
 out: random.choice(words)
+```
+
+### Normal Sampling Recipe
+
+Stability: stable recipe. Effect status: pure expression calls.
+
+WalkLang does not expose a first-party `random.normal` helper yet. Use a
+source-level Marsaglia polar helper when a program needs normally distributed
+samples:
+
+```walk
+imp: math
+imp: random
+
+func: normal_sample() float
+    var: u = 0.0
+    var: v = 0.0
+    var: s = 2.0
+    while: or >= s 1.0 == s 0.0
+        u = - (* 2 random.float(0, 1)) 1
+        v = - (* 2 random.float(0, 1)) 1
+        var: uu = * u u
+        var: vv = * v v
+        s = + uu vv
+    var: log_s = math.log(s)
+    var: numerator = * -2 log_s
+    var: ratio = / numerator s
+    var: scale = math.sqrt(ratio)
+    return: * u scale
 ```
 
 ---
@@ -682,7 +747,9 @@ input.
 
 Failure policy: fail-stop runtime failure only for unrecoverable allocation failure.
 
-Returns command-line arguments passed after the executable path.
+Returns command-line arguments passed after the executable path. `walk build`
+preserves arguments passed to the built executable, and `walk run <source.walk>
+-- <program args>` passes arguments through to the temporary executable.
 
 ### process.arg_count() -> int
 

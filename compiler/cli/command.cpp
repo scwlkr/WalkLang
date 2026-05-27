@@ -95,6 +95,7 @@ struct RunArgs {
     WarningMode warning_mode = WarningMode::Default;
     std::string source_path;
     NativeOptions native;
+    std::vector<std::string> program_args;
 };
 
 struct DocsArgs {
@@ -226,7 +227,7 @@ std::string build_usage() {
 }
 
 std::string run_usage() {
-    return "usage: walk run [--mode debug|release] [--warnings=off|default|error] [--cc <cc>] [--cflag <flag>] <source.walk>";
+    return "usage: walk run [--mode debug|release] [--warnings=off|default|error] [--cc <cc>] [--cflag <flag>] <source.walk> [-- <program args>]";
 }
 
 std::string test_usage() {
@@ -385,10 +386,18 @@ std::optional<BuildArgs> parse_build_args(const std::vector<std::string>& args, 
     return parsed;
 }
 
-std::optional<RunArgs> parse_run_like_args(const std::vector<std::string>& args, CommandResult& error, const std::string& usage) {
+std::optional<RunArgs> parse_run_like_args(const std::vector<std::string>& args, CommandResult& error, const std::string& usage, bool allow_program_args = false) {
     RunArgs parsed;
     for (std::size_t index = 0; index < args.size(); ++index) {
         const std::string& arg = args[index];
+        if (allow_program_args && arg == "--") {
+            if (parsed.source_path.empty()) {
+                error = {kUsageExitCode, "", format_simple_error("W0005", usage)};
+                return std::nullopt;
+            }
+            parsed.program_args.insert(parsed.program_args.end(), args.begin() + static_cast<std::ptrdiff_t>(index + 1), args.end());
+            break;
+        }
         if (parse_warning_arg(args, index, parsed.warning_mode, error, usage) || parse_native_arg(args, index, parsed.native, error, usage)) {
             if (error.exit_code != 0) {
                 return std::nullopt;
@@ -865,8 +874,13 @@ Result<void> build_c(const std::string& c_code, const std::string& c_path, const
     return Result<void>::success();
 }
 
-int run_passthrough(const std::string& executable) {
-    return std::system(shell_quote(executable).c_str());
+int run_passthrough(const std::string& executable, const std::vector<std::string>& args = {}) {
+    std::ostringstream command;
+    command << shell_quote(executable);
+    for (const std::string& arg : args) {
+        command << " " << shell_quote(arg);
+    }
+    return std::system(command.str().c_str());
 }
 
 int run_capture(const std::string& executable, const std::filesystem::path& stdout_path, const std::filesystem::path& stderr_path) {
@@ -1190,7 +1204,7 @@ CommandResult build_command(const std::vector<std::string>& args) {
 
 CommandResult run_command(const std::vector<std::string>& args) {
     CommandResult parse_error{0, "", ""};
-    const std::optional<RunArgs> parsed = parse_run_like_args(args, parse_error, run_usage());
+    const std::optional<RunArgs> parsed = parse_run_like_args(args, parse_error, run_usage(), true);
     if (!parsed) {
         return parse_error;
     }
@@ -1207,7 +1221,7 @@ CommandResult run_command(const std::vector<std::string>& args) {
         std::filesystem::remove_all(dir);
         return {kDiagnosticExitCode, "", format_simple_error("W5003", built.error())};
     }
-    if (const int code = run_passthrough(exe.string()); code != 0) {
+    if (const int code = run_passthrough(exe.string(), parsed->program_args); code != 0) {
         std::filesystem::remove_all(dir);
         return {kDiagnosticExitCode, "", compiled->warning_stderr + format_simple_error("W5004", "program failed")};
     }

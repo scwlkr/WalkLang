@@ -90,7 +90,14 @@ walk fmt examples/hello.walk
 
 `walk run <source.walk>` compiles the file to a temporary native executable,
 runs it, streams program input and output, and removes the temporary build
-directory. `walk <source.walk>` is the shorthand for the same flow.
+directory. Use `--` to pass arguments through to the program:
+
+```bash
+walk run examples/hello.walk -- alpha beta
+```
+
+`walk <source.walk>` is the shorthand for the same flow and accepts the same
+`--` passthrough.
 
 ## Module Search
 
