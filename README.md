@@ -38,13 +38,13 @@ out: add(2, 3)
 
 ## Current Version
 
-WalkLang is currently `v6.2.0`.
+WalkLang is currently `v6.3.0`.
 
-`v6.2.0` adds stable numeric helpers for native ML-style workloads and lets
-`walk run` pass program arguments through with `--`. The repo-local `walk`
-binary is built from C++ sources, generated programs link with the Walk C
-runtime, and features inside a release are labeled `stable`, `draft`,
-`experimental`, or `planned` when their maturity matters.
+`v6.3.0` adds bounded `string.slice` and `string.prefix` helpers for native
+text workloads while keeping string extraction explicit and namespaced. The
+repo-local `walk` binary is built from C++ sources, generated programs link
+with the Walk C runtime, and features inside a release are labeled `stable`,
+`draft`, `experimental`, or `planned` when their maturity matters.
 
 The first CLI standard-platform slice remains `walktop`, an official
 standalone WalkLang-built system monitor installed by the normal local install

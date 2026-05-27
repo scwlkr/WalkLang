@@ -146,6 +146,8 @@ Use the `string` module for common string helpers.
 ```walk
 imp: string
 out: string.contains('walk', 'al')
+out: string.slice('walklang', 4, 99)
+out: string.prefix('walklang', 4)
 out: string.concat('walk', 'lang')
 out: string.lower('Hi WALK')
 out: string.replace('banana', 'na', 'NA')

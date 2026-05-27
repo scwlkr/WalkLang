@@ -145,6 +145,43 @@ imp: string
 out: string.contains('walk', 'al')
 ```
 
+### string.slice(string, int, int) -> string
+
+Stability: stable. Effect status: pure expression.
+
+Returns a new string copied from a zero-based byte `start`, containing at most
+`count` bytes. If `start` is at or past the end of the string, the result is
+`''`. If `count` extends past the end, the result stops at the end. Negative
+`start` runtime-stops with `walk runtime error: string slice start out of
+range`; negative `count` runtime-stops with `walk runtime error: string slice
+count out of range`. Allocation failure runtime-stops with `walk runtime error:
+out of memory`.
+
+`string.slice` is byte-indexed to match `string.len`, `string.at`, and string
+indexing. It does not support negative indexes.
+
+```walk
+imp: string
+out: string.slice('walklang', 4, 99)
+```
+
+### string.prefix(string, int) -> string
+
+Stability: stable. Effect status: pure expression.
+
+Returns a new string containing at most the first `count` bytes. If `count`
+exceeds the string length, the whole string is copied. Negative `count`
+runtime-stops with `walk runtime error: string prefix count out of range`.
+Allocation failure runtime-stops with `walk runtime error: out of memory`.
+
+Use `string.prefix` when a program needs a bounded text sample without building
+it one character at a time.
+
+```walk
+imp: string
+out: string.prefix('walklang', 4)
+```
+
 ### string.concat(string, string) -> string
 
 Stability: stable. Effect status: pure expression.

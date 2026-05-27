@@ -54,8 +54,13 @@ fail/bad_process_exit_arg	fail	check	tests/fail/bad_process_exit_arg.walk	.	-	no
 fail/bad_process_run_arg	fail	check	tests/fail/bad_process_run_arg.walk	.	-	no
 fail/bad_random_choice	fail	check	tests/fail/bad_random_choice.walk	.	-	no
 fail/bad_random_float_arg	fail	check	tests/fail/bad_random_float_arg.walk	.	-	no
+fail/bad_string_prefix_arg	fail	check	tests/fail/bad_string_prefix_arg.walk	.	-	no
+fail/bad_string_prefix_negative	fail	run	tests/fail/bad_string_prefix_negative.walk	.	-	no
 fail/bad_string_at	fail	check	tests/fail/bad_string_at.walk	.	-	no
 fail/bad_string_index	fail	check	tests/fail/bad_string_index.walk	.	-	no
+fail/bad_string_slice_arg	fail	check	tests/fail/bad_string_slice_arg.walk	.	-	no
+fail/bad_string_slice_negative	fail	run	tests/fail/bad_string_slice_negative.walk	.	-	no
+fail/bad_string_slice_negative_count	fail	run	tests/fail/bad_string_slice_negative_count.walk	.	-	no
 fail/bad_struct_field_type	fail	check	tests/fail/bad_struct_field_type.walk	.	-	no
 fail/bad_term_clear_as_expression	fail	check	tests/fail/bad_term_clear_as_expression.walk	.	-	no
 fail/bad_term_move_arg	fail	check	tests/fail/bad_term_move_arg.walk	.	-	no

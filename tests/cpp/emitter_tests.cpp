@@ -176,7 +176,9 @@ void test_string_helpers_build_and_run() {
         "var: parts = string.split('a b', ' ')\n"
         "out: parts[0]\n"
         "out: parts[1]\n"
-        "out: string.replace('banana', 'na', 'NA')\n");
+        "out: string.replace('banana', 'na', 'NA')\n"
+        "out: string.slice('walklang', 4, 99)\n"
+        "out: string.prefix('walklang', 4)\n");
     const std::filesystem::path dir = std::filesystem::path("build") / "cpp-tests" / "string-helpers";
     std::filesystem::create_directories(dir);
     const std::filesystem::path c_path = dir / "main.c";
@@ -188,7 +190,7 @@ void test_string_helpers_build_and_run() {
         fail("string helper run", "program failed");
         return;
     }
-    expect_eq("string helper output", read_file(out_path), "hi walk\na\nb\nbaNANA\n");
+    expect_eq("string helper output", read_file(out_path), "hi walk\na\nb\nbaNANA\nlang\nwalk\n");
 }
 
 void test_numeric_ml_helpers_build_and_run() {

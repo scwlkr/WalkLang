@@ -12,13 +12,13 @@ release or local build label you installed.
 
 ## Release Artifact Install
 
-Release artifacts are produced by `scripts/release.sh`. The v6.2.0 release
+Release artifacts are produced by `scripts/release.sh`. The v6.3.0 release
 path is C++/C-only and writes current-host artifacts:
 
 ```text
-walk-v6.2.0-<host-os>-<host-arch>
-walk-runtime-v6.2.0.tar.gz
-walktop-v6.2.0-<host-os>-<host-arch>
+walk-v6.3.0-<host-os>-<host-arch>
+walk-runtime-v6.3.0.tar.gz
+walktop-v6.3.0-<host-os>-<host-arch>
 SHA256SUMS
 ```
 
@@ -30,9 +30,9 @@ Install on macOS or Linux:
 
 ```bash
 mkdir -p ~/.local/bin ~/.local/lib/walk
-cp walk-v6.2.0-<os>-<arch> ~/.local/bin/walk
-cp walktop-v6.2.0-<os>-<arch> ~/.local/bin/walktop
-tar -xzf walk-runtime-v6.2.0.tar.gz -C ~/.local/lib/walk
+cp walk-v6.3.0-<os>-<arch> ~/.local/bin/walk
+cp walktop-v6.3.0-<os>-<arch> ~/.local/bin/walktop
+tar -xzf walk-runtime-v6.3.0.tar.gz -C ~/.local/lib/walk
 chmod +x ~/.local/bin/walk ~/.local/bin/walktop
 walk version
 NO_COLOR=1 walktop --once
@@ -129,7 +129,7 @@ Score:
 Maintainers can produce the current-host release artifact set with:
 
 ```bash
-make release VERSION=v6.2.0 OUT=dist
+make release VERSION=v6.3.0 OUT=dist
 ```
 
 The command writes the current-host `walk` compiler binary, the runtime source
@@ -140,5 +140,5 @@ Release artifact generation builds `walktop` through `build/walk` by default.
 Maintainers can override the WalkLang build driver for diagnostics:
 
 ```bash
-WALK_RELEASE_BUILD_BIN=build/walk scripts/release.sh v6.2.0 dist
+WALK_RELEASE_BUILD_BIN=build/walk scripts/release.sh v6.3.0 dist
 ```

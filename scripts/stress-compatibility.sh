@@ -83,6 +83,10 @@ hi walk
 a
 b
 baNANA
+lang
+
+walk
+walklang
 3
 2
 true

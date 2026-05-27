@@ -183,6 +183,12 @@ out: 'walk'[1]
 String indexing returns a one-character string by zero-based byte index and
 runtime-stops when the index is out of range.
 
+Stable string slicing uses named helpers instead of slice punctuation.
+`string.slice(text, start, count)` copies at most `count` bytes from a
+zero-based byte `start`. Starts at or past the end return `''`; counts past the
+end return the available suffix. `string.prefix(text, count)` copies at most the
+first `count` bytes. Negative starts or counts runtime-stop.
+
 Grouping uses parentheses:
 
 ```walk
@@ -387,6 +393,8 @@ math.log(number) -> float
 math.pow(number, number) -> float
 string.len(string) -> int
 string.at(string, int) -> string
+string.slice(string, int, int) -> string
+string.prefix(string, int) -> string
 string.contains(string, string) -> bool
 string.concat(string, string) -> string
 string.lower(string) -> string
@@ -463,6 +471,9 @@ walk runtime error: stdin read failed
 walk runtime error: out of memory
 walk runtime error: format failed
 walk runtime error: string index out of range
+walk runtime error: string slice start out of range
+walk runtime error: string slice count out of range
+walk runtime error: string prefix count out of range
 walk runtime error: random.choice on empty array
 ```
 

@@ -1,0 +1,2 @@
+imp: string
+out: string.prefix('walk', -1)

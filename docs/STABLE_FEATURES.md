@@ -100,6 +100,8 @@ imp: random
 
 var: words = ['dog', 'cat']
 out: string.contains('dog', 'o')
+out: string.slice('walklang', 4, 99)
+out: string.prefix('walklang', 4)
 out: string.concat('walk', 'lang')
 out: string.lower('Hi WALK')
 out: string.replace('banana', 'na', 'NA')
@@ -142,6 +144,8 @@ math.log(number) -> float
 math.pow(number, number) -> float
 string.len(string) -> int
 string.at(string, int) -> string
+string.slice(string, int, int) -> string
+string.prefix(string, int) -> string
 string.contains(string, string) -> bool
 string.concat(string, string) -> string
 string.lower(string) -> string

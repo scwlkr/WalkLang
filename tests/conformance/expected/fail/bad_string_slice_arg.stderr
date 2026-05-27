@@ -1,0 +1,4 @@
+tests/fail/bad_string_slice_arg.walk:2:30: type error: arg 3 to string.slice must be int, got string
+
+out: string.slice('walk', 0, '2')
+                             ^

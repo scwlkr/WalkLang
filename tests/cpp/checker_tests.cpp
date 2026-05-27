@@ -61,9 +61,13 @@ void test_accepts_new_string_helpers() {
         "var: lowered = string.lower('Hi')\n"
         "var: parts = string.split('a b', ' ')\n"
         "var: replaced = string.replace('abc', 'b', 'x')\n"
+        "var: sliced = string.slice('walklang', 4, 99)\n"
+        "var: prefixed = string.prefix('walklang', 4)\n"
         "out: lowered\n"
         "out: parts[1]\n"
-        "out: replaced\n");
+        "out: replaced\n"
+        "out: sliced\n"
+        "out: prefixed\n");
     expect_true("new string helpers ok", result.ok(), result.diagnostics.format());
 }
 

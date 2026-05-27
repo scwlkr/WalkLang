@@ -26,6 +26,13 @@ test: 'stdlib works'
     assert: == parts[0] 'a'
     assert: == parts[1] 'b'
     assert: == string.replace('banana', 'na', 'NA') 'baNANA'
+    assert: == string.slice('walklang', 4, 4) 'lang'
+    assert: == string.slice('walklang', 4, 99) 'lang'
+    assert: == string.slice('walklang', 99, 4) ''
+    assert: == string.slice('', 0, 4) ''
+    assert: == string.prefix('walklang', 4) 'walk'
+    assert: == string.prefix('walklang', 99) 'walklang'
+    assert: == string.prefix('', 4) ''
     assert: == random.choice(choices) 'only'
     assert: == math.exp(0) 1
     assert: == math.log(1) 0

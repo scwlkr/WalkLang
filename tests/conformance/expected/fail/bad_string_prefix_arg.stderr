@@ -1,0 +1,4 @@
+tests/fail/bad_string_prefix_arg.walk:2:28: type error: string.prefix count must be int, got string
+
+out: string.prefix('walk', '4')
+                           ^

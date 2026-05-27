@@ -25,6 +25,10 @@ var: parts = string.split('a b', ' ')
 out: parts[0]
 out: parts[1]
 out: string.replace('banana', 'na', 'NA')
+out: string.slice('walklang', 4, 99)
+out: string.slice('walklang', 99, 4)
+out: string.prefix('walklang', 4)
+out: string.prefix('walklang', 99)
 out: array.len(nums)
 out: array.len(letters)
 out: array.contains(letters, 'd')

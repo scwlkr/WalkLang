@@ -1,0 +1,2 @@
+imp: string
+out: string.slice('walk', 0, -1)

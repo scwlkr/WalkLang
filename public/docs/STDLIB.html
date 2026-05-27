@@ -117,6 +117,18 @@ out: string.at(&#39;walk&#39;, 1)</code></pre>
 <p>Returns <code>true</code> when the second string appears inside the first. An empty search string returns <code>true</code>.</p>
 <pre><code class="language-walk">imp: string
 out: string.contains(&#39;walk&#39;, &#39;al&#39;)</code></pre>
+<h3 id="string-slice-string-int-int-string">string.slice(string, int, int) -&gt; string</h3>
+<p>Stability: stable. Effect status: pure expression.</p>
+<p>Returns a new string copied from a zero-based byte <code>start</code>, containing at most <code>count</code> bytes. If <code>start</code> is at or past the end of the string, the result is <code>&#39;&#39;</code>. If <code>count</code> extends past the end, the result stops at the end. Negative <code>start</code> runtime-stops with <code>walk runtime error: string slice start out of range</code>; negative <code>count</code> runtime-stops with <code>walk runtime error: string slice count out of range</code>. Allocation failure runtime-stops with <code>walk runtime error: out of memory</code>.</p>
+<p><code>string.slice</code> is byte-indexed to match <code>string.len</code>, <code>string.at</code>, and string indexing. It does not support negative indexes.</p>
+<pre><code class="language-walk">imp: string
+out: string.slice(&#39;walklang&#39;, 4, 99)</code></pre>
+<h3 id="string-prefix-string-int-string">string.prefix(string, int) -&gt; string</h3>
+<p>Stability: stable. Effect status: pure expression.</p>
+<p>Returns a new string containing at most the first <code>count</code> bytes. If <code>count</code> exceeds the string length, the whole string is copied. Negative <code>count</code> runtime-stops with <code>walk runtime error: string prefix count out of range</code>. Allocation failure runtime-stops with <code>walk runtime error: out of memory</code>.</p>
+<p>Use <code>string.prefix</code> when a program needs a bounded text sample without building it one character at a time.</p>
+<pre><code class="language-walk">imp: string
+out: string.prefix(&#39;walklang&#39;, 4)</code></pre>
 <h3 id="string-concat-string-string-string">string.concat(string, string) -&gt; string</h3>
 <p>Stability: stable. Effect status: pure expression.</p>
 <p>Returns a new string made from the left string followed by the right string. Allocation failure runtime-stops with <code>walk runtime error: out of memory</code>.</p>

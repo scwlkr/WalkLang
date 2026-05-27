@@ -60,6 +60,29 @@
 <h1 id="walklang-release-notes">WalkLang Release Notes</h1>
 <h2 id="unreleased">Unreleased</h2>
 <p>No unreleased changes.</p>
+<h2 id="v6-3-0-bounded-string-slicing">v6.3.0 - Bounded String Slicing</h2>
+<p>Date: 2026-05-27</p>
+<p>v6.3.0 adds Python-inspired bounded string extraction while keeping WalkLang&#39;s surface explicit and namespaced. The new helpers are aimed at WalkLang-native text workloads such as tokenizers, corpus preprocessing, logs, and generated text assembly.</p>
+<h3 id="added">Added</h3>
+<ul>
+<li>Stable <code>string.slice(text, start, count) -&gt; string</code> for byte-indexed bounded copies.</li>
+<li>Stable <code>string.prefix(text, count) -&gt; string</code> for capped leading text samples.</li>
+<li>Conformance coverage for normal, empty, overlong, start-past-end, type-error, and negative-bound cases.</li>
+</ul>
+<h3 id="notes">Notes</h3>
+<ul>
+<li>The helpers use zero-based byte positions to match <code>string.len</code>, <code>string.at</code>, and string indexing.</li>
+<li>Negative indexes are intentionally not supported; this keeps slicing explicit instead of adding Python-style negative-index magic.</li>
+<li>Counts past the end return the available text, so callers do not need to pre-check length for bounded snippets.</li>
+</ul>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<p>None.</p>
+<h3 id="upgrade">Upgrade</h3>
+<p>Regenerate docs, install locally, and produce release artifacts with:</p>
+<pre><code class="language-bash">scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/install-local.sh v6.3.0
+scripts/release.sh v6.3.0 dist</code></pre>
 <h2 id="v6-2-0-native-numeric-runtime-helpers">v6.2.0 - Native Numeric Runtime Helpers</h2>
 <p>Date: 2026-05-26</p>
 <p>v6.2.0 adds the small numeric and CLI runtime pieces needed by WalkLang-native ML-style programs without adding an external ML library or broad serialization surface.</p>

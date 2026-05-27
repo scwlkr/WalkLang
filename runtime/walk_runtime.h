@@ -122,6 +122,8 @@ WalkString walk_rt_array_choice_string(WalkArrayString array);
 
 WalkInt walk_rt_string_len(WalkString value);
 WalkString walk_rt_string_at(WalkString value, WalkInt index);
+WalkString walk_rt_string_slice(WalkString value, WalkInt start, WalkInt count);
+WalkString walk_rt_string_prefix(WalkString value, WalkInt count);
 WalkBool walk_rt_string_contains(WalkString text, WalkString item);
 WalkString walk_rt_string_concat(WalkString left, WalkString right);
 WalkString walk_rt_string_lower(WalkString text);

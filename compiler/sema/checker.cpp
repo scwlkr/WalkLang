@@ -1126,7 +1126,7 @@ private:
             out = ast::basic(ast::TypeKind::Float);
             return true;
         }
-        if (qualified == "string.len" || qualified == "string.at" || qualified == "string.contains" || qualified == "string.concat" ||
+        if (qualified == "string.len" || qualified == "string.at" || qualified == "string.slice" || qualified == "string.prefix" || qualified == "string.contains" || qualified == "string.concat" ||
             qualified == "string.lower" || qualified == "string.split" || qualified == "string.replace") {
             return check_string_builtin(call, qualified, out);
         }
@@ -1249,6 +1249,54 @@ private:
             }
             if (!type_equal(index_type, ast::basic(ast::TypeKind::Int))) {
                 add_error(*diagnostics_, call.args[1]->range, "type error: string.at index must be int, got " + index_type.to_string());
+                return false;
+            }
+            out = ast::basic(ast::TypeKind::String);
+            return true;
+        }
+        if (qualified == "string.slice") {
+            if (!expect_arg_count(call, "string.slice", 3)) {
+                return false;
+            }
+            ast::Type text_type;
+            if (!check_expression(call.args[0], text_type)) {
+                return false;
+            }
+            if (text_type.kind != ast::TypeKind::String) {
+                add_error(*diagnostics_, call.args[0]->range, "type error: string.slice needs string first arg, got " + text_type.to_string());
+                return false;
+            }
+            for (std::size_t index = 1; index < call.args.size(); ++index) {
+                ast::Type arg_type;
+                if (!check_expression(call.args[index], arg_type)) {
+                    return false;
+                }
+                if (!type_equal(arg_type, ast::basic(ast::TypeKind::Int))) {
+                    add_error(*diagnostics_, call.args[index]->range, "type error: arg " + std::to_string(index + 1) + " to string.slice must be int, got " + arg_type.to_string());
+                    return false;
+                }
+            }
+            out = ast::basic(ast::TypeKind::String);
+            return true;
+        }
+        if (qualified == "string.prefix") {
+            if (!expect_arg_count(call, "string.prefix", 2)) {
+                return false;
+            }
+            ast::Type text_type;
+            if (!check_expression(call.args[0], text_type)) {
+                return false;
+            }
+            if (text_type.kind != ast::TypeKind::String) {
+                add_error(*diagnostics_, call.args[0]->range, "type error: string.prefix needs string first arg, got " + text_type.to_string());
+                return false;
+            }
+            ast::Type count_type;
+            if (!check_expression(call.args[1], count_type)) {
+                return false;
+            }
+            if (!type_equal(count_type, ast::basic(ast::TypeKind::Int))) {
+                add_error(*diagnostics_, call.args[1]->range, "type error: string.prefix count must be int, got " + count_type.to_string());
                 return false;
             }
             out = ast::basic(ast::TypeKind::String);

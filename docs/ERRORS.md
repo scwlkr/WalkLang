@@ -144,6 +144,9 @@ walk runtime error: stdin read failed
 walk runtime error: out of memory
 walk runtime error: format failed
 walk runtime error: string index out of range
+walk runtime error: string slice start out of range
+walk runtime error: string slice count out of range
+walk runtime error: string prefix count out of range
 walk runtime error: random.choice on empty array
 ```
 

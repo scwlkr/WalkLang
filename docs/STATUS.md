@@ -1,6 +1,6 @@
 # WalkLang Status
 
-Current WalkLang version: `v6.2.0`.
+Current WalkLang version: `v6.3.0`.
 
 Current architecture direction on 2026-05-26: `docs/SYSTEMS_COMPILER_PORT_PLAN.md`
 is the accepted execution contract for the systems architecture: C++ compiler
@@ -8,16 +8,16 @@ core, C runtime and platform layer, C backend, optional assembly leaf routines,
 and no final Go or JavaScript implementation footprint. Phases 1 through 12 are
 complete. The systems compiler port is complete.
 
-`v6.2.0` keeps the completed C++/C systems compiler release line and adds the
-native numeric/runtime slice requested by downstream WalkLang-native workloads:
-stable `math.exp`, stable `math.log`, stable `random.float`, a documented
-normal-sampling recipe, and `walk run <source.walk> -- <program args>`
-passthrough. The repo-local `walk` binary builds from C++ sources, generated
-programs link with the Walk C runtime, the former Go reference implementation
-and Go module metadata are removed, JavaScript source files are removed, and
-the current language surface is verified against the recorded conformance
-oracle. Feature maturity is described with status labels instead of separate
-version lines.
+`v6.3.0` keeps the completed C++/C systems compiler release line and adds the
+bounded string tooling requested by downstream WalkLang-native text workloads:
+stable `string.slice(text, start, count)` and stable `string.prefix(text,
+count)`. These helpers use explicit namespaced calls, zero-based byte positions,
+bounded copies, and no negative-index shorthand. The repo-local `walk` binary
+builds from C++ sources, generated programs link with the Walk C runtime, the
+former Go reference implementation and Go module metadata are removed,
+JavaScript source files are removed, and the current language surface is
+verified against the recorded conformance oracle. Feature maturity is described
+with status labels instead of separate version lines.
 
 Current feature status:
 
@@ -36,19 +36,44 @@ standard platform
   WalkLang-built tool
 ```
 
-Current release state: `v6.2.0` is the current public release. It proves
+Current release state: `v6.3.0` is the current public release. It proves
 `walk` builds from C++/C, the docs site is static HTML/CSS without JavaScript
 assets, repo-local install/release packaging no longer depends on Go, and the
-PicoNet string/map tooling plus the native numeric helpers work through native
-execution. `walktop` remains under `tools/walktop/` as a real WalkLang project
-and standalone native command.
+PicoNet-driven string/map/numeric tooling works through native execution.
+`walktop` remains under `tools/walktop/` as a real WalkLang project and
+standalone native command.
 
-Conformance state on 2026-05-26: `tests/conformance/` preserves the recorded
+Conformance state on 2026-05-27: `tests/conformance/` preserves the recorded
 oracle and current post-port fixture coverage.
-The manifest covers 20 pass fixtures, 55 fail fixtures, 4 compatibility
+The manifest covers 20 pass fixtures, 60 fail fixtures, 4 compatibility
 fixtures, 12 runtime-module fixtures, 3 generated-C snapshot fixtures, and 4
 `walktop` fixture groups. `make conformance` now builds the active C++/C
 `build/walk` binary and verifies it against those recorded artifacts.
+
+v6.3.0 release verification on 2026-05-27:
+
+```text
+make clean passed
+make walk WALK_VERSION=v6.3.0 passed
+./build/walk version reported v6.3.0
+./build/walk test tests/pass/walk_tests.walk passed
+./build/walk run tests/pass/stdlib.walk printed the new string.slice/string.prefix outputs
+make test WALK_VERSION=v6.3.0 passed
+make conformance WALK_VERSION=v6.3.0 passed with 20 pass fixtures, 60 fail fixtures, 37 native executions, 4 compat fixtures, 12 runtime module fixtures, 3 snapshot fixtures, and 4 walktop fixture groups
+WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported compatibility stress ok
+scripts/build-docs-site.sh passed
+scripts/check-docs-site.sh passed after staging generated docs
+scripts/release.sh v6.3.0 dist/v6.3.0 passed and produced current-host walk, runtime, walktop, and SHA256SUMS artifacts
+shasum -a 256 -c dist/v6.3.0/SHA256SUMS passed for all 3 artifacts when run from dist/v6.3.0 as shasum -a 256 -c SHA256SUMS
+dist/v6.3.0/walk-v6.3.0-darwin-arm64 version reported v6.3.0
+dist/v6.3.0/walktop-v6.3.0-darwin-arm64 passed --once --fixture tools/walktop/testdata/basic
+scripts/install-local.sh v6.3.0 passed, installed walk/runtime/walktop
+walk version reported v6.3.0
+command -v walktop returned /Users/shanewalker/.local/bin/walktop
+NO_COLOR=1 walktop --once --fixture tools/walktop/testdata/basic passed
+installed walk run --warnings=error tests/pass/stdlib.walk printed the new string.slice/string.prefix outputs
+git ls-files '*.go' 'go.mod' 'go.sum' '*.js' returned empty
+```
 
 v6.2.0 release verification on 2026-05-26:
 

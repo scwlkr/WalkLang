@@ -4,6 +4,42 @@
 
 No unreleased changes.
 
+## v6.3.0 - Bounded String Slicing
+
+Date: 2026-05-27
+
+v6.3.0 adds Python-inspired bounded string extraction while keeping WalkLang's
+surface explicit and namespaced. The new helpers are aimed at WalkLang-native
+text workloads such as tokenizers, corpus preprocessing, logs, and generated
+text assembly.
+
+### Added
+
+- Stable `string.slice(text, start, count) -> string` for byte-indexed bounded copies.
+- Stable `string.prefix(text, count) -> string` for capped leading text samples.
+- Conformance coverage for normal, empty, overlong, start-past-end, type-error, and negative-bound cases.
+
+### Notes
+
+- The helpers use zero-based byte positions to match `string.len`, `string.at`, and string indexing.
+- Negative indexes are intentionally not supported; this keeps slicing explicit instead of adding Python-style negative-index magic.
+- Counts past the end return the available text, so callers do not need to pre-check length for bounded snippets.
+
+### Breaking Changes
+
+None.
+
+### Upgrade
+
+Regenerate docs, install locally, and produce release artifacts with:
+
+```bash
+scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/install-local.sh v6.3.0
+scripts/release.sh v6.3.0 dist
+```
+
 ## v6.2.0 - Native Numeric Runtime Helpers
 
 Date: 2026-05-26

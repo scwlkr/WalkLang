@@ -33,6 +33,8 @@ out: string.lower('Hi WALK')
 out: stableParts[0]
 out: stableParts[1]
 out: string.replace('banana', 'na', 'NA')
+out: string.slice('walklang', 4, 99)
+out: string.prefix('walklang', 4)
 out: array.len(nums)
 out: array.len(letters)
 out: array.contains(letters, 'W')

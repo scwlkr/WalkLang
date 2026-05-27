@@ -19,6 +19,8 @@ test: 'stdlib assert stays compatible'
     assert: == parts[0] 'a'
     assert: == parts[1] 'b'
     assert: == string.replace('banana', 'na', 'NA') 'baNANA'
+    assert: == string.slice('walklang', 4, 99) 'lang'
+    assert: == string.prefix('walklang', 4) 'walk'
     assert: array.contains(letters, 'w')
     assert: == random.choice(choices) 'stable'
     assert: == math.exp(0) 1

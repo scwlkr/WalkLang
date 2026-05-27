@@ -143,6 +143,7 @@ var: name = in: &#39;Name? &#39;</code></pre>
 out: nums[0]
 out: &#39;walk&#39;[1]</code></pre>
 <p>String indexing returns a one-character string by zero-based byte index and runtime-stops when the index is out of range.</p>
+<p>Stable string slicing uses named helpers instead of slice punctuation. <code>string.slice(text, start, count)</code> copies at most <code>count</code> bytes from a zero-based byte <code>start</code>. Starts at or past the end return <code>&#39;&#39;</code>; counts past the end return the available suffix. <code>string.prefix(text, count)</code> copies at most the first <code>count</code> bytes. Negative starts or counts runtime-stop.</p>
 <p>Grouping uses parentheses:</p>
 <pre><code class="language-walk">var: x = * (+ 1 2) (- 9 4)</code></pre>
 <p>Numeric operators:</p>
@@ -244,6 +245,8 @@ math.log(number) -&gt; float
 math.pow(number, number) -&gt; float
 string.len(string) -&gt; int
 string.at(string, int) -&gt; string
+string.slice(string, int, int) -&gt; string
+string.prefix(string, int) -&gt; string
 string.contains(string, string) -&gt; bool
 string.concat(string, string) -&gt; string
 string.lower(string) -&gt; string
@@ -290,6 +293,9 @@ walk runtime error: stdin read failed
 walk runtime error: out of memory
 walk runtime error: format failed
 walk runtime error: string index out of range
+walk runtime error: string slice start out of range
+walk runtime error: string slice count out of range
+walk runtime error: string prefix count out of range
 walk runtime error: random.choice on empty array</code></pre>
 <p>Failed assertions and draft recoverable result data are not compiler diagnostics. Draft runtime failures are documented with their draft APIs in <code>docs/STDLIB.md</code>.</p>
 <p>---</p>

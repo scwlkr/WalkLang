@@ -1192,6 +1192,12 @@ private:
         if (call.callee == "string.at") {
             return "walk_rt_string_at(" + args[0] + ", " + args[1] + ")";
         }
+        if (call.callee == "string.slice") {
+            return "walk_rt_string_slice(" + args[0] + ", " + args[1] + ", " + args[2] + ")";
+        }
+        if (call.callee == "string.prefix") {
+            return "walk_rt_string_prefix(" + args[0] + ", " + args[1] + ")";
+        }
         if (call.callee == "string.contains") {
             return "walk_rt_string_contains(" + args[0] + ", " + args[1] + ")";
         }

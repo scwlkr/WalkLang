@@ -130,6 +130,8 @@ out: &#39;the secret word is {secretWordLength} characters long&#39;</code></pre
 <p>Use the <code>string</code> module for common string helpers.</p>
 <pre><code class="language-walk">imp: string
 out: string.contains(&#39;walk&#39;, &#39;al&#39;)
+out: string.slice(&#39;walklang&#39;, 4, 99)
+out: string.prefix(&#39;walklang&#39;, 4)
 out: string.concat(&#39;walk&#39;, &#39;lang&#39;)
 out: string.lower(&#39;Hi WALK&#39;)
 out: string.replace(&#39;banana&#39;, &#39;na&#39;, &#39;NA&#39;)</code></pre>

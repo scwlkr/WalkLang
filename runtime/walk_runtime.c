@@ -112,6 +112,32 @@ WalkString walk_rt_string_at(WalkString value, WalkInt index) {
     return out;
 }
 
+WalkString walk_rt_string_slice(WalkString value, WalkInt start, WalkInt count) {
+    if (value == NULL) { value = ""; }
+    if (start < 0) { walk_rt_panic("string slice start out of range"); }
+    if (count < 0) { walk_rt_panic("string slice count out of range"); }
+    const char *cursor = value;
+    WalkInt skipped = 0;
+    while (*cursor != '\0' && skipped < start) {
+        cursor++;
+        skipped++;
+    }
+    WalkSize out_len = 0;
+    while (out_len < (WalkSize)count && cursor[out_len] != '\0') {
+        out_len++;
+    }
+    char *out = (char *)malloc(out_len + 1);
+    if (out == NULL) { walk_rt_panic("out of memory"); }
+    memcpy(out, cursor, out_len);
+    out[out_len] = '\0';
+    return out;
+}
+
+WalkString walk_rt_string_prefix(WalkString value, WalkInt count) {
+    if (count < 0) { walk_rt_panic("string prefix count out of range"); }
+    return walk_rt_string_slice(value, 0, count);
+}
+
 WalkBool walk_rt_string_contains(WalkString text, WalkString item) {
     if (text == NULL) { text = ""; }
     if (item == NULL) { item = ""; }
