@@ -23,6 +23,7 @@ while: == game true
       var: display = ' '
       var: i = 0
       var: maxWrongGuesses = 6
+      var: wrongGuesses = 0
       var: guess = in: 'input 1 letter: '
       if: != string.len(guess) 1                               
             out: 'guess must be a single letter'
