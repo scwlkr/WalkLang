@@ -50,6 +50,17 @@ fixtures, 12 runtime-module fixtures, 3 generated-C snapshot fixtures, and 4
 `walktop` fixture groups. `make conformance` now builds the active C++/C
 `build/walk` binary and verifies it against those recorded artifacts.
 
+Health check on 2026-05-31: `v6.3.0` remains the current public release and the
+repo-local compiler health is intact. `make test WALK_VERSION=dev-status-check`
+passed, `make conformance WALK_VERSION=dev-status-check` passed with 20 pass
+fixtures, 60 fail fixtures, 37 native executions, 4 compatibility fixtures, 12
+runtime module fixtures, 3 snapshot fixtures, and 4 `walktop` fixture groups,
+`scripts/build-docs-site.sh` passed, `scripts/check-docs-site.sh` passed, and
+`git diff --check` passed. The practical next step is a narrow stability slice:
+choose one user-visible helper or workflow from `docs/ROADMAP.md`, update the
+contract docs first, add positive and negative proof, verify through the public
+compiler, and only then release.
+
 v6.3.0 release verification on 2026-05-27:
 
 ```text
