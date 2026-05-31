@@ -38,11 +38,11 @@ out: add(2, 3)
 
 ## Current Version
 
-WalkLang is currently `v6.3.2`.
+WalkLang is currently `v6.3.3`.
 
-`v6.3.2` keeps the completed C++/C compiler release line and adds stable
-`math.remainder(int, int) -> int`, a small helper surfaced by the TinyChain
-example project. The repo-local `walk` binary is built from C++ sources,
+`v6.3.3` keeps the completed C++/C compiler release line, keeps stable
+`math.remainder(int, int) -> int`, and upgrades TinyChain into a more polished
+terminal showcase. The repo-local `walk` binary is built from C++ sources,
 generated programs link with the Walk C runtime, and features inside a release
 are labeled `stable`, `draft`, `experimental`, or `planned` when their maturity
 matters.
@@ -68,9 +68,10 @@ flow.
   command with deterministic fixture mode and live OS-command mode.
 - Project mode supports `walk init`, `walk.toml`, source/test layout, builds,
   checks, tests, formatting, explicit debug/release build modes, and cleanup.
-- `examples/tinychain/` shows a tested blockchain-style project that also
-  records missing language tools such as real hashing, struct-array append,
-  multiline arrays, and stable persistence.
+- `examples/tinychain/` shows a tested blockchain-style project with a colorful
+  terminal transcript, tamper audit, and recorded missing language tools such
+  as real hashing, struct-array append, multiline arrays, and stable
+  persistence.
 - Static docs and generated API reference output are repo-owned and deployed
   through GitHub Pages; live custom-domain HTTPS state is tracked in
   [STATUS.md](docs/STATUS.md).
@@ -102,6 +103,7 @@ From the repository root, try the TinyChain showcase project:
 cd examples/tinychain
 ../../build/walk test
 ../../build/walk run src/main.walk
+env -u NO_COLOR CLICOLOR_FORCE=1 ../../build/walk run src/main.walk
 ```
 
 ## Installing From Source

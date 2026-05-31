@@ -58,6 +58,9 @@
 <div class="page">
 <article class="doc">
 <h1 id="walklang-migration-guide">WalkLang Migration Guide</h1>
+<h2 id="v6-3-2-to-v6-3-3">v6.3.2 to v6.3.3</h2>
+<p>v6.3.3 is an example and documentation release. There are no language, compiler, runtime, or standard-library migrations from v6.3.2.</p>
+<p>TinyChain&#39;s terminal output is more polished and now uses the draft <code>term</code> module for color when stdout supports ANSI. Redirected output remains plain text, and <code>env -u NO_COLOR CLICOLOR_FORCE=1</code> can force color for scripted previews.</p>
 <h2 id="v6-3-1-to-v6-3-2">v6.3.1 to v6.3.2</h2>
 <p>v6.3.2 adds stable <code>math.remainder(value, divisor) -&gt; int</code>. Existing v6.3.1 source should not need changes.</p>
 <p>New code can replace hand-written positive remainder loops with the standard helper:</p>

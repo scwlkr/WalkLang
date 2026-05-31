@@ -48,6 +48,8 @@ func: toy_hash(height int, previous_hash int, nonce int, payload_score int, summ
     return: + 1000 height_score previous_score nonce_score payload_score summary_score
 func: proof_valid(hash int, difficulty int) bool
     return: == math.remainder(hash, difficulty) 0
+func: proof_report(block Block) string
+    return: 'math.remainder({block.hash}, {block.difficulty}) = {math.remainder(block.hash, block.difficulty)}'
 func: mine_block(height int, previous_hash int, transactions array[Transaction], difficulty int) Block
     var: payload_score = transactions_weight(transactions)
     var: summary = ledger_summary(transactions)
@@ -81,6 +83,7 @@ exp: transactions_weight
 exp: ledger_summary
 exp: toy_hash
 exp: proof_valid
+exp: proof_report
 exp: mine_block
 exp: mine_next
 exp: block_valid

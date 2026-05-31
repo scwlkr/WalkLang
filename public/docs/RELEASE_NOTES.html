@@ -60,6 +60,24 @@
 <h1 id="walklang-release-notes">WalkLang Release Notes</h1>
 <h2 id="unreleased">Unreleased</h2>
 <p>No unreleased changes.</p>
+<h2 id="v6-3-3-tinychain-terminal-showcase">v6.3.3 - TinyChain Terminal Showcase</h2>
+<p>Date: 2026-05-31</p>
+<p>v6.3.3 makes TinyChain a better public example by turning its plain output into a terminal-friendly mining transcript with color, proof reports, and a tamper audit.</p>
+<h3 id="added">Added</h3>
+<ul>
+<li>TinyChain now prints a structured ASCII transcript with block cards, proof details, chain validation, and a tamper check.</li>
+<li>TinyChain uses draft <code>term.color</code> and <code>term.style</code> helpers for terminal color while preserving clean redirected output.</li>
+<li>A tested <code>chain.proof_report(block)</code> helper shows the stable <code>math.remainder</code> proof rule in the demo output.</li>
+<li>TinyChain README instructions now show normal run/test/build commands and <code>env -u NO_COLOR CLICOLOR_FORCE=1</code> for forced-color previews.</li>
+</ul>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<p>None.</p>
+<h3 id="upgrade">Upgrade</h3>
+<p>Regenerate docs, install locally, and produce release artifacts with:</p>
+<pre><code class="language-bash">scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/install-local.sh v6.3.3
+scripts/release.sh v6.3.3 dist</code></pre>
 <h2 id="v6-3-2-stable-remainder-helper">v6.3.2 - Stable Remainder Helper</h2>
 <p>Date: 2026-05-31</p>
 <p>v6.3.2 promotes the TinyChain proof-loop gap into a stable standard-library helper: <code>math.remainder(int, int) -&gt; int</code>.</p>

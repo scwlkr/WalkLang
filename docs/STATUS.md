@@ -1,6 +1,6 @@
 # WalkLang Status
 
-Current WalkLang version: `v6.3.2`.
+Current WalkLang version: `v6.3.3`.
 
 Current architecture direction on 2026-05-26: `docs/SYSTEMS_COMPILER_PORT_PLAN.md`
 is the accepted execution contract for the systems architecture: C++ compiler
@@ -8,17 +8,16 @@ core, C runtime and platform layer, C backend, optional assembly leaf routines,
 and no final Go or JavaScript implementation footprint. Phases 1 through 12 are
 complete. The systems compiler port is complete.
 
-`v6.3.2` keeps the completed C++/C systems compiler release line and adds
-stable `math.remainder(value, divisor) -> int`, the first language gap promoted
-from the TinyChain example project. The helper stays explicit and namespaced
-instead of adding `%` punctuation, requires `int` arguments, runtime-stops on a
-zero divisor, and follows C integer remainder semantics for negative values.
-TinyChain now uses the stable helper in its proof loop. The repo-local `walk`
-binary builds from C++ sources, generated programs link with the Walk C
-runtime, the former Go reference implementation and Go module metadata are
-removed, JavaScript source files are removed, and the current language surface
-is verified against the recorded conformance oracle. Feature maturity is
-described with status labels instead of separate version lines.
+`v6.3.3` keeps the completed C++/C systems compiler release line and the stable
+`math.remainder(value, divisor) -> int` helper added in v6.3.2. This release
+upgrades TinyChain from a plain smoke-test output into a terminal showcase with
+a structured mining transcript, proof reports, draft terminal color/style calls,
+and a visible tamper audit. The repo-local `walk` binary builds from C++
+sources, generated programs link with the Walk C runtime, the former Go
+reference implementation and Go module metadata are removed, JavaScript source
+files are removed, and the current language surface is verified against the
+recorded conformance oracle. Feature maturity is described with status labels
+instead of separate version lines.
 
 Current feature status:
 
@@ -37,7 +36,7 @@ standard platform
   WalkLang-built tool
 ```
 
-Current release state: `v6.3.2` is the current public release. It proves
+Current release state: `v6.3.3` is the current public release. It proves
 `walk` builds from C++/C, the docs site is static HTML/CSS without JavaScript
 assets, repo-local install/release packaging no longer depends on Go, and the
 PicoNet-driven string/map/numeric tooling plus the TinyChain example project
@@ -50,6 +49,34 @@ The manifest covers 20 pass fixtures, 62 fail fixtures, 4 compatibility
 fixtures, 12 runtime-module fixtures, 3 generated-C snapshot fixtures, and 4
 `walktop` fixture groups. `make conformance` now builds the active C++/C
 `build/walk` binary and verifies it against those recorded artifacts.
+
+v6.3.3 release verification on 2026-05-31:
+
+```text
+make clean passed
+make walk WALK_VERSION=v6.3.3 passed
+./build/walk version reported v6.3.3
+examples/tinychain ../../build/walk check --warnings=error passed
+examples/tinychain ../../build/walk test --warnings=error passed with 5 tests
+examples/tinychain ../../build/walk run --warnings=error src/main.walk printed the TinyChain banner, mining transcript, proof reports, and tamper audit
+examples/tinychain env -u NO_COLOR CLICOLOR_FORCE=1 ./build/tinychain emitted ANSI bytes starting with 1b 5b after unsetting NO_COLOR
+examples/tinychain ../../build/walk build --warnings=error passed and produced build/tinychain
+examples/tinychain ./build/tinychain printed the TinyChain banner, mining transcript, proof reports, and tamper audit
+make test WALK_VERSION=v6.3.3 passed
+make conformance WALK_VERSION=v6.3.3 passed with 20 pass fixtures, 62 fail fixtures, 37 native executions, 4 compat fixtures, 12 runtime module fixtures, 3 snapshot fixtures, and 4 walktop fixture groups
+WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported compatibility stress ok
+scripts/build-docs-site.sh passed
+scripts/check-docs-site.sh passed after staging generated docs
+scripts/release.sh v6.3.3 dist/v6.3.3 passed and produced current-host walk, runtime, walktop, and SHA256SUMS artifacts
+shasum -a 256 -c dist/v6.3.3/SHA256SUMS passed for all 3 artifacts when run from dist/v6.3.3 as shasum -a 256 -c SHA256SUMS
+dist/v6.3.3/walk-v6.3.3-darwin-arm64 version reported v6.3.3
+NO_COLOR=1 dist/v6.3.3/walktop-v6.3.3-darwin-arm64 --once --fixture tools/walktop/testdata/basic passed
+scripts/install-local.sh v6.3.3 passed, installed walk/runtime/walktop
+walk version reported v6.3.3
+NO_COLOR=1 walktop --once --fixture tools/walktop/testdata/basic passed
+installed walk run --warnings=error examples/tinychain/src/main.walk printed the TinyChain banner, mining transcript, proof reports, and tamper audit
+env -u NO_COLOR CLICOLOR_FORCE=1 walk run --warnings=error examples/tinychain/src/main.walk emitted ANSI bytes starting with 1b 5b after unsetting NO_COLOR
+```
 
 Health check on 2026-05-31 before the `v6.3.1` example release: `v6.3.0` was
 the current public release and the repo-local compiler health was intact.

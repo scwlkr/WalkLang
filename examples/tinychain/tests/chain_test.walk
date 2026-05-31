@@ -17,6 +17,8 @@ test: 'mining produces a valid block'
     assert: == block.previous_hash 0
     assert: == block.transaction_count 1
     assert: == math.remainder(block.hash, 11) 0
+    assert: string.contains(chain.proof_report(block), 'math.remainder')
+    assert: string.contains(chain.proof_report(block), '= 0')
 test: 'chained blocks validate and broken links fail'
     var: first = [chain.new_transaction('genesis', 'walker', 50, 'initial mint')]
     var: second = [chain.new_transaction('walker', 'tools', 7, 'compiler fuel')]

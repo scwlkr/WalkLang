@@ -103,10 +103,10 @@ walk run examples/hello.walk -- alpha beta
 
 `examples/tinychain/` is a small blockchain-style project with `walk.toml`,
 `src/`, tests, and a local README. It shows structs, arrays of structs, module
-exports, string interpolation, project tests, and a deterministic proof loop.
-It also records useful language gaps exposed by the exercise: real hashing,
-struct-array append, multiline arrays, stable persistence, byte arrays, and
-command arguments.
+exports, string interpolation, draft terminal styling, project tests, a
+deterministic proof loop, and a visible tamper audit. It also records useful
+language gaps exposed by the exercise: real hashing, struct-array append,
+multiline arrays, stable persistence, byte arrays, and command arguments.
 
 Run it from the repository root with:
 
@@ -115,6 +115,7 @@ make walk
 cd examples/tinychain
 ../../build/walk test
 ../../build/walk run src/main.walk
+env -u NO_COLOR CLICOLOR_FORCE=1 ../../build/walk run src/main.walk
 ```
 
 ## Module Search

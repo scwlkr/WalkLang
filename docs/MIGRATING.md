@@ -1,5 +1,15 @@
 # WalkLang Migration Guide
 
+## v6.3.2 to v6.3.3
+
+v6.3.3 is an example and documentation release. There are no language,
+compiler, runtime, or standard-library migrations from v6.3.2.
+
+TinyChain's terminal output is more polished and now uses the draft `term`
+module for color when stdout supports ANSI. Redirected output remains plain
+text, and `env -u NO_COLOR CLICOLOR_FORCE=1` can force color for scripted
+previews.
+
 ## v6.3.1 to v6.3.2
 
 v6.3.2 adds stable `math.remainder(value, divisor) -> int`. Existing v6.3.1

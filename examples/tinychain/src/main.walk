@@ -1,14 +1,74 @@
 imp: array
 imp: chain
+imp: math
+imp: term
 var: genesis = [chain.new_transaction('genesis', 'walker', 50, 'initial mint'), chain.new_transaction('walker', 'tools', 7, 'compiler fuel')]
-var: feature_work = [chain.new_transaction('walker', 'examples', 12, 'tinychain demo'), chain.new_transaction('examples', 'language gaps', 3, 'hash file json bytes')]
+var: feature_work = [chain.new_transaction('walker', 'examples', 12, 'terminal glow'), chain.new_transaction('examples', 'language gaps', 3, 'hash bytes')]
 var: first = chain.mine_block(0, 0, genesis, 11)
 var: second = chain.mine_next(first, feature_work, 11)
 var: blocks = [first, second]
-out: 'TinyChain demo'
-out: 'blocks: {array.len(blocks)}'
+var: tampered = second
+tampered.previous_hash = 123
+var: broken = [first, tampered]
+do: term.style('bold')
+do: term.color('cyan')
+out: '+------------------------------------------------------------+'
+out: '| TINYCHAIN                                                  |'
+out: '| A tiny blockchain mined by WalkLang                        |'
+out: '+------------------------------------------------------------+'
+do: term.reset()
+out: ''
+out: 'network: local demo net'
+out: 'blocks mined: {array.len(blocks)}'
+out: 'difficulty: hash must satisfy math.remainder(hash, 11) == 0'
+out: ''
+do: term.style('bold')
+do: term.color('cyan')
+out: '== mining transcript =='
+do: term.reset()
 for: block in blocks
-    out: 'block {block.height}: prev={block.previous_hash} hash={block.hash} nonce={block.nonce}'
-    out: 'payload: {block.summary}'
-out: 'chain valid: {chain.chain_valid(blocks)}'
-out: 'language gaps exposed: crypto.hash, struct array push, stable json/file persistence, bytes'
+    var: label = 'FEATURE'
+    if: == block.height 0
+        label = 'GENESIS'
+    out: '+------------------------------------------------------------+'
+    do: term.style('bold')
+    do: term.color('green')
+    out: '| block #{block.height} {label} mined'
+    do: term.reset()
+    out: '| prev hash : {block.previous_hash}'
+    out: '| hash      : {block.hash}'
+    out: '| nonce     : {block.nonce}'
+    out: '| proof     : {chain.proof_report(block)}'
+    out: '| proof bar : [###########] remainder {math.remainder(block.hash, block.difficulty)}'
+    out: '| tx count  : {block.transaction_count}'
+    out: '| payload   : {block.summary}'
+out: '+------------------------------------------------------------+'
+out: ''
+do: term.style('bold')
+do: term.color('cyan')
+out: '== chain audit =='
+do: term.reset()
+do: term.style('bold')
+do: term.color('green')
+out: '[pass] linked chain valid: {chain.chain_valid(blocks)}'
+do: term.reset()
+do: term.style('bold')
+do: term.color('yellow')
+out: '[tamper] rewrite block #1 previous_hash -> 123'
+do: term.reset()
+out: '[audit] tampered chain valid: {chain.chain_valid(broken)}'
+out: ''
+do: term.style('bold')
+do: term.color('cyan')
+out: '== useful gaps exposed =='
+do: term.reset()
+out: '[ ] crypto.hash for real hashing'
+out: '[ ] array.push for arrays of structs'
+out: '[ ] multiline array literals for larger ledgers'
+out: '[ ] stable file/json persistence'
+out: '[ ] byte arrays for hash and encoding APIs'
+out: '[ ] command args for difficulty and transactions'
+out: ''
+do: term.style('dim')
+out: 'try: ../../build/walk test && ../../build/walk build && ./build/tinychain'
+do: term.reset()

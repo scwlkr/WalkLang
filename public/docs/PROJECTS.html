@@ -121,12 +121,13 @@ walk fmt examples/hello.walk</code></pre>
 <pre><code class="language-bash">walk run examples/hello.walk -- alpha beta</code></pre>
 <p><code>walk &lt;source.walk&gt;</code> is the shorthand for the same flow and accepts the same <code>--</code> passthrough.</p>
 <h2 id="example-projects">Example Projects</h2>
-<p><code>examples/tinychain/</code> is a small blockchain-style project with <code>walk.toml</code>, <code>src/</code>, tests, and a local README. It shows structs, arrays of structs, module exports, string interpolation, project tests, and a deterministic proof loop. It also records useful language gaps exposed by the exercise: real hashing, struct-array append, multiline arrays, stable persistence, byte arrays, and command arguments.</p>
+<p><code>examples/tinychain/</code> is a small blockchain-style project with <code>walk.toml</code>, <code>src/</code>, tests, and a local README. It shows structs, arrays of structs, module exports, string interpolation, draft terminal styling, project tests, a deterministic proof loop, and a visible tamper audit. It also records useful language gaps exposed by the exercise: real hashing, struct-array append, multiline arrays, stable persistence, byte arrays, and command arguments.</p>
 <p>Run it from the repository root with:</p>
 <pre><code class="language-bash">make walk
 cd examples/tinychain
 ../../build/walk test
-../../build/walk run src/main.walk</code></pre>
+../../build/walk run src/main.walk
+env -u NO_COLOR CLICOLOR_FORCE=1 ../../build/walk run src/main.walk</code></pre>
 <h2 id="module-search">Module Search</h2>
 <p>Project tests can import modules from <code>src/</code>.</p>
 <pre><code class="language-walk">imp: math_extra

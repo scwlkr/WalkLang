@@ -8,7 +8,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     env:
-      WALK_RELEASE_VERSION: v6.3.2
+      WALK_RELEASE_VERSION: v6.3.3
     steps:
       - uses: actions/checkout@v6
       - run: make clean

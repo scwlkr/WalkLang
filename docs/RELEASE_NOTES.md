@@ -4,6 +4,36 @@
 
 No unreleased changes.
 
+## v6.3.3 - TinyChain Terminal Showcase
+
+Date: 2026-05-31
+
+v6.3.3 makes TinyChain a better public example by turning its plain output into
+a terminal-friendly mining transcript with color, proof reports, and a tamper
+audit.
+
+### Added
+
+- TinyChain now prints a structured ASCII transcript with block cards, proof details, chain validation, and a tamper check.
+- TinyChain uses draft `term.color` and `term.style` helpers for terminal color while preserving clean redirected output.
+- A tested `chain.proof_report(block)` helper shows the stable `math.remainder` proof rule in the demo output.
+- TinyChain README instructions now show normal run/test/build commands and `env -u NO_COLOR CLICOLOR_FORCE=1` for forced-color previews.
+
+### Breaking Changes
+
+None.
+
+### Upgrade
+
+Regenerate docs, install locally, and produce release artifacts with:
+
+```bash
+scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/install-local.sh v6.3.3
+scripts/release.sh v6.3.3 dist
+```
+
 ## v6.3.2 - Stable Remainder Helper
 
 Date: 2026-05-31

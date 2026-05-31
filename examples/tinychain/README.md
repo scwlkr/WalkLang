@@ -18,11 +18,36 @@ From this directory:
 ./build/tinychain
 ```
 
+For the full color terminal showcase, run it in a real terminal or force ANSI
+color for a scripted preview. `NO_COLOR` intentionally disables color, so unset
+it when you want a forced-color capture:
+
+```bash
+env -u NO_COLOR CLICOLOR_FORCE=1 ../../build/walk run src/main.walk
+```
+
 Or from the repository root:
 
 ```bash
 build/walk run examples/tinychain/src/main.walk
 cd examples/tinychain && ../../build/walk test
+```
+
+Expected shape:
+
+```text
++------------------------------------------------------------+
+| TINYCHAIN                                                  |
+| A tiny blockchain mined by WalkLang                        |
++------------------------------------------------------------+
+network: local demo net
+blocks mined: 2
+difficulty: hash must satisfy math.remainder(hash, 11) == 0
+...
+== chain audit ==
+[pass] linked chain valid: true
+[tamper] rewrite block #1 previous_hash -> 123
+[audit] tampered chain valid: false
 ```
 
 ## What It Shows
@@ -32,6 +57,8 @@ cd examples/tinychain && ../../build/walk test
 - Module exports through `chain.walk`.
 - String interpolation and string helpers.
 - A deterministic mining loop with `while:`, `for:`, and early `return:`.
+- Draft terminal styling through `term.color` and `term.style`, with clean
+  redirected output.
 - Project mode with `walk.toml`, `src/`, and `tests/`.
 
 ## Language Gaps Exposed
