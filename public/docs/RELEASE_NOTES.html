@@ -60,6 +60,32 @@
 <h1 id="walklang-release-notes">WalkLang Release Notes</h1>
 <h2 id="unreleased">Unreleased</h2>
 <p>No unreleased changes.</p>
+<h2 id="v6-3-1-tinychain-example-project">v6.3.1 - TinyChain Example Project</h2>
+<p>Date: 2026-05-31</p>
+<p>v6.3.1 adds TinyChain, a small blockchain-style WalkLang project that shows the language building a real multi-file example with tests while documenting the next useful language tools it exposes.</p>
+<h3 id="added">Added</h3>
+<ul>
+<li><code>examples/tinychain/</code>, a project-mode demo with <code>walk.toml</code>, a <code>chain</code> module,</li>
+<p>a runnable <code>main.walk</code>, project tests, and a local README.</p>
+<li>A toy blockchain ledger with <code>Transaction</code> and <code>Block</code> structs, arrays of</li>
+<p>structs, deterministic mining, chain validation, and tamper-detection tests.</p>
+<li>Documentation for gaps surfaced by the demo: real hashing, remainder,</li>
+<p>struct-array append, multiline arrays, stable persistence, byte arrays, and command arguments.</p>
+</ul>
+<h3 id="notes">Notes</h3>
+<ul>
+<li>TinyChain is intentionally not a secure blockchain. It uses a deterministic</li>
+<p>toy hash so the example remains small and readable as WalkLang source.</p>
+<li>No compiler or stable language behavior changed in this release.</li>
+</ul>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<p>None.</p>
+<h3 id="upgrade">Upgrade</h3>
+<p>Regenerate docs, install locally, and produce release artifacts with:</p>
+<pre><code class="language-bash">scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/install-local.sh v6.3.1
+scripts/release.sh v6.3.1 dist</code></pre>
 <h2 id="v6-3-0-bounded-string-slicing">v6.3.0 - Bounded String Slicing</h2>
 <p>Date: 2026-05-27</p>
 <p>v6.3.0 adds Python-inspired bounded string extraction while keeping WalkLang&#39;s surface explicit and namespaced. The new helpers are aimed at WalkLang-native text workloads such as tokenizers, corpus preprocessing, logs, and generated text assembly.</p>

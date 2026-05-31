@@ -4,6 +4,45 @@
 
 No unreleased changes.
 
+## v6.3.1 - TinyChain Example Project
+
+Date: 2026-05-31
+
+v6.3.1 adds TinyChain, a small blockchain-style WalkLang project that shows the
+language building a real multi-file example with tests while documenting the
+next useful language tools it exposes.
+
+### Added
+
+- `examples/tinychain/`, a project-mode demo with `walk.toml`, a `chain` module,
+  a runnable `main.walk`, project tests, and a local README.
+- A toy blockchain ledger with `Transaction` and `Block` structs, arrays of
+  structs, deterministic mining, chain validation, and tamper-detection tests.
+- Documentation for gaps surfaced by the demo: real hashing, remainder,
+  struct-array append, multiline arrays, stable persistence, byte arrays, and
+  command arguments.
+
+### Notes
+
+- TinyChain is intentionally not a secure blockchain. It uses a deterministic
+  toy hash so the example remains small and readable as WalkLang source.
+- No compiler or stable language behavior changed in this release.
+
+### Breaking Changes
+
+None.
+
+### Upgrade
+
+Regenerate docs, install locally, and produce release artifacts with:
+
+```bash
+scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/install-local.sh v6.3.1
+scripts/release.sh v6.3.1 dist
+```
+
 ## v6.3.0 - Bounded String Slicing
 
 Date: 2026-05-27

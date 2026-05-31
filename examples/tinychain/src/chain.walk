@@ -1,0 +1,92 @@
+imp: array
+imp: string
+struct: Transaction
+    from string
+    to string
+    amount int
+    memo string
+struct: Block
+    height int
+    previous_hash int
+    nonce int
+    hash int
+    difficulty int
+    transaction_count int
+    payload_score int
+    summary string
+func: new_transaction(from string, to string, amount int, memo string) Transaction
+    return: Transaction(from, to, amount, memo)
+func: remainder(value int, divisor int) int
+    var: result = value
+    while: >= result divisor
+        result = - result divisor
+    return: result
+func: transaction_weight(tx Transaction) int
+    var: names = + string.len(tx.from) string.len(tx.to)
+    var: memo = string.len(tx.memo)
+    var: amount_score = * tx.amount 17
+    return: + names memo amount_score
+func: transaction_summary(tx Transaction) string
+    return: '{tx.from}->{tx.to}:{tx.amount}:{string.prefix(tx.memo, 16)}'
+func: transactions_weight(transactions array[Transaction]) int
+    var: total = 0
+    for: tx in transactions
+        total = + total transaction_weight(tx)
+    return: total
+func: ledger_summary(transactions array[Transaction]) string
+    var: summary = ''
+    var: first = true
+    for: tx in transactions
+        var: part = transaction_summary(tx)
+        if: first
+            summary = part
+            first = false
+        else:
+            summary = string.concat(string.concat(summary, ' | '), part)
+    return: summary
+func: toy_hash(height int, previous_hash int, nonce int, payload_score int, summary string) int
+    var: height_score = * height 103
+    var: previous_score = * previous_hash 31
+    var: nonce_score = * nonce 17
+    var: summary_score = * string.len(summary) 19
+    return: + 1000 height_score previous_score nonce_score payload_score summary_score
+func: proof_valid(hash int, difficulty int) bool
+    return: == remainder(hash, difficulty) 0
+func: mine_block(height int, previous_hash int, transactions array[Transaction], difficulty int) Block
+    var: payload_score = transactions_weight(transactions)
+    var: summary = ledger_summary(transactions)
+    var: nonce = 0
+    var: hash = toy_hash(height, previous_hash, nonce, payload_score, summary)
+    while: not proof_valid(hash, difficulty)
+        nonce = + nonce 1
+        hash = toy_hash(height, previous_hash, nonce, payload_score, summary)
+    return: Block(height, previous_hash, nonce, hash, difficulty, array.len(transactions), payload_score, summary)
+func: mine_next(previous Block, transactions array[Transaction], difficulty int) Block
+    var: next_height = + previous.height 1
+    return: mine_block(next_height, previous.hash, transactions, difficulty)
+func: block_valid(block Block) bool
+    var: expected = toy_hash(block.height, block.previous_hash, block.nonce, block.payload_score, block.summary)
+    if: != block.hash expected
+        return: false
+    return: proof_valid(block.hash, block.difficulty)
+func: chain_valid(chain array[Block]) bool
+    var: expected_previous = 0
+    for: block in chain
+        if: != block.previous_hash expected_previous
+            return: false
+        if: not block_valid(block)
+            return: false
+        expected_previous = block.hash
+    return: true
+exp: new_transaction
+exp: remainder
+exp: transaction_weight
+exp: transaction_summary
+exp: transactions_weight
+exp: ledger_summary
+exp: toy_hash
+exp: proof_valid
+exp: mine_block
+exp: mine_next
+exp: block_valid
+exp: chain_valid

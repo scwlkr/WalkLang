@@ -38,10 +38,10 @@ out: add(2, 3)
 
 ## Current Version
 
-WalkLang is currently `v6.3.0`.
+WalkLang is currently `v6.3.1`.
 
-`v6.3.0` adds bounded `string.slice` and `string.prefix` helpers for native
-text workloads while keeping string extraction explicit and namespaced. The
+`v6.3.1` keeps the completed C++/C compiler release line and adds TinyChain, a
+small blockchain-style example project under `examples/tinychain/`. The
 repo-local `walk` binary is built from C++ sources, generated programs link
 with the Walk C runtime, and features inside a release are labeled `stable`,
 `draft`, `experimental`, or `planned` when their maturity matters.
@@ -67,6 +67,9 @@ flow.
   command with deterministic fixture mode and live OS-command mode.
 - Project mode supports `walk init`, `walk.toml`, source/test layout, builds,
   checks, tests, formatting, explicit debug/release build modes, and cleanup.
+- `examples/tinychain/` shows a tested blockchain-style project that also
+  records missing language tools such as real hashing, remainder, struct-array
+  append, multiline arrays, and stable persistence.
 - Static docs and generated API reference output are repo-owned and deployed
   through GitHub Pages; live custom-domain HTTPS state is tracked in
   [STATUS.md](docs/STATUS.md).
@@ -90,6 +93,14 @@ walk check
 walk build
 ./build/hello
 walk test
+```
+
+From the repository root, try the TinyChain showcase project:
+
+```bash
+cd examples/tinychain
+../../build/walk test
+../../build/walk run src/main.walk
 ```
 
 ## Installing From Source

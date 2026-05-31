@@ -10,6 +10,7 @@ these docs explain how to install, learn, use, verify, and evolve WalkLang.
 
 - [Install WalkLang](INSTALL.md)
 - [Build projects](PROJECTS.md)
+- [Explore examples](https://github.com/scwlkr/WalkLang/tree/main/examples)
 - [Learn the syntax](SYNTAX.md)
 - [Read the language specification](SPEC.md)
 
@@ -33,15 +34,15 @@ these docs explain how to install, learn, use, verify, and evolve WalkLang.
 
 ## Current Version
 
-WalkLang is currently `v5.14.1`. That single project version covers the
+WalkLang is currently `v6.3.1`. That single project version covers the
 compiler, tooling, backend, release artifacts, docs, and implemented language
 surface.
 
-Features inside `v5.14.1` use maturity labels:
+Features inside `v6.3.1` use maturity labels:
 
 - stable: core syntax, diagnostics, modules, tests, and standard-library helpers
 - draft: `do:`, `defer:`, `io`, `parse`, `process`, `file`, `dir`, `path`,
-  `json`, `term`, `http`, and `html`
+  `json`, `map`, `term`, `http`, and `html`
 - experimental: structs, methods, and simple generic functions
 - standard platform: `walktop` is the first official standalone
   WalkLang-built CLI tool

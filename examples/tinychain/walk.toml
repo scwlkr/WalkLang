@@ -1,0 +1,7 @@
+name = "tinychain"
+version = "0.1.0"
+entry = "src/main.walk"
+
+[build]
+output = "build/tinychain"
+mode = "debug"

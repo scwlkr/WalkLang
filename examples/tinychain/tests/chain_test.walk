@@ -1,0 +1,40 @@
+imp: array
+imp: chain
+imp: string
+test: 'remainder helper behaves like modulo for positive values'
+    assert: == chain.remainder(35, 11) 2
+    assert: == chain.remainder(22, 11) 0
+test: 'transactions produce deterministic payload data'
+    var: tx = chain.new_transaction('ada', 'ben', 12, 'coffee beans')
+    assert: == chain.transaction_weight(tx) 222
+    assert: == chain.transaction_summary(tx) 'ada->ben:12:coffee beans'
+test: 'mining produces a valid block'
+    var: txs = [chain.new_transaction('ada', 'ben', 12, 'coffee beans')]
+    var: block = chain.mine_block(0, 0, txs, 11)
+    assert: chain.block_valid(block)
+    assert: == block.height 0
+    assert: == block.previous_hash 0
+    assert: == block.transaction_count 1
+    assert: == chain.remainder(block.hash, 11) 0
+test: 'chained blocks validate and broken links fail'
+    var: first = [chain.new_transaction('genesis', 'walker', 50, 'initial mint')]
+    var: second = [chain.new_transaction('walker', 'tools', 7, 'compiler fuel')]
+    var: block0 = chain.mine_block(0, 0, first, 11)
+    var: block1 = chain.mine_next(block0, second, 11)
+    var: blocks = [block0, block1]
+    assert: chain.chain_valid(blocks)
+    assert: == blocks[1].previous_hash blocks[0].hash
+    var: broken = blocks[1]
+    broken.previous_hash = 123
+    var: broken_chain = [blocks[0], broken]
+    assert: not chain.chain_valid(broken_chain)
+test: 'payload changes alter the proof inputs'
+    var: coffee = [chain.new_transaction('ada', 'ben', 10, 'coffee')]
+    var: tea = [chain.new_transaction('ada', 'ben', 11, 'tea')]
+    var: coffee_block = chain.mine_block(0, 0, coffee, 11)
+    var: tea_block = chain.mine_block(0, 0, tea, 11)
+    assert: != coffee_block.payload_score tea_block.payload_score
+    assert: string.contains(coffee_block.summary, 'coffee')
+    assert: string.contains(tea_block.summary, 'tea')
+    assert: chain.block_valid(coffee_block)
+    assert: chain.block_valid(tea_block)
