@@ -1,7 +1,7 @@
 imp: array
 imp: chain
 var: genesis = [chain.new_transaction('genesis', 'walker', 50, 'initial mint'), chain.new_transaction('walker', 'tools', 7, 'compiler fuel')]
-var: feature_work = [chain.new_transaction('walker', 'examples', 12, 'tinychain demo'), chain.new_transaction('examples', 'language gaps', 3, 'hash modulo file json')]
+var: feature_work = [chain.new_transaction('walker', 'examples', 12, 'tinychain demo'), chain.new_transaction('examples', 'language gaps', 3, 'hash file json bytes')]
 var: first = chain.mine_block(0, 0, genesis, 11)
 var: second = chain.mine_next(first, feature_work, 11)
 var: blocks = [first, second]
@@ -11,4 +11,4 @@ for: block in blocks
     out: 'block {block.height}: prev={block.previous_hash} hash={block.hash} nonce={block.nonce}'
     out: 'payload: {block.summary}'
 out: 'chain valid: {chain.chain_valid(blocks)}'
-out: 'language gaps exposed: crypto.hash, %, struct array push, stable json/file persistence, bytes'
+out: 'language gaps exposed: crypto.hash, struct array push, stable json/file persistence, bytes'

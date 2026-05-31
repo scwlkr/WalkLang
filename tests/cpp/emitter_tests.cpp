@@ -202,6 +202,8 @@ void test_numeric_ml_helpers_build_and_run() {
         "imp: random\n"
         "out: math.exp(0)\n"
         "out: math.log(1)\n"
+        "out: math.remainder(35, 11)\n"
+        "out: math.remainder(-35, 11)\n"
         "out: random.float(4, 4)\n"
         "out: random.float(5, 2)\n");
     const std::filesystem::path dir = std::filesystem::path("build") / "cpp-tests" / "numeric-ml-helpers";
@@ -215,7 +217,7 @@ void test_numeric_ml_helpers_build_and_run() {
         fail("numeric ml helper run", "program failed");
         return;
     }
-    expect_eq("numeric ml helper output", read_file(out_path), "1\n0\n4\n5\n");
+    expect_eq("numeric ml helper output", read_file(out_path), "1\n0\n2\n-2\n4\n5\n");
 }
 
 void test_map_string_arrays_build_and_run() {

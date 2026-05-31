@@ -98,6 +98,13 @@ out: math.log(1)</code></pre>
 <p>Accepts <code>int</code> or <code>float</code> arguments and returns the native C <code>pow</code> result as <code>float</code>. Valid numeric arguments have no WalkLang-defined runtime failure.</p>
 <pre><code class="language-walk">imp: math
 out: math.pow(2, 3)</code></pre>
+<h3 id="math-remainder-int-int-int">math.remainder(int, int) -&gt; int</h3>
+<p>Stability: stable. Effect status: pure expression.</p>
+<p>Returns the integer remainder of <code>value / divisor</code>. The divisor must not be zero. If <code>divisor</code> is zero, the program runtime-stops with <code>walk runtime error: math.remainder divisor is zero</code>.</p>
+<p><code>math.remainder</code> follows the native C integer remainder rule used by WalkLang&#39;s C backend: division truncates toward zero, and the remainder has the same sign as <code>value</code>.</p>
+<pre><code class="language-walk">imp: math
+out: math.remainder(35, 11)
+out: math.remainder(-35, 11)</code></pre>
 <p>---</p>
 <h2 id="string">string</h2>
 <h3 id="string-len-string-int">string.len(string) -&gt; int</h3>

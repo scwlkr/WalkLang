@@ -113,6 +113,7 @@ void walk_rt_init(int argc, char **argv);
 void walk_rt_panic(const char *message);
 void *walk_rt_alloc_array(WalkSize len, size_t item_size);
 
+WalkInt walk_rt_math_remainder(WalkInt value, WalkInt divisor);
 WalkInt walk_rt_random_int(WalkInt min, WalkInt max);
 WalkFloat walk_rt_random_float(WalkFloat min, WalkFloat max);
 WalkInt walk_rt_array_choice_int(WalkArrayInt array);

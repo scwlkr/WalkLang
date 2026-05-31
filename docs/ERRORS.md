@@ -147,6 +147,7 @@ walk runtime error: string index out of range
 walk runtime error: string slice start out of range
 walk runtime error: string slice count out of range
 walk runtime error: string prefix count out of range
+walk runtime error: math.remainder divisor is zero
 walk runtime error: random.choice on empty array
 ```
 

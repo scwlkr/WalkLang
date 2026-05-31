@@ -100,6 +100,24 @@ imp: math
 out: math.pow(2, 3)
 ```
 
+### math.remainder(int, int) -> int
+
+Stability: stable. Effect status: pure expression.
+
+Returns the integer remainder of `value / divisor`. The divisor must not be
+zero. If `divisor` is zero, the program runtime-stops with `walk runtime error:
+math.remainder divisor is zero`.
+
+`math.remainder` follows the native C integer remainder rule used by WalkLang's
+C backend: division truncates toward zero, and the remainder has the same sign
+as `value`.
+
+```walk
+imp: math
+out: math.remainder(35, 11)
+out: math.remainder(-35, 11)
+```
+
 ---
 
 ## string

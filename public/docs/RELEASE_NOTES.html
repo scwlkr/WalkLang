@@ -60,6 +60,31 @@
 <h1 id="walklang-release-notes">WalkLang Release Notes</h1>
 <h2 id="unreleased">Unreleased</h2>
 <p>No unreleased changes.</p>
+<h2 id="v6-3-2-stable-remainder-helper">v6.3.2 - Stable Remainder Helper</h2>
+<p>Date: 2026-05-31</p>
+<p>v6.3.2 promotes the TinyChain proof-loop gap into a stable standard-library helper: <code>math.remainder(int, int) -&gt; int</code>.</p>
+<h3 id="added">Added</h3>
+<ul>
+<li>Stable <code>math.remainder(value, divisor) -&gt; int</code> for integer remainder checks.</li>
+<li>Compile-time diagnostics for non-<code>int</code> arguments.</li>
+<li>Runtime failure coverage for divisor zero.</li>
+<li>TinyChain now uses <code>math.remainder</code> instead of a hand-written loop.</li>
+</ul>
+<h3 id="notes">Notes</h3>
+<ul>
+<li><code>math.remainder</code> is an explicit namespaced helper rather than a <code>%</code> operator,</li>
+<p>matching WalkLang&#39;s preference for small, readable library APIs before adding new punctuation.</p>
+<li>The result follows C integer remainder semantics: division truncates toward</li>
+<p>zero, and the remainder has the same sign as <code>value</code>.</p>
+</ul>
+<h3 id="breaking-changes">Breaking Changes</h3>
+<p>None.</p>
+<h3 id="upgrade">Upgrade</h3>
+<p>Regenerate docs, install locally, and produce release artifacts with:</p>
+<pre><code class="language-bash">scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/install-local.sh v6.3.2
+scripts/release.sh v6.3.2 dist</code></pre>
 <h2 id="v6-3-1-tinychain-example-project">v6.3.1 - TinyChain Example Project</h2>
 <p>Date: 2026-05-31</p>
 <p>v6.3.1 adds TinyChain, a small blockchain-style WalkLang project that shows the language building a real multi-file example with tests while documenting the next useful language tools it exposes.</p>

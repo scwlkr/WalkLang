@@ -93,9 +93,11 @@ void test_accepts_numeric_ml_helpers() {
         "imp: random\n"
         "var: e = math.exp(0)\n"
         "var: l = math.log(1)\n"
+        "var: r = math.remainder(35, 11)\n"
         "var: f = random.float(0, 1)\n"
         "out: e\n"
         "out: l\n"
+        "out: r\n"
         "out: f\n");
     expect_true("numeric ml helpers ok", result.ok(), result.diagnostics.format());
 }
@@ -121,6 +123,15 @@ void test_rejects_invalid_numeric_ml_helper_args() {
         "out: math.log('x')\n");
     expect_true("bad math log rejects", !log_result.ok(), "bad math log unexpectedly passed");
     expect_true("bad math log diagnostic", log_result.diagnostics.format().find("type error: math.log needs numeric arg, got string") != std::string::npos, "missing math.log diagnostic");
+
+    walk::sema::CheckResult remainder_result = check_text(
+        "imp: math\n"
+        "out: math.remainder(9.5, 2)\n");
+    expect_true("bad math remainder rejects", !remainder_result.ok(), "bad math remainder unexpectedly passed");
+    expect_true(
+        "bad math remainder diagnostic",
+        remainder_result.diagnostics.format().find("type error: math.remainder args must be int, got float") != std::string::npos,
+        "missing math.remainder diagnostic");
 
     walk::sema::CheckResult float_result = check_text(
         "imp: random\n"

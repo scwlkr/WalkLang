@@ -45,6 +45,8 @@ fail/bad_json_parse_arg	fail	check	tests/fail/bad_json_parse_arg.walk	.	-	no
 fail/bad_json_write_as_expression	fail	check	tests/fail/bad_json_write_as_expression.walk	.	-	no
 fail/bad_math_exp_arg	fail	check	tests/fail/bad_math_exp_arg.walk	.	-	no
 fail/bad_math_log_arg	fail	check	tests/fail/bad_math_log_arg.walk	.	-	no
+fail/bad_math_remainder_arg	fail	check	tests/fail/bad_math_remainder_arg.walk	.	-	no
+fail/bad_math_remainder_zero	fail	run	tests/fail/bad_math_remainder_zero.walk	.	-	no
 fail/bad_method_arg	fail	check	tests/fail/bad_method_arg.walk	.	-	no
 fail/bad_method_receiver	fail	check	tests/fail/bad_method_receiver.walk	.	-	no
 fail/bad_parse_int_arg	fail	check	tests/fail/bad_parse_int_arg.walk	.	-	no

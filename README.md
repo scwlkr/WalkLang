@@ -38,13 +38,14 @@ out: add(2, 3)
 
 ## Current Version
 
-WalkLang is currently `v6.3.1`.
+WalkLang is currently `v6.3.2`.
 
-`v6.3.1` keeps the completed C++/C compiler release line and adds TinyChain, a
-small blockchain-style example project under `examples/tinychain/`. The
-repo-local `walk` binary is built from C++ sources, generated programs link
-with the Walk C runtime, and features inside a release are labeled `stable`,
-`draft`, `experimental`, or `planned` when their maturity matters.
+`v6.3.2` keeps the completed C++/C compiler release line and adds stable
+`math.remainder(int, int) -> int`, a small helper surfaced by the TinyChain
+example project. The repo-local `walk` binary is built from C++ sources,
+generated programs link with the Walk C runtime, and features inside a release
+are labeled `stable`, `draft`, `experimental`, or `planned` when their maturity
+matters.
 
 The first CLI standard-platform slice remains `walktop`, an official
 standalone WalkLang-built system monitor installed by the normal local install
@@ -68,8 +69,8 @@ flow.
 - Project mode supports `walk init`, `walk.toml`, source/test layout, builds,
   checks, tests, formatting, explicit debug/release build modes, and cleanup.
 - `examples/tinychain/` shows a tested blockchain-style project that also
-  records missing language tools such as real hashing, remainder, struct-array
-  append, multiline arrays, and stable persistence.
+  records missing language tools such as real hashing, struct-array append,
+  multiline arrays, and stable persistence.
 - Static docs and generated API reference output are repo-owned and deployed
   through GitHub Pages; live custom-domain HTTPS state is tracked in
   [STATUS.md](docs/STATUS.md).

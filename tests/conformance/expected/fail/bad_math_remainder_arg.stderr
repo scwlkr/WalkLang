@@ -1,0 +1,4 @@
+tests/fail/bad_math_remainder_arg.walk:2:21: type error: math.remainder args must be int, got float
+
+out: math.remainder(9.5, 2)
+                    ^

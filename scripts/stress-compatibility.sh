@@ -73,6 +73,10 @@ expect_output "$work_dir/stdlib" "3
 8
 1
 0
+2
+0
+-2
+2
 4
 a
 l

@@ -1,0 +1,2 @@
+imp: math
+out: math.remainder(9, 0)

@@ -105,8 +105,8 @@ walk run examples/hello.walk -- alpha beta
 `src/`, tests, and a local README. It shows structs, arrays of structs, module
 exports, string interpolation, project tests, and a deterministic proof loop.
 It also records useful language gaps exposed by the exercise: real hashing,
-remainder, struct-array append, multiline arrays, stable persistence, byte
-arrays, and command arguments.
+struct-array append, multiline arrays, stable persistence, byte arrays, and
+command arguments.
 
 Run it from the repository root with:
 

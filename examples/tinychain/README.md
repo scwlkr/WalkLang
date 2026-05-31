@@ -37,8 +37,6 @@ cd examples/tinychain && ../../build/walk test
 ## Language Gaps Exposed
 
 - A real `crypto.hash` module would remove the demo's toy hash.
-- A `%` or `math.remainder` helper would remove the hand-written
-  `remainder(value, divisor)` loop.
 - `array.push` currently supports stable primitive arrays, not arrays of
   structs, so the demo builds a fixed block array after mining.
 - Multiline array literals would make larger example data sets easier to read.

@@ -58,6 +58,12 @@
 <div class="page">
 <article class="doc">
 <h1 id="walklang-migration-guide">WalkLang Migration Guide</h1>
+<h2 id="v6-3-1-to-v6-3-2">v6.3.1 to v6.3.2</h2>
+<p>v6.3.2 adds stable <code>math.remainder(value, divisor) -&gt; int</code>. Existing v6.3.1 source should not need changes.</p>
+<p>New code can replace hand-written positive remainder loops with the standard helper:</p>
+<pre><code class="language-walk">imp: math
+out: math.remainder(35, 11)</code></pre>
+<p><code>math.remainder</code> requires <code>int</code> arguments and runtime-stops if the divisor is zero. Negative values follow C remainder semantics: division truncates toward zero, and the result has the same sign as <code>value</code>.</p>
 <h2 id="v1-8-to-v1-9">v1.8 to v1.9</h2>
 <p>v1.9 adds string interpolation for simple display text. Existing v1.8 source should not need changes.</p>
 <p>New code can put display expressions inside single-quoted strings:</p>

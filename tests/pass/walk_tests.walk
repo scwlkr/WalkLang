@@ -37,6 +37,10 @@ test: 'stdlib works'
     assert: == math.exp(0) 1
     assert: == math.log(1) 0
     assert: == math.pow(2, 3) 8
+    assert: == math.remainder(35, 11) 2
+    assert: == math.remainder(22, 11) 0
+    assert: == math.remainder(-35, 11) -2
+    assert: == math.remainder(35, -11) 2
     assert: == random.float(4, 4) 4
     assert: == random.float(5, 2) 5
     assert: testing.assert(== fixed_random 2)

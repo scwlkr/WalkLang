@@ -25,6 +25,8 @@ test: 'stdlib assert stays compatible'
     assert: == random.choice(choices) 'stable'
     assert: == math.exp(0) 1
     assert: == math.log(1) 0
+    assert: == math.remainder(35, 11) 2
+    assert: == math.remainder(-35, 11) -2
     assert: == random.float(4, 4) 4
     assert: == random.float(5, 2) 5
     assert: == 'length {wordLength}' 'length 4'

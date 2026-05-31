@@ -1,9 +1,10 @@
 imp: array
 imp: chain
+imp: math
 imp: string
-test: 'remainder helper behaves like modulo for positive values'
-    assert: == chain.remainder(35, 11) 2
-    assert: == chain.remainder(22, 11) 0
+test: 'math.remainder supports proof checks'
+    assert: == math.remainder(35, 11) 2
+    assert: == math.remainder(22, 11) 0
 test: 'transactions produce deterministic payload data'
     var: tx = chain.new_transaction('ada', 'ben', 12, 'coffee beans')
     assert: == chain.transaction_weight(tx) 222
@@ -15,7 +16,7 @@ test: 'mining produces a valid block'
     assert: == block.height 0
     assert: == block.previous_hash 0
     assert: == block.transaction_count 1
-    assert: == chain.remainder(block.hash, 11) 0
+    assert: == math.remainder(block.hash, 11) 0
 test: 'chained blocks validate and broken links fail'
     var: first = [chain.new_transaction('genesis', 'walker', 50, 'initial mint')]
     var: second = [chain.new_transaction('walker', 'tools', 7, 'compiler fuel')]

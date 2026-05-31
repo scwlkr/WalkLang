@@ -1,4 +1,5 @@
 imp: array
+imp: math
 imp: string
 struct: Transaction
     from string
@@ -16,11 +17,6 @@ struct: Block
     summary string
 func: new_transaction(from string, to string, amount int, memo string) Transaction
     return: Transaction(from, to, amount, memo)
-func: remainder(value int, divisor int) int
-    var: result = value
-    while: >= result divisor
-        result = - result divisor
-    return: result
 func: transaction_weight(tx Transaction) int
     var: names = + string.len(tx.from) string.len(tx.to)
     var: memo = string.len(tx.memo)
@@ -51,7 +47,7 @@ func: toy_hash(height int, previous_hash int, nonce int, payload_score int, summ
     var: summary_score = * string.len(summary) 19
     return: + 1000 height_score previous_score nonce_score payload_score summary_score
 func: proof_valid(hash int, difficulty int) bool
-    return: == remainder(hash, difficulty) 0
+    return: == math.remainder(hash, difficulty) 0
 func: mine_block(height int, previous_hash int, transactions array[Transaction], difficulty int) Block
     var: payload_score = transactions_weight(transactions)
     var: summary = ledger_summary(transactions)
@@ -79,7 +75,6 @@ func: chain_valid(chain array[Block]) bool
         expected_previous = block.hash
     return: true
 exp: new_transaction
-exp: remainder
 exp: transaction_weight
 exp: transaction_summary
 exp: transactions_weight

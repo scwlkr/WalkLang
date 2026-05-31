@@ -142,6 +142,7 @@ math.sqrt(number) -> float
 math.exp(number) -> float
 math.log(number) -> float
 math.pow(number, number) -> float
+math.remainder(int, int) -> int
 string.len(string) -> int
 string.at(string, int) -> string
 string.slice(string, int, int) -> string

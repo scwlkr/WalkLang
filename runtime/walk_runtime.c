@@ -51,6 +51,12 @@ void walk_rt_panic(const char *message) {
     exit(1);
 }
 
+WalkInt walk_rt_math_remainder(WalkInt value, WalkInt divisor) {
+    if (divisor == 0) { walk_rt_panic("math.remainder divisor is zero"); }
+    if (value == LLONG_MIN && divisor == -1) { return 0; }
+    return value % divisor;
+}
+
 static unsigned long long walk_rt_random_state = 0;
 
 static WALK_UNUSED unsigned long long walk_rt_random_seed(void) {

@@ -1,5 +1,22 @@
 # WalkLang Migration Guide
 
+## v6.3.1 to v6.3.2
+
+v6.3.2 adds stable `math.remainder(value, divisor) -> int`. Existing v6.3.1
+source should not need changes.
+
+New code can replace hand-written positive remainder loops with the standard
+helper:
+
+```walk
+imp: math
+out: math.remainder(35, 11)
+```
+
+`math.remainder` requires `int` arguments and runtime-stops if the divisor is
+zero. Negative values follow C remainder semantics: division truncates toward
+zero, and the result has the same sign as `value`.
+
 ## v1.8 to v1.9
 
 v1.9 adds string interpolation for simple display text. Existing v1.8 source should not need changes.

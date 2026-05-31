@@ -271,6 +271,15 @@ Use subtraction from zero to negate a name.
 var: y = - 0 x
 ```
 
+Use `math.remainder(value, divisor)` when integer code needs the remainder of
+division. WalkLang keeps this as a named helper instead of adding `%`
+punctuation.
+
+```walk
+imp: math
+out: math.remainder(35, 11)
+```
+
 ---
 
 ## Grouping

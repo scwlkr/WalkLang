@@ -1126,6 +1126,23 @@ private:
             out = ast::basic(ast::TypeKind::Float);
             return true;
         }
+        if (qualified == "math.remainder") {
+            if (!expect_arg_count(call, "math.remainder", 2)) {
+                return false;
+            }
+            for (ast::Expression* arg : call.args) {
+                ast::Type arg_type;
+                if (!check_expression(arg, arg_type)) {
+                    return false;
+                }
+                if (!type_equal(arg_type, ast::basic(ast::TypeKind::Int))) {
+                    add_error(*diagnostics_, arg->range, "type error: math.remainder args must be int, got " + arg_type.to_string());
+                    return false;
+                }
+            }
+            out = ast::basic(ast::TypeKind::Int);
+            return true;
+        }
         if (qualified == "string.len" || qualified == "string.at" || qualified == "string.slice" || qualified == "string.prefix" || qualified == "string.contains" || qualified == "string.concat" ||
             qualified == "string.lower" || qualified == "string.split" || qualified == "string.replace") {
             return check_string_builtin(call, qualified, out);

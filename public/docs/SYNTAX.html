@@ -189,6 +189,9 @@ var: square = ^ x 2</code></pre>
 <pre><code class="language-walk">var: x = -4</code></pre>
 <p>Use subtraction from zero to negate a name.</p>
 <pre><code class="language-walk">var: y = - 0 x</code></pre>
+<p>Use <code>math.remainder(value, divisor)</code> when integer code needs the remainder of division. WalkLang keeps this as a named helper instead of adding <code>%</code> punctuation.</p>
+<pre><code class="language-walk">imp: math
+out: math.remainder(35, 11)</code></pre>
 <p>---</p>
 <h2 id="grouping">Grouping</h2>
 <p>Use parentheses when an expression must be one operand.</p>

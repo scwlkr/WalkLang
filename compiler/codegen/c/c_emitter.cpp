@@ -1186,6 +1186,9 @@ private:
         if (call.callee == "math.pow") {
             return "pow(" + join(args, ", ") + ")";
         }
+        if (call.callee == "math.remainder") {
+            return "walk_rt_math_remainder(" + join(args, ", ") + ")";
+        }
         if (call.callee == "string.len") {
             return "walk_rt_string_len(" + args[0] + ")";
         }

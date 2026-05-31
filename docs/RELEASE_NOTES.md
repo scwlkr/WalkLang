@@ -4,6 +4,43 @@
 
 No unreleased changes.
 
+## v6.3.2 - Stable Remainder Helper
+
+Date: 2026-05-31
+
+v6.3.2 promotes the TinyChain proof-loop gap into a stable standard-library
+helper: `math.remainder(int, int) -> int`.
+
+### Added
+
+- Stable `math.remainder(value, divisor) -> int` for integer remainder checks.
+- Compile-time diagnostics for non-`int` arguments.
+- Runtime failure coverage for divisor zero.
+- TinyChain now uses `math.remainder` instead of a hand-written loop.
+
+### Notes
+
+- `math.remainder` is an explicit namespaced helper rather than a `%` operator,
+  matching WalkLang's preference for small, readable library APIs before adding
+  new punctuation.
+- The result follows C integer remainder semantics: division truncates toward
+  zero, and the remainder has the same sign as `value`.
+
+### Breaking Changes
+
+None.
+
+### Upgrade
+
+Regenerate docs, install locally, and produce release artifacts with:
+
+```bash
+scripts/build-docs-site.sh
+scripts/check-docs-site.sh
+scripts/install-local.sh v6.3.2
+scripts/release.sh v6.3.2 dist
+```
+
 ## v6.3.1 - TinyChain Example Project
 
 Date: 2026-05-31
