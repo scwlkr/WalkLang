@@ -121,6 +121,7 @@ walk check --warnings=default main.walk
 walk check --warnings=error main.walk</code></pre>
 <h2 id="runtime-failures">Runtime Failures</h2>
 <p><code>walk test</code> builds and runs a native executable. Failed assertions print failure lines and make the executable exit non-zero. A failed assertion is not a compiler diagnostic.</p>
+<p>When <code>walk run</code> or <code>walk test</code> launches a native executable that exits non-zero, <code>W5004</code> or <code>W5005</code> includes the child exit status or terminating signal. Runtime stderr from the native program is printed before the WalkLang diagnostic.</p>
 <p>Stable runtime failure messages include:</p>
 <pre><code class="language-text">walk runtime error: input reached EOF
 walk runtime error: stdin read failed

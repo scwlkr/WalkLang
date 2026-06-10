@@ -116,7 +116,10 @@ method calls on non-struct values are compile errors
 unknown methods are compile errors</code></pre>
 <h2 id="arrays">Arrays</h2>
 <p>Struct values can be stored in arrays, indexed, looped over, and updated through mutable array elements.</p>
-<pre><code class="language-walk">var: users = [User(&#39;Walker&#39;, 25), User(&#39;Ada&#39;, 37)]
+<pre><code class="language-walk">imp: array
+
+var: users = [User(&#39;Walker&#39;, 25), User(&#39;Ada&#39;, 37)]
+users = array.push(users, User(&#39;Grace&#39;, 41))
 users[1].age = 38
 
 for: user in users

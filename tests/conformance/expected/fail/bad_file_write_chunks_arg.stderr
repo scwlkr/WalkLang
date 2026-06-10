@@ -1,0 +1,4 @@
+tests/fail/bad_file_write_chunks_arg.walk:3:34: type error: arg 2 to file.write_chunks is array[string], got string
+
+do: file.write_chunks('out.txt', 'not chunks')
+                                 ^ string cannot initialize array[string]

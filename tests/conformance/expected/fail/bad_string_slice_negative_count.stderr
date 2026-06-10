@@ -1,2 +1,2 @@
 walk runtime error: string slice count out of range
-error[W5004]: program failed
+error[W5004]: program failed with exit status 1

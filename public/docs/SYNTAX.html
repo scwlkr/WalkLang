@@ -281,7 +281,7 @@ var: names = [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;]</code></pre>
 <pre><code class="language-walk">nums[1] = 99
 out: nums[0]
 var: guessed array[string] = []</code></pre>
-<p>Stable native element types are <code>int</code>, <code>float</code>, <code>bool</code>, and <code>string</code>.</p>
+<p>Stable native element types are <code>int</code>, <code>float</code>, <code>bool</code>, and <code>string</code>. Experimental struct values can also be stored in arrays, indexed, looped over, and appended with <code>array.push</code>.</p>
 <p>Use the <code>array</code> module for common helpers. <code>array.push</code> returns a new array; assign it back when you want to keep the appended value.</p>
 <pre><code class="language-walk">imp: array
 var: guessed array[string] = []
@@ -359,6 +359,14 @@ if: term.is_tty()
     do: io.write_line(&#39;error&#39;)
     do: term.reset()</code></pre>
 <p>Draft HTTP and HTML helpers are ordinary imported function calls that return result structs or strings. They are documented in <code>docs/STDLIB.md</code>.</p>
+<p>For large generated text, prefer bounded chunks over repeated whole-string concatenation:</p>
+<pre><code class="language-walk">imp: array
+imp: file
+
+var: chunks array[string] = []
+chunks = array.push(chunks, &#39;header\n&#39;)
+chunks = array.push(chunks, &#39;body\n&#39;)
+do: file.write_chunks(&#39;report.txt&#39;, chunks)</code></pre>
 <p>---</p>
 <h2 id="tests">Tests</h2>
 <p>Use <code>test:</code> and <code>assert:</code> with <code>walk test</code>.</p>
@@ -368,6 +376,7 @@ if: term.is_tty()
 test: &#39;add works&#39;
     assert: == add(2, 3) 5</code></pre>
 <p><code>assert:</code> requires a bool expression.</p>
+<p>Imported modules may contain top-level <code>test:</code> blocks. Those tests are checked when the module is imported, are not run by the importer, and run when that module file is the <code>walk test</code> entry.</p>
 <p><code>testing.assert(bool)</code> can wrap that bool expression when you want a namespaced stdlib assertion helper.</p>
 <pre><code class="language-walk">imp: testing
 

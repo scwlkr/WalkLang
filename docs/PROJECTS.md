@@ -129,6 +129,35 @@ test: 'cube works'
     assert: == math_extra.cube(3) 27
 ```
 
+In flat source trees without `walk.toml`, imports resolve from the importing
+file's directory. A root-local test file can import root-local modules:
+
+```text
+data.walk
+data_test.walk
+main.walk
+```
+
+```walk
+# data_test.walk
+imp: data
+
+test: 'loader works'
+    assert: == data.count_rows('a\nb') 2
+```
+
+If tests live in a `tests/` folder without `walk.toml`, imports resolve from
+`tests/`, so either place helper modules beside the test or run in project mode
+with `walk.toml` so `tests/*_test.walk` can import modules from `src/`.
+
+Module files may contain top-level `test:` blocks. Those tests are type-checked
+when the module is imported, but they are not executed by importers. Run the
+module file directly to execute them:
+
+```bash
+walk test data.walk
+```
+
 The importing file's directory is searched first. The project entry directory is searched next.
 
 Package dependencies add locked package `src/` directories after local project search paths. Package imports use dotted module names:

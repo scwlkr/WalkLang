@@ -1,6 +1,6 @@
 # WalkLang Status
 
-Current WalkLang version: `v6.3.3`.
+Current WalkLang version: `v6.4.0`.
 
 Current architecture direction on 2026-05-26: `docs/SYSTEMS_COMPILER_PORT_PLAN.md`
 is the accepted execution contract for the systems architecture: C++ compiler
@@ -8,16 +8,14 @@ core, C runtime and platform layer, C backend, optional assembly leaf routines,
 and no final Go or JavaScript implementation footprint. Phases 1 through 12 are
 complete. The systems compiler port is complete.
 
-`v6.3.3` keeps the completed C++/C systems compiler release line and the stable
-`math.remainder(value, divisor) -> int` helper added in v6.3.2. This release
-upgrades TinyChain from a plain smoke-test output into a terminal showcase with
-a structured mining transcript, proof reports, draft terminal color/style calls,
-and a visible tamper audit. The repo-local `walk` binary builds from C++
-sources, generated programs link with the Walk C runtime, the former Go
-reference implementation and Go module metadata are removed, JavaScript source
-files are removed, and the current language surface is verified against the
-recorded conformance oracle. Feature maturity is described with status labels
-instead of separate version lines.
+`v6.4.0` keeps the completed C++/C systems compiler release line and resolves
+the open PicoNet-driven GitHub issues around struct-array append, module-local
+tests, scalable text output, and native runtime failure diagnostics. The
+repo-local `walk` binary builds from C++ sources, generated programs link with
+the Walk C runtime, the former Go reference implementation and Go module
+metadata are removed, JavaScript source files are removed, and the current
+language surface is verified against the recorded conformance oracle. Feature
+maturity is described with status labels instead of separate version lines.
 
 Current feature status:
 
@@ -36,19 +34,46 @@ standard platform
   WalkLang-built tool
 ```
 
-Current release state: `v6.3.3` is the current public release. It proves
-`walk` builds from C++/C, the docs site is static HTML/CSS without JavaScript
-assets, repo-local install/release packaging no longer depends on Go, and the
-PicoNet-driven string/map/numeric tooling plus the TinyChain example project
-work through native execution. `walktop` remains under `tools/walktop/` as a
-real WalkLang project and standalone native command.
+Current release state: `v6.4.0` is the current local release. It proves `walk`
+builds from C++/C, the docs site is static HTML/CSS without JavaScript assets,
+repo-local install/release packaging no longer depends on Go, and the
+PicoNet-driven struct-array, module-test, chunked text, and runtime diagnostic
+issues work through native execution. `walktop` remains under
+`tools/walktop/` as a real WalkLang project and standalone native command.
 
-Conformance state on 2026-05-27: `tests/conformance/` preserves the recorded
+Conformance state on 2026-06-09: `tests/conformance/` preserves the recorded
 oracle and current post-port fixture coverage.
-The manifest covers 20 pass fixtures, 62 fail fixtures, 4 compatibility
+The manifest covers 24 pass fixtures, 64 fail fixtures, 4 compatibility
 fixtures, 12 runtime-module fixtures, 3 generated-C snapshot fixtures, and 4
 `walktop` fixture groups. `make conformance` now builds the active C++/C
 `build/walk` binary and verifies it against those recorded artifacts.
+
+v6.4.0 release verification on 2026-06-09:
+
+```text
+make clean passed
+make walk WALK_VERSION=v6.4.0 passed
+./build/walk version reported v6.4.0
+./build/walk run --warnings=error tests/pass/struct_arrays.walk passed and printed struct-array append/index/module-return proof
+./build/walk run --warnings=error tests/pass/module_with_tests.walk passed and printed 14 without running imported module tests
+./build/walk test --warnings=error tests/pass/testable_module.walk passed with 1 module-local test
+./build/walk run --warnings=error tests/runtime_modules/file.walk passed and printed string.join plus chunked file output proof
+./build/walk run --warnings=error examples/large_text_stream.walk wrote 20,971,520 bytes to large-text-stream.txt
+make test WALK_VERSION=v6.4.0 passed
+make conformance WALK_VERSION=v6.4.0 passed with 24 pass fixtures, 64 fail fixtures, 41 native executions, 4 compat fixtures, 12 runtime module fixtures, 3 snapshot fixtures, and 4 walktop fixture groups
+WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported compatibility stress ok
+scripts/release.sh v6.4.0 dist/v6.4.0 passed and produced current-host walk, runtime, walktop, and SHA256SUMS artifacts
+shasum -a 256 -c dist/v6.4.0/SHA256SUMS passed for all 3 artifacts when run from dist/v6.4.0
+dist/v6.4.0/walk-v6.4.0-darwin-arm64 version reported v6.4.0
+NO_COLOR=1 dist/v6.4.0/walktop-v6.4.0-darwin-arm64 --once --fixture tools/walktop/testdata/basic passed
+scripts/install-local.sh v6.4.0 passed, installed walk/runtime/walktop
+walk version reported v6.4.0
+NO_COLOR=1 walktop --once --fixture tools/walktop/testdata/basic passed
+installed walk run --warnings=error tests/pass/struct_arrays.walk passed
+installed walk run --warnings=error tests/runtime_modules/file.walk passed
+PicoNet width-16 1024-step SFT completed with the repo-local v6.4.0 walk and saved checkpoints/chat.pn
+PicoNet width-32 512-step SFT reported error[W5004]: program terminated by signal 9 (SIGKILL)
+```
 
 v6.3.3 release verification on 2026-05-31:
 

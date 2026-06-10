@@ -297,6 +297,13 @@ std::string native_array_helper_suffix(const ast::Type& type) {
     }
 }
 
+std::string array_push_helper_name(const ast::Type& type) {
+    if (type.kind == ast::TypeKind::Struct) {
+        return "walk_rt_array_push_" + c_struct_name(type.name);
+    }
+    return "walk_rt_array_push_" + native_array_helper_suffix(type);
+}
+
 std::string builtin_runtime_name(const std::string& qualified) {
     return "walk_rt_" + replace_all(qualified, ".", "_");
 }
@@ -481,6 +488,7 @@ public:
             out << emit_struct_decl(*user_structs_.at(name));
             out << "typedef struct { " << c_struct_name(name) << " *items; WalkSize len; } " << c_struct_array_name(name) << ";\n\n";
         }
+        emit_struct_array_push_helpers(out);
 
         for (const auto& item : lowered_.modules) {
             current_module_ = item.first;
@@ -686,6 +694,19 @@ private:
         }
         out << "} " << c_struct_name(decl.name) << ";\n";
         return out.str();
+    }
+
+    void emit_struct_array_push_helpers(std::ostringstream& out) {
+        for (const std::string& name : struct_order_) {
+            const std::string item_type = c_struct_name(name);
+            const std::string array_type = c_struct_array_name(name);
+            out << "static WALK_UNUSED " << array_type << " " << array_push_helper_name(ast::struct_type(name)) << "(" << array_type << " array, " << item_type << " item) {\n";
+            out << "    " << item_type << " *items = (" << item_type << " *)walk_rt_alloc_array(array.len + 1, sizeof(" << item_type << "));\n";
+            out << "    for (WalkSize i = 0; i < array.len; i++) { items[i] = array.items[i]; }\n";
+            out << "    items[array.len] = item;\n";
+            out << "    return (" << array_type << "){items, array.len + 1};\n";
+            out << "}\n\n";
+        }
     }
 
     std::string emit_function(const ir::FuncDecl& function) {
@@ -1213,6 +1234,9 @@ private:
         if (call.callee == "string.split") {
             return "walk_rt_string_split(" + args[0] + ", " + args[1] + ")";
         }
+        if (call.callee == "string.join") {
+            return "walk_rt_string_join(" + args[0] + ", " + args[1] + ")";
+        }
         if (call.callee == "string.replace") {
             return "walk_rt_string_replace(" + args[0] + ", " + args[1] + ", " + args[2] + ")";
         }
@@ -1229,7 +1253,7 @@ private:
             if (call.args[0]->type.elem == nullptr) {
                 throw EmitError("internal error: array.push needs array element type");
             }
-            return "walk_rt_array_push_" + native_array_helper_suffix(*call.args[0]->type.elem) + "(" + args[0] + ", " + args[1] + ")";
+            return array_push_helper_name(*call.args[0]->type.elem) + "(" + args[0] + ", " + args[1] + ")";
         }
         if (call.callee == "map.empty") {
             return "walk_rt_map_string_array_string_empty()";

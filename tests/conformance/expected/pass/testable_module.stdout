@@ -1,0 +1,2 @@
+test: module-local test can run directly
+ok 1 tests

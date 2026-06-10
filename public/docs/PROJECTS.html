@@ -134,6 +134,18 @@ env -u NO_COLOR CLICOLOR_FORCE=1 ../../build/walk run src/main.walk</code></pre>
 
 test: &#39;cube works&#39;
     assert: == math_extra.cube(3) 27</code></pre>
+<p>In flat source trees without <code>walk.toml</code>, imports resolve from the importing file&#39;s directory. A root-local test file can import root-local modules:</p>
+<pre><code class="language-text">data.walk
+data_test.walk
+main.walk</code></pre>
+<pre><code class="language-walk"># data_test.walk
+imp: data
+
+test: &#39;loader works&#39;
+    assert: == data.count_rows(&#39;a\nb&#39;) 2</code></pre>
+<p>If tests live in a <code>tests/</code> folder without <code>walk.toml</code>, imports resolve from <code>tests/</code>, so either place helper modules beside the test or run in project mode with <code>walk.toml</code> so <code>tests/*_test.walk</code> can import modules from <code>src/</code>.</p>
+<p>Module files may contain top-level <code>test:</code> blocks. Those tests are type-checked when the module is imported, but they are not executed by importers. Run the module file directly to execute them:</p>
+<pre><code class="language-bash">walk test data.walk</code></pre>
 <p>The importing file&#39;s directory is searched first. The project entry directory is searched next.</p>
 <p>Package dependencies add locked package <code>src/</code> directories after local project search paths. Package imports use dotted module names:</p>
 <pre><code class="language-walk">imp: geometry.core

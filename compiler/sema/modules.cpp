@@ -31,14 +31,15 @@ std::vector<ast::Import*> imports(ast::Program& program) {
 bool validate_module_surface(ast::Program& program, DiagnosticSet& diagnostics) {
     for (ast::Statement* statement : program.statements) {
         if (dynamic_cast<ast::Import*>(statement) != nullptr || dynamic_cast<ast::FuncDecl*>(statement) != nullptr ||
-            dynamic_cast<ast::StructDecl*>(statement) != nullptr || dynamic_cast<ast::Export*>(statement) != nullptr) {
+            dynamic_cast<ast::StructDecl*>(statement) != nullptr || dynamic_cast<ast::TestDecl*>(statement) != nullptr ||
+            dynamic_cast<ast::Export*>(statement) != nullptr) {
             continue;
         }
         if (dynamic_cast<ast::Defer*>(statement) != nullptr) {
             add_module_error(diagnostics, statement->range, "module error: top-level defer is only valid in an entry or test source");
             return false;
         }
-        add_module_error(diagnostics, statement->range, "module error: modules may contain only imp, struct, func, and exp at top level");
+        add_module_error(diagnostics, statement->range, "module error: modules may contain only imp, struct, func, test, and exp at top level");
         return false;
     }
     return true;

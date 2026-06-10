@@ -104,6 +104,7 @@ out: string.slice('walklang', 4, 99)
 out: string.prefix('walklang', 4)
 out: string.concat('walk', 'lang')
 out: string.lower('Hi WALK')
+out: string.join(words, '::')
 out: string.replace('banana', 'na', 'NA')
 out: random.choice(words)
 ```
@@ -133,7 +134,8 @@ Rules:
 - Imported calls stay namespaced: `math_extra.cube(3)`.
 - Only functions named by `exp:` are callable from another file.
 - Private helper functions may be used inside the module but not through the imported namespace.
-- Module files may contain only `imp:`, `func:`, and `exp:` at top level.
+- Module files may contain `imp:`, `struct:`, `func:`, `test:`, and `exp:` at top level.
+- Imported module `test:` blocks are checked but not run by the importer; run `walk test module.walk` to execute them directly.
 
 ## Stable Built-In APIs
 
@@ -151,6 +153,7 @@ string.contains(string, string) -> bool
 string.concat(string, string) -> string
 string.lower(string) -> string
 string.split(string, string) -> array[string]
+string.join(array[string], string) -> string
 string.replace(string, string, string) -> string
 array.len(array[T]) -> int
 array.contains(array[T], T) -> bool

@@ -1,5 +1,7 @@
+imp: array
 imp: file
 imp: path
+imp: string
 
 var: note = path.join('tests/conformance/tmp', 'runtime-module-file.txt')
 do: file.write(note, 'alpha')
@@ -18,3 +20,16 @@ var: bad_write = file.try_write('', 'nope')
 out: bad_write.ok
 out: bad_write.value
 out: bad_write.error
+
+var: chunks array[string] = []
+chunks = array.push(chunks, 'walk')
+chunks = array.push(chunks, 'lang')
+chunks = array.push(chunks, 'chunks')
+out: string.join(chunks, '::')
+
+var: chunked = path.join('tests/conformance/tmp', 'runtime-module-file-chunks.txt')
+do: file.write_chunks(chunked, chunks)
+var: suffix array[string] = []
+suffix = array.push(suffix, '!')
+do: file.append_chunks(chunked, suffix)
+out: file.read(chunked)

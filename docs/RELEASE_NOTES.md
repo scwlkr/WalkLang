@@ -4,6 +4,26 @@
 
 No unreleased changes.
 
+## v6.4.0 - PicoNet Runtime Issue Fixes
+
+Date: 2026-06-09
+
+v6.4.0 resolves the open PicoNet-driven GitHub issues around struct arrays,
+module-local tests, scalable text output, and actionable native runtime
+failures.
+
+### Added
+
+- Experimental `array.push` support for arrays of user-defined structs, including indexed field access and exported module functions returning struct arrays.
+- Module-local `test:` blocks are now allowed in imported modules; importers type-check them but do not run them, while `walk test module.walk` runs them directly.
+- Stable `string.join(array[string], string) -> string` for one-pass assembly of text fragments.
+- Draft `file.write_chunks`, `file.try_write_chunks`, `file.append_chunks`, and `file.try_append_chunks` for chunked UTF-8 text output without building one aggregate string.
+- `examples/large_text_stream.walk`, a 20 MiB chunked-output proof example.
+
+### Fixed
+
+- `walk run` and `walk test` now report native child exit statuses and POSIX signal names in `W5004`/`W5005` instead of only `program failed` or `tests failed`.
+
 ## v6.3.3 - TinyChain Terminal Showcase
 
 Date: 2026-05-31

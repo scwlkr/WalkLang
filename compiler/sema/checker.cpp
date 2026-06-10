@@ -1144,7 +1144,7 @@ private:
             return true;
         }
         if (qualified == "string.len" || qualified == "string.at" || qualified == "string.slice" || qualified == "string.prefix" || qualified == "string.contains" || qualified == "string.concat" ||
-            qualified == "string.lower" || qualified == "string.split" || qualified == "string.replace") {
+            qualified == "string.lower" || qualified == "string.split" || qualified == "string.join" || qualified == "string.replace") {
             return check_string_builtin(call, qualified, out);
         }
         if (qualified == "array.len" || qualified == "array.contains" || qualified == "array.push") {
@@ -1334,6 +1334,30 @@ private:
             out = ast::basic(ast::TypeKind::String);
             return true;
         }
+        if (qualified == "string.join") {
+            if (!expect_arg_count(call, "string.join", 2)) {
+                return false;
+            }
+            ast::Type parts_type;
+            if (!check_expression(call.args[0], parts_type)) {
+                return false;
+            }
+            const ast::Type string_array = ast::array_of(ast::basic(ast::TypeKind::String));
+            if (!type_equal(parts_type, string_array)) {
+                add_error(*diagnostics_, call.args[0]->range, "type error: string.join needs array[string] first arg, got " + parts_type.to_string());
+                return false;
+            }
+            ast::Type sep_type;
+            if (!check_expression(call.args[1], sep_type)) {
+                return false;
+            }
+            if (!type_equal(sep_type, ast::basic(ast::TypeKind::String))) {
+                add_error(*diagnostics_, call.args[1]->range, "type error: string.join separator must be string, got " + sep_type.to_string());
+                return false;
+            }
+            out = ast::basic(ast::TypeKind::String);
+            return true;
+        }
         const std::string name =
             qualified == "string.contains" ? "string.contains" : qualified == "string.concat" ? "string.concat" : qualified == "string.split" ? "string.split" : "string.replace";
         const std::size_t want_args = qualified == "string.replace" ? 3 : 2;
@@ -1391,8 +1415,12 @@ private:
             add_error(*diagnostics_, call.args[0]->range, "type error: " + name + " needs array first arg, got " + array_type.to_string());
             return false;
         }
-        if (!native_array_element(*array_type.elem)) {
-            add_error(*diagnostics_, call.args[0]->range, "type error: " + name + " needs array of int, float, bool, or string, got " + array_type.to_string());
+        if (qualified == "array.contains" && !native_array_element(*array_type.elem)) {
+            add_error(*diagnostics_, call.args[0]->range, "type error: array.contains needs array of int, float, bool, or string, got " + array_type.to_string());
+            return false;
+        }
+        if (qualified == "array.push" && !native_array_element(*array_type.elem) && array_type.elem->kind != ast::TypeKind::Struct) {
+            add_error(*diagnostics_, call.args[0]->range, "type error: array.push needs array of int, float, bool, string, or struct, got " + array_type.to_string());
             return false;
         }
         ast::Type item_type;

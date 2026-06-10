@@ -113,7 +113,10 @@ unknown methods are compile errors
 Struct values can be stored in arrays, indexed, looped over, and updated through mutable array elements.
 
 ```walk
+imp: array
+
 var: users = [User('Walker', 25), User('Ada', 37)]
+users = array.push(users, User('Grace', 41))
 users[1].age = 38
 
 for: user in users

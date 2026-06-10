@@ -239,6 +239,23 @@ var: parts = string.split('a b', ' ')
 out: parts[0]
 ```
 
+### string.join(array[string], string) -> string
+
+Stability: stable. Effect status: pure expression.
+
+Returns a new string made by joining each part with the separator between
+items. Joining an empty array returns `''`. Allocation failure runtime-stops
+with `walk runtime error: out of memory`.
+
+Use `string.join` when a program has text fragments already separated and wants
+one final allocation instead of repeated `string.concat` copies.
+
+```walk
+imp: string
+var: parts = string.split('walk lang', ' ')
+out: string.join(parts, '::')
+```
+
 ### string.replace(string, string, string) -> string
 
 Stability: stable. Effect status: pure expression.
@@ -282,7 +299,8 @@ out: array.contains(letters, 'w')
 
 ### array.push(array[T], T) -> array[T]
 
-Stability: stable. Effect status: pure expression.
+Stability: stable for `int`, `float`, `bool`, and `string` arrays;
+experimental for arrays of structs. Effect status: pure expression.
 
 Returns a new array with the item appended. `array.push` does not mutate the input array in place.
 Allocation failure runtime-stops with `walk runtime error: out of memory`.
@@ -609,9 +627,10 @@ relative paths resolve against the current working directory, absolute paths
 are passed to the host OS, and this draft slice does not normalize paths or
 expand `~`. Empty paths runtime-stop for fail-stop file effects and reads.
 
-`file.read`, `file.write`, and `file.append` are fail-stop helpers. Missing
-files, permission errors, invalid UTF-8, embedded null bytes on read, and
-write failures stop the native program with a `walk runtime error`.
+`file.read`, `file.write`, `file.append`, `file.write_chunks`, and
+`file.append_chunks` are fail-stop helpers. Missing files, permission errors,
+invalid UTF-8, embedded null bytes on read, and write failures stop the native
+program with a `walk runtime error`.
 
 Recoverable file helpers return draft result structs:
 
@@ -632,12 +651,9 @@ struct: FileActionResult
 
 Failure policy:
 
-- `file.read`, `file.write`, and `file.append`: fail-stop runtime failure for
-  ordinary file/path/read/write failures.
-- `file.try_read`, `file.try_write`, and `file.try_append`: recoverable result
-  data for ordinary file/path/read/write failures.
-- `file.exists`: boolean data for path existence and no runtime failure for an
-  empty path.
+- `file.read`, `file.write`, `file.append`, `file.write_chunks`, and `file.append_chunks`: fail-stop runtime failure for ordinary file/path/read/write failures.
+- `file.try_read`, `file.try_write`, `file.try_append`, `file.try_write_chunks`, and `file.try_append_chunks`: recoverable result data for ordinary file/path/read/write failures.
+- `file.exists`: boolean data for path existence and no runtime failure for an empty path.
 
 ### file.read(string) -> string
 
@@ -682,11 +698,44 @@ Failure policy: recoverable result data.
 Attempts the same append behavior as `file.append` and returns failures as data
 instead of runtime-stopping for ordinary file/path/write errors.
 
+### file.write_chunks(string, array[string]) -> effect
+
+Failure policy: fail-stop runtime failure.
+
+Overwrites the target path by writing each UTF-8 chunk in order through one
+opened file. Create parent directories first; this helper does not create them.
+Use this for large generated text when the program can produce bounded chunks
+and should not build one large aggregate string first.
+
+### file.try_write_chunks(string, array[string]) -> FileActionResult
+
+Failure policy: recoverable result data.
+
+Attempts the same chunked overwrite behavior as `file.write_chunks` and returns
+ordinary file/path/write failures as data.
+
+### file.append_chunks(string, array[string]) -> effect
+
+Failure policy: fail-stop runtime failure.
+
+Appends each UTF-8 chunk in order through one opened file, creating the file if
+needed. Create parent directories first; this helper does not create them.
+
+### file.try_append_chunks(string, array[string]) -> FileActionResult
+
+Failure policy: recoverable result data.
+
+Attempts the same chunked append behavior as `file.append_chunks` and returns
+ordinary file/path/write failures as data.
+
 ```walk
+imp: array
 imp: file
 
-do: file.write('note.txt', 'hello')
-do: file.append('note.txt', ' world')
+var: chunks array[string] = []
+chunks = array.push(chunks, 'hello')
+chunks = array.push(chunks, ' world')
+do: file.write_chunks('note.txt', chunks)
 out: file.read('note.txt')
 ```
 

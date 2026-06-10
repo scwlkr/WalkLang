@@ -1,0 +1,4 @@
+tests/fail/bad_string_join_arg.walk:3:18: type error: string.join needs array[string] first arg, got string
+
+out: string.join('not chunks', 'sep')
+                 ^

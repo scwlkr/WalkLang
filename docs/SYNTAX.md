@@ -453,6 +453,8 @@ var: guessed array[string] = []
 ```
 
 Stable native element types are `int`, `float`, `bool`, and `string`.
+Experimental struct values can also be stored in arrays, indexed, looped over,
+and appended with `array.push`.
 
 Use the `array` module for common helpers. `array.push` returns a new array; assign it back when you want to keep the appended value.
 
@@ -594,6 +596,19 @@ if: term.is_tty()
 Draft HTTP and HTML helpers are ordinary imported function calls that return
 result structs or strings. They are documented in `docs/STDLIB.md`.
 
+For large generated text, prefer bounded chunks over repeated whole-string
+concatenation:
+
+```walk
+imp: array
+imp: file
+
+var: chunks array[string] = []
+chunks = array.push(chunks, 'header\n')
+chunks = array.push(chunks, 'body\n')
+do: file.write_chunks('report.txt', chunks)
+```
+
 ---
 
 ## Tests
@@ -609,6 +624,10 @@ test: 'add works'
 ```
 
 `assert:` requires a bool expression.
+
+Imported modules may contain top-level `test:` blocks. Those tests are checked
+when the module is imported, are not run by the importer, and run when that
+module file is the `walk test` entry.
 
 `testing.assert(bool)` can wrap that bool expression when you want a namespaced stdlib assertion helper.
 

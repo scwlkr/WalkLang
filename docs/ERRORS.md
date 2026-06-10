@@ -136,6 +136,11 @@ walk check --warnings=error main.walk
 lines and make the executable exit non-zero. A failed assertion is not a
 compiler diagnostic.
 
+When `walk run` or `walk test` launches a native executable that exits
+non-zero, `W5004` or `W5005` includes the child exit status or terminating
+signal. Runtime stderr from the native program is printed before the WalkLang
+diagnostic.
+
 Stable runtime failure messages include:
 
 ```text

@@ -1,0 +1,34 @@
+imp: array
+imp: file
+imp: string
+
+var: parts array[string] = []
+parts = array.push(parts, '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef')
+parts = array.push(parts, '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef')
+parts = array.push(parts, '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef')
+parts = array.push(parts, '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef')
+parts = array.push(parts, '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef')
+parts = array.push(parts, '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef')
+parts = array.push(parts, '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef')
+parts = array.push(parts, '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef')
+parts = array.push(parts, '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef')
+parts = array.push(parts, '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef')
+parts = array.push(parts, '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef')
+parts = array.push(parts, '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef')
+parts = array.push(parts, '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef')
+parts = array.push(parts, '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef')
+parts = array.push(parts, '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef')
+parts = array.push(parts, '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef')
+
+var: kib = string.join(parts, '')
+var: batch array[string] = []
+repeat: 128
+    batch = array.push(batch, kib)
+
+var: empty array[string] = []
+do: file.write_chunks('large-text-stream.txt', empty)
+
+repeat: 160
+    do: file.append_chunks('large-text-stream.txt', batch)
+
+out: 'wrote 20 MiB to large-text-stream.txt'

@@ -1,0 +1,21 @@
+imp: array
+
+struct: ManifestRow
+    path string
+    tokens int
+
+struct: ManifestBatch
+    rows array[ManifestRow]
+    label string
+
+func: sample_rows() array[ManifestRow]
+    var: rows array[ManifestRow] = []
+    rows = array.push(rows, ManifestRow('a.txt', 11))
+    rows = array.push(rows, ManifestRow('b.txt', 17))
+    return: rows
+
+func: sample_batch() ManifestBatch
+    return: ManifestBatch(sample_rows(), 'sample')
+
+exp: sample_rows
+exp: sample_batch

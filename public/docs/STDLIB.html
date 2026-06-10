@@ -152,6 +152,13 @@ out: string.lower(&#39;Hi WALK&#39;)</code></pre>
 <pre><code class="language-walk">imp: string
 var: parts = string.split(&#39;a b&#39;, &#39; &#39;)
 out: parts[0]</code></pre>
+<h3 id="string-join-array-string-string-string">string.join(array[string], string) -&gt; string</h3>
+<p>Stability: stable. Effect status: pure expression.</p>
+<p>Returns a new string made by joining each part with the separator between items. Joining an empty array returns <code>&#39;&#39;</code>. Allocation failure runtime-stops with <code>walk runtime error: out of memory</code>.</p>
+<p>Use <code>string.join</code> when a program has text fragments already separated and wants one final allocation instead of repeated <code>string.concat</code> copies.</p>
+<pre><code class="language-walk">imp: string
+var: parts = string.split(&#39;walk lang&#39;, &#39; &#39;)
+out: string.join(parts, &#39;::&#39;)</code></pre>
 <h3 id="string-replace-string-string-string-string">string.replace(string, string, string) -&gt; string</h3>
 <p>Stability: stable. Effect status: pure expression.</p>
 <p>Returns a new string with every non-overlapping match of <code>from</code> replaced by <code>to</code>. Replacing an empty <code>from</code> string returns a copy of the original text. Allocation failure runtime-stops with <code>walk runtime error: out of memory</code>.</p>
@@ -172,7 +179,7 @@ out: array.len(nums)</code></pre>
 var: letters = [&#39;w&#39;, &#39;a&#39;]
 out: array.contains(letters, &#39;w&#39;)</code></pre>
 <h3 id="array-push-array-t-t-array-t">array.push(array[T], T) -&gt; array[T]</h3>
-<p>Stability: stable. Effect status: pure expression.</p>
+<p>Stability: stable for <code>int</code>, <code>float</code>, <code>bool</code>, and <code>string</code> arrays; experimental for arrays of structs. Effect status: pure expression.</p>
 <p>Returns a new array with the item appended. <code>array.push</code> does not mutate the input array in place. Allocation failure runtime-stops with <code>walk runtime error: out of memory</code>.</p>
 <pre><code class="language-walk">imp: array
 var: guessed array[string] = []
@@ -343,7 +350,7 @@ struct: ParseBoolResult
 <p>---</p>
 <h2 id="draft-file">Draft file</h2>
 <p>Draft <code>file</code> APIs are UTF-8 text helpers. They use native process paths: relative paths resolve against the current working directory, absolute paths are passed to the host OS, and this draft slice does not normalize paths or expand <code>~</code>. Empty paths runtime-stop for fail-stop file effects and reads.</p>
-<p><code>file.read</code>, <code>file.write</code>, and <code>file.append</code> are fail-stop helpers. Missing files, permission errors, invalid UTF-8, embedded null bytes on read, and write failures stop the native program with a <code>walk runtime error</code>.</p>
+<p><code>file.read</code>, <code>file.write</code>, <code>file.append</code>, <code>file.write_chunks</code>, and <code>file.append_chunks</code> are fail-stop helpers. Missing files, permission errors, invalid UTF-8, embedded null bytes on read, and write failures stop the native program with a <code>walk runtime error</code>.</p>
 <p>Recoverable file helpers return draft result structs:</p>
 <pre><code class="language-walk">struct: FileReadResult
     ok bool
@@ -357,12 +364,9 @@ struct: FileActionResult
 <p><code>error</code> is <code>&#39;&#39;</code> on success. <code>FileActionResult.value</code> is <code>true</code> on success and <code>false</code> on failure.</p>
 <p>Failure policy:</p>
 <ul>
-<li><code>file.read</code>, <code>file.write</code>, and <code>file.append</code>: fail-stop runtime failure for</li>
-<p>ordinary file/path/read/write failures.</p>
-<li><code>file.try_read</code>, <code>file.try_write</code>, and <code>file.try_append</code>: recoverable result</li>
-<p>data for ordinary file/path/read/write failures.</p>
-<li><code>file.exists</code>: boolean data for path existence and no runtime failure for an</li>
-<p>empty path.</p>
+<li><code>file.read</code>, <code>file.write</code>, <code>file.append</code>, <code>file.write_chunks</code>, and <code>file.append_chunks</code>: fail-stop runtime failure for ordinary file/path/read/write failures.</li>
+<li><code>file.try_read</code>, <code>file.try_write</code>, <code>file.try_append</code>, <code>file.try_write_chunks</code>, and <code>file.try_append_chunks</code>: recoverable result data for ordinary file/path/read/write failures.</li>
+<li><code>file.exists</code>: boolean data for path existence and no runtime failure for an empty path.</li>
 </ul>
 <h3 id="file-read-string-string">file.read(string) -&gt; string</h3>
 <p>Failure policy: fail-stop runtime failure.</p>
@@ -382,10 +386,25 @@ struct: FileActionResult
 <h3 id="file-try-append-string-string-fileactionresult">file.try_append(string, string) -&gt; FileActionResult</h3>
 <p>Failure policy: recoverable result data.</p>
 <p>Attempts the same append behavior as <code>file.append</code> and returns failures as data instead of runtime-stopping for ordinary file/path/write errors.</p>
-<pre><code class="language-walk">imp: file
+<h3 id="file-write-chunks-string-array-string-effect">file.write_chunks(string, array[string]) -&gt; effect</h3>
+<p>Failure policy: fail-stop runtime failure.</p>
+<p>Overwrites the target path by writing each UTF-8 chunk in order through one opened file. Create parent directories first; this helper does not create them. Use this for large generated text when the program can produce bounded chunks and should not build one large aggregate string first.</p>
+<h3 id="file-try-write-chunks-string-array-string-fileactionresult">file.try_write_chunks(string, array[string]) -&gt; FileActionResult</h3>
+<p>Failure policy: recoverable result data.</p>
+<p>Attempts the same chunked overwrite behavior as <code>file.write_chunks</code> and returns ordinary file/path/write failures as data.</p>
+<h3 id="file-append-chunks-string-array-string-effect">file.append_chunks(string, array[string]) -&gt; effect</h3>
+<p>Failure policy: fail-stop runtime failure.</p>
+<p>Appends each UTF-8 chunk in order through one opened file, creating the file if needed. Create parent directories first; this helper does not create them.</p>
+<h3 id="file-try-append-chunks-string-array-string-fileactionresult">file.try_append_chunks(string, array[string]) -&gt; FileActionResult</h3>
+<p>Failure policy: recoverable result data.</p>
+<p>Attempts the same chunked append behavior as <code>file.append_chunks</code> and returns ordinary file/path/write failures as data.</p>
+<pre><code class="language-walk">imp: array
+imp: file
 
-do: file.write(&#39;note.txt&#39;, &#39;hello&#39;)
-do: file.append(&#39;note.txt&#39;, &#39; world&#39;)
+var: chunks array[string] = []
+chunks = array.push(chunks, &#39;hello&#39;)
+chunks = array.push(chunks, &#39; world&#39;)
+do: file.write_chunks(&#39;note.txt&#39;, chunks)
 out: file.read(&#39;note.txt&#39;)</code></pre>
 <h3 id="file-exists-string-bool">file.exists(string) -&gt; bool</h3>
 <p>Failure policy: returns <code>false</code> for ordinary missing or empty paths.</p>

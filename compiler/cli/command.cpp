@@ -28,6 +28,10 @@
 #include <utility>
 #include <vector>
 
+#if !defined(_WIN32)
+#include <sys/wait.h>
+#endif
+
 namespace walk::cli {
 namespace {
 
@@ -883,6 +887,66 @@ int run_passthrough(const std::string& executable, const std::vector<std::string
     return std::system(command.str().c_str());
 }
 
+std::string process_failure_message(const std::string& label, int status) {
+    if (status == -1) {
+        return label + " failed: process launch failed";
+    }
+#if defined(_WIN32)
+    return label + " failed with status " + std::to_string(status);
+#else
+    const auto signal_name = [](int signal) -> std::string {
+        switch (signal) {
+#if defined(SIGABRT)
+        case SIGABRT:
+            return "SIGABRT";
+#endif
+#if defined(SIGALRM)
+        case SIGALRM:
+            return "SIGALRM";
+#endif
+#if defined(SIGBUS)
+        case SIGBUS:
+            return "SIGBUS";
+#endif
+#if defined(SIGFPE)
+        case SIGFPE:
+            return "SIGFPE";
+#endif
+#if defined(SIGILL)
+        case SIGILL:
+            return "SIGILL";
+#endif
+#if defined(SIGKILL)
+        case SIGKILL:
+            return "SIGKILL";
+#endif
+#if defined(SIGSEGV)
+        case SIGSEGV:
+            return "SIGSEGV";
+#endif
+#if defined(SIGTERM)
+        case SIGTERM:
+            return "SIGTERM";
+#endif
+        default:
+            return "";
+        }
+    };
+    if (WIFEXITED(status)) {
+        return label + " failed with exit status " + std::to_string(WEXITSTATUS(status));
+    }
+    if (WIFSIGNALED(status)) {
+        const int signal = WTERMSIG(status);
+        const std::string name = signal_name(signal);
+        if (!name.empty()) {
+            return label + " terminated by signal " + std::to_string(signal) + " (" + name + ")";
+        }
+        return label + " terminated by signal " + std::to_string(signal);
+    }
+    return label + " failed with status " + std::to_string(status);
+#endif
+}
+
 int run_capture(const std::string& executable, const std::filesystem::path& stdout_path, const std::filesystem::path& stderr_path) {
     const std::string command = shell_quote(executable) + " > " + shell_quote(stdout_path.string()) + " 2> " + shell_quote(stderr_path.string());
     return std::system(command.c_str());
@@ -1031,7 +1095,7 @@ CommandResult project_test_command(const std::vector<std::string>& args) {
         }
         if (const int code = run_passthrough(exe.string()); code != 0) {
             std::filesystem::remove_all(dir);
-            return {kDiagnosticExitCode, "", warning_stderr + format_simple_error("W5005", "tests failed")};
+            return {kDiagnosticExitCode, "", warning_stderr + format_simple_error("W5005", process_failure_message("tests", code))};
         }
         std::filesystem::remove_all(dir);
     }
@@ -1223,7 +1287,7 @@ CommandResult run_command(const std::vector<std::string>& args) {
     }
     if (const int code = run_passthrough(exe.string(), parsed->program_args); code != 0) {
         std::filesystem::remove_all(dir);
-        return {kDiagnosticExitCode, "", compiled->warning_stderr + format_simple_error("W5004", "program failed")};
+        return {kDiagnosticExitCode, "", compiled->warning_stderr + format_simple_error("W5004", process_failure_message("program", code))};
     }
     std::filesystem::remove_all(dir);
     return {0, "", compiled->warning_stderr};
@@ -1252,7 +1316,7 @@ CommandResult test_command(const std::vector<std::string>& args) {
     }
     if (const int code = run_passthrough(exe.string()); code != 0) {
         std::filesystem::remove_all(dir);
-        return {kDiagnosticExitCode, "", compiled->warning_stderr + format_simple_error("W5005", "tests failed")};
+        return {kDiagnosticExitCode, "", compiled->warning_stderr + format_simple_error("W5005", process_failure_message("tests", code))};
     }
     std::filesystem::remove_all(dir);
     return {0, "", compiled->warning_stderr};

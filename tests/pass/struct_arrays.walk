@@ -1,0 +1,28 @@
+imp: array
+imp: row_factory
+
+var: rows array[ManifestRow] = []
+rows = array.push(rows, ManifestRow('root.txt', 5))
+rows = array.push(rows, ManifestRow('train.txt', 13))
+
+out: array.len(rows)
+out: rows[0].path
+out: rows[1].tokens
+
+rows[0].tokens = + rows[0].tokens 7
+out: rows[0].tokens
+
+var: total = 0
+for: row in rows
+    total = + total row.tokens
+out: total
+
+var: imported = row_factory.sample_rows()
+out: array.len(imported)
+out: imported[1].path
+out: imported[1].tokens
+
+var: batch = row_factory.sample_batch()
+out: batch.label
+out: array.len(batch.rows)
+out: batch.rows[0].path

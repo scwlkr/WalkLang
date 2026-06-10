@@ -209,6 +209,38 @@ WalkArrayString walk_rt_string_split(WalkString text, WalkString sep) {
     return (WalkArrayString){items, count};
 }
 
+WalkString walk_rt_string_join(WalkArrayString parts, WalkString sep) {
+    if (sep == NULL) { sep = ""; }
+    if (parts.len <= 0) { return ""; }
+    const size_t sep_len = strlen(sep);
+    size_t total = 0;
+    for (WalkSize i = 0; i < parts.len; i++) {
+        WalkString part = parts.items[i] == NULL ? "" : parts.items[i];
+        const size_t part_len = strlen(part);
+        if (part_len > ((size_t)-1) - total) { walk_rt_panic("out of memory"); }
+        total += part_len;
+        if (i + 1 < parts.len) {
+            if (sep_len > ((size_t)-1) - total) { walk_rt_panic("out of memory"); }
+            total += sep_len;
+        }
+    }
+    char *out = (char *)malloc(total + 1);
+    if (out == NULL) { walk_rt_panic("out of memory"); }
+    char *write = out;
+    for (WalkSize i = 0; i < parts.len; i++) {
+        WalkString part = parts.items[i] == NULL ? "" : parts.items[i];
+        const size_t part_len = strlen(part);
+        memcpy(write, part, part_len);
+        write += part_len;
+        if (i + 1 < parts.len && sep_len > 0) {
+            memcpy(write, sep, sep_len);
+            write += sep_len;
+        }
+    }
+    *write = '\0';
+    return out;
+}
+
 WalkString walk_rt_string_replace(WalkString text, WalkString from, WalkString to) {
     if (text == NULL) { text = ""; }
     if (from == NULL) { from = ""; }
@@ -848,6 +880,48 @@ void walk_rt_file_append(WalkString path, WalkString text) {
 
 FileActionResult walk_rt_file_try_append(WalkString path, WalkString text) {
     WalkString error = walk_rt_file_write_try_error(path, text, "ab", "file append failed");
+    WalkBool ok = error[0] == '\0';
+    return (FileActionResult){.ok = ok, .value = ok, .error = error};
+}
+
+static WALK_UNUSED WalkString walk_rt_file_write_chunks_try_error(WalkString path, WalkArrayString chunks, const char *mode, const char *failure) {
+    if (path == NULL || path[0] == '\0') { return "file path empty"; }
+    for (WalkSize i = 0; i < chunks.len; i++) {
+        WalkString chunk = chunks.items[i];
+        if (chunk == NULL || !walk_rt_is_valid_utf8(chunk)) { return "file invalid utf-8"; }
+    }
+    FILE *file = fopen(path, mode);
+    if (file == NULL) { return failure; }
+    for (WalkSize i = 0; i < chunks.len; i++) {
+        WalkString chunk = chunks.items[i];
+        size_t len = strlen(chunk);
+        if (len > 0 && fwrite(chunk, 1, len, file) != len) {
+            fclose(file);
+            return failure;
+        }
+    }
+    if (fclose(file) != 0) { return failure; }
+    return "";
+}
+
+void walk_rt_file_write_chunks(WalkString path, WalkArrayString chunks) {
+    WalkString error = walk_rt_file_write_chunks_try_error(path, chunks, "wb", "file write failed");
+    if (error[0] != '\0') { walk_rt_panic(error); }
+}
+
+FileActionResult walk_rt_file_try_write_chunks(WalkString path, WalkArrayString chunks) {
+    WalkString error = walk_rt_file_write_chunks_try_error(path, chunks, "wb", "file write failed");
+    WalkBool ok = error[0] == '\0';
+    return (FileActionResult){.ok = ok, .value = ok, .error = error};
+}
+
+void walk_rt_file_append_chunks(WalkString path, WalkArrayString chunks) {
+    WalkString error = walk_rt_file_write_chunks_try_error(path, chunks, "ab", "file append failed");
+    if (error[0] != '\0') { walk_rt_panic(error); }
+}
+
+FileActionResult walk_rt_file_try_append_chunks(WalkString path, WalkArrayString chunks) {
+    WalkString error = walk_rt_file_write_chunks_try_error(path, chunks, "ab", "file append failed");
     WalkBool ok = error[0] == '\0';
     return (FileActionResult){.ok = ok, .value = ok, .error = error};
 }

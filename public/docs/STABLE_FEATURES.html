@@ -115,6 +115,7 @@ out: string.slice(&#39;walklang&#39;, 4, 99)
 out: string.prefix(&#39;walklang&#39;, 4)
 out: string.concat(&#39;walk&#39;, &#39;lang&#39;)
 out: string.lower(&#39;Hi WALK&#39;)
+out: string.join(words, &#39;::&#39;)
 out: string.replace(&#39;banana&#39;, &#39;na&#39;, &#39;NA&#39;)
 out: random.choice(words)</code></pre>
 <h2 id="module-rules">Module Rules</h2>
@@ -134,7 +135,8 @@ out: math_extra.cube(3)</code></pre>
 <li>Imported calls stay namespaced: <code>math_extra.cube(3)</code>.</li>
 <li>Only functions named by <code>exp:</code> are callable from another file.</li>
 <li>Private helper functions may be used inside the module but not through the imported namespace.</li>
-<li>Module files may contain only <code>imp:</code>, <code>func:</code>, and <code>exp:</code> at top level.</li>
+<li>Module files may contain <code>imp:</code>, <code>struct:</code>, <code>func:</code>, <code>test:</code>, and <code>exp:</code> at top level.</li>
+<li>Imported module <code>test:</code> blocks are checked but not run by the importer; run <code>walk test module.walk</code> to execute them directly.</li>
 </ul>
 <h2 id="stable-built-in-apis">Stable Built-In APIs</h2>
 <pre><code class="language-text">math.sqrt(number) -&gt; float
@@ -150,6 +152,7 @@ string.contains(string, string) -&gt; bool
 string.concat(string, string) -&gt; string
 string.lower(string) -&gt; string
 string.split(string, string) -&gt; array[string]
+string.join(array[string], string) -&gt; string
 string.replace(string, string, string) -&gt; string
 array.len(array[T]) -&gt; int
 array.contains(array[T], T) -&gt; bool
