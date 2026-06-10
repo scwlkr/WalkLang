@@ -34,7 +34,7 @@ standard platform
   WalkLang-built tool
 ```
 
-Current release state: `v6.4.0` is the current local release. It proves `walk`
+Current release state: `v6.4.0` is the current public release. It proves `walk`
 builds from C++/C, the docs site is static HTML/CSS without JavaScript assets,
 repo-local install/release packaging no longer depends on Go, and the
 PicoNet-driven struct-array, module-test, chunked text, and runtime diagnostic
@@ -73,6 +73,10 @@ installed walk run --warnings=error tests/pass/struct_arrays.walk passed
 installed walk run --warnings=error tests/runtime_modules/file.walk passed
 PicoNet width-16 1024-step SFT completed with the repo-local v6.4.0 walk and saved checkpoints/chat.pn
 PicoNet width-32 512-step SFT reported error[W5004]: program terminated by signal 9 (SIGKILL)
+git push origin main pushed db7bc7c
+git tag -a v6.4.0 and git push origin v6.4.0 passed
+gh release create v6.4.0 published https://github.com/scwlkr/WalkLang/releases/tag/v6.4.0 with walk, runtime, walktop, and SHA256SUMS assets
+gh issue list --state open returned []
 ```
 
 v6.3.3 release verification on 2026-05-31:

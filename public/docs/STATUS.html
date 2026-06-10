@@ -74,7 +74,7 @@ experimental
 standard platform
   CLI standard-platform slice with `walktop` as the first official standalone
   WalkLang-built tool</code></pre>
-<p>Current release state: <code>v6.4.0</code> is the current local release. It proves <code>walk</code> builds from C++/C, the docs site is static HTML/CSS without JavaScript assets, repo-local install/release packaging no longer depends on Go, and the PicoNet-driven struct-array, module-test, chunked text, and runtime diagnostic issues work through native execution. <code>walktop</code> remains under <code>tools/walktop/</code> as a real WalkLang project and standalone native command.</p>
+<p>Current release state: <code>v6.4.0</code> is the current public release. It proves <code>walk</code> builds from C++/C, the docs site is static HTML/CSS without JavaScript assets, repo-local install/release packaging no longer depends on Go, and the PicoNet-driven struct-array, module-test, chunked text, and runtime diagnostic issues work through native execution. <code>walktop</code> remains under <code>tools/walktop/</code> as a real WalkLang project and standalone native command.</p>
 <p>Conformance state on 2026-06-09: <code>tests/conformance/</code> preserves the recorded oracle and current post-port fixture coverage. The manifest covers 24 pass fixtures, 64 fail fixtures, 4 compatibility fixtures, 12 runtime-module fixtures, 3 generated-C snapshot fixtures, and 4 <code>walktop</code> fixture groups. <code>make conformance</code> now builds the active C++/C <code>build/walk</code> binary and verifies it against those recorded artifacts.</p>
 <p>v6.4.0 release verification on 2026-06-09:</p>
 <pre><code class="language-text">make clean passed
@@ -98,7 +98,11 @@ NO_COLOR=1 walktop --once --fixture tools/walktop/testdata/basic passed
 installed walk run --warnings=error tests/pass/struct_arrays.walk passed
 installed walk run --warnings=error tests/runtime_modules/file.walk passed
 PicoNet width-16 1024-step SFT completed with the repo-local v6.4.0 walk and saved checkpoints/chat.pn
-PicoNet width-32 512-step SFT reported error[W5004]: program terminated by signal 9 (SIGKILL)</code></pre>
+PicoNet width-32 512-step SFT reported error[W5004]: program terminated by signal 9 (SIGKILL)
+git push origin main pushed db7bc7c
+git tag -a v6.4.0 and git push origin v6.4.0 passed
+gh release create v6.4.0 published https://github.com/scwlkr/WalkLang/releases/tag/v6.4.0 with walk, runtime, walktop, and SHA256SUMS assets
+gh issue list --state open returned []</code></pre>
 <p>v6.3.3 release verification on 2026-05-31:</p>
 <pre><code class="language-text">make clean passed
 make walk WALK_VERSION=v6.3.3 passed
