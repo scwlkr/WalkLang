@@ -79,6 +79,23 @@ gh release create v6.4.0 published https://github.com/scwlkr/WalkLang/releases/t
 gh issue list --state open returned []
 ```
 
+GitHub issue audit on 2026-06-10:
+
+```text
+gh issue list --repo scwlkr/WalkLang --state open --limit 100 returned []
+issues #3, #4, #5, and #6 remain closed against db7bc7c / v6.4.0
+make walk WALK_VERSION=v6.4.0 passed
+./build/walk version reported v6.4.0
+./build/walk run --warnings=error tests/pass/struct_arrays.walk passed
+./build/walk run --warnings=error tests/pass/module_with_tests.walk passed
+./build/walk test --warnings=error tests/pass/testable_module.walk passed with 1 module-local test
+./build/walk run --warnings=error tests/runtime_modules/file.walk passed
+./build/walk run --warnings=error examples/large_text_stream.walk wrote 20 MiB to large-text-stream.txt
+make test WALK_VERSION=v6.4.0 passed
+make conformance WALK_VERSION=v6.4.0 passed with 24 pass fixtures, 64 fail fixtures, 41 native executions, 4 compat fixtures, 12 runtime module fixtures, 3 snapshot fixtures, and 4 walktop fixture groups
+WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed and reported compatibility stress ok
+```
+
 v6.3.3 release verification on 2026-05-31:
 
 ```text
