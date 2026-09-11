@@ -99,9 +99,15 @@ WalkBool walk_platform_chdir(WalkString path) {
 }
 
 WalkString walk_platform_temp_path(void) {
-    char path[] = "/tmp/walklang-process-XXXXXX";
+    const char *tmpdir = getenv("TMPDIR");
+    if (tmpdir == NULL || tmpdir[0] == '\0') { tmpdir = "/tmp"; }
+    size_t dir_len = strlen(tmpdir);
+    size_t path_len = dir_len + 1 + strlen("walklang-process-XXXXXX") + 1;
+    char *path = (char *)malloc(path_len);
+    if (path == NULL) { return NULL; }
+    snprintf(path, path_len, "%s/walklang-process-XXXXXX", tmpdir);
     int fd = mkstemp(path);
-    if (fd < 0) { return NULL; }
+    if (fd < 0) { free(path); return NULL; }
     close(fd);
     return walk_platform_copy_string(path);
 }
