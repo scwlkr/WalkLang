@@ -12,13 +12,13 @@ release or local build label you installed.
 
 ## Release Artifact Install
 
-Release artifacts are produced by `scripts/release.sh`. The v6.3.3 release
+Release artifacts are produced by `scripts/release.sh`. The v6.4.1 release
 path is C++/C-only and writes current-host artifacts:
 
 ```text
-walk-v6.3.3-<host-os>-<host-arch>
-walk-runtime-v6.3.3.tar.gz
-walktop-v6.3.3-<host-os>-<host-arch>
+walk-v6.4.1-<host-os>-<host-arch>
+walk-runtime-v6.4.1.tar.gz
+walktop-v6.4.1-<host-os>-<host-arch>
 SHA256SUMS
 ```
 
@@ -30,9 +30,9 @@ Install on macOS or Linux:
 
 ```bash
 mkdir -p ~/.local/bin ~/.local/lib/walk
-cp walk-v6.3.3-<os>-<arch> ~/.local/bin/walk
-cp walktop-v6.3.3-<os>-<arch> ~/.local/bin/walktop
-tar -xzf walk-runtime-v6.3.3.tar.gz -C ~/.local/lib/walk
+cp walk-v6.4.1-<os>-<arch> ~/.local/bin/walk
+cp walktop-v6.4.1-<os>-<arch> ~/.local/bin/walktop
+tar -xzf walk-runtime-v6.4.1.tar.gz -C ~/.local/lib/walk
 chmod +x ~/.local/bin/walk ~/.local/bin/walktop
 walk version
 NO_COLOR=1 walktop --once

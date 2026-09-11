@@ -38,9 +38,9 @@ out: add(2, 3)
 
 ## Current Version
 
-WalkLang is currently `v6.3.3`.
+WalkLang is currently `v6.4.1`.
 
-`v6.3.3` keeps the completed C++/C compiler release line, keeps stable
+`v6.4.1` keeps the completed C++/C compiler release line, keeps stable
 `math.remainder(int, int) -> int`, and upgrades TinyChain into a more polished
 terminal showcase. The repo-local `walk` binary is built from C++ sources,
 generated programs link with the Walk C runtime, and features inside a release
