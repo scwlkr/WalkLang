@@ -1,6 +1,6 @@
 # WalkLang Status
 
-Current WalkLang version: `v6.4.0`.
+Current WalkLang version: `v6.4.1`.
 
 Current architecture direction on 2026-05-26: `docs/SYSTEMS_COMPILER_PORT_PLAN.md`
 is the accepted execution contract for the systems architecture: C++ compiler

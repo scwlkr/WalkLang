@@ -63,17 +63,17 @@
 source install for local development</code></pre>
 <p>Use <code>walk version</code> after either path. The reported version should match the release or local build label you installed.</p>
 <h2 id="release-artifact-install">Release Artifact Install</h2>
-<p>Release artifacts are produced by <code>scripts/release.sh</code>. The v6.3.3 release path is C++/C-only and writes current-host artifacts:</p>
-<pre><code class="language-text">walk-v6.3.3-&lt;host-os&gt;-&lt;host-arch&gt;
-walk-runtime-v6.3.3.tar.gz
-walktop-v6.3.3-&lt;host-os&gt;-&lt;host-arch&gt;
+<p>Release artifacts are produced by <code>scripts/release.sh</code>. The v6.4.1 release path is C++/C-only and writes current-host artifacts:</p>
+<pre><code class="language-text">walk-v6.4.1-&lt;host-os&gt;-&lt;host-arch&gt;
+walk-runtime-v6.4.1.tar.gz
+walktop-v6.4.1-&lt;host-os&gt;-&lt;host-arch&gt;
 SHA256SUMS</code></pre>
 <p>The release script builds <code>walk</code> from C++ sources, packages the C runtime source, builds <code>walktop</code> through the newly built <code>walk</code>, and checksums each artifact.</p>
 <p>Install on macOS or Linux:</p>
 <pre><code class="language-bash">mkdir -p ~/.local/bin ~/.local/lib/walk
-cp walk-v6.3.3-&lt;os&gt;-&lt;arch&gt; ~/.local/bin/walk
-cp walktop-v6.3.3-&lt;os&gt;-&lt;arch&gt; ~/.local/bin/walktop
-tar -xzf walk-runtime-v6.3.3.tar.gz -C ~/.local/lib/walk
+cp walk-v6.4.1-&lt;os&gt;-&lt;arch&gt; ~/.local/bin/walk
+cp walktop-v6.4.1-&lt;os&gt;-&lt;arch&gt; ~/.local/bin/walktop
+tar -xzf walk-runtime-v6.4.1.tar.gz -C ~/.local/lib/walk
 chmod +x ~/.local/bin/walk ~/.local/bin/walktop
 walk version
 NO_COLOR=1 walktop --once</code></pre>
