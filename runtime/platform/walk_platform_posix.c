@@ -109,5 +109,7 @@ WalkString walk_platform_temp_path(void) {
     int fd = mkstemp(path);
     if (fd < 0) { free(path); return NULL; }
     close(fd);
-    return walk_platform_copy_string(path);
+    WalkString result = walk_platform_copy_string(path);
+    free(path);
+    return result;
 }
