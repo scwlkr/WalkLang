@@ -28,6 +28,7 @@ only**. Other systems should use the source install below.
 ```bash
 # Download and install (macOS Apple Silicon)
 (
+  set -e
   cd "$(mktemp -d)"
   curl -fLO https://github.com/scwlkr/WalkLang/releases/download/v6.4.1/SHA256SUMS
   curl -fLO https://github.com/scwlkr/WalkLang/releases/download/v6.4.1/walk-v6.4.1-darwin-arm64
