@@ -22,21 +22,25 @@ full instructions.
 
 ### Release artifact install
 
-Release artifacts are produced by `scripts/release.sh` and are
-**current-host only** — the v6.4.1 release path writes artifacts for the
-build host's OS and architecture. No prebuilt binaries for other platforms
-are observed in the repository.
+The v6.4.1 release provides prebuilt binaries for **macOS Apple Silicon
+only**. Other systems should use the source install below.
 
 ```bash
-# Verify checksums before installing
-shasum -a 256 -c SHA256SUMS
-
-# Install on macOS or Linux
-mkdir -p ~/.local/bin ~/.local/lib/walk
-cp walk-v6.4.1-<os>-<arch> ~/.local/bin/walk
-cp walktop-v6.4.1-<os>-<arch> ~/.local/bin/walktop
-tar -xzf walk-runtime-v6.4.1.tar.gz -C ~/.local/lib/walk
-chmod +x ~/.local/bin/walk ~/.local/bin/walktop
+# Download and install (macOS Apple Silicon)
+(
+  cd "$(mktemp -d)"
+  curl -fLO https://github.com/scwlkr/WalkLang/releases/download/v6.4.1/SHA256SUMS
+  curl -fLO https://github.com/scwlkr/WalkLang/releases/download/v6.4.1/walk-v6.4.1-darwin-arm64
+  curl -fLO https://github.com/scwlkr/WalkLang/releases/download/v6.4.1/walktop-v6.4.1-darwin-arm64
+  curl -fLO https://github.com/scwlkr/WalkLang/releases/download/v6.4.1/walk-runtime-v6.4.1.tar.gz
+  shasum -a 256 -c SHA256SUMS
+  mkdir -p ~/.local/bin ~/.local/lib/walk
+  cp walk-v6.4.1-darwin-arm64 ~/.local/bin/walk
+  cp walktop-v6.4.1-darwin-arm64 ~/.local/bin/walktop
+  tar -xzf walk-runtime-v6.4.1.tar.gz -C ~/.local/lib/walk
+  chmod +x ~/.local/bin/walk ~/.local/bin/walktop
+)
+export PATH="$HOME/.local/bin:$PATH"
 walk version
 NO_COLOR=1 walktop --once
 ```
@@ -44,7 +48,10 @@ NO_COLOR=1 walktop --once
 ### Source install
 
 ```bash
+git clone https://github.com/scwlkr/WalkLang.git
+cd WalkLang
 scripts/install-local.sh local
+export PATH="$HOME/.local/bin:$PATH"
 walk version
 NO_COLOR=1 walktop --once --fixture tools/walktop/testdata/basic
 ```
@@ -84,7 +91,7 @@ walk test examples/compiler_tests.walk
 walk build tests/pass/structs.walk -o build/structs
 walk build tests/pass/methods.walk -o build/methods
 walk build tests/pass/generics.walk -o build/generics
-cd examples/tinychain && ../../build/walk test && ../../build/walk run src/main.walk
+(cd examples/tinychain && ../../build/walk test && ../../build/walk run src/main.walk)
 NO_COLOR=1 walktop --once
 ```
 
