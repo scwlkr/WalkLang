@@ -33,3 +33,12 @@ Tall Talents is paused globally. For ordinary WalkLang roadmap phases, follow th
 
 - WalkLang source code will be located on github
 - WalkLang will have an official minimal website at walklang.wlkrlabs.com
+
+## Linear work queue
+
+- Team: **WLKR LABS**.
+- Project: [WalkLang](https://linear.app/wlkr-labs/project/walklang-5e79443d2710).
+- Linear is the task source of truth. Existing GitHub issues and Markdown plans are historical context; this section supersedes older tracker or backlog guidance.
+- Before starting substantive work, read the Linear issue and discussion and check for existing work. Find or create a Linear issue for substantive user-requested work, not every question or minor action.
+- Keep status current, include the issue ID in branches and PRs, and post concise outcomes or blockers. Mark Done only when completion criteria are met.
+- Do not maintain a competing Markdown backlog or import or sync GitHub issues.
