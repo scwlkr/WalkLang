@@ -2,6 +2,30 @@
 
 Current WalkLang version: `v6.4.1`.
 
+Runtime correctness verification on 2026-10-09 (WLK-159): the unreleased
+`random.int` fix handles full and wide signed 64-bit ranges using unsigned
+arithmetic, rejection sampling, and defined signed conversion. Singleton and
+reversed bounds retain their existing results. The generated-C regression
+fails on the original runtime under UndefinedBehaviorSanitizer with signed
+overflow, then passes with the fix. A private-state C test proves a rejected
+draw and full-range mapping without adding a public seed API.
+
+Local verification on macOS arm64:
+
+```text
+make test WALK_VERSION=v6.4.1 passed, including sanitized native range tests
+build/walk test --warnings=error tests/runtime/random_int.walk passed (4 tests)
+make conformance WALK_VERSION=v6.4.1 passed (24 pass, 64 fail, 41 native,
+  4 compatibility, 12 runtime module, 3 snapshot, and 4 walktop fixture groups)
+WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed
+make release VERSION=v6.4.1 OUT=dist passed
+release checksums, packaged compiler version, and walktop fixture smoke passed
+```
+
+Next step: independently review WLK-159, require passing PR CI, merge the tested
+head, and verify the landed main revision. The project version stays `v6.4.1`;
+the fix is recorded under Unreleased until a versioned release is published.
+
 Current architecture direction on 2026-05-26: `docs/SYSTEMS_COMPILER_PORT_PLAN.md`
 is the accepted execution contract for the systems architecture: C++ compiler
 core, C runtime and platform layer, C backend, optional assembly leaf routines,

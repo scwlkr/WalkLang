@@ -2,7 +2,11 @@
 
 ## Unreleased
 
-No unreleased changes.
+### Fixed
+
+- Stable `random.int(min, max)` supports the full signed 64-bit range without
+  signed overflow or division by zero. Bounded sampling uses rejection before
+  modulo reduction; singleton and reversed bounds keep their existing behavior.
 
 ## v6.4.0 - PicoNet Runtime Issue Fixes
 

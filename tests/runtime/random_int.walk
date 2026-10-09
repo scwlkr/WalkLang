@@ -1,0 +1,63 @@
+imp: random
+
+const: high = 9223372036854775807
+const: low = - (- 0 high) 1
+const: low_end = + low 2
+const: high_start = - high 2
+
+test: 'random int endpoint and reversed bounds'
+    assert: == random.int(low, low) low
+    assert: == random.int(high, high) high
+    assert: == random.int(0, 0) 0
+    assert: == random.int(high, low) high
+    assert: == random.int(10, 1) 10
+
+test: 'random int full range varies across both signs'
+    var: negative = false
+    var: positive = false
+    repeat: 1024
+        var: sample = random.int(low, high)
+        assert: >= sample low
+        assert: <= sample high
+        if: < sample -4611686018427387904
+            negative = true
+        if: > sample 4611686018427387904
+            positive = true
+    assert: negative
+    assert: positive
+
+test: 'random int wide and endpoint ranges stay bounded'
+    repeat: 1024
+        var: negative = random.int(low, 0)
+        assert: >= negative low
+        assert: <= negative 0
+        var: positive = random.int(0, high)
+        assert: >= positive 0
+        assert: <= positive high
+        var: wide = random.int(-7000000000000000000, 7000000000000000000)
+        assert: >= wide -7000000000000000000
+        assert: <= wide 7000000000000000000
+        var: near_low = random.int(low, low_end)
+        assert: >= near_low low
+        assert: <= near_low low_end
+        var: near_high = random.int(high_start, high)
+        assert: >= near_high high_start
+        assert: <= near_high high
+
+test: 'random int small range reaches every value'
+    var: minus_one = false
+    var: zero = false
+    var: one = false
+    repeat: 1024
+        var: sample = random.int(-1, 1)
+        assert: >= sample -1
+        assert: <= sample 1
+        if: == sample -1
+            minus_one = true
+        if: == sample 0
+            zero = true
+        if: == sample 1
+            one = true
+    assert: minus_one
+    assert: zero
+    assert: one

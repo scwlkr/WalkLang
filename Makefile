@@ -86,6 +86,7 @@ TEST_CPP_SOURCES := \
 
 TEST_CPP_OBJECTS := $(TEST_CPP_SOURCES:%.cpp=$(CPP_BUILD_DIR)/%.o)
 TEST_CPP_BIN := $(CPP_BUILD_DIR)/walk-tests
+RANDOM_INT_TEST_BIN := $(BUILD_DIR)/runtime-tests/random-int
 
 .PHONY: walk test conformance docs check-docs release install-local clean FORCE
 
@@ -103,8 +104,13 @@ $(CPP_BUILD_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
-test: $(TEST_CPP_BIN)
+test: $(TEST_CPP_BIN) $(RANDOM_INT_TEST_BIN)
 	$(TEST_CPP_BIN)
+	$(RANDOM_INT_TEST_BIN)
+
+$(RANDOM_INT_TEST_BIN): tests/runtime/random_int.c runtime/walk_runtime.c runtime/walk_runtime.h runtime/platform/walk_platform_posix.c runtime/platform/walk_platform.h
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -fsanitize=undefined -fno-sanitize-recover=undefined tests/runtime/random_int.c runtime/platform/walk_platform_posix.c -lm -o $@
 
 $(TEST_CPP_BIN): $(TEST_CPP_OBJECTS)
 	@mkdir -p $(dir $@)
@@ -127,4 +133,4 @@ install-local:
 	scripts/install-local.sh "$(VERSION)"
 
 clean:
-	rm -rf $(BUILD_DIR)/cpp $(CPP_TEST_TMP) $(WALK) $(WALK_VERSION_FILE)
+	rm -rf $(BUILD_DIR)/cpp $(CPP_TEST_TMP) $(BUILD_DIR)/runtime-tests $(WALK) $(WALK_VERSION_FILE)

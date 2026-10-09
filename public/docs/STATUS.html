@@ -59,6 +59,16 @@
 <article class="doc">
 <h1 id="walklang-status">WalkLang Status</h1>
 <p>Current WalkLang version: <code>v6.4.1</code>.</p>
+<p>Runtime correctness verification on 2026-10-09 (WLK-159): the unreleased <code>random.int</code> fix handles full and wide signed 64-bit ranges using unsigned arithmetic, rejection sampling, and defined signed conversion. Singleton and reversed bounds retain their existing results. The generated-C regression fails on the original runtime under UndefinedBehaviorSanitizer with signed overflow, then passes with the fix. A private-state C test proves a rejected draw and full-range mapping without adding a public seed API.</p>
+<p>Local verification on macOS arm64:</p>
+<pre><code class="language-text">make test WALK_VERSION=v6.4.1 passed, including sanitized native range tests
+build/walk test --warnings=error tests/runtime/random_int.walk passed (4 tests)
+make conformance WALK_VERSION=v6.4.1 passed (24 pass, 64 fail, 41 native,
+  4 compatibility, 12 runtime module, 3 snapshot, and 4 walktop fixture groups)
+WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh passed
+make release VERSION=v6.4.1 OUT=dist passed
+release checksums, packaged compiler version, and walktop fixture smoke passed</code></pre>
+<p>Next step: independently review WLK-159, require passing PR CI, merge the tested head, and verify the landed main revision. The project version stays <code>v6.4.1</code>; the fix is recorded under Unreleased until a versioned release is published.</p>
 <p>Current architecture direction on 2026-05-26: <code>docs/SYSTEMS_COMPILER_PORT_PLAN.md</code> is the accepted execution contract for the systems architecture: C++ compiler core, C runtime and platform layer, C backend, optional assembly leaf routines, and no final Go or JavaScript implementation footprint. Phases 1 through 12 are complete. The systems compiler port is complete.</p>
 <p><code>v6.4.0</code> keeps the completed C++/C systems compiler release line and resolves the open PicoNet-driven GitHub issues around struct-array append, module-local tests, scalable text output, and native runtime failure diagnostics. The repo-local <code>walk</code> binary builds from C++ sources, generated programs link with the Walk C runtime, the former Go reference implementation and Go module metadata are removed, JavaScript source files are removed, and the current language surface is verified against the recorded conformance oracle. Feature maturity is described with status labels instead of separate version lines.</p>
 <p>Current feature status:</p>

@@ -335,7 +335,9 @@ out: > time.now() 0
 Stability: stable. Effect status: pure expression.
 
 Returns an integer in the inclusive range. If `max < min`, WalkLang returns
-`min`.
+`min`. All valid `int` bounds are supported, including the full signed 64-bit
+range. Bounded sampling discards the incomplete remainder bucket before
+reducing the PRNG output to the requested range.
 
 `random.int`, `random.float`, and `random.choice` use a runtime-owned PRNG
 seeded once per native process. WalkLang does not expose manual seeding.
