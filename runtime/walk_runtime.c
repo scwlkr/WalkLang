@@ -88,7 +88,19 @@ static WALK_UNUSED unsigned long long walk_rt_random_next(void) {
 
 WalkInt walk_rt_random_int(WalkInt min, WalkInt max) {
     if (max < min) { return min; }
-    return min + (WalkInt)(walk_rt_random_next() % (unsigned long long)(max - min + 1));
+    /* Unsigned arithmetic also represents the full range: its size wraps to 0. */
+    const unsigned long long span = (unsigned long long)max - (unsigned long long)min + 1ULL;
+    unsigned long long sample = walk_rt_random_next();
+    if (span != 0) {
+        /* Reject the incomplete bucket so modulo does not favor smaller offsets. */
+        const unsigned long long threshold = (0ULL - span) % span;
+        while (sample < threshold) { sample = walk_rt_random_next(); }
+        sample %= span;
+    }
+    const unsigned long long result = (unsigned long long)min + sample;
+    if (result <= (unsigned long long)LLONG_MAX) { return (WalkInt)result; }
+    /* Convert the negative half without an out-of-range unsigned-to-signed cast. */
+    return -1 - (WalkInt)(ULLONG_MAX - result);
 }
 
 WalkFloat walk_rt_random_float(WalkFloat min, WalkFloat max) {

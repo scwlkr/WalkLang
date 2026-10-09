@@ -195,7 +195,7 @@ out: &gt; time.now() 0</code></pre>
 <h2 id="random">random</h2>
 <h3 id="random-int-int-int-int">random.int(int, int) -&gt; int</h3>
 <p>Stability: stable. Effect status: pure expression.</p>
-<p>Returns an integer in the inclusive range. If <code>max &lt; min</code>, WalkLang returns <code>min</code>.</p>
+<p>Returns an integer in the inclusive range. If <code>max &lt; min</code>, WalkLang returns <code>min</code>. All valid <code>int</code> bounds are supported, including the full signed 64-bit range. Bounded sampling discards the incomplete remainder bucket before reducing the PRNG output to the requested range.</p>
 <p><code>random.int</code>, <code>random.float</code>, and <code>random.choice</code> use a runtime-owned PRNG seeded once per native process. WalkLang does not expose manual seeding.</p>
 <pre><code class="language-walk">imp: random
 out: random.int(1, 10)</code></pre>
