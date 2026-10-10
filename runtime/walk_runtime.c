@@ -106,7 +106,17 @@ WalkInt walk_rt_random_int(WalkInt min, WalkInt max) {
 WalkFloat walk_rt_random_float(WalkFloat min, WalkFloat max) {
     if (max < min) { return min; }
     const double unit = (double)(walk_rt_random_next() >> 11) * (1.0 / 9007199254740992.0);
-    return min + (max - min) * unit;
+    const WalkBool finite_bounds = isfinite(min) && isfinite(max);
+    double result;
+    if (finite_bounds && min < 0 && max > 0) {
+        /* Opposite-sign finite bounds can have an overflowing difference. */
+        result = (1.0 - unit) * min + unit * max;
+    } else {
+        result = min + (max - min) * unit;
+    }
+    /* Rounding can reach the excluded endpoint, even though unit is below 1. */
+    if (finite_bounds && min < max && result >= max) { result = nextafter(max, min); }
+    return result;
 }
 
 static WALK_UNUSED WalkSize walk_rt_random_index(WalkSize len) {

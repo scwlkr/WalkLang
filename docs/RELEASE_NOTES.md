@@ -4,6 +4,10 @@
 
 ### Fixed
 
+- Stable `random.float(min, max)` keeps samples finite for finite bounds whose
+  difference would overflow, and excludes `max` when rounding reaches the
+  upper endpoint. Adjacent representable bounds return `min`; singleton and
+  reversed bounds retain their existing results.
 - Stable `random.int(min, max)` supports the full signed 64-bit range without
   signed overflow or division by zero. Bounded sampling uses rejection before
   modulo reduction; singleton and reversed bounds keep their existing behavior.

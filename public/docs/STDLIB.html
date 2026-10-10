@@ -201,7 +201,8 @@ out: &gt; time.now() 0</code></pre>
 out: random.int(1, 10)</code></pre>
 <h3 id="random-float-number-number-float">random.float(number, number) -&gt; float</h3>
 <p>Stability: stable. Effect status: pure expression.</p>
-<p>Returns a uniform float in <code>[min, max)</code>. Arguments may be <code>int</code> or <code>float</code>. If <code>max &lt; min</code>, WalkLang returns <code>min</code>.</p>
+<p>Returns a uniform float in <code>[min, max)</code>. Arguments may be <code>int</code> or <code>float</code>. If <code>max &lt; min</code> or <code>max == min</code>, WalkLang returns <code>min</code>.</p>
+<p>For finite bounds with <code>min &lt; max</code>, the result is finite and strictly below <code>max</code>, even when the range width exceeds the largest finite float. If rounding would reach <code>max</code>, the result is the nearest representable float below <code>max</code> toward <code>min</code>. Adjacent representable bounds therefore return <code>min</code>.</p>
 <pre><code class="language-walk">imp: random
 out: random.float(0, 1)</code></pre>
 <h3 id="random-choice-array-t-t">random.choice(array[T]) -&gt; T</h3>
