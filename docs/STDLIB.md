@@ -351,8 +351,9 @@ out: random.int(1, 10)
 
 Stability: stable. Effect status: pure expression.
 
-Returns a uniform float in `[min, max)`. Arguments may be `int` or `float`. If
-`max < min` or `max == min`, WalkLang returns `min`.
+Returns a uniform float in `[min, max)` for finite bounds with `min < max`.
+Arguments may be `int` or `float`. If `max < min`, WalkLang returns `min`.
+Equal finite bounds also return `min`.
 
 For finite bounds with `min < max`, the result is finite and strictly below
 `max`, even when the range width exceeds the largest finite float. If rounding
