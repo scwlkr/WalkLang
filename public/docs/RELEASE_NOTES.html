@@ -61,6 +61,8 @@
 <h2 id="unreleased">Unreleased</h2>
 <h3 id="fixed">Fixed</h3>
 <ul>
+<li>Stable <code>random.float(min, max)</code> keeps samples finite for finite bounds whose</li>
+<p>difference would overflow, and excludes <code>max</code> when rounding reaches the upper endpoint. Adjacent representable bounds return <code>min</code>; singleton and reversed bounds retain their existing results.</p>
 <li>Stable <code>random.int(min, max)</code> supports the full signed 64-bit range without</li>
 <p>signed overflow or division by zero. Bounded sampling uses rejection before modulo reduction; singleton and reversed bounds keep their existing behavior.</p>
 </ul>

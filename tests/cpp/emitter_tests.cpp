@@ -259,21 +259,22 @@ void test_map_string_arrays_build_and_run() {
     expect_eq("map output", read_file(out_path), "0\n0\ntrue\nfalse\n2\npeople\nwalk\nother\nvalue\n0\n");
 }
 
-void test_random_int_ranges_build_and_run() {
+void test_random_ranges_build_and_run(const std::string& kind) {
     if (std::system("command -v cc >/dev/null 2>&1") != 0) {
         return;
     }
-    const std::string c_code = emit_source(read_file("tests/runtime/random_int.walk"), true);
-    const std::filesystem::path dir = std::filesystem::path("build") / "cpp-tests" / "random-int";
+    const std::string name = "random " + kind;
+    const std::string c_code = emit_source(read_file("tests/runtime/random_" + kind + ".walk"), true);
+    const std::filesystem::path dir = std::filesystem::path("build") / "cpp-tests" / ("random-" + kind);
     std::filesystem::create_directories(dir);
     const auto exe_path = dir / "tests";
     const auto out_path = dir / "tests.out";
     // ARM64 can mask division by zero without a trap; check arithmetic UB too.
-    build_generated_c("random int build", c_code, dir / "tests.c", exe_path,
+    build_generated_c(name + " build", c_code, dir / "tests.c", exe_path,
         "-fsanitize=undefined -fno-sanitize-recover=undefined");
     const int code = std::system((shell_quote(exe_path) + " > " + shell_quote(out_path)).c_str());
-    expect_true("random int run", code == 0, "range regression failed\n" + read_file(out_path));
-    expect_true("random int tests", read_file(out_path).find("ok 4 tests\n") != std::string::npos,
+    expect_true(name + " run", code == 0, "range regression failed\n" + read_file(out_path));
+    expect_true(name + " tests", read_file(out_path).find("ok 4 tests\n") != std::string::npos,
         "missing native test completion");
 }
 
@@ -286,7 +287,8 @@ int run_emitter_tests() {
     test_test_runner_program_builds_and_runs();
     test_string_helpers_build_and_run();
     test_numeric_ml_helpers_build_and_run();
-    test_random_int_ranges_build_and_run();
+    test_random_ranges_build_and_run("int");
+    test_random_ranges_build_and_run("float");
     test_map_string_arrays_build_and_run();
     return failures;
 }

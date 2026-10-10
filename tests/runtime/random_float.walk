@@ -1,0 +1,54 @@
+imp: random
+imp: math
+
+const: high = math.pow(10.0, 308.0)
+const: low = - 0.0 high
+const: higher = * high 1.5
+const: lower = - 0.0 higher
+
+test: 'random float keeps singleton and reversed bounds'
+    assert: == random.float(high, high) high
+    assert: == random.float(low, low) low
+    assert: == random.float(0, 0) 0
+    assert: == random.float(high, low) high
+    assert: == random.float(5, 2) 5
+
+test: 'random float wide finite range stays bounded and varies'
+    var: negative = false
+    var: positive = false
+    repeat: 1024
+        var: sample = random.float(low, high)
+        assert: >= sample low
+        assert: < sample high
+        if: < sample 0.0
+            negative = true
+        if: > sample 0.0
+            positive = true
+    assert: negative
+    assert: positive
+
+test: 'random float excludes adjacent upper endpoints'
+    repeat: 64
+        var: positive = random.float(1.0, 1.0000000000000002)
+        assert: == positive 1.0
+        assert: < positive 1.0000000000000002
+        var: negative = random.float(-1.0000000000000002, -1.0)
+        assert: == negative -1.0000000000000002
+        assert: < negative -1.0
+
+test: 'random float same sign and ordinary ranges stay bounded'
+    var: first = random.float(-2, 3)
+    var: changed = false
+    repeat: 64
+        var: positive = random.float(high, higher)
+        assert: >= positive high
+        assert: < positive higher
+        var: negative = random.float(lower, low)
+        assert: >= negative lower
+        assert: < negative low
+        var: sample = random.float(-2, 3)
+        assert: >= sample -2
+        assert: < sample 3
+        if: != sample first
+            changed = true
+    assert: changed

@@ -2,6 +2,32 @@
 
 Current WalkLang version: `v6.4.1`.
 
+Runtime correctness verification on 2026-10-10 (WLK-198): the unreleased
+`random.float` fix keeps samples finite for finite bounds whose difference
+would overflow, and excludes the upper endpoint after floating-point rounding.
+Adjacent representable bounds return the lower bound. Singleton and reversed
+bounds keep their results; nonfinite-bound behavior remains unchanged.
+
+The private-state C regression and public CLI WalkLang tests both failed on
+the original runtime and pass with the fix. Deterministic proof covers extreme
+finite bounds, adjacent values, subnormals, and singleton/reversed bounds.
+Generated-C tests also prove ordinary-range variation and both signs in a wide
+finite range. Local macOS arm64 verification passed:
+
+```text
+make test WALK_VERSION=v6.4.1, including both sanitized random runtime tests
+build/walk test --warnings=error tests/runtime/random_float.walk (4 tests)
+make conformance WALK_VERSION=v6.4.1 (24 pass, 64 fail, 41 native,
+  4 compatibility, 12 runtime module, 3 snapshot, and 4 walktop fixture groups)
+WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh
+scripts/check-docs-site.sh
+make release VERSION=v6.4.1 OUT=dist, checksums and packaged native smoke tests
+```
+
+Next release step: publish the accumulated correctness fixes in the next
+versioned release after its release checks. These fixes remain under Unreleased;
+the current project version stays `v6.4.1`.
+
 Runtime correctness verification on 2026-10-09 (WLK-159): the unreleased
 `random.int` fix handles full and wide signed 64-bit ranges using unsigned
 arithmetic, rejection sampling, and defined signed conversion. Singleton and
@@ -22,9 +48,9 @@ make release VERSION=v6.4.1 OUT=dist passed
 release checksums, packaged compiler version, and walktop fixture smoke passed
 ```
 
-Next step: independently review WLK-159, require passing PR CI, merge the tested
-head, and verify the landed main revision. The project version stays `v6.4.1`;
-the fix is recorded under Unreleased until a versioned release is published.
+WLK-159 was independently reviewed and merged in [PR #9](https://github.com/scwlkr/WalkLang/pull/9).
+Landed main `a6c2b84ce4a60dd745fb1c1e080207b7b05316ff` passed fresh local
+verification and CI.
 
 Current architecture direction on 2026-05-26: `docs/SYSTEMS_COMPILER_PORT_PLAN.md`
 is the accepted execution contract for the systems architecture: C++ compiler

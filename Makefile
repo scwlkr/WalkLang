@@ -87,6 +87,7 @@ TEST_CPP_SOURCES := \
 TEST_CPP_OBJECTS := $(TEST_CPP_SOURCES:%.cpp=$(CPP_BUILD_DIR)/%.o)
 TEST_CPP_BIN := $(CPP_BUILD_DIR)/walk-tests
 RANDOM_INT_TEST_BIN := $(BUILD_DIR)/runtime-tests/random-int
+RANDOM_FLOAT_TEST_BIN := $(BUILD_DIR)/runtime-tests/random-float
 
 .PHONY: walk test conformance docs check-docs release install-local clean FORCE
 
@@ -104,13 +105,14 @@ $(CPP_BUILD_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
-test: $(TEST_CPP_BIN) $(RANDOM_INT_TEST_BIN)
+test: $(TEST_CPP_BIN) $(RANDOM_INT_TEST_BIN) $(RANDOM_FLOAT_TEST_BIN)
 	$(TEST_CPP_BIN)
 	$(RANDOM_INT_TEST_BIN)
+	$(RANDOM_FLOAT_TEST_BIN)
 
-$(RANDOM_INT_TEST_BIN): tests/runtime/random_int.c runtime/walk_runtime.c runtime/walk_runtime.h runtime/platform/walk_platform_posix.c runtime/platform/walk_platform.h
+$(BUILD_DIR)/runtime-tests/random-%: tests/runtime/random_%.c runtime/walk_runtime.c runtime/walk_runtime.h runtime/platform/walk_platform_posix.c runtime/platform/walk_platform.h
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -fsanitize=undefined -fno-sanitize-recover=undefined tests/runtime/random_int.c runtime/platform/walk_platform_posix.c -lm -o $@
+	$(CC) $(CFLAGS) -fsanitize=undefined -fno-sanitize-recover=undefined $< runtime/platform/walk_platform_posix.c -lm -o $@
 
 $(TEST_CPP_BIN): $(TEST_CPP_OBJECTS)
 	@mkdir -p $(dir $@)
