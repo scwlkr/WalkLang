@@ -1357,11 +1357,14 @@ ParseFloatResult walk_rt_parse_float(WalkString text) {
     errno = 0;
     char *end = NULL;
     double value = strtod(text, &end);
-    if (end == text || *end != '\0' || !isfinite(value)) {
+    if (end == text || *end != '\0') {
         return (ParseFloatResult){.ok = false, .value = 0, .error = "invalid float"};
     }
     if (errno == ERANGE) {
         return (ParseFloatResult){.ok = false, .value = 0, .error = "float out of range"};
+    }
+    if (!isfinite(value)) {
+        return (ParseFloatResult){.ok = false, .value = 0, .error = "invalid float"};
     }
     return (ParseFloatResult){.ok = true, .value = (WalkFloat)value, .error = ""};
 }

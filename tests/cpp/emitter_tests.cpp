@@ -278,6 +278,23 @@ void test_random_ranges_build_and_run(const std::string& kind) {
         "missing native test completion");
 }
 
+void test_parse_float_build_and_run() {
+    if (std::system("command -v cc >/dev/null 2>&1") != 0) {
+        return;
+    }
+    const std::string c_code = emit_source(read_file("tests/runtime/parse_float.walk"), true);
+    const auto dir = std::filesystem::path("build") / "cpp-tests" / "parse-float";
+    std::filesystem::create_directories(dir);
+    const auto exe_path = dir / "tests";
+    const auto out_path = dir / "tests.out";
+    build_generated_c("parse float build", c_code, dir / "tests.c", exe_path,
+        "-fsanitize=undefined -fno-sanitize-recover=undefined");
+    const int code = std::system((shell_quote(exe_path) + " > " + shell_quote(out_path)).c_str());
+    expect_true("parse float run", code == 0, "parse regression failed\n" + read_file(out_path));
+    expect_true("parse float tests", read_file(out_path).find("ok 4 tests\n") != std::string::npos,
+        "missing native test completion");
+}
+
 }  // namespace
 
 int run_emitter_tests() {
@@ -289,6 +306,7 @@ int run_emitter_tests() {
     test_numeric_ml_helpers_build_and_run();
     test_random_ranges_build_and_run("int");
     test_random_ranges_build_and_run("float");
+    test_parse_float_build_and_run();
     test_map_string_arrays_build_and_run();
     return failures;
 }

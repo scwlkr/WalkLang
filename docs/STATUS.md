@@ -2,6 +2,20 @@
 
 Current WalkLang version: `v6.4.1`.
 
+Runtime correctness verification on 2026-10-11 (WLK-202): the unreleased draft
+`parse.float` fix reports well-formed numeric overflow as `float out of range`.
+Whole-input validation still takes precedence for malformed or whitespace
+input; explicit infinity and NaN values remain `invalid float`.
+
+Four public CLI regression tests cover signed overflow, underflow, invalid
+input, and finite parsing after a range error. The overflow cases fail against
+the original runtime and pass with the fix. Generated-C native execution with
+UndefinedBehaviorSanitizer is included in `make test`.
+
+WLK-198 was independently reviewed and merged in [PR #10](https://github.com/scwlkr/WalkLang/pull/10).
+Landed main `1c7aeb799e5e45ca98020cd1557372268423bedd` passed fresh local
+verification and CI.
+
 Runtime correctness verification on 2026-10-10 (WLK-198): the unreleased
 `random.float` fix keeps samples finite for finite bounds whose difference
 would overflow, and excludes the upper endpoint after floating-point rounding.

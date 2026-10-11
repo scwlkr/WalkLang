@@ -4,6 +4,7 @@
 
 ### Fixed
 
+- Draft `parse.float` reports well-formed numeric overflow as `float out of range`, matching underflow and the documented range-error contract. Explicit infinity/NaN values and malformed whole-input strings remain `invalid float`.
 - Stable `random.float(min, max)` keeps samples finite for finite bounds whose
   difference would overflow, and excludes `max` when rounding reaches the
   upper endpoint. Adjacent representable bounds return `min`; singleton and
