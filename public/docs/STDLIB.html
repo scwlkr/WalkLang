@@ -344,7 +344,11 @@ struct: ParseBoolResult
 <p>Parses a base-10 integer with an optional leading sign. Invalid input returns <code>error &#39;invalid int&#39;</code>; overflow returns <code>error &#39;int out of range&#39;</code>.</p>
 <h3 id="parse-float-string-parsefloatresult">parse.float(string) -&gt; ParseFloatResult</h3>
 <p>Failure policy: recoverable result data.</p>
-<p>Parses a finite floating-point number. Invalid input returns <code>error &#39;invalid float&#39;</code>; range errors return <code>error &#39;float out of range&#39;</code>.</p>
+<p>Parses a finite floating-point number. Invalid input returns <code>error &#39;invalid float&#39;</code>; range errors return <code>error &#39;float out of range&#39;</code>. Well-formed numeric overflow and underflow are range errors. Explicit infinity and NaN values are invalid input. Extra characters or whitespace remain invalid even when the numeric part would overflow or underflow.</p>
+<pre><code class="language-walk">var: result = parse.float(&#39;1e9999&#39;)
+out: result.ok
+out: result.error</code></pre>
+<p>This prints <code>false</code> and <code>float out of range</code>.</p>
 <h3 id="parse-bool-string-parseboolresult">parse.bool(string) -&gt; ParseBoolResult</h3>
 <p>Failure policy: recoverable result data.</p>
 <p>Parses exactly <code>true</code> or <code>false</code>. Other text returns <code>error &#39;invalid bool&#39;</code>.</p>

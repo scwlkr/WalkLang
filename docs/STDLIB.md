@@ -619,6 +619,17 @@ Failure policy: recoverable result data.
 
 Parses a finite floating-point number. Invalid input returns
 `error 'invalid float'`; range errors return `error 'float out of range'`.
+Well-formed numeric overflow and underflow are range errors. Explicit infinity
+and NaN values are invalid input. Extra characters or whitespace remain invalid
+even when the numeric part would overflow or underflow.
+
+```walk
+var: result = parse.float('1e9999')
+out: result.ok
+out: result.error
+```
+
+This prints `false` and `float out of range`.
 
 ### parse.bool(string) -> ParseBoolResult
 

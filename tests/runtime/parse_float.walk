@@ -1,0 +1,49 @@
+imp: parse
+
+test: 'parse float reports numeric overflow as a range error'
+    var: inputs = ['1e309', '-1e309', '+1e9999', '-1e9999']
+    for: text in inputs
+        var: result = parse.float(text)
+        assert: == result.ok false
+        assert: == result.value 0.0
+        assert: == result.error 'float out of range'
+
+test: 'parse float reports numeric underflow as a range error'
+    var: inputs = ['1e-9999', '-1e-9999', '+1e-9999']
+    for: text in inputs
+        var: result = parse.float(text)
+        assert: == result.ok false
+        assert: == result.value 0.0
+        assert: == result.error 'float out of range'
+
+test: 'parse float keeps invalid input distinct from range errors'
+    var: inputs = ['inf', '-Infinity', 'nan', 'NaN(1)', '1e9999x', '1e-9999x', ' 1e9999', '1e9999 ', '', '--1', '1e', '1.2.3']
+    for: text in inputs
+        var: result = parse.float(text)
+        assert: == result.ok false
+        assert: == result.value 0.0
+        assert: == result.error 'invalid float'
+
+test: 'parse float accepts finite values after a range error'
+    var: overflow = parse.float('1e9999')
+    assert: == overflow.ok false
+    var: positive = parse.float('+2.5')
+    assert: positive.ok
+    assert: == positive.value 2.5
+    assert: == positive.error ''
+    var: negative = parse.float('-2.5e1')
+    assert: negative.ok
+    assert: == negative.value -25.0
+    assert: == negative.error ''
+    var: zero = parse.float('0e9999')
+    assert: zero.ok
+    assert: == zero.value 0.0
+    assert: == zero.error ''
+    var: large = parse.float('1.7976931348623157e308')
+    assert: large.ok
+    assert: > large.value 0.0
+    assert: == large.error ''
+    var: small = parse.float('2.2250738585072014e-308')
+    assert: small.ok
+    assert: > small.value 0.0
+    assert: == small.error ''

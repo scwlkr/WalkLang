@@ -59,6 +59,9 @@
 <article class="doc">
 <h1 id="walklang-status">WalkLang Status</h1>
 <p>Current WalkLang version: <code>v6.4.1</code>.</p>
+<p>Runtime correctness verification on 2026-10-11 (WLK-202): the unreleased draft <code>parse.float</code> fix reports well-formed numeric overflow as <code>float out of range</code>. Whole-input validation still takes precedence for malformed or whitespace input; explicit infinity and NaN values remain <code>invalid float</code>.</p>
+<p>Four public CLI regression tests cover signed overflow, underflow, invalid input, and finite parsing after a range error. The overflow cases fail against the original runtime and pass with the fix. Generated-C native execution with UndefinedBehaviorSanitizer is included in <code>make test</code>.</p>
+<p>WLK-198 was independently reviewed and merged in <a href="https://github.com/scwlkr/WalkLang/pull/10">PR #10</a>. Landed main <code>1c7aeb799e5e45ca98020cd1557372268423bedd</code> passed fresh local verification and CI.</p>
 <p>Runtime correctness verification on 2026-10-10 (WLK-198): the unreleased <code>random.float</code> fix keeps samples finite for finite bounds whose difference would overflow, and excludes the upper endpoint after floating-point rounding. Adjacent representable bounds return the lower bound. Singleton and reversed bounds keep their results; nonfinite-bound behavior remains unchanged.</p>
 <p>The private-state C regression and public CLI WalkLang tests both failed on the original runtime and pass with the fix. Deterministic proof covers extreme finite bounds, adjacent values, subnormals, and singleton/reversed bounds. Generated-C tests also prove ordinary-range variation and both signs in a wide finite range. Local macOS arm64 verification passed:</p>
 <pre><code class="language-text">make test WALK_VERSION=v6.4.1, including both sanitized random runtime tests
