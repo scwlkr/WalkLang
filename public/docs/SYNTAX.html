@@ -117,6 +117,9 @@ var: name = &#39;Walker&#39;
 var: optional_name string? = null</code></pre>
 <p>Strings are single-quoted.</p>
 <pre><code class="language-walk">var: msg = &#39;don\&#39;t stop&#39;</code></pre>
+<p>Quoted text stays a string even when it matches an operator or delimiter.</p>
+<pre><code class="language-walk">var: signs = [&#39;+&#39;, &#39;)&#39;, &#39;]&#39;]
+out: signs[0]</code></pre>
 <p>Put an expression inside <code>{}</code> when a string should include a value.</p>
 <pre><code class="language-walk">imp: string
 

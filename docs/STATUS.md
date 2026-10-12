@@ -2,6 +2,22 @@
 
 Current WalkLang version: `v6.4.1`.
 
+Compiler correctness verification on 2026-10-12 (WLK-226): the unreleased fix
+keeps quoted operator, keyword, and delimiter text as string values. Parser
+decisions now respect token kinds in expressions, array/call boundaries,
+multiline expressions, and assignment recognition. Formatter punctuation
+spacing also respects token kinds.
+
+The original compiler rejects `out: '+'` and the public native regression
+fixture. Proof covers all current prefix operator spellings, delimiters,
+ordinary/multiline expressions, AST string values, invalid syntax, native
+execution, and formatter idempotence. Generated-C native regression tests
+run under UndefinedBehaviorSanitizer through `make test`.
+
+WLK-202 was independently reviewed and merged in [PR #11](https://github.com/scwlkr/WalkLang/pull/11).
+Landed main `fbf333e0752c836e61840dbc4ceaed2818ab1a6e` passed fresh local
+verification and CI.
+
 Runtime correctness verification on 2026-10-11 (WLK-202): the unreleased draft
 `parse.float` fix reports well-formed numeric overflow as `float out of range`.
 Whole-input validation still takes precedence for malformed or whitespace

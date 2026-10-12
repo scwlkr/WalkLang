@@ -129,6 +129,36 @@ void test_semantic_fail_fixture_still_parses() {
     expect_file_parses("tests/fail/bad_array.walk");
 }
 
+void test_quoted_syntax_constructs_string_literals() {
+    for (const std::string value : {"+", "-", "*", "/", "^", ">", "<", ">=", "<=", "==", "!=",
+            "and", "or", "not", "(", ")", "[", "]", ",", ".", ":", "=", "?"}) {
+        auto parsed = parse_text("out: '" + value + "'\n");
+        expect_true("quoted syntax parses " + value, parsed.ok(), parsed.diagnostics.format());
+        if (!parsed.ok()) { continue; }
+        const auto* out = dynamic_cast<walk::ast::Out*>(parsed.program->statements[0]);
+        const auto* literal = out == nullptr ? nullptr : dynamic_cast<walk::ast::Literal*>(out->value);
+        expect_true("quoted syntax literal " + value,
+            literal != nullptr && literal->literal_kind == walk::ast::LiteralKind::String && literal->value == value,
+            "quoted syntax did not retain its string value");
+    }
+    expect_file_parses("tests/runtime/quoted_tokens.walk");
+    auto assignment = parse_text("table['['] = ['value']\n");
+    expect_true("quoted bracket in assignment target", assignment.ok(), assignment.diagnostics.format());
+    if (assignment.ok()) {
+        expect_true("quoted bracket assignment shape",
+            assignment.program->statements[0]->kind == walk::ast::StatementKind::Assignment,
+            "quoted bracket changed assignment recognition");
+    }
+}
+
+void test_quoted_delimiters_do_not_replace_syntax() {
+    for (const std::string text : {"out: + 1\n", "out: (1 ')'\n", "var: xs = [1 ']'\n",
+            "out: call(1 ')'\n", "out: 'and' true false\n", "out ':' '+'\n"}) {
+        auto parsed = parse_text(text);
+        expect_true("reject incomplete syntax " + text, !parsed.ok(), "quoted text substituted for syntax");
+    }
+}
+
 }  // namespace
 
 int run_parser_tests() {
@@ -139,5 +169,7 @@ int run_parser_tests() {
     test_current_pass_fixtures_parse();
     test_syntax_fail_fixtures_reject();
     test_semantic_fail_fixture_still_parses();
+    test_quoted_syntax_constructs_string_literals();
+    test_quoted_delimiters_do_not_replace_syntax();
     return failures;
 }

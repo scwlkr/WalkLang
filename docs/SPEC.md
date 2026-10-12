@@ -53,6 +53,9 @@ Stable strings are single-quoted. Stable string escapes:
 \t tab
 ```
 
+Quoted operator, keyword, and delimiter text remains a string value. For
+example, `'+'`, `'and'`, `')'`, and `']'` do not act as syntax tokens.
+
 Stable string interpolation uses `{expression}` inside a single-quoted string.
 Interpolation accepts display expressions of type `int`, `float`, `bool`,
 `string`, and nullable string. Doubled braces emit literal braces.

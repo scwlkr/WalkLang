@@ -118,6 +118,13 @@ Strings are single-quoted.
 var: msg = 'don\'t stop'
 ```
 
+Quoted text stays a string even when it matches an operator or delimiter.
+
+```walk
+var: signs = ['+', ')', ']']
+out: signs[0]
+```
+
 Put an expression inside `{}` when a string should include a value.
 
 ```walk

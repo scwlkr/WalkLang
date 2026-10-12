@@ -81,6 +81,7 @@ func return imp exp true false null and or not in test assert</code></pre>
 \\ backslash
 \n newline
 \t tab</code></pre>
+<p>Quoted operator, keyword, and delimiter text remains a string value. For example, <code>&#39;+&#39;</code>, <code>&#39;and&#39;</code>, <code>&#39;)&#39;</code>, and <code>&#39;]&#39;</code> do not act as syntax tokens.</p>
 <p>Stable string interpolation uses <code>{expression}</code> inside a single-quoted string. Interpolation accepts display expressions of type <code>int</code>, <code>float</code>, <code>bool</code>, <code>string</code>, and nullable string. Doubled braces emit literal braces.</p>
 <pre><code class="language-walk">out: &#39;score {score}&#39;
 out: &#39;{{literal}}&#39;</code></pre>

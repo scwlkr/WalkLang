@@ -1,0 +1,42 @@
+imp: string
+imp: array
+
+func: identity(value string) string
+    return: value
+
+test: 'quoted operators remain string values'
+    var: operators = ['+', '-', '*', '/', '^', '>', '<', '>=', '<=', '==', '!=', 'and', 'or', 'not']
+    assert: == array.len(operators) 14
+    assert: == string.join(operators, '|') '+|-|*|/|^|>|<|>=|<=|==|!=|and|or|not'
+
+test: 'quoted delimiters remain array elements'
+    var: delimiters = [')', ']', ',', '(', '[', '.', ':', '?', '=']
+    assert: == array.len(delimiters) 9
+    assert: == string.join(delimiters, '|') ')|]|,|(|[|.|:|?|='
+
+test: 'quoted syntax works in calls groups and prefix operands'
+    assert: == identity(')') ')'
+    assert: == identity(',') ','
+    assert: == (']') ']'
+    assert: == ('(') '('
+    assert: == string.concat('+', '-') '+-'
+    assert: == 'and' identity('and')
+    assert: == 'not' 'not'
+    assert: and true not false
+    assert: == (+ 1 2) 3
+
+test: 'quoted closers and openers survive multiline expressions'
+    var: joined =
+        string.concat(
+            ')'
+            '('
+        )
+    assert: == joined ')('
+    var: bracket =
+        ']'
+    assert: == bracket ']'
+    var: equal =
+        ==:
+            '+'
+            '+'
+    assert: equal
