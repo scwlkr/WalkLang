@@ -31,8 +31,13 @@ std::string quote(std::string_view value) {
     return "\"" + std::string(value) + "\"";
 }
 
-bool is_stop(const std::vector<std::string>& stop, const std::string& value) {
-    return std::find(stop.begin(), stop.end(), value) != stop.end();
+bool is_symbol(const lex::Token& token, const std::string& value) {
+    return token.kind == lex::TokenKind::Symbol && token.value == value;
+}
+
+bool is_stop(const std::vector<std::string>& stop, const lex::Token& token) {
+    return token.kind == lex::TokenKind::Symbol &&
+        std::find(stop.begin(), stop.end(), token.value) != stop.end();
 }
 
 std::optional<std::pair<int, int>> prefix_arity(const std::string& op) {
@@ -48,6 +53,13 @@ std::optional<std::pair<int, int>> prefix_arity(const std::string& op) {
     return std::nullopt;
 }
 
+std::optional<std::pair<int, int>> prefix_arity(const lex::Token& token) {
+    if (token.kind != lex::TokenKind::Name && token.kind != lex::TokenKind::Symbol) {
+        return std::nullopt;
+    }
+    return prefix_arity(token.value);
+}
+
 bool is_reserved_word(const std::string& value) {
     static const std::set<std::string> reserved = {
         "var", "const", "out", "if", "else", "while", "for", "repeat", "break", "continue", "func", "return",
@@ -57,11 +69,11 @@ bool is_reserved_word(const std::string& value) {
 }
 
 bool is_close_only(const std::vector<lex::Token>& tokens) {
-    return tokens.size() == 1 && (tokens[0].value == ")" || tokens[0].value == "]");
+    return tokens.size() == 1 && (is_symbol(tokens[0], ")") || is_symbol(tokens[0], "]"));
 }
 
 std::optional<std::string> command_keyword(const std::vector<lex::Token>& tokens) {
-    if (tokens.size() >= 2 && tokens[0].kind == lex::TokenKind::Name && tokens[1].value == ":") {
+    if (tokens.size() >= 2 && tokens[0].kind == lex::TokenKind::Name && is_symbol(tokens[1], ":")) {
         return tokens[0].value;
     }
     return std::nullopt;
@@ -491,11 +503,11 @@ ast::Expression* Parser::Cursor::parse_expression(const std::vector<std::string>
         parser_.add_error(current_range(), "syntax error: expected expression");
         return nullptr;
     }
-    if (is_stop(stop, token->value)) {
+    if (is_stop(stop, *token)) {
         parser_.add_error(token->range, "syntax error: expected expression");
         return nullptr;
     }
-    if (prefix_arity(token->value)) {
+    if (prefix_arity(*token)) {
         return parse_prefix(stop);
     }
     return parse_postfix(stop);
@@ -503,10 +515,10 @@ ast::Expression* Parser::Cursor::parse_expression(const std::vector<std::string>
 
 ast::Expression* Parser::Cursor::parse_prefix(const std::vector<std::string>& stop) {
     const lex::Token op = advance();
-    const std::pair<int, int> arity = *prefix_arity(op.value);
+    const std::pair<int, int> arity = *prefix_arity(op);
     std::vector<ast::Expression*> args;
     while (peek() != nullptr) {
-        if (is_stop(stop, peek()->value)) {
+        if (is_stop(stop, *peek())) {
             break;
         }
         if (arity.second >= 0 && static_cast<int>(args.size()) >= arity.second) {
@@ -534,10 +546,10 @@ ast::Expression* Parser::Cursor::parse_postfix(const std::vector<std::string>& s
         return nullptr;
     }
     while (peek() != nullptr) {
-        if (is_stop(stop, peek()->value)) {
+        if (is_stop(stop, *peek())) {
             break;
         }
-        if (peek()->value == "[") {
+        if (is_symbol(*peek(), "[")) {
             const lex::Token open = advance();
             ast::Expression* index = parse_expression({"]"});
             if (index == nullptr || !expect_symbol("]")) {
@@ -549,7 +561,7 @@ ast::Expression* Parser::Cursor::parse_postfix(const std::vector<std::string>& s
             expression = indexed;
             continue;
         }
-        if (peek()->value == ".") {
+        if (is_symbol(*peek(), ".")) {
             const lex::Token dot = advance();
             const lex::Token* field = expect_name("field name");
             if (field == nullptr) {
@@ -561,7 +573,7 @@ ast::Expression* Parser::Cursor::parse_postfix(const std::vector<std::string>& s
             expression = access;
             continue;
         }
-        if (peek()->value == "(") {
+        if (is_symbol(*peek(), "(")) {
             const lex::Token open = advance();
             std::vector<ast::Expression*> args = parse_call_args();
             if (parser_.failed()) {
@@ -616,7 +628,7 @@ ast::Expression* Parser::Cursor::parse_atom(const std::vector<std::string>& stop
                 return nullptr;
             }
             ast::Expression* prompt = nullptr;
-            if (peek() != nullptr && !is_stop(stop, peek()->value)) {
+            if (peek() != nullptr && !is_stop(stop, *peek())) {
                 prompt = parse_expression(stop);
                 if (prompt == nullptr) {
                     return nullptr;
@@ -644,13 +656,13 @@ ast::Expression* Parser::Cursor::parse_atom(const std::vector<std::string>& stop
         }
         if (token.value == "[") {
             std::vector<ast::Expression*> elements;
-            while (peek() != nullptr && peek()->value != "]") {
+            while (peek() != nullptr && !is_symbol(*peek(), "]")) {
                 ast::Expression* element = parse_expression({",", "]"});
                 if (element == nullptr) {
                     return nullptr;
                 }
                 elements.push_back(element);
-                if (peek() != nullptr && peek()->value == ",") {
+                if (peek() != nullptr && is_symbol(*peek(), ",")) {
                     advance();
                 }
             }
@@ -755,13 +767,13 @@ ast::Type Parser::Cursor::parse_type() {
 
 std::vector<ast::Expression*> Parser::Cursor::parse_call_args() {
     std::vector<ast::Expression*> args;
-    while (peek() != nullptr && peek()->value != ")") {
+    while (peek() != nullptr && !is_symbol(*peek(), ")")) {
         ast::Expression* arg = parse_expression({",", ")"});
         if (arg == nullptr) {
             return {};
         }
         args.push_back(arg);
-        if (peek() != nullptr && peek()->value == ",") {
+        if (peek() != nullptr && is_symbol(*peek(), ",")) {
             advance();
         }
     }
@@ -1130,9 +1142,9 @@ std::vector<ast::Expression*> Parser::parse_expression_list(const std::vector<Li
 
 ast::Expression* Parser::parse_expression_node(const LineNode& node) {
     const std::vector<lex::Token>& tokens = node.line.tokens;
-    if (tokens.size() == 2 && tokens[1].value == ":") {
+    if (tokens.size() == 2 && is_symbol(tokens[1], ":")) {
         const std::string& op = tokens[0].value;
-        if (prefix_arity(op)) {
+        if (prefix_arity(tokens[0])) {
             std::vector<ast::Expression*> args = parse_expression_list(node.children);
             if (failed()) {
                 return nullptr;
@@ -1143,7 +1155,7 @@ ast::Expression* Parser::parse_expression_node(const LineNode& node) {
             return expression;
         }
     }
-    if (!tokens.empty() && tokens.back().value == "(") {
+    if (!tokens.empty() && is_symbol(tokens.back(), "(")) {
         std::vector<lex::Token> target_tokens(tokens.begin(), tokens.end() - 1);
         ast::Expression* target = parse_expression_tokens(target_tokens, node.line.range);
         if (target == nullptr) {
@@ -1332,6 +1344,9 @@ SourceRange Parser::callee_range(ast::Expression* expression) const {
 int Parser::find_assignment(const std::vector<lex::Token>& tokens) const {
     int depth = 0;
     for (std::size_t index = 0; index < tokens.size(); ++index) {
+        if (tokens[index].kind != lex::TokenKind::Symbol) {
+            continue;
+        }
         const std::string& value = tokens[index].value;
         if (value == "(" || value == "[") {
             ++depth;

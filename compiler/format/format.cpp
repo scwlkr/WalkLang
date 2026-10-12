@@ -34,7 +34,9 @@ std::string escape_walk_string(const std::string& value) {
     return output.str();
 }
 
-bool needs_space(const std::string& previous, const std::string& current) {
+bool needs_space(const lex::Token& previous_token, const lex::Token& current_token) {
+    const std::string previous = previous_token.kind == lex::TokenKind::Symbol ? previous_token.value : "";
+    const std::string current = current_token.kind == lex::TokenKind::Symbol ? current_token.value : "";
     if (current == ")" || current == "]" || current == "," || current == ":" || current == "." || current == "?") {
         return false;
     }
@@ -56,7 +58,7 @@ bool needs_space(const std::string& previous, const std::string& current) {
 std::string format_tokens(const std::vector<lex::Token>& tokens) {
     std::ostringstream output;
     for (std::size_t index = 0; index < tokens.size(); ++index) {
-        if (index > 0 && needs_space(tokens[index - 1].value, tokens[index].value)) {
+        if (index > 0 && needs_space(tokens[index - 1], tokens[index])) {
             output << ' ';
         }
         if (tokens[index].kind == lex::TokenKind::String) {
