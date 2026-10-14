@@ -120,6 +120,9 @@ string
 null
 ```
 
+Integer literals use decimal digits, with an optional leading minus sign.
+Leading zeros do not select another base: `010` is ten and `08` is eight.
+
 `null` is stable for nullable strings:
 
 ```walk

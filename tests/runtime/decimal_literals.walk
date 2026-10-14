@@ -1,0 +1,38 @@
+imp: array
+
+func: identity(value int) int
+    return: value
+
+test: 'leading zero integers retain signed decimal values'
+    assert: == 010 10
+    assert: == -010 -10
+    assert: == 08 8
+    assert: == 09 9
+    assert: == -009 -9
+    assert: == 0000 0
+    assert: == -0000 0
+
+test: 'leading zero values work in arrays calls and arithmetic'
+    var: values = [0000, 0010, 0008, 0009, -0010]
+    assert: == array.len(values) 5
+    assert: == values[0] 0
+    assert: == values[1] 10
+    assert: == values[2] 8
+    assert: == values[3] 9
+    assert: == values[4] -10
+    assert: == identity(007) 7
+    assert: == (+ 0010 0008) 18
+
+test: 'decimal normalization preserves large integer precision'
+    var: high = 009223372036854775807
+    var: low = -009223372036854775807
+    assert: == high 9223372036854775807
+    assert: == low -9223372036854775807
+    assert: == (- high 1) 9223372036854775806
+    assert: == (- 0 high) low
+
+test: 'float string and interpolation values keep their meaning'
+    assert: == 0002.5 2.5
+    assert: == -0002.5 -2.5
+    assert: == '0010' '0010'
+    assert: == 'decimal {0010} {08} {-009}' 'decimal 10 8 -9'

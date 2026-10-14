@@ -4,6 +4,7 @@
 
 ### Fixed
 
+- Stable integer literals with leading zeros retain decimal values in native programs: `010` means ten and `08` compiles as eight. Negative and all-zero literals are supported; source spelling, floats, and strings remain unchanged.
 - Stable quoted operators, keywords, and delimiters remain string values in expressions, arrays, calls, and multiline expressions. The parser and formatter distinguish quoted text from syntax tokens.
 - Draft `parse.float` reports well-formed numeric overflow as `float out of range`, matching underflow and the documented range-error contract. Explicit infinity/NaN values and malformed whole-input strings remain `invalid float`.
 - Stable `random.float(min, max)` keeps samples finite for finite bounds whose
