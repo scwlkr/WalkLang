@@ -112,6 +112,10 @@ var: name = 'Walker'
 var: optional_name string? = null
 ```
 
+Integer literals are decimal, including leading zeros. `010` means ten,
+`08` means eight, and `-009` means negative nine. Formatting keeps the source
+spelling; native compilation preserves the decimal value.
+
 Strings are single-quoted.
 
 ```walk

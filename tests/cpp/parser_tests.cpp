@@ -159,6 +159,19 @@ void test_quoted_delimiters_do_not_replace_syntax() {
     }
 }
 
+void test_parser_preserves_decimal_literal_source_spelling() {
+    for (const std::string value : {"0008", "-0010", "000", "-000", "009223372036854775807"}) {
+        auto parsed = parse_text("out: " + value + "\n");
+        expect_true("decimal source parses " + value, parsed.ok(), parsed.diagnostics.format());
+        if (!parsed.ok()) { continue; }
+        const auto* out = dynamic_cast<walk::ast::Out*>(parsed.program->statements[0]);
+        const auto* literal = out == nullptr ? nullptr : dynamic_cast<walk::ast::Literal*>(out->value);
+        expect_true("decimal source spelling " + value,
+            literal != nullptr && literal->literal_kind == walk::ast::LiteralKind::Int && literal->value == value,
+            "integer source spelling changed");
+    }
+}
+
 }  // namespace
 
 int run_parser_tests() {
@@ -171,5 +184,6 @@ int run_parser_tests() {
     test_semantic_fail_fixture_still_parses();
     test_quoted_syntax_constructs_string_literals();
     test_quoted_delimiters_do_not_replace_syntax();
+    test_parser_preserves_decimal_literal_source_spelling();
     return failures;
 }

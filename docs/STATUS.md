@@ -2,6 +2,22 @@
 
 Current WalkLang version: `v6.4.1`.
 
+Compiler correctness verification on 2026-10-14 (WLK-242): leading-zero
+integer literals keep decimal values through native C compilation. The emitter
+removes redundant leading zeros from integer constants, preserving their sign
+and exact remaining digits. Lexer/parser and formatter source spelling is
+unchanged; float and string literals retain their behavior.
+
+The original compiler fails a public `010 == 10` regression and cannot build
+the `08`/`09` regression fixture. Four native tests cover signed values, zeros,
+arrays/calls/arithmetic, large integer precision, floats, strings, and
+interpolation. Generated-C spelling checks and parser/formatter preservation
+tests accompany native UndefinedBehaviorSanitizer coverage in `make test`.
+
+WLK-226 was independently reviewed and merged in [PR #12](https://github.com/scwlkr/WalkLang/pull/12).
+Landed main `77b3a83b0106caff430777a8f66126d3238b529a` passed fresh local
+verification and CI. October 13 was skipped at the owner's request.
+
 Compiler correctness verification on 2026-10-12 (WLK-226): the unreleased fix
 keeps quoted operator, keyword, and delimiter text as string values. Parser
 decisions now respect token kinds in expressions, array/call boundaries,

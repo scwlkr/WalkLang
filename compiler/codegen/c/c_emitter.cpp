@@ -1079,7 +1079,15 @@ private:
 
     std::string emit_literal(const ir::Literal& literal) {
         switch (literal.literal_kind) {
-        case ast::LiteralKind::Int:
+        case ast::LiteralKind::Int: {
+            // WalkLang integers are decimal; a leading zero would select C octal.
+            const std::size_t sign_size = literal.value.starts_with("-") ? 1 : 0;
+            std::size_t first_digit = sign_size;
+            while (first_digit + 1 < literal.value.size() && literal.value[first_digit] == '0') {
+                ++first_digit;
+            }
+            return literal.value.substr(0, sign_size) + literal.value.substr(first_digit);
+        }
         case ast::LiteralKind::Float:
             return literal.value;
         case ast::LiteralKind::Bool:

@@ -124,6 +124,18 @@ void test_emit_c_for_variables_and_output() {
     }
 }
 
+void test_emit_decimal_integer_spellings() {
+    const auto code = emit_source(
+        "var: small = 0008\nvar: signed_value = -0010\nvar: zero = -000\n"
+        "var: large = 009223372036854775807\nvar: ratio = 0002.5\nout: '0010'\n");
+    for (const std::string want : {"WalkInt small = 8;", "WalkInt signed_value = -10;",
+            "WalkInt zero = -0;", "WalkInt large = 9223372036854775807;",
+            "WalkFloat ratio = 0002.5;", "\"0010\""}) {
+        expect_true("decimal literal generated C " + want, code.find(want) != std::string::npos,
+            "missing expected spelling\n" + code);
+    }
+}
+
 void test_generated_c_builds_and_runs() {
     if (std::system("command -v cc >/dev/null 2>&1") != 0) {
         return;
@@ -300,6 +312,7 @@ void test_runtime_fixture_build_and_run(const std::string& fixture) {
 int run_emitter_tests() {
     test_ir_lowering_keeps_typed_program();
     test_emit_c_for_variables_and_output();
+    test_emit_decimal_integer_spellings();
     test_generated_c_builds_and_runs();
     test_test_runner_program_builds_and_runs();
     test_string_helpers_build_and_run();
@@ -308,6 +321,7 @@ int run_emitter_tests() {
     test_random_ranges_build_and_run("float");
     test_runtime_fixture_build_and_run("parse_float");
     test_runtime_fixture_build_and_run("quoted_tokens");
+    test_runtime_fixture_build_and_run("decimal_literals");
     test_map_string_arrays_build_and_run();
     return failures;
 }
