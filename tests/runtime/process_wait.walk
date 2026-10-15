@@ -1,0 +1,34 @@
+imp: process
+
+test: 'process run captures both output streams on success'
+    var: args = ['-c', 'printf public-out; printf public-err >&2']
+    var: result = process.run('/bin/sh', args)
+    assert: result.ok
+    assert: == result.status 0
+    assert: == result.stdout 'public-out'
+    assert: == result.stderr 'public-err'
+    assert: == result.error ''
+
+test: 'process run preserves nonzero status and output'
+    var: args = ['-c', 'printf failed-out; printf failed-err >&2; exit 7']
+    var: result = process.run('/bin/sh', args)
+    assert: == result.ok false
+    assert: == result.status 7
+    assert: == result.stdout 'failed-out'
+    assert: == result.stderr 'failed-err'
+    assert: == result.error 'process exited non-zero'
+
+test: 'process output uses the successful child result'
+    var: args = ['-c', 'printf wrapped-out']
+    var: result = process.output('/bin/sh', args)
+    assert: result.ok
+    assert: == result.status 0
+    assert: == result.value 'wrapped-out'
+    assert: == result.error ''
+
+test: 'process shell keeps signal termination status'
+    var: result = process.run_shell('printf signaled-out; kill -TERM $$')
+    assert: == result.ok false
+    assert: == result.status 143
+    assert: == result.stdout 'signaled-out'
+    assert: == result.error 'process exited non-zero'

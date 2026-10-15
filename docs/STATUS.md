@@ -2,6 +2,21 @@
 
 Current WalkLang version: `v6.4.1`.
 
+Runtime correctness verification on 2026-10-15 (WLK-253): POSIX process helpers
+retry child waits interrupted with `EINTR`, preserving the actual exit status
+and captured output. Other wait failures and Windows behavior are unchanged.
+
+The deterministic native C regression injects one/repeated interruptions at
+the real wait seam and fails on the original runtime. It checks output,
+success/nonzero statuses, child reaping, capture cleanup, and permanent-error
+handling. Four public native tests cover process.run, process.output, and
+process.run_shell, including nonzero and signal exits. Both regressions run
+under UndefinedBehaviorSanitizer through `make test`.
+
+WLK-242 was independently reviewed and merged in [PR #13](https://github.com/scwlkr/WalkLang/pull/13).
+Landed main `a00fc88dd78eb04fb41bee20e89974107b738434` passed fresh local
+verification and CI.
+
 Compiler correctness verification on 2026-10-14 (WLK-242): leading-zero
 integer literals keep decimal values through native C compilation. The emitter
 removes redundant leading zeros from integer constants, preserving their sign
