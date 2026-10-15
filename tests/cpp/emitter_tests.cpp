@@ -322,6 +322,7 @@ int run_emitter_tests() {
     test_runtime_fixture_build_and_run("parse_float");
     test_runtime_fixture_build_and_run("quoted_tokens");
     test_runtime_fixture_build_and_run("decimal_literals");
+    test_runtime_fixture_build_and_run("process_wait");
     test_map_string_arrays_build_and_run();
     return failures;
 }

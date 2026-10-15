@@ -486,6 +486,7 @@ struct: ProcessOutputResult
 <p>Failure policy: recoverable result data.</p>
 <p>Runs a command without invoking a shell. The first argument is the executable path or command name and the second argument is the argv array passed after the command. Captured stdout and stderr are UTF-8 text. A zero status returns <code>ok true</code>; a non-zero status returns <code>ok false</code>, keeps <code>stdout</code>, <code>stderr</code>, and <code>status</code> as data, and sets <code>error &#39;process exited non-zero&#39;</code>.</p>
 <p>Spawn or wait failures return <code>ok false</code>, <code>status -1</code>, and a process error. Allocation failure still runtime-stops.</p>
+<p>On POSIX hosts, a signal-interrupted child wait is retried. The helper waits for the same child and returns its actual exit status and captured output; an interruption alone does not return <code>process wait failed</code>. Other wait failures retain the failure result described above. <code>process.output</code> and <code>process.run_shell</code> share this behavior.</p>
 <h3 id="process-output-string-array-string-processoutputresult">process.output(string, array[string]) -&gt; ProcessOutputResult</h3>
 <p>Failure policy: recoverable result data.</p>
 <p>Runs a command without invoking a shell and returns stdout in <code>value</code>. It is a convenience wrapper around <code>process.run</code>; non-zero status is still returned as data.</p>

@@ -913,6 +913,12 @@ command. Captured stdout and stderr are UTF-8 text. A zero status returns
 Spawn or wait failures return `ok false`, `status -1`, and a process error.
 Allocation failure still runtime-stops.
 
+On POSIX hosts, a signal-interrupted child wait is retried. The helper waits
+for the same child and returns its actual exit status and captured output;
+an interruption alone does not return `process wait failed`. Other wait
+failures retain the failure result described above. `process.output` and
+`process.run_shell` share this behavior.
+
 ### process.output(string, array[string]) -> ProcessOutputResult
 
 Failure policy: recoverable result data.

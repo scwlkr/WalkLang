@@ -1164,7 +1164,9 @@ ProcessResult walk_rt_process_run(WalkString command, WalkArrayString args) {
         _exit(127);
     }
     int raw_status = 0;
-    if (waitpid(pid, &raw_status, 0) < 0) { remove(stdout_path); remove(stderr_path); free(argv); return walk_rt_process_result(false, -1, "", "", "process wait failed"); }
+    pid_t waited;
+    do { waited = waitpid(pid, &raw_status, 0); } while (waited < 0 && errno == EINTR);
+    if (waited < 0) { remove(stdout_path); remove(stderr_path); free(argv); return walk_rt_process_result(false, -1, "", "", "process wait failed"); }
     WalkInt status = -1;
     if (WIFEXITED(raw_status)) { status = (WalkInt)WEXITSTATUS(raw_status); }
     else if (WIFSIGNALED(raw_status)) { status = (WalkInt)(128 + WTERMSIG(raw_status)); }
