@@ -1,6 +1,6 @@
 # WalkLang Documentation
 
-WalkLang docs are built into a static site for `walklang.wlkrlabs.com/docs`.
+WalkLang docs are built into a static site for `walklang.wlkr.si/docs`.
 This directory remains the source for the hosted documentation path.
 
 Use this page as the docs front door. The root README explains the repository;
@@ -81,7 +81,7 @@ Markdown, and `api.json` from the same compiler output.
 The public docs home is configured for:
 
 ```text
-walklang.wlkrlabs.com/docs
+walklang.wlkr.si/docs
 ```
 
 The public scheme is HTTPS, and HTTP redirects to HTTPS. `docs/STATUS.md`
