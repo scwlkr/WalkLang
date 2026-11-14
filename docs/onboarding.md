@@ -180,6 +180,6 @@ Read [CONTRIBUTING.md](../CONTRIBUTING.md) before making changes. Key points:
 
 ## Getting Help
 
-The public docs site is at `walklang.wlkrlabs.com/docs`. Until public
+The public docs site is at `walklang.wlkr.si/docs`. Until public
 community channels exist, use this repository's issue tracker for bugs and
 design questions.

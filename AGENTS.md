@@ -32,7 +32,7 @@ Tall Talents is paused globally. For ordinary WalkLang roadmap phases, follow th
 # Side Notes
 
 - WalkLang source code will be located on github
-- WalkLang will have an official minimal website at walklang.wlkrlabs.com
+- WalkLang will have an official minimal website at walklang.wlkr.si
 
 ## Linear work queue
 

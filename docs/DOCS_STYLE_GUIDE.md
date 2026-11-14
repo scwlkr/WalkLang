@@ -12,7 +12,7 @@ defined there, define it there first or avoid using it as a formal term.
 The hosted docs entry point is:
 
 ```text
-https://walklang.wlkrlabs.com/docs
+https://walklang.wlkr.si/docs
 ```
 
 ## Page Roles

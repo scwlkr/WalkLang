@@ -592,7 +592,7 @@ Result<void> build_site(const std::string& docs_dir, const std::string& public_d
         }
     }
     for (const auto& write : {
-             std::pair<std::filesystem::path, std::string>{std::filesystem::path(public_dir) / "CNAME", "walklang.wlkrlabs.com\n"},
+             std::pair<std::filesystem::path, std::string>{std::filesystem::path(public_dir) / "CNAME", "walklang.wlkr.si\n"},
              {std::filesystem::path(public_dir) / ".nojekyll", ""},
          }) {
         Result<void> written = write_file(write.first, write.second);

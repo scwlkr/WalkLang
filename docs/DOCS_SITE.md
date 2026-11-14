@@ -14,7 +14,7 @@ public/
 The hosted path is configured for:
 
 ```text
-walklang.wlkrlabs.com/docs
+walklang.wlkr.si/docs
 ```
 
 The generated site includes:
@@ -29,7 +29,7 @@ public/docs/reference/api.json
 
 The site is static HTML/CSS. It does not ship JavaScript assets.
 
-`public/CNAME` sets the custom domain to `walklang.wlkrlabs.com` for static
+`public/CNAME` sets the custom domain to `walklang.wlkr.si` for static
 hosts that honor CNAME files.
 
 HTTPS is the public scheme for the custom domain, and HTTP redirects to HTTPS.

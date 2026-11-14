@@ -114,7 +114,7 @@ If you want to install from this repository, see [INSTALL.md](docs/INSTALL.md).
 
 Start with the docs index at [docs/README.md](docs/README.md). The public docs
 site is built from `docs/` and `public/` in this repository and configured for
-`walklang.wlkrlabs.com/docs`. Until public community channels exist, use this
+`walklang.wlkr.si/docs`. Until public community channels exist, use this
 repository's issue tracker for bugs and design questions.
 
 ## Contributing
