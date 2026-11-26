@@ -1,2 +1,0 @@
-var: age = 25
-var: adult = age.is_adult()

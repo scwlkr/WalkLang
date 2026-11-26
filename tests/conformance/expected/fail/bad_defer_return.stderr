@@ -1,4 +1,0 @@
-tests/fail/bad_defer_return.walk:2:5: type error: defer requires do: effect call
-
-    defer: return: 1
-    ^

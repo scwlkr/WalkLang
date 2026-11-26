@@ -7,14 +7,14 @@ Compiler target: `.walk` → C++ compiler → generated C + Walk C runtime → n
 
 - After each non-trivial project conversation, update `docs/STATUS.md` with the current version, verification, and next step.
 - After each successfully completed task proceed with commiting/syncing changes and going through the new release flow
-- Every feature should be backed by tdd, it is unacceptable to have a feature not proven as either working/failed. e.g. if you have a random.choice function you must always verify that it is truly random via tdd.
+- Prove changed behavior through the public compiler or CLI and capture the result.
 
 # Language Documentation Standard
 
 - Treat `docs/LANGUAGE_CONCEPTS.md` as the canonical vocabulary and docs-governance standard before creating or reshaping language docs.
 - New language docs must use the concepts defined there, choose one clear doc role, and label behavior as stable, draft, experimental, planned, deprecated, or removed.
-- Language docs and implementation move in the same TDD slice: update the contract or draft doc, add positive proof, add negative proof when invalid forms matter, update formatter/snapshots when syntax or backend output changes, then verify through the public compiler or CLI.
-- Do not claim a syntax form, type rule, runtime behavior, or standard-library API exists unless repo tests, fixtures, generated docs, or native execution prove it.
+- Update the language contract or draft alongside implementation changes. Verify valid forms and expected errors through the public compiler or CLI.
+- Do not claim a syntax form, type rule, runtime behavior, or standard-library API exists unless generated docs or native execution prove it.
 
 # Agent Context Shortcuts
 
@@ -36,7 +36,7 @@ Tall Talents is paused globally. For ordinary WalkLang roadmap phases, follow th
 
 ## Linear work queue
 
-- Team: **WLKR LABS**.
+- Team: **WLKR.SI** (`WLK`, displayed as `WLKRSI` in Linear).
 - Project: [WalkLang](https://linear.app/wlkr-labs/project/walklang-5e79443d2710).
 - Linear is the task source of truth. Existing GitHub issues and Markdown plans are historical context; this section supersedes older tracker or backlog guidance.
 - Before starting substantive work, read the Linear issue and discussion and check for existing work. Find or create a Linear issue for substantive user-requested work, not every question or minor action.

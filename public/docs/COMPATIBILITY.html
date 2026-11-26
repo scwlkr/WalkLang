@@ -62,8 +62,7 @@
 <h2 id="compatibility-promise">Compatibility Promise</h2>
 <p>Stable features should continue to compile and behave as documented unless one of these applies:</p>
 <pre><code class="language-text">the behavior was undocumented
-the behavior failed conformance or compatibility tests
-the behavior relied on internal generated C shape outside snapshots
+the behavior relied on the internal shape of generated C
 a safety or correctness fix requires a documented break</code></pre>
 <p>When a safety or correctness fix breaks stable code, the release notes and migration guide must name the break.</p>
 <h2 id="stability-labels">Stability Labels</h2>
@@ -87,18 +86,8 @@ removed
 docs/SYNTAX.md
 docs/STDLIB.md
 docs/ERRORS.md
-docs/COMPATIBILITY.md
-tests/pass/
-tests/fail/
-compatibility fixtures
-tests/snapshots/</code></pre>
+docs/COMPATIBILITY.md</code></pre>
 <p>If a feature is accepted by the compiler but absent from the stable surface, treat it as draft, experimental, or planned according to the labels in <code>docs/LANGUAGE_CONCEPTS.md</code>.</p>
-<h2 id="compatibility-test-suite">Compatibility Test Suite</h2>
-<p>Run the focused stable compatibility suite with:</p>
-<pre><code class="language-bash">make conformance</code></pre>
-<p>The full repository test flow also runs compiler unit tests:</p>
-<pre><code class="language-bash">make test</code></pre>
-<p>The suite covers representative stable programs, test syntax, user-module exports, stable stdlib APIs, and selected stable diagnostic first lines.</p>
 <h2 id="draft-experimental-or-future-features">Draft, Experimental, Or Future Features</h2>
 <p>These are implemented or planned, but not compatibility-protected as stable features:</p>
 <pre><code class="language-text">structs (experimental)

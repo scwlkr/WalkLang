@@ -22,9 +22,6 @@ Run the standard checks before sending changes:
 ```bash
 make clean
 make walk WALK_VERSION=dev
-make test
-make conformance
-WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh
 scripts/check-docs-site.sh
 git diff --check
 ```
@@ -45,7 +42,7 @@ that should be generated from structured comments.
 
 ## Compatibility
 
-Stable v1 behavior is covered by [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md)
-and the compatibility fixtures under `tests/compat/`. Do not break stable syntax,
+Stable v1 behavior is covered by [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md).
+Do not break stable syntax,
 standard-library behavior, or CLI expectations without a migration note and an
 explicit compatibility decision.

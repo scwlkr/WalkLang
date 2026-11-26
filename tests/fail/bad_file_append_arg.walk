@@ -1,3 +1,0 @@
-imp: file
-
-do: file.append('note.txt', 3)

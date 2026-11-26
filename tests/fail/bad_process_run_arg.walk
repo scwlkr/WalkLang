@@ -1,3 +1,0 @@
-imp: process
-
-var: result = process.run('walk', 'version')

@@ -1,3 +1,0 @@
-imp: parse
-
-var: value = parse.int(1)

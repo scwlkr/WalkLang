@@ -134,7 +134,7 @@ See [LICENSE](LICENSE) for details.
 ## Trademark
 
 The WalkLang name, logo, and brand identity are protected project marks owned by
-Shane Walker / WLKRLABS.
+Shane Walker / WLKR.SI.
 
 If you want to use the WalkLang name, logo, or brand identity, read
 [TRADEMARKS.md](TRADEMARKS.md).

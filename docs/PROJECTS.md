@@ -84,7 +84,6 @@ Single-file commands still work:
 walk run examples/hello.walk
 walk examples/hello.walk
 walk build examples/hello.walk -o build/hello
-walk test examples/compiler_tests.walk
 walk fmt examples/hello.walk
 ```
 
@@ -102,8 +101,8 @@ walk run examples/hello.walk -- alpha beta
 ## Example Projects
 
 `examples/tinychain/` is a small blockchain-style project with `walk.toml`,
-`src/`, tests, and a local README. It shows structs, arrays of structs, module
-exports, string interpolation, draft terminal styling, project tests, a
+`src/` and a local README. It shows structs, arrays of structs, module
+exports, string interpolation, draft terminal styling, a
 deterministic proof loop, and a visible tamper audit. It also records useful
 language gaps exposed by the exercise: real hashing, struct-array append,
 multiline arrays, stable persistence, byte arrays, and command arguments.
@@ -113,7 +112,6 @@ Run it from the repository root with:
 ```bash
 make walk
 cd examples/tinychain
-../../build/walk test
 ../../build/walk run src/main.walk
 env -u NO_COLOR CLICOLOR_FORCE=1 ../../build/walk run src/main.walk
 ```

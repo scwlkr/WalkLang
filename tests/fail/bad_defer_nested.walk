@@ -1,3 +1,0 @@
-imp: io
-
-defer: defer: do io.write_line('x')

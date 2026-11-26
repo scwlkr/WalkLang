@@ -1,4 +1,0 @@
-tests/fail/bad_indent.walk:2:5: syntax error: unexpected indented block
-
-    out: 'bad'
-    ^

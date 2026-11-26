@@ -100,11 +100,7 @@ walk playground/route_ranker.walk
 walk build examples/hello.walk -o build/hello
 ./build/hello
 walk check --warnings=error examples/stable.walk
-walk test examples/compiler_tests.walk
-walk build tests/pass/structs.walk -o build/structs
-walk build tests/pass/methods.walk -o build/methods
-walk build tests/pass/generics.walk -o build/generics
-cd examples/tinychain && ../../build/walk test && ../../build/walk run src/main.walk
+cd examples/tinychain && ../../build/walk run src/main.walk
 NO_COLOR=1 walktop --once
 ```
 

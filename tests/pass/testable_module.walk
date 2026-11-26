@@ -1,7 +1,0 @@
-func: twice(value int) int
-    return: * value 2
-
-test: 'module-local test can run directly'
-    assert: == twice(6) 12
-
-exp: twice

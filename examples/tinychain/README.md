@@ -13,7 +13,6 @@ From this directory:
 
 ```bash
 ../../build/walk run src/main.walk
-../../build/walk test
 ../../build/walk build
 ./build/tinychain
 ```
@@ -59,7 +58,7 @@ difficulty: hash must satisfy math.remainder(hash, 11) == 0
 - A deterministic mining loop with `while:`, `for:`, and early `return:`.
 - Draft terminal styling through `term.color` and `term.style`, with clean
   redirected output.
-- Project mode with `walk.toml`, `src/`, and `tests/`.
+- Project mode with `walk.toml` and `src/`.
 
 ## Language Gaps Exposed
 

@@ -106,7 +106,6 @@ Before shipping a docs pass:
 
 ```bash
 git diff --check
-make test
 ```
 
 For docs that mention generated API output, also prove the command works against

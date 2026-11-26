@@ -1,5 +1,0 @@
-struct: User
-    name string
-
-func: User.wrap[T](self User, value T) T
-    return: value

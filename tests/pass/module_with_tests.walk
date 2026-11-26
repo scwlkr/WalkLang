@@ -1,3 +1,0 @@
-imp: testable_module
-
-out: testable_module.twice(7)

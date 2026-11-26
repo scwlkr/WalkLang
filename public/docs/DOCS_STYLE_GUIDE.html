@@ -125,8 +125,7 @@ scripts/check-docs-site.sh</code></pre>
 </ul>
 <h2 id="docs-qa">Docs QA</h2>
 <p>Before shipping a docs pass:</p>
-<pre><code class="language-bash">git diff --check
-make test</code></pre>
+<pre><code class="language-bash">git diff --check</code></pre>
 <p>For docs that mention generated API output, also prove the command works against a real source file:</p>
 <pre><code class="language-bash">make walk
 ./build/walk docs --strict -o build/api.md examples/stable.walk

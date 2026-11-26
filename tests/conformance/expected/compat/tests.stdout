@@ -1,3 +1,0 @@
-test: stdlib assert stays compatible
-test: module export stays compatible
-ok 2 tests

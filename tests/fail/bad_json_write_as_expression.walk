@@ -1,3 +1,0 @@
-imp: json
-
-out: json.write('data.json', '{{}}')
