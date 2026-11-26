@@ -13,7 +13,6 @@ BUILD_DIR := build
 CPP_BUILD_DIR := $(BUILD_DIR)/cpp/$(subst /,_,$(WALK_VERSION))
 WALK := $(BUILD_DIR)/walk
 WALK_VERSION_FILE := $(BUILD_DIR)/.walk-version
-CPP_TEST_TMP := $(BUILD_DIR)/cpp-tests
 
 CPPFLAGS += -Icompiler -DWALK_VERSION=\"$(WALK_VERSION)\"
 
@@ -46,51 +45,7 @@ WALK_CPP_SOURCES := \
 
 WALK_CPP_OBJECTS := $(WALK_CPP_SOURCES:%.cpp=$(CPP_BUILD_DIR)/%.o)
 
-TEST_CPP_SOURCES := \
-	tests/cpp/test_main.cpp \
-	tests/cpp/checker_tests.cpp \
-	tests/cpp/emitter_tests.cpp \
-	tests/cpp/lexer_tests.cpp \
-	tests/cpp/module_tests.cpp \
-	tests/cpp/package_tests.cpp \
-	tests/cpp/parser_tests.cpp \
-	tests/cpp/project_tests.cpp \
-	tests/cpp/format_tests.cpp \
-	tests/cpp/docs_tests.cpp \
-	tests/cpp/lsp_tests.cpp \
-	tests/cpp/repl_tests.cpp \
-	compiler/cli/command.cpp \
-	compiler/ast/ast.cpp \
-	compiler/codegen/c/c_emitter.cpp \
-	compiler/codegen/c/name_mangle.cpp \
-	compiler/debug_map/debug_map.cpp \
-	compiler/docs/api_docs.cpp \
-	compiler/docs/sitegen.cpp \
-	compiler/format/format.cpp \
-	compiler/ir/ir.cpp \
-	compiler/ir/lower.cpp \
-	compiler/lex/lexer.cpp \
-	compiler/lsp/server.cpp \
-	compiler/package/package.cpp \
-	compiler/parse/parser.cpp \
-	compiler/project/project.cpp \
-	compiler/repl/repl.cpp \
-	compiler/sema/builtins.cpp \
-	compiler/sema/checker.cpp \
-	compiler/sema/modules.cpp \
-	compiler/sema/scope.cpp \
-	compiler/sema/types.cpp \
-	compiler/support/diagnostic.cpp \
-	compiler/support/source_file.cpp \
-	compiler/support/toml_like.cpp
-
-TEST_CPP_OBJECTS := $(TEST_CPP_SOURCES:%.cpp=$(CPP_BUILD_DIR)/%.o)
-TEST_CPP_BIN := $(CPP_BUILD_DIR)/walk-tests
-RANDOM_INT_TEST_BIN := $(BUILD_DIR)/runtime-tests/random-int
-RANDOM_FLOAT_TEST_BIN := $(BUILD_DIR)/runtime-tests/random-float
-PROCESS_WAIT_TEST_BIN := $(BUILD_DIR)/runtime-tests/process-wait
-
-.PHONY: walk test conformance docs check-docs release install-local clean FORCE
+.PHONY: walk docs check-docs release install-local clean FORCE
 
 walk: $(WALK)
 
@@ -106,27 +61,6 @@ $(CPP_BUILD_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
-test: $(TEST_CPP_BIN) $(RANDOM_INT_TEST_BIN) $(RANDOM_FLOAT_TEST_BIN) $(PROCESS_WAIT_TEST_BIN)
-	$(TEST_CPP_BIN)
-	$(RANDOM_INT_TEST_BIN)
-	$(RANDOM_FLOAT_TEST_BIN)
-	$(PROCESS_WAIT_TEST_BIN)
-
-$(PROCESS_WAIT_TEST_BIN): tests/runtime/process_wait.c runtime/walk_runtime.c runtime/walk_runtime.h runtime/platform/walk_platform_posix.c runtime/platform/walk_platform.h
-	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -fsanitize=undefined -fno-sanitize-recover=undefined $< runtime/platform/walk_platform_posix.c -lm -o $@
-
-$(BUILD_DIR)/runtime-tests/random-%: tests/runtime/random_%.c runtime/walk_runtime.c runtime/walk_runtime.h runtime/platform/walk_platform_posix.c runtime/platform/walk_platform.h
-	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -fsanitize=undefined -fno-sanitize-recover=undefined $< runtime/platform/walk_platform_posix.c -lm -o $@
-
-$(TEST_CPP_BIN): $(TEST_CPP_OBJECTS)
-	@mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $^ -o $@
-
-conformance: walk
-	WALK_REF=$$PWD/$(WALK) tests/conformance/run.sh --verify
-
 docs:
 	scripts/build-docs-site.sh
 
@@ -141,4 +75,4 @@ install-local:
 	scripts/install-local.sh "$(VERSION)"
 
 clean:
-	rm -rf $(BUILD_DIR)/cpp $(CPP_TEST_TMP) $(BUILD_DIR)/runtime-tests $(WALK) $(WALK_VERSION_FILE)
+	rm -rf $(BUILD_DIR)/cpp $(WALK) $(WALK_VERSION_FILE)

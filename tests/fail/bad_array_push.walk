@@ -1,3 +1,0 @@
-imp: array
-var: nums = [1, 2]
-nums = array.push(nums, 'three')

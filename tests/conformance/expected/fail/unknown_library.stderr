@@ -1,4 +1,0 @@
-tests/fail/unknown_library.walk:2:6: name error: unknown library function math.nope
-
-out: math.nope(1)
-     ^

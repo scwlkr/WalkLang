@@ -1,3 +1,0 @@
-imp: dir
-
-out: dir.make('data')

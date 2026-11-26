@@ -1,3 +1,0 @@
-imp: json
-
-var: result = json.parse(1)

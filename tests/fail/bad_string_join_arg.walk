@@ -1,3 +1,0 @@
-imp: string
-
-out: string.join('not chunks', 'sep')

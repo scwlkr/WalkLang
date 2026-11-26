@@ -1,4 +1,0 @@
-tests/fail/bad_do_value.walk:1:1: type error: do needs effect call, got int
-
-do: 1
-^

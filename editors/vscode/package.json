@@ -3,7 +3,7 @@
   "displayName": "WalkLang",
   "description": "WalkLang syntax highlighting and language configuration.",
   "version": "0.1.0",
-  "publisher": "wlkrlabs",
+  "publisher": "scwlkr",
   "license": "MIT",
   "engines": {
     "vscode": "^1.90.0"
@@ -36,5 +36,6 @@
         "path": "./syntaxes/walk.tmLanguage.json"
       }
     ]
-  }
+  },
+  "homepage": "https://walklang.wlkr.si/"
 }

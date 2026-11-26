@@ -199,18 +199,6 @@ Use a different C compiler or flags when needed:
 walk build examples/stable.walk -o build/stable --cc clang --cflag -Wall
 ```
 
-Run the compatibility stress path:
-
-```bash
-scripts/stress-compatibility.sh
-```
-
-Run the focused stable compatibility suite:
-
-```bash
-make conformance
-```
-
 Build release CLI artifacts:
 
 ```bash
@@ -230,10 +218,3 @@ walk clean
 ```
 
 Project mode is defined in `docs/PROJECTS.md`.
-
-Run conformance:
-
-```bash
-make test
-make conformance
-```

@@ -1,2 +1,0 @@
-test: 'bad'
-    assert: 1

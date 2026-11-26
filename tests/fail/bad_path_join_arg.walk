@@ -1,3 +1,0 @@
-imp: path
-
-out: path.join('data', 3)

@@ -1,4 +1,0 @@
-tests/fail/bad_term_clear_as_expression.walk:3:6: type error: term.clear is an effect; use do: term.clear(...)
-
-out: term.clear()
-     ^

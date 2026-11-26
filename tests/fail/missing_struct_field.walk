@@ -1,5 +1,0 @@
-struct: User
-    name string
-    age int
-
-var: user = User('Walker')

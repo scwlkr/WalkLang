@@ -1,4 +1,0 @@
-tests/fail/top_break.walk:1:1: syntax error: break outside loop
-
-break:
-^

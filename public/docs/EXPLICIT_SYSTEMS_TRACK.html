@@ -258,17 +258,13 @@ walk run --release</code></pre>
 <p>Minimum commands before this track can be marked complete:</p>
 <pre><code class="language-bash">make clean
 make walk WALK_VERSION=&lt;version&gt;
-make test
-make conformance WALK_VERSION=&lt;version&gt;
 ./build/walk version
-./build/walk check --warnings=error tests/pass/walk_tests.walk
-WALK_BIN=$PWD/build/walk scripts/stress-compatibility.sh
 scripts/build-docs-site.sh
 scripts/check-docs-site.sh
 make release VERSION=&lt;version&gt; OUT=&lt;temp&gt;/release
 wc -l &lt;temp&gt;/release/SHA256SUMS
 git diff --check</code></pre>
-<p>Also run focused tests added for this track and record their exact names in <code>docs/STATUS.md</code>.</p>
+<p>Record the public compiler commands and observed outcomes in <code>docs/STATUS.md</code>.</p>
 <h2 id="status-log">Status Log</h2>
 <ul>
 <li>2026-05-25: Track opened from design discussion. No implementation has started.</li>

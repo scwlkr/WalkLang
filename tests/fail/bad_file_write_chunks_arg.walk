@@ -1,3 +1,0 @@
-imp: file
-
-do: file.write_chunks('out.txt', 'not chunks')

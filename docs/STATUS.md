@@ -2,6 +2,9 @@
 
 Current WalkLang version: `v6.4.1`.
 
+Documentation update on 2026-11-26: the site and VS Code extension metadata
+use [walklang.wlkr.si](https://walklang.wlkr.si/). The compiler version is unchanged.
+
 Runtime correctness verification on 2026-10-15 (WLK-253): POSIX process helpers
 retry child waits interrupted with `EINTR`, preserving the actual exit status
 and captured output. Other wait failures and Windows behavior are unchanged.
@@ -747,8 +750,8 @@ hosted-docs HTTPS behavior.
 Hosted docs state checked on 2026-05-26:
 
 ```text
-https://walklang.wlkrlabs.com/docs/ returned HTTP/2 200
-http://walklang.wlkrlabs.com/docs/ returned 301 to https://walklang.wlkrlabs.com/docs/
+HTTPS on the former documentation host returned HTTP/2 200.
+HTTP on that host redirected to HTTPS.
 ```
 
 Docs alignment verification on 2026-05-26:

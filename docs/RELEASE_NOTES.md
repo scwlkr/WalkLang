@@ -1031,7 +1031,7 @@ scripts/release.sh v5.2.0 dist
 Date: 2026-05-22
 
 v5.1.0 turns the docs and generated reference output into a repo-owned static
-site for `walklang.wlkrlabs.com/docs`.
+site for the WalkLang documentation.
 
 ### Added
 

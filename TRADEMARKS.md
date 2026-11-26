@@ -1,6 +1,6 @@
 # WalkLang Trademark Policy
 
-WalkLang is the official name of the programming language, compiler, documentation, and project identity created by Shane Walker / WLKRLABS.
+WalkLang is the official name of the programming language, compiler, documentation, and project identity created by Shane Walker / WLKR.SI.
 
 The WalkLang source code is open source under the Apache License 2.0.
 
@@ -27,7 +27,7 @@ WalkLang tutorial
 
 ## You may not
 
-You may not use the WalkLang name, logo, or branding in a way that suggests your project is official, endorsed, or controlled by Shane Walker / WLKRLABS unless you have written permission.
+You may not use the WalkLang name, logo, or branding in a way that suggests your project is official, endorsed, or controlled by Shane Walker / WLKR.SI unless you have written permission.
 
 You may not:
 
@@ -74,7 +74,7 @@ You may say that your work is based on WalkLang, as long as the statement is acc
 Example:
 
 ```txt
-This project is based on WalkLang, created by Shane Walker / WLKRLABS.
+This project is based on WalkLang, created by Shane Walker / WLKR.SI.
 ```
 
 ## Permission
@@ -100,7 +100,7 @@ Do not claim the WalkLang identity as your own.
 ```txt
 WalkLang
 
-Copyright 2026 Shane Walker / scwlkr  / WLKRLABS
+Copyright 2026 Shane Walker / scwlkr / WLKR.SI
 
 WalkLang is an open source programming language project.
 

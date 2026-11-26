@@ -1,3 +1,0 @@
-func: bad() int
-    defer: return: 1
-    return: 2

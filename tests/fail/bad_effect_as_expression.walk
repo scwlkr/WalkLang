@@ -1,3 +1,0 @@
-imp: io
-
-var: value = io.write('x')

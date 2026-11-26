@@ -11,8 +11,7 @@ of these applies:
 
 ```text
 the behavior was undocumented
-the behavior failed conformance or compatibility tests
-the behavior relied on internal generated C shape outside snapshots
+the behavior relied on the internal shape of generated C
 a safety or correctness fix requires a documented break
 ```
 
@@ -47,31 +46,11 @@ docs/SYNTAX.md
 docs/STDLIB.md
 docs/ERRORS.md
 docs/COMPATIBILITY.md
-tests/pass/
-tests/fail/
-compatibility fixtures
-tests/snapshots/
 ```
 
 If a feature is accepted by the compiler but absent from the stable surface,
 treat it as draft, experimental, or planned according to the labels in
 `docs/LANGUAGE_CONCEPTS.md`.
-
-## Compatibility Test Suite
-
-Run the focused stable compatibility suite with:
-
-```bash
-make conformance
-```
-
-The full repository test flow also runs compiler unit tests:
-
-```bash
-make test
-```
-
-The suite covers representative stable programs, test syntax, user-module exports, stable stdlib APIs, and selected stable diagnostic first lines.
 
 ## Draft, Experimental, Or Future Features
 

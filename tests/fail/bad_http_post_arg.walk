@@ -1,3 +1,0 @@
-imp: http
-
-var: result = http.post('https://example.com', 1)

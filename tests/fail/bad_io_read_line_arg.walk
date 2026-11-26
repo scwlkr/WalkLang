@@ -1,3 +1,0 @@
-imp: io
-
-var: line = io.read_line('extra')

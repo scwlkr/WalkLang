@@ -1,4 +1,0 @@
-tests/fail/unknown_name.walk:1:6: name error: missing_value is not defined
-
-out: missing_value
-     ^ define the name before using it

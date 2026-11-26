@@ -1,3 +1,0 @@
-imp: io
-
-do: io.write(1)

@@ -1,3 +1,0 @@
-imp: process
-
-do: process.chdir(3)

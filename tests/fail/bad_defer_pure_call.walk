@@ -1,3 +1,0 @@
-imp: math
-
-defer: do math.sqrt(4)

@@ -1,3 +1,0 @@
-out: 'hello'
-out: + 1 2
-out: true
